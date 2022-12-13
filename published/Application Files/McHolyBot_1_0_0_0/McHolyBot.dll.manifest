@@ -204,7 +204,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>NN2KoQ41NFgq1t1kxiPyUgmijmpqg+Yz89OuJQ3kfHY=</dsig:DigestValue>
+      <dsig:DigestValue>T/Th/y3qkc4uc3/YaGku+Zef6/WGoDQhbHunLawQTj4=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.OpenGL.dll" size="380928">
@@ -276,7 +276,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>YhjzAAMsMfJ7qMjInE4xCI4RIZfCz8NCLFfJ5khgL68=</dsig:DigestValue>
+      <dsig:DigestValue>oArSW7F2O3gvCQMlWhLBNBJzLOQ4zqsPF9wKnibgOms=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Win32.dll" size="1011712">
@@ -294,7 +294,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>rTdXLQrPjp1YElHQ/x1s4pw3kyUEM90iWbHnV+QLY24=</dsig:DigestValue>
+      <dsig:DigestValue>idLE+PymkMwsyd5JprJkEEaCDWw7rnKgpAL6pUCEct0=</dsig:DigestValue>
     </hash>
   </file>
   <file name="DynamicData.dll" size="2097152">
