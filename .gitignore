@@ -362,5 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-McSpammer/
-/McSpammer/McSpammer.csproj
+McSpammer//
