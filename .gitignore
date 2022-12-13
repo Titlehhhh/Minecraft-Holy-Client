@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /McSpammer
-/McSpammer/McSpammer.csproj
-/McSpammer/McSpammer_TemporaryKey.pfx
+/Dll1/Dll1.vcxproj.filters
+/Dll1/Dll1.vcxproj
