@@ -362,6 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-/McSpammer
-/Dll1/Dll1.vcxproj.filters
-/Dll1/Dll1.vcxproj
+**/McSpammer
