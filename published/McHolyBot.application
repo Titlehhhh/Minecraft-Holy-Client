@@ -8,7 +8,7 @@
         <beforeApplicationStartup />
       </update>
     </subscription>
-    <deploymentProvider codebase="https://github.com/Titlehhhh/Minecraft-DDOS-Free/master/published/McHolyBot.application" />
+    <deploymentProvider codebase="https://raw.githubusercontent.com/Titlehhhh/Minecraft-DDOS-Free/master/published/McHolyBot.application" />
   </deployment>
   <compatibleFrameworks xmlns="urn:schemas-microsoft-com:clickonce.v2">
     <framework targetVersion="4.5" profile="Full" supportedRuntime="4.0.30319" />
@@ -21,7 +21,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>LYRGhDebRPuCIlA3JmbNTClKBEFC4oHHEZAtxqZXl10=</dsig:DigestValue>
+        <dsig:DigestValue>dPlnl44vwNdCGbQoIAGjpBa3pHOAuEGHRsD4y3/iDrg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
