@@ -168,7 +168,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>xVzafYL6VUmwHG0m9mFoYYzsRpfwcMw4UMDe1O+Q3wk=</dsig:DigestValue>
+      <dsig:DigestValue>Oj8uwaejLxWXGJZAx1lFry6TrERGXSn1BftzujmiSno=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Markup.dll" size="159744">
@@ -204,7 +204,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>vJNTPYvDzleryraHCV8a8iiOSY/mCqbnB0VbUa6qtmQ=</dsig:DigestValue>
+      <dsig:DigestValue>wzdIGtPu4u6tCVdR3Q35PcafKyX7VdiSBVXkHyNIIas=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.OpenGL.dll" size="380928">
@@ -285,7 +285,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>hud2Aey+zpnJGSYnjBzqhgbGIit/+FRtlNS9/odSWCQ=</dsig:DigestValue>
+      <dsig:DigestValue>cwS+6V5fx7KObXAiZIu6dx7/kjaBEBSxuuKhNs58yhE=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Win32.dll" size="1011712">
@@ -303,7 +303,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>uwkCZ24QRqMVtz4pb+/1f7J+fUgs5i3BMUQaBtejU3U=</dsig:DigestValue>
+      <dsig:DigestValue>pmzqW1TR46Y3EVoBCE1VKLpU3hgaWr/8fkPRrs9+HY0=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Xaml.Interactions.dll" size="270336">
@@ -375,7 +375,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>Edu0ADUmdVygtcEZ8b8c4+lLCTmK2IG/NpjJ6VvGVhE=</dsig:DigestValue>
+      <dsig:DigestValue>oOdCcrC8lxEDVqOzKn/gHae44nt4xJ1fY9UXDthmoIk=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Fizzler.dll" size="98304">
@@ -609,7 +609,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>e/TM3aVbw7FIitUyKRHZ1r0W1f/Sn+0gEfmrBfQ1cSQ=</dsig:DigestValue>
+      <dsig:DigestValue>4JqIEUQYZbfjwQhc7dTKh1NWv3jhCaedihiwUugE9ww=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Svg.Model.dll" size="368640">
@@ -618,7 +618,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>MdNn+OBGCvUCDPzAc6POf3W1TMx2gf4OrVAOLe7fqMI=</dsig:DigestValue>
+      <dsig:DigestValue>fF6e2ERCM5+ASBTa9yENJqV2ZtOHkl5HjD+AXiLAXr4=</dsig:DigestValue>
     </hash>
   </file>
   <file name="System.Drawing.Common.dll" size="954368">
