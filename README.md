@@ -21,7 +21,7 @@
 
 
 
-# Предварительная версия
+# Предварительная версия(Скоро...)
 
 ![image](https://user-images.githubusercontent.com/93156853/215139488-3b0fcf46-032c-4928-abf7-f92625efbf2b.png)
 
