@@ -21,10 +21,11 @@
 
 
 
-# Предварительная версия(Скоро...)
-
+# Предварительная версия Уже доступна!
 
 ![image](https://user-images.githubusercontent.com/93156853/216658594-945b9351-86ee-4245-b903-fcdb97180e3d.png)
+
+[Скачать]([https://github.com/user/repo/blob/branch/other_file.md](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/1.0.0.pre))
 
 
 
