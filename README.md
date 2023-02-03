@@ -23,7 +23,8 @@
 
 # Предварительная версия(Скоро...)
 
-![image](https://user-images.githubusercontent.com/93156853/215139488-3b0fcf46-032c-4928-abf7-f92625efbf2b.png)
+
+![image](https://user-images.githubusercontent.com/93156853/216658594-945b9351-86ee-4245-b903-fcdb97180e3d.png)
 
 
 
