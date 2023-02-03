@@ -25,6 +25,9 @@
 
 [Скачать](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/1.0.0.pre)
 
+## Добавлен график реального времени
+
+![image](https://user-images.githubusercontent.com/93156853/216661121-97959e39-4c38-4c4f-8310-847481b84656.png)
 
 
 теги
