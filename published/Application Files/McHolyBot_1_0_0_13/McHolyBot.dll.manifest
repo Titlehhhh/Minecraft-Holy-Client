@@ -69,7 +69,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>ysdzFtuTrzUcQ+FAyKwBFTJ5HVb3ntAiNqhprjkpWw8=</dsig:DigestValue>
+      <dsig:DigestValue>cjL5URcurp4UUCHJxeQQpkavZRgRzG0p4h67Eu7nBP0=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Controls.ColorPicker.dll" size="1216512">
@@ -87,7 +87,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>yJLAxV6bD5dlgbgWkBTwuwBV+NS54zwvty1WrxJhgS8=</dsig:DigestValue>
+      <dsig:DigestValue>FxPPq9cOfYnuwcpDvGrcB0MyLurrhYIqmvJvfqZwJps=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Controls.dll" size="2650112">
@@ -96,7 +96,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>I66jyDCymo0XsIzPGTKoHuslz8HSUbSOtjMMf98gKy4=</dsig:DigestValue>
+      <dsig:DigestValue>y3o7emUZSn8Gk872ydtmMFci/T2rlerGBSJ83UhfP1Y=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.DesignerSupport.dll" size="303104">
@@ -186,7 +186,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>u6nvOEjAWUSCOkkex0mjPho9idk0CDGDlosC2sfuJM0=</dsig:DigestValue>
+      <dsig:DigestValue>jSmjMPlfunDLzSTAUhLyZUEt38EnVdScQnkU5Egxqhg=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.OpenGL.dll" size="172032">
@@ -249,7 +249,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>Xy/sk1unIWKatWMEVgSrLiWqqstyWMTT7lNFG1JInrI=</dsig:DigestValue>
+      <dsig:DigestValue>klL7frIdR+qG/r/IhO5VFVF5aUezszWp4tILOu80hBE=</dsig:DigestValue>
     </hash>
   </file>
   <file name="AvaloniaEdit.dll" size="1572864">
@@ -258,7 +258,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>KxfiKr9BII9KV6IRxksS6QTw1vFLTUGVpQNhmAVaIz4=</dsig:DigestValue>
+      <dsig:DigestValue>daPciq+rXDACqpZaKhCzdRx8y2hRbBtiT8cJbZe01/A=</dsig:DigestValue>
     </hash>
   </file>
   <file name="BouncyCastle.Crypto.dll" size="8044544">
