@@ -14,6 +14,8 @@
 
 Перейди по [ссылке](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main) и скачай setup.exe. Это установщик ClickOnce, который установит и при небходимости удалит приложение. Подробнее про ClickOnce можно [здесь](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022)
 
+Примечание! С версии 1.0.0.13 старая версия приложения больше не обновляется автоматически, так как сменилось название программы и другие вещи. Вам нужно будет вручную скачать новый установщик, который переустановит программу.
+
 
 
 теги
