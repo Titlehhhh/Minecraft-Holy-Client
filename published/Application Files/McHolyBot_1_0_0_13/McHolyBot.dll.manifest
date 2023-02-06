@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
-  <asmv1:assemblyIdentity name="McHolyBot.exe" version="1.0.0.13" publicKeyToken="62cb363fe72f8ab0" language="neutral" processorArchitecture="msil" type="win32" />
-  <description asmv2:iconFile="Assets\icon.ico" asmv2:publisher="Title" co.v1:suiteName="McHolyBot" asmv2:product="Minecraft Holy Bot" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <asmv1:assemblyIdentity name="McHolyBot.exe" version="1.0.0.13" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="Assets\icon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
     <assemblyIdentity name="Launcher" version="7.0.0.0" language="neutral" processorArchitecture="msil" />
     <commandLine file="Launcher.exe" parameters="" />
   </entryPoint>
-  <co.v1:useManifestForTrust xmlns="urn:schemas-microsoft-com:asm.v1" />
   <trustInfo>
     <security>
       <applicationRequestMinimum>
@@ -44,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Launcher.exe" size="16864">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Launcher.exe" size="15872">
       <assemblyIdentity name="Launcher" version="7.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>1ZfyN0eGjVlXMkjNxe0sZ0lJyDp1BCDDg15QrPbzWbs=</dsig:DigestValue>
+        <dsig:DigestValue>DBgD0QCC1vG3xrHEiSnjEDiD5riFU96esb7mNTvPcoY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -70,7 +69,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>7ncvheDtFKHab21NAL7HIEJKDnrfnPVC+PHYV+pcMFI=</dsig:DigestValue>
+      <dsig:DigestValue>xcI4pJMgq+7erZ0zauaoY3enK+7LgRt1imQWpWifVKE=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Controls.ColorPicker.dll" size="1216512">
@@ -88,7 +87,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>0H0rQpC4HsSJcaYVp2j+wMT01t5HxOqI8074PmX7F0A=</dsig:DigestValue>
+      <dsig:DigestValue>z+zqpCKKrZNmGKrOigl7ugg2TSSEvuWMzaN6yy77CBk=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.Controls.dll" size="2650112">
@@ -97,7 +96,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>K7S4+UeFrwJgAnu7S2hNfofNPOQhqMamc4JN40Z2NGY=</dsig:DigestValue>
+      <dsig:DigestValue>BckDJBgr6m5GSAmU181Y0XxmEHhbzAcMMFlu/zvwmGw=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.DesignerSupport.dll" size="303104">
@@ -187,7 +186,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>8KtyYv2i4+juNmbAI3bsu/KS26+CjJVPk46Th8wM6kc=</dsig:DigestValue>
+      <dsig:DigestValue>iOzpQriBMYuJebj5+OqveigsRfC0h9ubm+AeesA040E=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Avalonia.OpenGL.dll" size="172032">
@@ -250,7 +249,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>yjhIcnPifsIC7Ck1tWmPTdQOMDDhMCcPE8nQjEv7roo=</dsig:DigestValue>
+      <dsig:DigestValue>uIHFQrolhdvAWY4CwZm9KzQDUnR3SjQBSQZS4e+mmM0=</dsig:DigestValue>
     </hash>
   </file>
   <file name="AvaloniaEdit.dll" size="1572864">
@@ -259,7 +258,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>o5Xi2miAQs/Y1raTt54yvJNO4wP0MJjmKV5v2gu2vl0=</dsig:DigestValue>
+      <dsig:DigestValue>9aGZQluMEJoLzsQHHbr7xBy22MWGOR3YZNulLN0nCa4=</dsig:DigestValue>
     </hash>
   </file>
   <file name="BouncyCastle.Crypto.dll" size="8044544">
@@ -622,22 +621,22 @@
       <dsig:DigestValue>JTUVTzO5dnn7YwfR8SfrmFFk9B7LBaTHmVDwiEgub5M=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="McHolyBot.dll" size="5575648">
+  <file name="McHolyBot.dll" size="5574656">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>xZYUHna3UlDRY+ivqyqm5NNRH8pXvCeZpGsQPPJOw8k=</dsig:DigestValue>
+      <dsig:DigestValue>5dmMQ77DIUEwX5Im8HjVOTLE5AQjqiUYKK02x0XtbEQ=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="McHolyBot.exe" size="222176">
+  <file name="McHolyBot.exe" size="221184">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>9/czHT/qwFrIcn2ANSF1Axcf/PvDAtPhsjhPIP10SeQ=</dsig:DigestValue>
+      <dsig:DigestValue>Pia8owTdNtUGAWMOXpeYovwwSusBU0ZHVZ3+LOOksDM=</dsig:DigestValue>
     </hash>
   </file>
   <file name="McHolyBot.runtimeconfig.json" size="330">
@@ -1054,4 +1053,4 @@
       <dsig:DigestValue>wIeVU23hvJMVtuNJyNckunjG1yKJpqckDYmeGGfNy/0=</dsig:DigestValue>
     </hash>
   </file>
-<publisherIdentity name="CN=DESKTOP-P1AA770\amper" issuerKeyHash="455aa0de8be25c76d59e4ad28a70335e076460c6" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>dhD3qLP66cucu/6EOMz5wvxyeSWMGn369Uz7+Vja8kE=</DigestValue></Reference></SignedInfo><SignatureValue>HeuKucu2h2jZxo0l5bDYefnVgosNJVo4ynMPm2K8MfL6Z77iGDtfUq0q7ruqzQ8Iee6S1P1AByZP/YndGF8GdIS/0NhGJhWqn8J6ctVIDYUfRP6yWxakxdFnevNQK+ASI0vZmFoCAZKGVA1UnCOWD7VrDE8VV8+/L42MvQmvlSw=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>vNdSIUoqqvsZe/TarG3FiB8bPgyqyb57wTrnayHm+DijhmyR1vFPqd3SVkmKcRNCuTDBFtX5qmMvFtJxXncCgwACBfMYFG09cXsOaMQwi0XZQeeAVv+MWjhNPUt9NzM0rXS62MDOFMd/eK/VkqMnmhL9PeHwM3xXkfP+Ojer7b0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="41f2da58f9fb4cf5fa7d1a8c257972fcc2f9cc3884febb9ccbe9fab3a8f71076" Description="" Url=""><as:assemblyIdentity name="McHolyBot.exe" version="1.0.0.13" publicKeyToken="62cb363fe72f8ab0" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=DESKTOP-P1AA770\amper</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>Wb8URFn9zDYEpOXurp5n7Z0GuaWIANhGXnA3ref9gIo=</DigestValue></Reference></SignedInfo><SignatureValue>ueCDE06m7piPDtrA3QrjSHWRa+3h42B0H9jlZv9nHVix52al9IHtsPFJGf++5tYmUu/ugXsmEOAESK5ARM9vDoePUY/kiALn40TSyBcVoo5tfY58eXvJ7T1SUFdWzzOB9mFvfTWOSnzQe2F7YdYTYg6lNgrjKWaMe5wTb4EpQX4=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>vNdSIUoqqvsZe/TarG3FiB8bPgyqyb57wTrnayHm+DijhmyR1vFPqd3SVkmKcRNCuTDBFtX5qmMvFtJxXncCgwACBfMYFG09cXsOaMQwi0XZQeeAVv+MWjhNPUt9NzM0rXS62MDOFMd/eK/VkqMnmhL9PeHwM3xXkfP+Ojer7b0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB7TCCAVagAwIBAgIQdotmshbJoJFOlEj4fZVLzzANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDHioARABFAFMASwBUAE8AUAAtAFAAMQBBAEEANwA3ADAAXABhAG0AcABlAHIwHhcNMjMwMjA2MTYyNjE1WhcNMjQwMjA2MjIyNjE1WjA1MTMwMQYDVQQDHioARABFAFMASwBUAE8AUAAtAFAAMQBBAEEANwA3ADAAXABhAG0AcABlAHIwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALzXUiFKKqr7GXv02qxtxYgfGz4Mqsm+e8E652sh5vg4o4ZskdbxT6nd0lZJinETQrkwwRbV+apjLxbScV53AoMAAgXzGBRtPXF7DmjEMItF2UHngFb/jFo4TT1LfTczNK10utjAzhTHf3iv1ZKjJ5oS/T3h8DN8V5Hz/jo3q+29AgMBAAEwDQYJKoZIhvcNAQELBQADgYEAb8pfSbemPaoHXELUEqFXRx/fYFdtjZsdCzvFNeTkHK5ElVIWhdyqsRUBzJQTWvIcaRp1mgihuP4aze61OcKMlEBJ7EX4/dmSdCFtXq7rXGy6zMkvMifEWbJoHtJPqqUjT0ChAPM2ana7iJqhEfInquxewkYeNlkHxlILmyIbT58=</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
+</asmv1:assembly>
