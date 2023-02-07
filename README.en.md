@@ -19,7 +19,7 @@ DDOS with 1000 threads consumes ~100 MB of RAM.
 
 # Download
 
-Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main ) and download setup.exe . This is the ClickOnce installer, which will install and, if necessary, delete the application. You can learn more about ClickOnce [here](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment ?view=vs-2022).
+Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main ) and download setup.exe . This is the ClickOnce installer, which will install and, if necessary, delete the application. You can learn more about ClickOnce [here](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022).
 
 Note! Starting from version 1.0.0.13, some components have changed in the application due to which there will be no auto-update, so you will need to update manually. To do this, download the new installer from the link above and run it. He will do all the "dirty" work himself. 
 
