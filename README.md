@@ -12,9 +12,14 @@
 
 # Скачать
 
-Перейди по ссылке и скачай setup.exe. Это установщик ClickOnce, который установит и при небходимости удалит приложение. Подробнее про ClickOnce можно [здесь](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022)
+Перейдите по [ссылке](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main) и скачайте setup.exe. Это установщик ClickOnce, который установит и при небходимости удалит приложение. Подробнее про ClickOnce можно узнать [здесь](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022).
+
+Примечание! Начиная с версии 1.0.0.13 в приложении сменились некоторые компонеты из-за которых автообновления не будет, поэтому необходимо будет обновится вручную. Для этого скачайте новый установщик по ссылке выше и запустите его. Всю "грязную" работу он сделает сам. 
 
 
+# Проблемы
+
+Если возникли какие-то проблемы с установкой или эксплуатацией ПО, то немедленно создавайте Issuse.
 
 теги
 
