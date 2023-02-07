@@ -1,5 +1,5 @@
 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.en.md)
+
 (The translation is not quite correct.)
 
 # Minecraft DDOS Free
