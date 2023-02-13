@@ -1,4 +1,4 @@
-
+The program was created solely for testing your server. Do not use it on other servers without the consent of the owner.
 
 (The translation is not quite correct.)
 
