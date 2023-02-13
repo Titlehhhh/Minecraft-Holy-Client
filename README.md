@@ -1,3 +1,6 @@
+Программа создана исключительно для тестирования вашего сервера! Не используйте программу на чужих серверах.
+
+
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.en.md)
 
 # Minecraft DDOS Free
