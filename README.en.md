@@ -6,7 +6,7 @@ The program was created solely for testing your server. Do not use it on other s
 
 A free convenient application to spam and ddos minecraft servers with bots.
 
-## Ddos by several methods (BotJoiner is still available)
+## Ddos by several methods
 ![image](https://user-images.githubusercontent.com/93156853/216658594-945b9351-86ee-4245-b903-fcdb97180e3d.png)
 
 
