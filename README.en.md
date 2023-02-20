@@ -7,7 +7,7 @@ The program was created solely for testing your server. Do not use it on other s
 A free convenient application to spam and ddos minecraft servers with bots.
 
 ## Ddos by several methods
-![image](https://user-images.githubusercontent.com/93156853/216658594-945b9351-86ee-4245-b903-fcdb97180e3d.png)
+![image](https://user-images.githubusercontent.com/93156853/220171541-0b6e3ffe-4e3e-465a-bd11-1b1925fe09d2.png)
 
 
 ## Real-time graph
