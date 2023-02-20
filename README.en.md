@@ -28,4 +28,4 @@ Note! Starting from version 1.0.0.13, some components have changed in the applic
 
 If you have any problems with the installation or operation of the software, then immediately create an Issuse.
 
-
+Error details can be found in %appdata%/McHolyBot/errors.txt
