@@ -5,4 +5,4 @@
 
 ## DDOS
   - Fixed a potential memory leak when switching pages.
-  - Now page switching works correctly and you can change the language during DDoS without bugs with the schedule.
+  - Now page switching works correctly and you can change the language during DDoS without bugs with the plot.
