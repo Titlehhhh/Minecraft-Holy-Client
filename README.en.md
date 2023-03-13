@@ -13,8 +13,18 @@ A free convenient application to spam and ddos minecraft servers with bots.
 ## Real-time graph
 ![image](https://user-images.githubusercontent.com/93156853/216661121-97959e39-4c38-4c4f-8310-847481b84656.png)
 
+## Spam bots
+Simple spam bots that send /register password password and immediately start spamming.
+
+![image](https://user-images.githubusercontent.com/93156853/224682635-6fed0c9d-016c-452c-b96e-ecfb2e1b3329.png)
+### Real-time graph (Displays the number of bots online)
+Configuration: 100 threads
+![image](https://user-images.githubusercontent.com/93156853/224682911-f2cd59ce-165f-478b-900a-fb7202b710fd.png)
+
+
+
 ## Perfomance
-DDOS with 1000 threads consumes ~100 MB of RAM.
+The program consumes approximately 100 MB of RAM during DDOS or spam attacks. It's really better than its Java counterparts, but the program has problems with multithreading. A lot of threads are being created that wait 99% of the time for a response from the network. Starting from version 1.0.0.20, there will be work in the direction of optimization, so updates will be less frequent.
 
 
 # Download
