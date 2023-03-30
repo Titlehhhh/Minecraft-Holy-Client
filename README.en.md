@@ -4,7 +4,7 @@ The program was created solely for testing your server. Do not use it on other s
 
 # Minecraft DDOS Free
 
-A free convenient application to spam and ddos minecraft servers with bots.
+A free handy application to emulate a high load Minecraft server. This app also serves as a clear example of how to use the McProtoNet library, where it shows incredible performance.
 
 ## Ddos by several methods
 ![image](https://user-images.githubusercontent.com/93156853/220171541-0b6e3ffe-4e3e-465a-bd11-1b1925fe09d2.png)
@@ -24,15 +24,15 @@ Configuration: 100 threads
 
 
 ## Perfomance
-The program consumes approximately 100 MB of RAM during DDOS or spam attacks. It's really better than its Java counterparts, but the program has problems with multithreading. A lot of threads are being created that wait 99% of the time for a response from the network. Starting from version 1.0.0.20, there will be work in the direction of optimization, so updates will be less frequent.
-
+The program consumes about 100 MB of RAM during a DDOS or spam attack. Since version 1.0.0.20 the number of threads decreased by a factor of 100! The power remained the same and the resources consumed decreased.
 
 # Download
 
 Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main) and download setup.exe . This is the ClickOnce installer, which will install and, if necessary, delete the application. You can learn more about ClickOnce [here](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022).
 
-Note! Starting from version 1.0.0.13, some components have changed in the application due to which there will be no auto-update, so you will need to update manually. To do this, download the new installer from the link above and run it. He will do all the "dirty" work himself. 
+# Source code
 
+The program is open source. It is available here: https://github.com/Titlehhhh/McHolyBot.Problems, but it is not always up-to-date. This repository was created specifically for other people to help solve some complicated problem with the program.
 
 # Problems
 
