@@ -1,4 +1,4 @@
 ## Приложение
- - Preparation for cross-platform
+ - Подготовка для кроссплатформенности 
 ## DDOS
- - Micro-optimizations of garbage cleaning after ddos
+ - Микрооптимизации очистки мусора после ддоса

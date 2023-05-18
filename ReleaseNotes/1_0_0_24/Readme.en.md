@@ -1,4 +1,4 @@
 ## App
- - Fixed update bug
+ - Preparation for cross-platform
 ## DDOS
- - Cosmetic changes
+ - Micro-optimizations of garbage cleaning after ddos
