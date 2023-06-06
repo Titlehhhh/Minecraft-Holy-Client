@@ -1,7 +1,7 @@
 The program was created solely for testing your server. Do not use it on other servers without the consent of the owner.
 
-[![ru](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.md)
-[![de](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.de.md)
+[![ru](https://img.shields.io/badge/lang-ru-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.md)
+[![de](https://img.shields.io/badge/lang-de-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.de.md)
 
 (The translation is not quite correct.)
 
