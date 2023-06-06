@@ -32,7 +32,7 @@ The program consumes about 100 MB of RAM during a DDOS or spam attack. Since ver
 
 # Download
 
-Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main) and download "setup.exe". This is the one click installer, which will install and, if necessary, delete the application. You can learn more about one click [here](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022).
+Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/Main) and download "setup.exe". This is the ClickOnce installer, which will install and, if necessary, delete the application. You can learn more about ClickOnce [here](https://learn.microsoft.com/ru-ru/visualstudio/deployment/clickonce-security-and-deployment?view=vs-2022).
 
 # Source code
 
