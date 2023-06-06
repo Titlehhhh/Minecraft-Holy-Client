@@ -1,5 +1,8 @@
 Das Programm wurde ausschließlich zum Testen Ihres Servers erstellt. Verwenden Sie es nicht ohne Zustimmung des Eigentümers auf anderen Servern.
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.en.md)
+[![ru](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.md)
+
 (Die Übersetzung ist nicht ganz korrekt.)
 
 # Minecraft DDOS kostenlos

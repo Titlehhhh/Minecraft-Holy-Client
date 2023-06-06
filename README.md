@@ -2,6 +2,7 @@
 
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.en.md)
+[![de](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Titlehhhh/Minecraft-DDOS-Free/blob/master/README.de.md)
 
 # Minecraft DDOS Free
 
