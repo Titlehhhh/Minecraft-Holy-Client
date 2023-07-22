@@ -32,7 +32,7 @@ Follow the [link](https://github.com/Titlehhhh/Minecraft-DDOS-Free/releases/tag/
 
 # Source code
 
-The program is open source. It is available here: https://github.com/Titlehhhh/McHolyBot.Problems, but it is not always up-to-date. This repository was created specifically for other people to help solve some complicated problem with the program.
+Will be available soon...
 
 # Problems
 
