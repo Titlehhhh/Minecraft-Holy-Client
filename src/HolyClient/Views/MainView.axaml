@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 xmlns:reactiveUi="http://reactiveui.net"
+			
+			 xmlns:models="using:HolyClient.Models"
+			 xmlns:vm="using:HolyClient.ViewModels"
+			 xmlns:views="using:HolyClient.Views"
+             x:Class="HolyClient.Views.MainView">
+	<UserControl.Resources>
+		<ui:PathIconSource   x:Key="HomeIcon"  Data="M220-180h150v-220q0-12.75 8.625-21.375T400-430h160q12.75 0 21.375 8.625T590-400v220h150v-390L480-765 220-570v390Zm-60 0v-390q0-14.25 6.375-27T184-618l260-195q15.68-12 35.84-12Q500-825 516-813l260 195q11.25 8.25 17.625 21T800-570v390q0 24.75-17.625 42.375T740-120H560q-12.75 0-21.375-8.625T530-150v-220H430v220q0 12.75-8.625 21.375T400-120H220q-24.75 0-42.375-17.625T160-180Zm320-293Z"/>
+		
+		<ui:PathIconSource   x:Key="BotManagerIcon"  Data="M190-120q-12.75 0-21.375-8.625T160-150v-190q0-24.75 17.625-42.375T220-400h520q24.75 0 42.375 17.625T800-340v190q0 12.75-8.625 21.375T770-120H190Zm170-320q-83 0-141.5-58.5T160-640q0-83 58.5-141.5T360-840h240q83 0 141.5 58.5T800-640q0 83-58.5 141.5T600-440H360ZM220-180h520v-160H220v160Zm140-320h240q58.333 0 99.167-40.765 40.833-40.764 40.833-99Q740-698 699.167-739 658.333-780 600-780H360q-58.333 0-99.167 40.765-40.833 40.764-40.833 99Q220-582 260.833-541q40.834 41 99.167 41Zm.175-110q12.825 0 21.325-8.675 8.5-8.676 8.5-21.5 0-12.825-8.675-21.325-8.676-8.5-21.5-8.5-12.825 0-21.325 8.675-8.5 8.676-8.5 21.5 0 12.825 8.675 21.325 8.676 8.5 21.5 8.5Zm240 0q12.825 0 21.325-8.675 8.5-8.676 8.5-21.5 0-12.825-8.675-21.325-8.676-8.5-21.5-8.5-12.825 0-21.325 8.675-8.5 8.676-8.5 21.5 0 12.825 8.675 21.325 8.676 8.5 21.5 8.5ZM480-180Zm0-460Z"/>
+		
+		<ui:PathIconSource   x:Key="StressTestIcon"  Data="M120-120v-76l60-60v136h-60Zm165 0v-236l60-60v296h-60Zm165 0v-296l60 61v235h-60Zm165 0v-235l60-60v295h-60Zm165 0v-396l60-60v456h-60ZM120-356v-85l280-278 160 160 280-281v85L560-474 400-634 120-356Z"/>
+		
+		<ui:PathIconSource   x:Key="ManagingExtensionsIcon"  Data="M356-120H180q-24 0-42-18t-18-42v-176q44-5 75.5-34.5T227-463q0-43-31.5-72.5T120-570v-176q0-24 18-42t42-18h177q11-40 39.5-67t68.5-27q40 0 68.5 27t39.5 67h173q24 0 42 18t18 42v173q40 11 65.5 41.5T897-461q0 40-25.5 67T806-356v176q0 24-18 42t-42 18H570q-5-48-35.5-77.5T463-227q-41 0-71.5 29.5T356-120Zm-176-60h130q25-61 69.888-84 44.888-23 83-23T546-264q45 23 70 84h130v-235h45q20 0 33-13t13-33q0-20-13-33t-33-13h-45v-239H511v-48q0-20-13-33t-33-13q-20 0-33 13t-13 33v48H180v130q48.15 17.817 77.575 59.686Q287-514.445 287-462.777 287-412 257.5-370T180-310v130Zm329-330Z"/>
+
+		<ui:PathIconSource   x:Key="SettingsIcon"  Data="M546-80H414q-11 0-19.5-7T384-105l-16-101q-19-7-40-19t-37-25l-93 43q-11 5-22 1.5T159-220L93-337q-6-10-3-21t12-18l86-63q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521l-86-63q-9-7-12-18t3-21l66-117q6-11 17-14.5t22 1.5l93 43q16-13 37-25t40-18l16-102q2-11 10.5-18t19.5-7h132q11 0 19.5 7t10.5 18l16 101q19 7 40.5 18.5T669-710l93-43q11-5 22-1.5t17 14.5l66 116q6 10 3.5 21.5T858-584l-86 61q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l86 62q9 7 12 18t-3 21l-66 117q-6 11-17 14.5t-22-1.5l-93-43q-16 13-36.5 25.5T592-206l-16 101q-2 11-10.5 18T546-80Zm-66-270q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-60q-29 0-49.5-20.5T410-480q0-29 20.5-49.5T480-550q29 0 49.5 20.5T550-480q0 29-20.5 49.5T480-410Zm0-70Zm-44 340h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Z"/>
+
+
+
+	</UserControl.Resources>
+		
+			
+
+
+			<ui:NavigationView  Grid.Row="1" SelectedItem="{Binding SelectedItem}" IsPaneOpen="False" Margin="5,0,0,0"  x:Name="Nav" IsSettingsVisible="False" ItemInvoked="NavigationView_ItemInvoked">
+				<ui:NavigationView.Styles>
+					
+					
+					
+				</ui:NavigationView.Styles>
+				<ui:NavigationView.MenuItems>
+					<ui:NavigationViewItem IconSource="{DynamicResource HomeIcon}" Margin="0,5,0,0" FontSize="16" Content="{Tr Home}">
+						<ui:NavigationViewItem.Tag>
+							<models:Page>Home</models:Page>
+						</ui:NavigationViewItem.Tag>						
+					</ui:NavigationViewItem>
+
+					<ui:NavigationViewItem  IconSource="{DynamicResource BotManagerIcon}" FontSize="16"  Content="{Tr BotManager}">
+						<ui:NavigationViewItem.Tag>
+							<models:Page>BotManager</models:Page>
+						</ui:NavigationViewItem.Tag>
+						
+					</ui:NavigationViewItem>
+					<ui:NavigationViewItem  IconSource="{DynamicResource StressTestIcon}"  FontSize="16"  Content="Stress test">
+						<ui:NavigationViewItem.Tag>
+							<models:Page>StressTest</models:Page>
+						</ui:NavigationViewItem.Tag>
+						
+					</ui:NavigationViewItem>
+
+					<ui:NavigationViewItem IconSource="{DynamicResource ManagingExtensionsIcon}"  FontSize="16"  Content="Управление расширениями">
+						<ui:NavigationViewItem.Tag>
+							<models:Page>ManagingExtensions</models:Page>
+						</ui:NavigationViewItem.Tag>
+						
+					</ui:NavigationViewItem>
+
+				</ui:NavigationView.MenuItems>
+
+				<ui:NavigationView.FooterMenuItems>
+					<ui:NavigationViewItem IconSource="{DynamicResource SettingsIcon}"  Content="{Tr Settings}" FontSize="16" >
+						<ui:NavigationViewItem.Tag>
+							<models:Page>Settings</models:Page>
+						</ui:NavigationViewItem.Tag>
+						
+					</ui:NavigationViewItem>
+				</ui:NavigationView.FooterMenuItems>
+
+				
+				<reactiveUi:RoutedViewHost Router="{Binding Router}"/>
+			</ui:NavigationView>
+
+	
+</UserControl>

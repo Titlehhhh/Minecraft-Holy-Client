@@ -1,0 +1,257 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sg="using:SpacedGridControl.Avalonia"
+			 xmlns:vm="using:HolyClient.ViewModels"
+			 x:CompileBindings="True"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 x:DataType="vm:AssembliesViewModel"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HolyClient.Views.AssembliesView">
+	<UserControl.Resources>
+
+	</UserControl.Resources>
+	<Panel>
+		<StackPanel
+			Spacing="5"
+			IsVisible="{Binding !Assemblies.Count}"
+			Grid.Row="1" Grid.ColumnSpan="2"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Center">
+
+			<TextBlock
+				HorizontalAlignment="Center"
+				Text="Нет загруженных сборок"
+				FontWeight="Thin"
+				Foreground="LightGray"
+				FontSize="16"
+				FontStyle="Italic"/>
+			<Button
+				HorizontalAlignment="Center"
+				Foreground="LightGray"
+				Command="{Binding AddAssemblyCommand}"
+				Content="Добавить"/>
+		</StackPanel>
+
+		<sg:SpacedGrid
+			IsVisible="{Binding Assemblies.Count}"
+			RowDefinitions="Auto, *"
+			ColumnDefinitions="*,Auto">
+
+
+
+
+			<TextBox
+				HorizontalAlignment="Left"
+				Width="250"
+				Text="{Binding Filter}"
+				Watermark="Поиск"/>
+
+			<Button
+				Grid.Column="1"
+				Content="Загрузить сборку"
+				Command="{Binding AddAssemblyCommand}"/>
+
+
+
+			<Grid
+				Margin="0,10,0,0"
+				ColumnDefinitions="*,Auto"
+				Grid.Row="1"
+				Grid.ColumnSpan="2">
+
+				<ListBox
+					Margin="0,0,7,0"
+					SelectedItem="{Binding SelectedItem}"
+					ItemsSource="{Binding Assemblies}">
+
+					<ListBox.DataTemplates>
+						<DataTemplate DataType="vm:AssemblyViewModel">
+							<DockPanel LastChildFill="False">
+								<ui:FontIcon
+									DockPanel.Dock="Left"
+									Glyph="&#xF808B;"
+									FontFamily="{StaticResource SymbolThemeFontFamily}"
+									FontSize="28"/>
+
+								<TextBlock
+									VerticalAlignment="Center"
+									Margin="7,0,0,0"
+									DockPanel.Dock="Left"
+									FontSize="16"									
+									Text="{Binding Name}"/>
+								<TextBlock
+									VerticalAlignment="Center"
+									Margin="0,0,10,0"
+									DockPanel.Dock="Right"
+									FontSize="15"
+									Text="{Binding Version}"/>
+							</DockPanel>
+						</DataTemplate>
+						<!--
+						
+						<DataTemplate DataType="vm:BotPluginVM">
+							<DockPanel>
+								<ui:FontIcon
+									Glyph="&#xE74C;"
+									FontSize="20"
+									FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+								<TextBlock
+									Margin="5,0,0,0"
+									VerticalAlignment="Center"
+									Text="{Binding Name}"/>
+							</DockPanel>
+						</DataTemplate>
+						<DataTemplate DataType="vm:StressTestPluginVM">
+							<DockPanel>
+								<ui:FontIcon
+									Glyph="&#xE9D2;"
+									FontSize="20"
+									FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+								<TextBlock
+									Margin="5,0,0,0"
+									VerticalAlignment="Center"
+									Text="{Binding Name}"/>
+							</DockPanel>
+						</DataTemplate>
+						-->
+					</ListBox.DataTemplates>
+
+				</ListBox>
+
+				<Border
+					Margin="0,0,10,10"
+					Padding="20,20,20,20"
+					CornerRadius="{DynamicResource OverlayCornerRadius}"
+					Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+					BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+					Grid.Column="1"
+					IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+					<ContentControl
+						Content="{Binding SelectedItem}">
+						<ContentControl.DataTemplates>
+							<DataTemplate DataType="vm:AssemblyViewModel">
+								<ScrollViewer>
+									<StackPanel>
+										<Grid
+											RowDefinitions="Auto,Auto"
+											ColumnDefinitions="Auto, Auto,Auto">
+											<ui:FontIcon
+												DockPanel.Dock="Left"
+												Grid.RowSpan="2"
+												Glyph="&#xF808B;"
+												FontFamily="{StaticResource SymbolThemeFontFamily}"
+												FontSize="40"/>
+
+											<TextBlock
+												Margin="5,0,0,0"
+												Grid.Column="1"
+												FontSize="16"
+												FontWeight="Bold"
+												Text="{Binding NameWithoutExtension}" />
+
+											<TextBlock
+												Margin="5,0,0,0"
+												Grid.Column="1"
+												Grid.Row="1"
+												Text="{Binding Author}"/>
+
+											<TextBlock
+												
+												Margin="5,0,0,0"
+												Grid.Column="2"
+												Text="{Binding Version}"/>
+										</Grid>
+
+										<sg:SpacedGrid
+											HorizontalAlignment="Stretch"
+											
+											Margin="0,20,0,0"
+											ColumnSpacing="10"
+											ColumnDefinitions="*,*">
+											<Button
+												HorizontalAlignment="Left"
+												Content="Перезагрузить">
+
+											</Button>
+
+											<Button
+												HorizontalAlignment="Right"
+												
+												Content="Удалить"
+												Grid.Column="1">
+
+											</Button>
+
+										</sg:SpacedGrid>
+
+										<TextBlock
+											FontSize="15"
+											Margin="0,10,0,0"
+											
+											Text="Путь"/>
+										<Grid Margin="0,5,0,0" ColumnDefinitions="*, Auto">
+											<TextBox
+												FontSize="15"
+												TextAlignment="Center"
+												VerticalContentAlignment="Center"
+												Width="200"
+												Text="{Binding Path}"
+												IsReadOnly="True"/>
+
+											<Button
+												Margin="5,0,0,0"
+												Grid.Column="1">
+												<ui:FontIcon
+													Glyph="&#xF80A8;"
+													FontFamily="{StaticResource SymbolThemeFontFamily}"
+													FontSize="22"/>
+											</Button>
+										</Grid>
+
+										<TextBlock
+											FontSize="15"
+											Margin="0,15,0,0"
+											Text="Найденные типы"/>
+										<StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+											<Rectangle
+												Fill="White"
+												Stroke="White"
+												Width="10"
+												Height="2"
+												RadiusX="2"
+												RadiusY="2"/>
+											<TextBlock Margin="5,0,0,0" >
+												<Run Text="Стресс-тест плагины"/>
+												<Run Text="{Binding Types.Count,StringFormat='({0}):'}"/>
+											</TextBlock>
+										</StackPanel>
+										<ItemsControl Margin="20,0,0,0" ItemsSource="{Binding Types}">
+											<ItemsControl.ItemTemplate>
+												<DataTemplate DataType="vm:StressTestPluginVM">
+													<TextBlock Margin="0,5,0,0" Text="{Binding Name}"/>
+												</DataTemplate>
+											</ItemsControl.ItemTemplate>
+										</ItemsControl>
+
+									</StackPanel>
+								</ScrollViewer>
+							</DataTemplate>
+						</ContentControl.DataTemplates>
+
+
+					</ContentControl>
+
+
+				</Border>
+
+			</Grid>
+
+		</sg:SpacedGrid>
+	</Panel>
+
+
+
+</UserControl>

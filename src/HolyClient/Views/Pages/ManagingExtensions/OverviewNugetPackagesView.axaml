@@ -1,0 +1,161 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
+             xmlns:vm="using:HolyClient.ViewModels"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 xmlns:design="using:HolyClient.DesignTime"
+			 xmlns:anim="using:HolyClient.Animation"
+			 xmlns:labs="clr-namespace:Avalonia.Labs.Controls;assembly=Avalonia.Labs.Controls"
+			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+			 xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+			 xmlns:behaviors="using:HolyClient.Behaviors"
+			 xmlns:converters="using:HolyClient.Converters"
+			 xmlns:views="using:HolyClient.Views"
+			 x:Name="Root"
+			xmlns:reactive="http://reactiveui.net"
+			 x:Class="HolyClient.Views.OverviewNugetPackagesView">
+	<Design.DataContext>
+		<design:DesignOverviewPackagesVM/>
+	</Design.DataContext>
+	<UserControl.Styles>
+		<Style Selector="Rectangle.SplitLine">
+			<Setter Property="Height" Value="0.3"/>
+			<Setter Property="Fill" Value="{DynamicResource ButtonBorderBrush}"/>
+			<Setter Property="RadiusY" Value="1"/>
+			<Setter Property="RadiusX" Value="1"/>
+		</Style>
+	</UserControl.Styles>
+	<UserControl.Resources>
+		<converters:DownloadCountFormatConverter x:Key="NugetDownloadCountConverter"/>		
+	</UserControl.Resources>
+	<Grid RowDefinitions="Auto,*">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="4"/>
+			<ColumnDefinition Width="350"/>
+		</Grid.ColumnDefinitions>
+		<StackPanel Orientation="Horizontal" Spacing="5">
+			<TextBox
+				Width="300"
+				Text="{Binding Filter}"
+				Watermark="Поиск" >
+				<TextBox.InnerRightContent>
+					<Button Command="{Binding SearchCommand}" VerticalAlignment="Stretch" Padding="3" Theme="{StaticResource TransparentButton}">
+						<ui:SymbolIcon Symbol="Find" Margin="9,0"/>
+					</Button>
+
+				</TextBox.InnerRightContent>
+				<TextBox.KeyBindings>
+					<KeyBinding Gesture="Enter" Command="{Binding SearchCommand}"/>
+				</TextBox.KeyBindings>
+			</TextBox>
+			<Button
+				Command="{Binding RefreshCommand}"
+				VerticalAlignment="Stretch"
+				Theme="{StaticResource TransparentButton}">
+				<ui:SymbolIcon Symbol="Refresh"/>
+			</Button>
+			<CheckBox IsChecked="{Binding EnablePreviewVersions}" Content="Включить предварительные версии" VerticalAlignment="Stretch"/>
+		</StackPanel>
+
+
+		<Grid Margin="0,10,0,0" Grid.Row="1">
+			<ContentControl>
+				<Panel>
+					<LoadNugetAnimationControl  IsVisible="{Binding IsLoading}"/>
+					<ScrollViewer
+						Margin="0,0,0,10"
+						IsVisible="{Binding !IsLoading}">
+
+
+						<i:Interaction.Behaviors>
+							<behaviors:OnScrollToEndBehavior Command="{Binding OnScrollEndCommand} "/>
+						</i:Interaction.Behaviors>
+
+
+						<StackPanel Margin="0,0,0,5">
+
+							<ListBox Margin="0,0,15,0" SelectedItem="{Binding SelectedPackage}"  ItemsSource="{Binding Packages}">
+
+								<ListBox.ItemTemplate>
+									<DataTemplate>
+										<DockPanel Margin="0,10,0,10">
+											<labs:AsyncImage
+												PlaceholderSource="/Assets/nugetIcon.png"
+												DockPanel.Dock="Left"
+												Height="48"
+												Width="48"
+												Source="{Binding Icon}"/>
+											<StackPanel Margin="10,0,0,0" DockPanel.Dock="Left">
+												<TextBlock >
+													<Run FontWeight="Bold" FontSize="16" Text="{Binding Id}"/>
+													<Run Text="автор: "/>
+													<Run Text="{Binding Authors}"/>
+													<Run Text=", скачиваний: "/>
+													<Run FontWeight="Bold"  Text="{Binding DownloadCount,Mode=OneWay,Converter={StaticResource NugetDownloadCountConverter}}"/>
+												</TextBlock>
+												<TextBlock Text="{Binding Description}" MaxLines="2" TextWrapping="WrapWithOverflow">
+
+												</TextBlock>
+											</StackPanel>
+
+										</DockPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+
+
+							<StackPanel IsVisible="{Binding IsLoadingNewItems}" HorizontalAlignment="Center" Spacing="5" Orientation="Horizontal">
+								<progRing:ProgressRing IsActive="True" Height="20" Width="20" Foreground="White"/>
+								<TextBlock Text="Загрузка"/>
+							</StackPanel>
+						</StackPanel>
+
+					</ScrollViewer>
+				</Panel>
+			</ContentControl>
+		</Grid>
+
+		<GridSplitter ResizeDirection="Auto" Background="Transparent" CornerRadius="10" Grid.Column="1" Grid.Row="1"/>
+
+		<Border
+			Name="OptionsHost"
+			Margin="0,0,10,10"
+			Padding="20,20,20,20"
+			
+			CornerRadius="{DynamicResource OverlayCornerRadius}"
+			Grid.Column="2"
+			Grid.Row="1"
+			Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+			BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+			BorderThickness="1">
+
+			<Panel>
+				<TextBlock
+					IsVisible="{Binding SelectedPackage, Converter={x:Static ObjectConverters.IsNull}}"
+					FontStyle="Italic"
+					Foreground="Gray"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Text="Нет выбранного пакета"
+					TextWrapping="WrapWithOverflow"/>
+				<TransitioningContentControl
+					IsVisible="{Binding SelectedPackage, Converter={x:Static ObjectConverters.IsNotNull}}"
+					Content="{Binding SelectedPackage}">
+
+					<TransitioningContentControl.ContentTemplate>
+						<DataTemplate>
+							<views:SelectedNugetPackage/>
+						</DataTemplate>
+					</TransitioningContentControl.ContentTemplate>
+
+				</TransitioningContentControl>
+
+			</Panel>
+
+		</Border>
+	</Grid>
+</UserControl>

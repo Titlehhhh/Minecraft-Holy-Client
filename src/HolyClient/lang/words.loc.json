@@ -1,0 +1,158 @@
+{
+  "LanguageName": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  
+  "Home": {
+    "en": "Home",
+    "ru": "Главная",
+    "WhatNew": {
+      "en": "What's new?",
+      "ru": "Что нового?"
+    },
+    "Version": {
+      "en": "Version: {0}",
+      "ru": "Версия: {0}"
+    }
+  },
+  "BotManager": {
+    "en": "Bot Manager",
+    "ru": "Менеджер ботов",
+    "ProfilesAbsent": {
+      "en": "You do not have any profiles.",
+      "ru": "У вас отсутсвуют профили."
+    },
+    "CreateProfile": {
+      "en": "Create profile",
+      "ru": "Создать профиль"
+    },
+    "RemoveProfile": {
+      "en": "Remove profile",
+      "ru": "Удалить профиль"
+    },
+    "DialogRemoveConfirmRequest": {
+      "en": "Are you sure you want to remove it?",
+      "ru": "Вы точно хотите удалить?"
+    },
+    "Process": {
+      "BotsCount": {
+        "en": "Number of bots",
+        "ru": "Количество ботов"
+      }
+    },
+    "Validation": {
+      "Enter": {
+        "Address": {
+          "en": "Enter address",
+          "ru": "Введите адрес"
+        },
+        "Port": {
+          "en": "Enter port",
+          "ru": "Введите порт"
+        }
+      },
+      "InvalidFormat": {
+        "en": "Invalid format",
+        "ru": "Неверный формат"
+      },
+      "LongPort": {
+        "en": "Port is too long",
+        "ru": "Порт длинный"
+      },
+      "UnkownVersion": {
+        "en": "Unknown version",
+        "ru": "Неизвестная версия"
+      },
+      "NicknameLong": {
+        "en": "The nickname is too long",
+        "ru": "Ник длинный"
+      }
+
+    },
+    "PreVersion": {
+      "en": "Preview version",
+      "ru": "Предварительная версия"
+    },
+    "Address": {
+      "en": "Address",
+      "ru": "Адрес"
+    },
+    "ThreadCount": {
+      "en": "Number of threads",
+      "ru": "Количество потоков"
+    },
+    "Version": {
+      "en": "Version",
+      "ru": "Версия"
+    },
+    "Nickname": {
+      "en": "Nickname",
+      "ru": "Никнейм"
+    },
+    "Start": {
+      "en": "Start",
+      "ru": "Запустить"
+    },
+    "Stop": {
+      "en": "Stop",
+      "ru": "Остановить"
+    },
+    "Error": {
+      "en": "An error occurred during startup:",
+      "ru": "Во время запуска произошла ошибка:"
+    },
+    "Tabs": {
+      "GeneralSettings": {
+        "en": "General settings",
+        "ru": "Основные настройки"
+      },
+      "Plugins": {
+        "en": "Plugins",
+        "ru": "Плагины"
+      },
+      "Console": {
+        "en": "Console",
+        "ru": "Консоль"
+      }
+    }
+  },
+  
+  "Settings": {
+    "en": "Settings",
+    "ru": "Настройки",
+    "Language": {
+      "en": "Language",
+      "ru": "Язык"
+    }
+  },
+  "Loading": {
+    "en": "Loading",
+    "ru": "Загрузка"
+  },
+  "Cancel": {
+    "en": "Cancel",
+    "ru": "Отмена"
+  },
+  "Back": {
+    "en": "Back",
+    "ru": "Назад"
+  },
+  "InDevelopment": {
+    "en": "Is in development",
+    "ru": "В разработке"
+  },
+  "Create": {
+    "en": "Create",
+    "ru": "Создать"
+  },
+  "Yes": {
+    "en": "Yes",
+    "ru": "Да"
+  },
+  "No": {
+    "en": "No",
+    "ru": "Нет"
+  }
+  
+}

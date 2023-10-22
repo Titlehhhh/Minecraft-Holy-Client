@@ -1,0 +1,210 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:des="using:HolyClient.DesignTime"
+			 xmlns:vm="using:HolyClient.ViewModels"
+			 xmlns:minecraft="using:McProtoNet.MultiVersion"
+			 x:CompileBindings="True"
+			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+			 x:DataType="vm:BotProfileViewModel"
+			 xmlns:sg="using:SpacedGridControl.Avalonia"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 xmlns:converters="using:HolyClient.Converters"
+			 xmlns:reactive="http://reactiveui.net"
+			 xmlns:custom="using:HolyClient.CustomControls"
+			 x:Class="HolyClient.Views.BotProfileView">
+	<UserControl.Resources>
+		<converters:MinecraftVersionToStringConverter x:Key="VersionToStringConverter"/>
+	</UserControl.Resources>
+	<Design.DataContext>
+		<des:DesignBotProfileViewModel/>
+	</Design.DataContext>
+
+
+	<Grid RowDefinitions="Auto, *" Margin="10,10,10,0">
+		<StackPanel Spacing="10">
+			<TextBox Text="{Binding Name}"  HorizontalAlignment="Center" Width="200" Watermark="Имя профиля">
+				<TextBox.Styles>
+					<Style Selector="DataValidationErrors">
+						<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+					</Style>
+				</TextBox.Styles>
+			</TextBox>
+
+
+			<StackPanel Orientation="Horizontal">
+				<Button Name="StartStopButton" Command="{Binding StartStopCommand}">
+					<i:Interaction.Behaviors>
+						<ia:DataTriggerBehavior Binding="{Binding StartStopCommand.IsActivate}"
+										Value="True">
+
+							<ia:ChangePropertyAction TargetObject="StartStopButton"
+													 PropertyName="Content">
+								<ia:ChangePropertyAction.Value>
+									<ui:SymbolIcon Symbol="StopFilled" Foreground="Red"/>
+								</ia:ChangePropertyAction.Value>
+							</ia:ChangePropertyAction>
+							<ia:ChangePropertyAction TargetObject="StartStopButton"
+													 Value="{Tr BotManager.Stop}"
+													 PropertyName="ToolTip.Tip">
+
+							</ia:ChangePropertyAction>
+						</ia:DataTriggerBehavior>
+						<ia:DataTriggerBehavior Binding="{Binding StartStopCommand.IsActivate}"
+												Value="False">
+							<ia:ChangePropertyAction TargetObject="StartStopButton"
+													 PropertyName="Content">
+								<ia:ChangePropertyAction.Value>
+									<ui:SymbolIcon Symbol="PlayFilled" Foreground="Green"/>
+								</ia:ChangePropertyAction.Value>
+							</ia:ChangePropertyAction>
+							<ia:ChangePropertyAction TargetObject="StartStopButton"
+													 Value="{Tr BotManager.Start}"
+													 PropertyName="ToolTip.Tip">
+
+							</ia:ChangePropertyAction>
+						</ia:DataTriggerBehavior>
+					</i:Interaction.Behaviors>
+
+				</Button>
+
+			</StackPanel>
+		</StackPanel>
+		<TabControl SelectedIndex="{Binding SelectedTab}" Padding="10,10,10,0" Grid.Row="1">
+			<TabItem Header="{Tr BotManager.Tabs.Console}" FontSize="15">
+
+				<Grid RowDefinitions="*, Auto" >
+					<Border CornerRadius="7" Padding="10,7,10,7" Background="{DynamicResource SolidBackgroundFillColorSecondary}">
+						<Border.Effect>
+							<DropShadowEffect Color="{DynamicResource SolidBackgroundFillColorSecondary}" BlurRadius="20" OffsetX="0" OffsetY="0"/>
+						</Border.Effect>
+						<ScrollViewer>
+							<ItemsControl ItemsSource="{Binding Console.LogItems}" Margin="10,7,10,7">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="x:String">
+										<TextBlock Text="{Binding}" FontFamily="Roboto" FontSize="16"/>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</ScrollViewer>
+					</Border>
+					<Grid Grid.Row="1" Margin="0,7,0,0" ColumnDefinitions="*,Auto">
+						<TextBox FontFamily="Consolas" FontSize="16" />
+						<Button FontSize="16" Margin="7,0,0,0" Grid.Column="1">
+							<Button.Content>
+								<ui:SymbolIcon Symbol="Send"/>
+							</Button.Content>
+						</Button>
+					</Grid>
+				</Grid>
+			</TabItem>
+
+
+			<TabItem Header="{Tr BotManager.Tabs.GeneralSettings}" FontSize="15">
+				<ScrollViewer>
+					<StackPanel Spacing="15">
+						<Border Classes="SettingItem" >
+							<StackPanel Spacing="10">
+								<TextBlock Text="{Tr BotManager.Address}" FontSize="15"/>
+								<TextBox
+									Text="{Binding Server}"
+									HorizontalAlignment="Left"
+									MaxHeight="180"
+									Width="200">
+
+								</TextBox>
+							</StackPanel>
+						</Border>
+						<Border Classes="SettingItem" >
+							<StackPanel Spacing="10">
+								<TextBlock Text="{Tr BotManager.Nickname}" FontSize="15"/>
+								<TextBox
+									Text="{Binding Nickname}"
+									HorizontalAlignment="Left"
+									MaxHeight="180"
+									Width="200">
+								</TextBox>
+							</StackPanel>
+						</Border>
+						<Border Classes="SettingItem" >
+							<StackPanel Spacing="10">
+								<TextBlock Text="{Tr BotManager.Version}" FontSize="15"/>
+								<ComboBox SelectedItem="{Binding Version}" ItemsSource="{Binding SupportedVersions}">
+									<ComboBox.ItemTemplate>
+										<DataTemplate DataType="minecraft:MinecraftVersion">
+											<TextBlock Text="{Binding Converter={StaticResource VersionToStringConverter}}" />
+										</DataTemplate>
+									</ComboBox.ItemTemplate>
+								</ComboBox>
+							</StackPanel>
+						</Border>
+
+					</StackPanel>
+
+				</ScrollViewer>
+			</TabItem>
+			<TabItem IsSelected="True" Header="{Tr BotManager.Tabs.Plugins}" FontSize="15">
+				<sg:SpacedGrid 
+					RowSpacing="10" 
+					ColumnSpacing="10"
+					RowDefinitions="Auto, *,Auto" 
+					ColumnDefinitions="*,*">
+					
+					<TextBlock 
+						Text="Доступные плагины" 
+						Grid.Row="0"
+						Grid.Column="0"/>
+					<TextBlock 
+						Text="Загруженные плагины"  
+						Grid.Row="0" 
+						Grid.Column="1"/>
+
+					<Border
+						CornerRadius="7"
+						Padding="7"
+						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+						Grid.Row="1" 
+						Grid.Column="0">
+						<ListBox SelectedItem="{Binding SelectedAvailablePlugin}" ItemsSource="{Binding AvailablePlugins}">
+							<ListBox.ItemTemplate>
+								<DataTemplate DataType="vm:BotPluginViewModel">
+									<TextBlock Text="{Binding Name}"/>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</Border>
+					<Border 
+						CornerRadius="7"
+						Padding="7"
+						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+						Grid.Row="1"
+						Grid.Column="1">
+						<ListBox SelectedItem="{Binding SelectedLoadedPlugin}" ItemsSource="{Binding LoadedPlugins}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding Name}"/>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</Border>
+					
+					<Button 
+						Command="{Binding AddPluginCommand}"
+						Content="Добавить" 
+						Grid.Row="2" 
+						Grid.Column="0"/>
+					<Button 
+						Command="{Binding RemovePluginCommand}"
+						Content="Удалить" 
+						Grid.Row="2" 
+						Grid.Column="1"/>
+				</sg:SpacedGrid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+
+
+</UserControl>

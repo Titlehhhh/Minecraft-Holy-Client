@@ -1,2 +1,0 @@
-## App
- - English language support.
