@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <LangVersion>11</LangVersion>
+    <Description>Библиотека, которая содержит все зависимости McProtoNet.
+
+Вы можете скачать эту библиотеку, когда вам нужно использвать все версии протокола.</Description>
+    <RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
+    <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
+    <ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

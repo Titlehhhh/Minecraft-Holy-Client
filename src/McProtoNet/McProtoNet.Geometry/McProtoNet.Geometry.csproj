@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PublishAot>true</PublishAot>
+		<LangVersion>11</LangVersion>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>Геометрические примитивы для McProtoNet</Description>
+		<RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+	</PropertyGroup>
+
+
+</Project>

@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <PublishAot>true</PublishAot>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>Пакеты и данные для версии майнкрафт протокола 754</Description>
+    <RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+	  <LangVersion>11</LangVersion>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Packets\Client\Game\" />
+    <Folder Include="Packets\Server\Game\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
+    <ProjectReference Include="..\McProtoNet.Geometry\McProtoNet.Geometry.csproj" />
+    <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
+  </ItemGroup>
+
+</Project>

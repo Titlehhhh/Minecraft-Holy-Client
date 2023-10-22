@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <PublishAot>true</PublishAot>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>Библиотека с инструментами для McProtoNet</Description>
+    <RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+	  <LangVersion>11</LangVersion>
+  </PropertyGroup>
+	
+	
+  <ItemGroup>
+    <PackageReference Include="DnsClient" Version="1.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+	
+	
+  <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
+    <ProjectReference Include="..\McProtoNet.Geometry\McProtoNet.Geometry.csproj" />
+    <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
+    <ProjectReference Include="..\QuickProxyNet\QuickProxyNet.csproj" />
+  </ItemGroup>
+
+</Project>

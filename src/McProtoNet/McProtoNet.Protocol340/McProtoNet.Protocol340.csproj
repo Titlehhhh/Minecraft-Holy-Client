@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <LangVersion>11</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))      </RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>Пакеты и данные для версии протокола 340</Description>
+    <RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+	 
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
+    <ProjectReference Include="..\McProtoNet.Geometry\McProtoNet.Geometry.csproj" />
+    <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
+    <ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

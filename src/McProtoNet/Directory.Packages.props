@@ -1,0 +1,21 @@
+<Project>
+	<PropertyGroup>
+		<!--
+		<PackageVersion>$([System.DateTime]::Now.ToString(yyyy.MM.dd.mm))</PackageVersion>
+		-->
+		<PackageVersion>99.0.0</PackageVersion>
+	</PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.5" />
+    <PackageVersion Include="BenchmarkDotNet.Annotations" Version="0.13.5" />
+    <PackageVersion Include="ConfigureAwait.Fody" Version="3.3.2" />
+    <PackageVersion Include="McProtoNet" Version="1.7.3" />
+    <PackageVersion Include="McProtoNet.Core" Version="1.0.2" />
+    <PackageVersion Include="McProtoNet.Protocol754" Version="1.7.3" />
+    <PackageVersion Include="McProtoNet.Utils" Version="1.4.8" />
+    <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="System.Buffers" Version="4.5.1" />
+    <PackageVersion Include="System.IO.Pipelines" Version="8.0.0-preview.3.23174.8" />
+  </ItemGroup>
+</Project>

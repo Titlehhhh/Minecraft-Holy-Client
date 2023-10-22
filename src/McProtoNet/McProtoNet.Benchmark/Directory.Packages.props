@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <PackageVersion Include="AngleSharp" Version="1.0.0" />
+  </ItemGroup>
+</Project>
