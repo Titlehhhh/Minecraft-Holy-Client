@@ -1,8 +1,0 @@
-<Project>
-  <ItemGroup>
-    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.0.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.0.2" />
-  </ItemGroup>
-</Project>
