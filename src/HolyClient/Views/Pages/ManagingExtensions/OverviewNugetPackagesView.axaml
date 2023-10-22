@@ -7,7 +7,7 @@
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:design="using:HolyClient.DesignTime"
 			 xmlns:anim="using:HolyClient.Animation"
-			 xmlns:labs="clr-namespace:Avalonia.Labs.Controls;assembly=Avalonia.Labs.Controls"
+			 
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
@@ -83,12 +83,15 @@
 								<ListBox.ItemTemplate>
 									<DataTemplate>
 										<DockPanel Margin="0,10,0,10">
+											<!--
 											<labs:AsyncImage
 												PlaceholderSource="/Assets/nugetIcon.png"
 												DockPanel.Dock="Left"
 												Height="48"
 												Width="48"
 												Source="{Binding Icon}"/>
+											-->
+											
 											<StackPanel Margin="10,0,0,0" DockPanel.Dock="Left">
 												<TextBlock >
 													<Run FontWeight="Bold" FontSize="16" Text="{Binding Id}"/>

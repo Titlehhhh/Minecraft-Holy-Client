@@ -10,7 +10,7 @@
 		<RemoveDir ContinueOnError="true" Directories="I:\LocalNuget\$(PackageId).$(PackageVersion)"/>
 		
 		
-		<Exec Command="nuget add $(NugetPath) -Source I:\LocalNuget" />
+		<Exec Command="nuget add &quot;$(NugetPath)&quot; -Source I:\LocalNuget" />
 		<Delete Files="$(NugetPath)"/>
 	</Target>
 </Project>
