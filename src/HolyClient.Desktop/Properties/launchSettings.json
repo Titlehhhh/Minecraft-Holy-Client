@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "HolyClient.Desktop": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "hotReloadEnabled": false
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}

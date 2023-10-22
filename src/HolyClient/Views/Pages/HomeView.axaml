@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+             
+			  xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HolyClient.Views.HomeView">
+	
+	<Grid RowDefinitions="Auto,Auto, *" Margin="20,20,0,0">
+		<TextBlock Text="{Tr Home.WhatNew}" FontSize="18" FontWeight="Bold"/>
+		<TextBlock Grid.Row="1" FontSize="16" Text="{Tr Home.Version, {Binding Version}}"/>
+		
+	</Grid>
+</UserControl>

@@ -1,0 +1,39 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            RequestedThemeVariant="Dark"
+			 
+			 xmlns:labs="using:Avalonia.Labs.Controls"
+			 xmlns:sty="using:FluentAvalonia.Styling"
+             x:Class="HolyClient.App">
+
+
+	<Application.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="Foreground" Value="White"/>
+		</Style>
+		<labs:ControlThemes />
+		<StyleInclude Source="/Styles/LoadNugetAnimationControlStyles.axaml" />
+		<StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+		<StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
+		<sty:FluentAvaloniaTheme PreferUserAccentColor="False" PreferSystemTheme="False" UseSystemFontOnWindows="False"/>
+		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
+
+	</Application.Styles>
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source='avares://HolyClient/Designer/CustomStyles.axaml'/>
+				<ResourceInclude Source='/Themes/NugetIconImage.axaml'/>
+				<ResourceInclude Source='/Themes/ListBoxItemStyles.axaml'/>
+			</ResourceDictionary.MergedDictionaries>
+			<SolidColorBrush x:Key="SystemControlErrorTextForegroundBrush" Color="#FFF000"/>
+			<SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#FFF000"/>
+
+		</ResourceDictionary>
+
+
+		<FontFamily x:Key="ContentControlThemeFontFamily">avares://HolyClient/Assets/Fonts/JetBrains#JetBrains Mono</FontFamily>
+	
+		
+	</Application.Resources>
+</Application>

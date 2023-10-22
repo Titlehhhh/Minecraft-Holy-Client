@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+   
+  </PropertyGroup>
+	<Target Name="PublishNuGetLocally" AfterTargets="Pack">
+		<PropertyGroup>
+			<NugetPath>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(PackageId).$(PackageVersion).nupkg</NugetPath>
+		</PropertyGroup>
+		
+		<RemoveDir ContinueOnError="true" Directories="I:\LocalNuget\$(PackageId).$(PackageVersion)"/>
+		
+		
+		<Exec Command="nuget add $(NugetPath) -Source I:\LocalNuget" />
+		<Delete Files="$(NugetPath)"/>
+	</Target>
+</Project>

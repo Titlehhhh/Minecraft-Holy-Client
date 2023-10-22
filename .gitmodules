@@ -1,12 +1,4 @@
-[submodule "McProtoNet"]
-	path = src/McProtoNet
-	url = https://github.com/Titlehhhh/McProtoNet
-[submodule "Avalonia.Labs"]
-	path = src/Avalonia.Labs
-	url = https://github.com/AvaloniaUI/Avalonia.Labs
 [submodule "src/McProtoNet"]
 	path = src/McProtoNet
 	url = https://github.com/Titlehhhh/McProtoNet
-[submodule "src/Avalonia.Labs"]
-	path = src/Avalonia.Labs
-	url = https://github.com/Titlehhhh/Avalonia.Labs
+
