@@ -58,7 +58,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Avalonia.Labs\src\Avalonia.Labs.Controls\Avalonia.Labs.Controls.csproj" />
     <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
     <ProjectReference Include="..\HolyClient.SDK\HolyClient.SDK.csproj" />
     <ProjectReference Include="..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
