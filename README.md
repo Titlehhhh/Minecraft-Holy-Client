@@ -1,3 +1,5 @@
+[![Discord Banner](https://img.shields.io/badge/discord-join%20chat-46BC99)](https://discord.gg/HVDzx4rCgg)
+
 # Minecraft Holy Client
 
 Удобное, высокопроизводительное, легко масштабируемое и кроссплатформенное приложение для создания и управления ботами Minecraft.
