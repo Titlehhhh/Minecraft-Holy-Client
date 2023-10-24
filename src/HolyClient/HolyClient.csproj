@@ -70,8 +70,8 @@
     <Compile Update="Views\Pages\BotManager\EmptyProfilesView.axaml.cs">
       <DependentUpon>EmptyProfilesView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\ManagingExtensions\AssembliesView.axaml.cs">
-      <DependentUpon>AssembliesView.axaml</DependentUpon>
+    <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
+      <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\StressTest\Dialogs\ImportProxyDialogContent.axaml.cs">
       <DependentUpon>ImportProxyDialogContent.axaml</DependentUpon>

@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace HolyClient.ViewModels
 {
-	public sealed class AssembliesViewModel : ReactiveObject, IActivatableViewModel
+	public sealed class AssemblyManagerViewModel : ReactiveObject, IActivatableViewModel
 	{
 
 		[Reactive]
@@ -51,7 +51,7 @@ namespace HolyClient.ViewModels
 
 		public ViewModelActivator Activator { get; } = new();
 		private readonly ExtensionManager manager;
-		public AssembliesViewModel()
+		public AssemblyManagerViewModel()
 		{
 			
 			manager = Locator.Current.GetService<ExtensionManager>();

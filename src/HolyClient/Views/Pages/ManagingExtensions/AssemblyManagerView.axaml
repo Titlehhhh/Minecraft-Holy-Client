@@ -6,9 +6,9 @@
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:CompileBindings="True"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
-			 x:DataType="vm:AssembliesViewModel"
+			 x:DataType="vm:AssemblyManagerViewModel"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="HolyClient.Views.AssembliesView">
+             x:Class="HolyClient.Views.AssemblyManagerView">
 	<UserControl.Resources>
 
 	</UserControl.Resources>

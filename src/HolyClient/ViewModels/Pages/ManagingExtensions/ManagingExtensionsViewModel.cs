@@ -12,7 +12,7 @@ namespace HolyClient.ViewModels
 		#region Tabs
 		public OverviewNugetPackagesViewModel OverviewNugetPackages { get; } = new();
 
-		public AssembliesViewModel Assemblies { get; } = new();
+		public AssemblyManagerViewModel Assemblies { get; } = new();
 		#endregion
 
 

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace HolyClient.Views;
 
-public partial class AssembliesView : ReactiveUserControl<AssembliesViewModel>
+public partial class AssemblyManagerView : ReactiveUserControl<AssemblyManagerViewModel>
 {
-	public AssembliesView()
+	public AssemblyManagerView()
 	{
 		InitializeComponent();
 

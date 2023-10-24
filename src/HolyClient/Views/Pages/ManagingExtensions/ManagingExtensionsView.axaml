@@ -43,7 +43,7 @@
 					<TextBlock Text="В разработке"  VerticalAlignment="Center" HorizontalAlignment="Center"/>
 				</TabItem>
 				<TabItem FontSize="16" Header="Сборки">
-					<views:AssembliesView DataContext="{Binding Assemblies}"/>
+					<views:AssemblyManagerView DataContext="{Binding Assemblies}"/>
 				</TabItem>
 			</TabControl>
 		</ui:FABorder>

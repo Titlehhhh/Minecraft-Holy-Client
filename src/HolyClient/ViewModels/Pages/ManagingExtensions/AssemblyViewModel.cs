@@ -55,6 +55,8 @@ namespace HolyClient.ViewModels
 
 
 
+
+
 			_cleanUp = d;
 		}
 
