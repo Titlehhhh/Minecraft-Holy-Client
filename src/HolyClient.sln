@@ -56,6 +56,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		McProtoNet\Directory.Packages.props = McProtoNet\Directory.Packages.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{8C0DECB2-07F1-4326-B8CC-539C0C962ADC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "build", "build\build.csproj", "{31784700-4289-435C-BC9C-7053363BB8CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +132,10 @@ Global
 		{61213C0E-11D1-46D2-8CEA-31C03CCD03F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61213C0E-11D1-46D2-8CEA-31C03CCD03F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61213C0E-11D1-46D2-8CEA-31C03CCD03F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31784700-4289-435C-BC9C-7053363BB8CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31784700-4289-435C-BC9C-7053363BB8CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31784700-4289-435C-BC9C-7053363BB8CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31784700-4289-435C-BC9C-7053363BB8CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +153,7 @@ Global
 		{C710D197-7B5B-47E0-90CC-455D5EC7C05C} = {8D32FACD-AD45-4A51-9B72-60D17C165693}
 		{5E4DF286-5752-46D9-9737-B189764A36AE} = {C710D197-7B5B-47E0-90CC-455D5EC7C05C}
 		{4F2C16F0-9243-418F-AB00-C96C6652721A} = {1C346236-F414-4CC3-83FA-6EAB07202420}
+		{31784700-4289-435C-BC9C-7053363BB8CE} = {8C0DECB2-07F1-4326-B8CC-539C0C962ADC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41AEE66A-568B-4B2B-A50B-5AC57D067A07}
