@@ -1,5 +1,5 @@
 ﻿using DynamicData;
-using HolyClient.Abastractions.StressTest;
+using HolyClient.Abstractions.StressTest;
 using HolyClient.SDK.Attributes;
 using System;
 using System.Reflection;

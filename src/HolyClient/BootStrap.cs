@@ -4,11 +4,11 @@ using Avalonia.Threading;
 using HolyClient.AppState;
 using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
-using HolyClient.Core.StressTest;
 using HolyClient.Localization;
 using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
 using HolyClient.Services;
+using HolyClient.StressTest;
 using HolyClient.ViewModels;
 using HolyClient.Views;
 using ReactiveUI;
@@ -144,7 +144,7 @@ namespace HolyClient
 
 			Locator.CurrentMutable.RegisterConstant<INugetClient>(new NugetClient());
 
-			
+
 
 			Locator.CurrentMutable.RegisterConstant<IProxyLoaderService>(new ProxyLoaderService());
 

@@ -4,7 +4,6 @@ using HolyClient.LoadPlugins;
 using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
-using HolyClient.SDK;
 using Splat;
 
 namespace HolyClient.Services
@@ -67,10 +66,10 @@ namespace HolyClient.Services
 
 
 
-		public BotPlugin Create()
-		{
-			return null;
-		}
+		//public BotPlugin Create()
+		//{
+		//	return null;
+		//}
 	}
 
 

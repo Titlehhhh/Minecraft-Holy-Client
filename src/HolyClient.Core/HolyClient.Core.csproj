@@ -8,6 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Logging\**" />
+	  <EmbeddedResource Remove="Logging\**" />
+	  <None Remove="Logging\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
 		<PackageReference Include="MessagePack" Version="2.5.129" />
 		<PackageReference Include="Polly" Version="8.0.0-alpha.5" />
@@ -20,14 +26,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Logging\" />
+		<Folder Include="Infrastructure\Plugin\" />
 		<Folder Include="Services\Implementation\" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
 	</ItemGroup>
-	<Import Project="..\LocalNuget.targets"/>
+	<Import Project="..\LocalNuget.targets" />
 
 
 </Project>

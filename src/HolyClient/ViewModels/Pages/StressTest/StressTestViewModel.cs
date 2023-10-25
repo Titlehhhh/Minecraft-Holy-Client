@@ -1,4 +1,4 @@
-﻿using HolyClient.Core.StressTest;
+﻿using HolyClient.StressTest;
 using ReactiveUI;
 using Splat;
 

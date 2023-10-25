@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HolyClient.SDK"/>
+    <PackageReference Include="HolyClient.SDK" Version="2023.10.24.46" />
   </ItemGroup>
 
 </Project>

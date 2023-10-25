@@ -1,5 +1,5 @@
 ﻿using HolyClient.Commands;
-using HolyClient.Core.StressTest;
+using HolyClient.StressTest;
 using ReactiveUI;
 using System.Windows.Input;
 

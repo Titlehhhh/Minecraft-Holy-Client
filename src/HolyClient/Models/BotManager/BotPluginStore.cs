@@ -31,7 +31,7 @@ public class BotPluginStore : IBotPluginStore
 		_stateRef.Add(plugin.Token);
 		try
 		{
-			bot.AddPlugin(plugin.Create());
+			//bot.AddPlugin(plugin.Create());
 		}
 		catch (Exception ex)
 		{

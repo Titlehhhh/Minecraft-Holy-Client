@@ -15,9 +15,8 @@
 
   <ItemGroup>
 	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
-	  <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
   </ItemGroup>
 
-	<Import Project="..\LocalNuget.targets"/>
+	<Import Project="..\LocalNuget.targets" />
 
 </Project>

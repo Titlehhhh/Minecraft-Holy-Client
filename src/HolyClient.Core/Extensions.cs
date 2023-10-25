@@ -1,11 +1,6 @@
-﻿using McProtoNet.MultiVersion;
-using McProtoNet.Utils;
-using Serilog;
-using System.Reactive.Subjects;
-
-namespace HolyClient.Core
+﻿namespace HolyClient.Core
 {
-	
+
 	public static class Extensions
 	{
 		public static int ProtocolVersion(this string MCVersion)

@@ -1,6 +1,7 @@
 ﻿using DynamicData;
 using HolyClient.Commands;
-using HolyClient.Core.StressTest;
+using HolyClient.Common;
+using HolyClient.StressTest;
 
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using McProtoNet.MultiVersion;
@@ -71,7 +72,7 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 
 
-		this.WhenActivated( d =>
+		this.WhenActivated(d =>
 		{
 
 

@@ -1,5 +1,4 @@
 ﻿using HolyClient.Models;
-using HolyClient.SDK;
 
 namespace HolyClient.LoadPlugins.Models
 {
@@ -11,7 +10,7 @@ namespace HolyClient.LoadPlugins.Models
 		string Assembly { get; }
 		string AssemblyFile { get; }
 
-		BotPlugin Create();
+		//BotPlugin Create();
 
 
 	}

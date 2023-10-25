@@ -1,15 +1,8 @@
-﻿using DynamicData;
-using McProtoNet.MultiVersion;
+﻿using McProtoNet.MultiVersion;
 using McProtoNet.Utils;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HolyClient.Core.Models.BotManager
 {
@@ -51,7 +44,7 @@ namespace HolyClient.Core.Models.BotManager
 		public void AddPlugin(IBotPlugin plugin)
 		{
 			_plugins.Add(plugin);
-			plugin.Client = this.minecraftClient; 
+			plugin.Client = this.minecraftClient;
 		}
 		public void RemovePlugin(IBotPlugin plugin)
 		{
@@ -105,7 +98,7 @@ namespace HolyClient.Core.Models.BotManager
 				Version = this.Version
 			};
 			CompositeDisposable disposables = new();
-			foreach(var plugin in this.Plugins)
+			foreach (var plugin in this.Plugins)
 			{
 
 

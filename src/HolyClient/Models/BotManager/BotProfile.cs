@@ -1,7 +1,7 @@
-﻿using HolyClient.Contracts.Models;
+﻿using HolyClient.Common;
+using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
 using HolyClient.Core.Models.BotManager;
-using HolyClient.Core.StressTest;
 using McProtoNet.MultiVersion;
 using MessagePack;
 using ReactiveUI;

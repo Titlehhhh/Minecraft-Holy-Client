@@ -1,4 +1,4 @@
-﻿namespace HolyClient.Core.StressTest
+﻿namespace HolyClient.StressTest
 {
 	public struct StressTestMetrik
 	{

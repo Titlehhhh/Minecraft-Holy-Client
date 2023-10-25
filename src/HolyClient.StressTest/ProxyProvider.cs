@@ -1,8 +1,8 @@
 ﻿using Fody;
-using HolyClient.Core.Services;
+using HolyClient.Common;
 using QuickProxyNet;
 
-namespace HolyClient.Core.StressTest
+namespace HolyClient.StressTest
 {
 	[ConfigureAwait(false)]
 	class ProxyProvider : IProxyProvider

@@ -13,6 +13,14 @@
 
   
   <ItemGroup>
+    <AvaloniaXaml Remove="Models\StressTest\**" />
+    <Compile Remove="Models\StressTest\**" />
+    <EmbeddedResource Remove="Models\StressTest\**" />
+    <None Remove="Models\StressTest\**" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
     <None Remove="lang\words.loc.json" />
   </ItemGroup>
 
@@ -60,6 +68,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
     <ProjectReference Include="..\HolyClient.SDK\HolyClient.SDK.csproj" />
+    <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
     <ProjectReference Include="..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
   </ItemGroup>
 
@@ -80,7 +89,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
-    <Folder Include="Models\StressTest\" />
     <Folder Include="Views\Pages\StressTest\Behavior\" />
   </ItemGroup>
 

@@ -1,9 +1,10 @@
 ﻿using DynamicData;
-using HolyClient.Abastractions.StressTest;
+using HolyClient.Abstractions.StressTest;
+using HolyClient.Common;
 using McProtoNet.MultiVersion;
 using System.ComponentModel;
 
-namespace HolyClient.Core.StressTest
+namespace HolyClient.StressTest
 {
 	[MessagePack.Union(0, typeof(StressTest))]
 	public interface IStressTest : INotifyPropertyChanged, INotifyPropertyChanging

@@ -1,10 +1,6 @@
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
-using LiveChartsCore.Measure;
-using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.VisualElements;
 using ReactiveUI;
-using SkiaSharp;
 
 namespace HolyClient.Views.Pages.StressTest;
 

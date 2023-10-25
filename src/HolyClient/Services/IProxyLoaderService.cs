@@ -1,5 +1,5 @@
 ﻿using DynamicData;
-using HolyClient.Core.StressTest;
+using HolyClient.Common;
 using QuickProxyNet;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

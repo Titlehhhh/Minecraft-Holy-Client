@@ -1,5 +1,5 @@
 ﻿using DynamicData;
-using HolyClient.Abastractions.StressTest;
+using HolyClient.Abstractions.StressTest;
 using HolyClient.AppState;
 using HolyClient.Core.Infrastructure;
 using HolyClient.LoadPlugins;
@@ -40,11 +40,11 @@ namespace HolyClient.Models.ManagingExtensions
 		{
 			string directory = Path.GetDirectoryName(_path);
 
-			
+
 
 			await wrapper.Load();
 
-			if(wrapper.CurrentState == PluginState.Loaded)
+			if (wrapper.CurrentState == PluginState.Loaded)
 			{
 				this.StressTestPlugins = wrapper.CurrentAssembly
 					.GetExportedTypes()

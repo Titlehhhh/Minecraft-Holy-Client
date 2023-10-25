@@ -1,5 +1,5 @@
-﻿using HolyClient.Contracts.Services;
-using HolyClient.Core.StressTest;
+﻿using HolyClient.Common;
+using HolyClient.Contracts.Services;
 using HolyClient.Models;
 using McProtoNet.MultiVersion;
 using System;

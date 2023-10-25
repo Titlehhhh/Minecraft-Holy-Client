@@ -1,5 +1,4 @@
-﻿using Avalonia.Markup.Xaml.Templates;
-using DynamicData;
+﻿using DynamicData;
 using HolyClient.Core.Infrastructure;
 using HolyClient.Models.ManagingExtensions;
 using ReactiveUI;
@@ -10,9 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels
@@ -53,7 +50,7 @@ namespace HolyClient.ViewModels
 		private readonly ExtensionManager manager;
 		public AssemblyManagerViewModel()
 		{
-			
+
 			manager = Locator.Current.GetService<ExtensionManager>();
 
 
@@ -62,7 +59,7 @@ namespace HolyClient.ViewModels
 
 			manager.AssemblyManager.Assemblies.Connect()
 				.Transform(CreateVM)
-				.Filter(filter)
+				//.Filter(filter)
 				.ObserveOn(RxApp.MainThreadScheduler)
 				.Bind(out var assemblies)
 				.DisposeMany()
@@ -80,6 +77,8 @@ namespace HolyClient.ViewModels
 					await manager.AssemblyManager.AddReference(path.LocalPath);
 				}
 			});
+
+
 
 
 

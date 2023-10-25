@@ -60,8 +60,9 @@ namespace HolyClient.LoadPlugins
 					Name = CurrentAssembly.GetName().Name;
 					CurrentState = PluginState.Loaded;
 				}
-				catch
+				catch (Exception ex)
 				{
+					Console.WriteLine("Assembly loading error: " + ex);
 					CurrentState = PluginState.Errored;
 				}
 				finally

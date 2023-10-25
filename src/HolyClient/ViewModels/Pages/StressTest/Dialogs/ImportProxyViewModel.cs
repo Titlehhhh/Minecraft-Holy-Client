@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls.Notifications;
-using HolyClient.Core.StressTest;
 using HolyClient.Services;
+using HolyClient.StressTest;
 using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

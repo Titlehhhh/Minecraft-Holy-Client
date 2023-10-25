@@ -1,5 +1,4 @@
-﻿using Avalonia.Threading;
-using HolyClient.Core.StressTest;
+﻿using HolyClient.StressTest;
 using HolyClient.ViewModels;
 using ReactiveUI;
 using Serilog;
@@ -48,7 +47,7 @@ namespace HolyClient.Commands
 
 				await _model.Start(logger);
 				//await Task.Factory.StartNew(() =>, default, TaskCreationOptions.LongRunning, StaScheduler).Unwrap();
-				
+
 
 				await screen.Router.Navigate.Execute(proccess);
 
@@ -99,7 +98,7 @@ namespace HolyClient.Commands
 				});
 				thread.Name = "STA THREAD";
 				thread.IsBackground = true;
-			//	thread.SetApartmentState(ApartmentState.STA);
+				//	thread.SetApartmentState(ApartmentState.STA);
 				return thread;
 			}).ToList();
 

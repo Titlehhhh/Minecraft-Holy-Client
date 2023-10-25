@@ -1,12 +1,10 @@
 ﻿using Fody;
-using HolyClient.Abastractions.StressTest;
-using HolyClient.Core.Services;
+using HolyClient.Abstractions.StressTest;
 using McProtoNet.MultiVersion;
 using Serilog;
-using Serilog.Core;
 using System.Reactive.Subjects;
 
-namespace HolyClient.Core.StressTest
+namespace HolyClient.StressTest
 {
 	[ConfigureAwait(false)]
 	public sealed class StressTestBot : IStressTestBot

@@ -3,7 +3,7 @@ using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace HolyClient.Core.StressTest
+namespace HolyClient.Common
 {
 	[MessagePackObject(keyAsPropertyName: true)]
 	public sealed class ProxyInfo : ReactiveObject

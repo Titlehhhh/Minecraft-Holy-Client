@@ -2,6 +2,7 @@
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 
@@ -20,7 +21,7 @@ namespace HolyClient.ViewModels
 		[Reactive]
 		public Version Version { get; set; }
 		[Reactive]
-		public string Path { get; set; } 
+		public string Path { get; set; }
 		[Reactive]
 		public string Name { get; set; }
 
@@ -51,7 +52,11 @@ namespace HolyClient.ViewModels
 
 			Name = System.IO.Path.GetFileName(assembly.FullPath);
 			Path = assembly.FullPath;
-			
+
+			Types = assembly.StressTestPlugins
+				.Select(x => new StressTestPluginVM(x.FullName))
+				.ToList();
+
 
 
 
