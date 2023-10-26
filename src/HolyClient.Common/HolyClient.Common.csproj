@@ -14,13 +14,8 @@
 		<PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />
 		<PackageReference Include="Serilog" Version="3.0.1" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-		<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta19" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
-		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
+		<PackageReference Include="QuickProxyNet" Version="0.1.4" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\McProtoNet\QuickProxyNet\QuickProxyNet.csproj" />
-	</ItemGroup>
 
 </Project>

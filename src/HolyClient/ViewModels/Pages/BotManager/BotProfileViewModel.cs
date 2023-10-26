@@ -4,7 +4,7 @@ using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
 using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;

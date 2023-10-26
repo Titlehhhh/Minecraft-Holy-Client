@@ -63,13 +63,16 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
     <PackageReference Include="System.ComponentModel.Composition.Registration" Version="7.0.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" />
+
+	  <PackageReference Include="McProtoNet" Version="1.8.0-experimental.179" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HolyClient.Common\HolyClient.Common.csproj" />
     <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
     <ProjectReference Include="..\HolyClient.SDK\HolyClient.SDK.csproj" />
     <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
-    <ProjectReference Include="..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
+    
   </ItemGroup>
 
   <ItemGroup>

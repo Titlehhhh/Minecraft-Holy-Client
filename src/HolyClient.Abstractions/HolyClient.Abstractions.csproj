@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-  </PropertyGroup>
-	<Import Project="..\LocalNuget.targets" />
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\McProtoNet\McProtoNet.MultiVersion\McProtoNet.MultiVersion.csproj" />
+		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
+		<PackageReference Include="McProtoNet" Version="1.8.0-experimental.179" />
 	</ItemGroup>
-
+	
 </Project>

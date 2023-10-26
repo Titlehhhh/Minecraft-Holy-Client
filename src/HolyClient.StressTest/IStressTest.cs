@@ -1,7 +1,7 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using System.ComponentModel;
 
 namespace HolyClient.StressTest

@@ -2,7 +2,7 @@
 using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using McProtoNet.Utils;
 using MessagePack;
 using ReactiveUI;
@@ -212,7 +212,7 @@ namespace HolyClient.StressTest
 			}
 		}
 
-		private void Bot_StateChanged(object? sender, McProtoNet.MultiVersion.Client.StateChangedEventArgs e)
+		private void Bot_StateChanged(object? sender, McProtoNet.StateChangedEventArgs e)
 		{
 			//Console.WriteLine(e.NewState);
 			if (e.NewState == ClientState.Play)

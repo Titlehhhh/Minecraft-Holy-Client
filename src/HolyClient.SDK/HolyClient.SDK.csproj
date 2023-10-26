@@ -4,8 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	 
+	  
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +15,5 @@
   <ItemGroup>
 	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
   </ItemGroup>
-
-	<Import Project="..\LocalNuget.targets" />
 
 </Project>

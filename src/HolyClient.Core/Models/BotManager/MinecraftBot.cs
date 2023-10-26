@@ -1,4 +1,4 @@
-﻿using McProtoNet.MultiVersion;
+﻿using McProtoNet;
 using McProtoNet.Utils;
 using Serilog;
 using System.Reactive.Disposables;

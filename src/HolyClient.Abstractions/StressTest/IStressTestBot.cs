@@ -1,4 +1,4 @@
-﻿using McProtoNet.MultiVersion;
+﻿using McProtoNet;
 
 namespace HolyClient.Abstractions.StressTest
 {

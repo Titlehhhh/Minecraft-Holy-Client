@@ -4,7 +4,7 @@ using HolyClient.Common;
 using HolyClient.StressTest;
 
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;

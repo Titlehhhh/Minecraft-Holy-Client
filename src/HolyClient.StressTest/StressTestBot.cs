@@ -1,6 +1,6 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using Serilog;
 using System.Reactive.Subjects;
 

@@ -1,7 +1,7 @@
 ﻿using HolyClient.Common;
 using HolyClient.Contracts.Services;
 using HolyClient.Models;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
