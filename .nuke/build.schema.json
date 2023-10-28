@@ -72,11 +72,16 @@
           "items": {
             "type": "string",
             "enum": [
+              "BuildSDKToLocal",
               "Clean",
               "Compile",
               "Restore"
             ]
           }
+        },
+        "Solution": {
+          "type": "string",
+          "description": "Path to a solution file that is automatically loaded"
         },
         "Target": {
           "type": "array",
@@ -84,6 +89,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "BuildSDKToLocal",
               "Clean",
               "Compile",
               "Restore"

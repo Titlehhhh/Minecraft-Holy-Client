@@ -1,4 +1,4 @@
-﻿using HolyClient.Abastractions.StressTest;
+﻿using HolyClient.Abstractions.StressTest;
 using System.Reactive.Disposables;
 
 namespace TestStressTestBehavior
