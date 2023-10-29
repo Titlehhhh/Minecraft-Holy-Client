@@ -2,7 +2,4 @@
   <PropertyGroup>
    
   </PropertyGroup>
-	<Target Name="PublishNuGetLocally" AfterTargets="Pack">
-		
-	</Target>
 </Project>

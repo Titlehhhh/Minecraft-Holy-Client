@@ -1,7 +1,12 @@
-﻿using System.Reactive;
+﻿using DynamicData;
+using System.Reactive;
 
 namespace HolyClient.Core.Infrastructure
 {
+	public interface IPluginProvider
+	{
+		IConnectableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins { get; }
+	}
 	public interface IAssemblyFile
 	{
 		string FullPath { get; }

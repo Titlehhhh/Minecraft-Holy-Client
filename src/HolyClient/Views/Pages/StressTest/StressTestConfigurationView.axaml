@@ -160,10 +160,22 @@
 				</ui:FABorder>
 			</TabItem>
 			<TabItem IsSelected="True" Header="Поведение" FontSize="15">
-				<sg:SpacedGrid ColumnDefinitions="*,*" RowDefinitions="Auto,*,Auto">
+				<sg:SpacedGrid
+					RowSpacing="10"
+					RowDefinitions="Auto,*">
 
-					<TextBlock Grid.Column="0" Grid.Row="0" Text="Доступные поведения"/>
-					<TextBlock Grid.Column="1" Grid.Row="0" Text="Текущее поведение"/>
+					<Grid ColumnDefinitions="*, Auto">
+
+						<TextBlock 							
+							VerticalAlignment="Center"
+							Grid.Column="0" 
+							Text="Доступные поведения"/>
+
+						<Button 
+							Margin="10,0,0,0"
+							Grid.Column="1"							
+							Content="Установить"/>
+					</Grid>
 
 					<Border
 						CornerRadius="7"
@@ -171,9 +183,11 @@
 						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
 						Grid.Row="1"
 						Grid.Column="0">
-						
+
 					</Border>
-					
+
+
+
 				</sg:SpacedGrid>
 			</TabItem>
 		</TabControl>

@@ -35,6 +35,8 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 	public ReadOnlyObservableCollection<ProxyInfo> Proxies => _proxies;
 
+
+	
 	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
 	public ICommand StartCommand { get; }
@@ -185,6 +187,3 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 	public ViewModelActivator Activator { get; } = new();
 }
-
-
-

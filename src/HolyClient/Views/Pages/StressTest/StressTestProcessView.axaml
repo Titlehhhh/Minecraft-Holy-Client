@@ -68,7 +68,7 @@
 					Padding="10"
 					CornerRadius="7"
 					Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
-					<TextBlock  Text="Подключения в секунду"/>
+					<TextBlock Text="Подключения в секунду"/>
 				</Border>
 
 				<Border
