@@ -34,7 +34,7 @@ namespace HolyClient.ViewModels
 		[Reactive]
 		public string Author { get; set; }
 
-		public List<StressTestPluginVM> Types { get; set; }
+		public List<PluginViewModel> Types { get; set; }
 
 		private IDisposable? _cleanUp;
 		public AssemblyViewModel(string name, Version version, string author)
@@ -54,7 +54,7 @@ namespace HolyClient.ViewModels
 			Path = assembly.FullPath;
 
 			Types = assembly.StressTestPlugins
-				.Select(x => new StressTestPluginVM(x.FullName))
+				.Select(x => new PluginViewModel(x.FullName))
 				.ToList();
 
 
@@ -71,18 +71,8 @@ namespace HolyClient.ViewModels
 		}
 	}
 
-	public abstract class TypeVM
-	{
-		public string Name { get; protected set; }
-	}
 
-	public sealed class StressTestPluginVM : TypeVM
-	{
-		public StressTestPluginVM(string name)
-		{
-			Name = name;
-		}
-	}
+	
 
 
 

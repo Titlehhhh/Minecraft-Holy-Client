@@ -230,7 +230,7 @@
 										</StackPanel>
 										<ItemsControl Margin="20,0,0,0" ItemsSource="{Binding Types}">
 											<ItemsControl.ItemTemplate>
-												<DataTemplate DataType="vm:StressTestPluginVM">
+												<DataTemplate DataType="vm:PluginViewModel">
 													<TextBlock Margin="0,5,0,0" Text="{Binding Name}"/>
 												</DataTemplate>
 											</ItemsControl.ItemTemplate>

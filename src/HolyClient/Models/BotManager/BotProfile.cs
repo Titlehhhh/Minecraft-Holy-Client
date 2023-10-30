@@ -115,10 +115,10 @@ public sealed class BotProfile : ReactiveObject, IBotProfile
 		bot.Stop();
 	}
 
-	public Task Initialization(IPluginProvider provider)
-	{
-		return this.PluignStore.Initialization(provider, this.PluginReferences);
-	}
+	//public Task Initialization(IPluginProvider provider)
+	//{
+	//	return this.PluignStore.Initialization(provider, this.PluginReferences);
+	//}
 }
 
 

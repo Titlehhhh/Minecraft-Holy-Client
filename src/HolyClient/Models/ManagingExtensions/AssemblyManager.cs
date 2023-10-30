@@ -10,11 +10,16 @@ namespace HolyClient.Models.ManagingExtensions
 {
 	public class AssemblyManager : IAssemblyManager
 	{
-		public SourceCache<IAssemblyFile, string> _references = new(x => x.NameWithExtension);
-		public IConnectableCache<IAssemblyFile, string> Assemblies => _references;
-		private Subject<IAssemblyFile> _fileUpdated = new();
+		
+		public IObservableCache<IAssemblyFile, string> Assemblies => _references;
 		public IObservable<IAssemblyFile> AssemblyFileUpdated => _fileUpdated;
+
+
+		public SourceCache<IAssemblyFile, string> _references = new(x => x.Name);
+		private Subject<IAssemblyFile> _fileUpdated = new();
 		private ExtensionManagerState _state;
+
+
 		public AssemblyManager(ExtensionManagerState state)
 		{
 			_state = state;
@@ -38,8 +43,14 @@ namespace HolyClient.Models.ManagingExtensions
 			var file = new AssemblyFile(path);
 
 
+			try
+			{
+				await file.Initialization();
+			}
+			catch
+			{
 
-			await file.Initialization();
+			}
 			file.FileUpdated.Subscribe(x =>
 			{
 				this._fileUpdated.OnNext(file);

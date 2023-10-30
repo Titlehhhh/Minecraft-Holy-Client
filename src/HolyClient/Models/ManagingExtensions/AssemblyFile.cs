@@ -29,7 +29,7 @@ namespace HolyClient.Models.ManagingExtensions
 		public Version Version { get; private set; }
 
 
-		public IEnumerable<Type> StressTestPlugins { get; private set; }
+		public IEnumerable<Type> StressTestPlugins { get; private set; } = Enumerable.Empty<Type>();
 
 		private AssemblyWrapper wrapper;
 

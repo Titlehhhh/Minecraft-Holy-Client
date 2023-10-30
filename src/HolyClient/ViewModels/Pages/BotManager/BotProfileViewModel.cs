@@ -2,6 +2,7 @@
 using HolyClient.Commands;
 using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
+using HolyClient.Core.Infrastructure;
 using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
 using McProtoNet;
@@ -117,21 +118,22 @@ namespace HolyClient.ViewModels
 
 				filterAvailablePlugins.DisposeWith(d);
 
+				return;
 
-				var pluginProvider = Locator.Current.GetService<IPluginProvider>();
+				//var pluginProvider = Locator.Current.GetService<IPluginProvider>();
 
 
-				pluginProvider.AvailableBotPlugins
-					.Connect()
-					.ObserveOn(RxApp.MainThreadScheduler)
-					.Filter(predicateChanged: filterAvailablePlugins.Select(x => this.BuildFilterAvailablePlugins()))
-					.Transform(createVM)
+				//pluginProvider.AvailableBotPlugins
+				//	.Connect()
+				//	.ObserveOn(RxApp.MainThreadScheduler)
+				//	.Filter(predicateChanged: filterAvailablePlugins.Select(x => this.BuildFilterAvailablePlugins()))
+				//	.Transform(createVM)
 
-					.Bind(out var plugins)
-					.Subscribe()
-					.DisposeWith(d);
+				//	.Bind(out var plugins)
+				//	.Subscribe()
+				//	.DisposeWith(d);
 
-				AvailablePlugins = plugins;
+				//AvailablePlugins = plugins;
 
 				filterAvailablePlugins.OnNext(default);
 
@@ -142,16 +144,16 @@ namespace HolyClient.ViewModels
 
 				AddPluginCommand = ReactiveCommand.Create(() =>
 				{
-					var pl = pluginProvider.AvailableBotPlugins.Lookup(this.SelectedAvailablePlugin.Token);
+					//var pl = pluginProvider.AvailableBotPlugins.Lookup(this.SelectedAvailablePlugin.Token);
 
-					if (pl.HasValue)
-					{
-						this._profile.PluignStore.AddPlugin(pl.Value);
+					//if (pl.HasValue)
+					//{
+					//	this._profile.PluignStore.AddPlugin(pl.Value);
 
-						LoadedPlugins.Add(this.SelectedAvailablePlugin);
-					}
+					//	LoadedPlugins.Add(this.SelectedAvailablePlugin);
+					//}
 
-					filterAvailablePlugins.OnNext(default);
+					//filterAvailablePlugins.OnNext(default);
 
 				}, canExecute: canExectuteAddPlugin).DisposeWith(d);
 

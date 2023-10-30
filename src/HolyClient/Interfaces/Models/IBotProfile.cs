@@ -29,7 +29,7 @@ namespace HolyClient.Contracts.Models
 		void Start(Serilog.ILogger logger);
 
 
-		Task Initialization(IPluginProvider provider);
+		//Task Initialization(IPluginProvider provider);
 
 
 	}

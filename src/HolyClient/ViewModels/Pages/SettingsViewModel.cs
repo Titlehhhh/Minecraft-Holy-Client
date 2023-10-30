@@ -9,7 +9,6 @@ using System.Reactive.Disposables;
 
 namespace HolyClient.ViewModels
 {
-
 	public class SettingsViewModel : ReactiveObject, ISettingsViewModel, IRoutableViewModel, IActivatableViewModel
 	{
 
