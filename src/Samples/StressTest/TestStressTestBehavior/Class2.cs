@@ -7,7 +7,8 @@ namespace TestStressTestBehavior
 	{
 		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
 		{
-			return Task.CompletedTask;
+			throw new NotImplementedException();
 		}
 	}
+
 }

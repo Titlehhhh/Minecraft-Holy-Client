@@ -6,10 +6,6 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Internal\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
 		<PackageReference Include="MessagePack" Version="2.5.129" />		
@@ -22,6 +18,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
 	  <ProjectReference Include="..\HolyClient.Common\HolyClient.Common.csproj" />
+	  <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
 	</ItemGroup>
 
 </Project>

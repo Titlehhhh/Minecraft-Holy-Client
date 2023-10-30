@@ -41,6 +41,6 @@ namespace HolyClient.Services
 			}
 		}
 		private SourceCache<IPluginSource, PluginTypeReference> _stressTestPlugins = new(x => x.Reference);
-		public IConnectableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins { get; private set; }
+		public IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins => _stressTestPlugins;
 	}
 }

@@ -22,7 +22,7 @@ namespace HolyClient.Models.ManagingExtensions
 		}
 		public string FullPath => _path;
 
-		public string NameWithExtension => Path.GetFileName(_path);
+		public string Name => Path.GetFileName(_path);
 		private Subject<Unit> _fileUpdate = new();
 		public IObservable<Unit> FileUpdated => _fileUpdate;
 

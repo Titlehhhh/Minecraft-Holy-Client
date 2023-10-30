@@ -4,8 +4,8 @@ namespace HolyClient.Core.Infrastructure
 {
 	public struct PluginTypeReference
 	{
-		public readonly string AssemblyName;
-		public readonly string FullName;
+		public string AssemblyName { get; }
+		public string FullName { get; }
 
 		public PluginTypeReference(string assemblyName, string fullName)
 		{
@@ -14,7 +14,7 @@ namespace HolyClient.Core.Infrastructure
 		}
 		public override bool Equals([NotNullWhen(true)] object? obj)
 		{
-			if(obj is PluginTypeReference reference)
+			if (obj is PluginTypeReference reference)
 			{
 				return this.AssemblyName == reference.AssemblyName && this.FullName == reference.AssemblyName;
 			}

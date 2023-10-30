@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using HolyClient.Abstractions.StressTest;
 using HolyClient.Commands;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
@@ -10,6 +11,7 @@ using ReactiveUI.Fody.Helpers;
 using Splat;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -112,7 +114,7 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 		StartCommand = new StartStressTestCommand(hostScreen, state);
 
 		#region Configure proxies
-		
+
 		this.WhenActivated(d =>
 		{
 			state.Proxies.Connect()
@@ -124,7 +126,7 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 				.DisposeWith(d);
 			this.RaisePropertyChanged(nameof(Proxies));
 		});
-		
+
 		this.WhenActivated(d =>
 		{
 
@@ -171,23 +173,41 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 		#region Configure plugins
 
-		
-		this.WhenActivated(d =>
+		var pluginProvider = Locator.Current.GetService<IPluginProvider>();
+
+		pluginProvider.AvailableStressTestPlugins
+			.Connect()
+			.Bind(out var plugins)
+			.Subscribe();
+
+		AvailableBehaviors = plugins;
+
+		var stateBehavior = pluginProvider
+			.AvailableStressTestPlugins
+			.Lookup(state.BehaviorRef);
+
+		if (stateBehavior.HasValue)
 		{
+			SelectedBehavior = stateBehavior.Value;
+		}
+		else
+		{
+			SelectedBehavior = plugins.FirstOrDefault();
+		}
 
-			var pluginProvider = Locator.Current.GetService<IPluginProvider>();
+		var canExecuteInstall =
+			this.WhenAnyValue(x => x.SelectedBehavior)
+				.Select(x => x is not null);
 
-			pluginProvider.AvailableStressTestPlugins
-				.Connect()
-				.Bind(out var plugins)
-				.Subscribe();
+		InstallBehaviorCommand = ReactiveCommand.Create(() =>
+		{
+			state.AddBehavior(SelectedBehavior);
 
-			AvailableBehaviors = plugins;
+		}, canExecute: canExecuteInstall);
 
 
-			Disposable.Empty.DisposeWith(d);
 
-		});
+
 		#endregion
 	}
 

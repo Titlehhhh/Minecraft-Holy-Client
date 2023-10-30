@@ -11,6 +11,9 @@
 			 xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
 			 xmlns:bhvs="using:HolyClient.Behaviors"
 			 xmlns:proxy="using:QuickProxyNet"
+			 
+			 xmlns:core="using:HolyClient.Core.Infrastructure"
+			 xmlns:services="using:HolyClient.Services"
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 xmlns:converters="using:HolyClient.Converters"
@@ -183,7 +186,13 @@
 						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
 						Grid.Row="1"
 						Grid.Column="0">
-
+						<ListBox SelectedItem="{Binding SelectedBehavior}" ItemsSource="{Binding AvailableBehaviors}">
+							<ListBox.ItemTemplate>
+								<DataTemplate DataType="services:PluginSource">
+									<TextBlock Text="{Binding Reference.FullName}"/>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
 					</Border>
 
 

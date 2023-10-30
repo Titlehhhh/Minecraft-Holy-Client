@@ -10,58 +10,81 @@ using ReactiveUI.Fody.Helpers;
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
+using HolyClient.Core.Infrastructure;
+using DynamicData.Kernel;
 
 namespace HolyClient.StressTest
 {
 	[MessagePackObject(keyAsPropertyName: true)]
 	public class StressTest : ReactiveObject, IStressTest
 	{
+		#region Properties
+		#region Serializable
+
+
+
 		[Reactive]
 		public string Server { get; set; }
-
-
 		[Reactive]
 		public string BotsNickname { get; set; }
-
-
 		[Reactive]
 		public int NumberOfBots { get; set; }
 
-
 		[Reactive]
 		public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-
-		[IgnoreMember]
-		public ISourceList<ProxyInfo> Proxies { get; } = new SourceList<ProxyInfo>();
-
-
 		public IEnumerable<ProxyInfo> ProxiesState
 		{
 			get => Proxies.Items.ToArray();
 			set => Proxies.AddRange(value);
 		}
-		private Subject<StressTestMetrik> _dataPerSecond = new();
+
+		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
+		public PluginTypeReference BehaviorRef { get; set; }
+		#endregion
+
+		#region NonSerializable
+
+
+		[IgnoreMember]
+		public ISourceList<ProxyInfo> Proxies { get; } = new SourceList<ProxyInfo>();
+
+
+
 		[IgnoreMember]
 		public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
 		[IgnoreMember]
-		public IStressTestBehavior Behavior { get; set; }
+		public IStressTestBehavior Behavior
+		{
+			get => behavior;
+		}
+
+		[Reactive]
+		public StressTestServiceState CurrentState { get; private set; }
+
+		#endregion
 
 
+		#endregion
+
+
+		private Subject<StressTestMetrik> _dataPerSecond = new();
 		private readonly object _currentInfoLock = new();
 		private StressTestMetrik currentInfo;
 
 		private int _botsOnlineCounter = 0;
 		private int _cpsCounter = 0;
 
+
+		private IDisposable? _cleanUp;
+		private IStressTestBehavior behavior;
+
 		public StressTest()
 		{
 
 		}
-		[Reactive]
-		public StressTestServiceState CurrentState { get; private set; }
 
 
-		private IDisposable? _cleanUp;
+
 
 		[ConfigureAwait(false)]
 		public async Task Start(Serilog.ILogger logger)
@@ -236,6 +259,38 @@ namespace HolyClient.StressTest
 			return Task.CompletedTask;
 		}
 
+		public Task Initialization(IPluginProvider pluginProvider)
+		{
+
+			Optional<IPluginSource> plugin =
+				pluginProvider
+				.AvailableStressTestPlugins
+				.Lookup(this.BehaviorRef);
+
+			if (plugin.HasValue)
+			{
+				this.AddBehavior(plugin.Value);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		public void AddBehavior(IPluginSource pluginSource)
+		{
+			if (pluginSource is null)
+				throw new ArgumentException("parameter is null", nameof(pluginSource));
+			try
+			{
+				var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
+
+				this.behavior = behavior;
+			}
+			catch
+			{
+
+			}
+			this.BehaviorRef = pluginSource.Reference;
+		}
 	}
 	class NickProvider : INickProvider
 	{

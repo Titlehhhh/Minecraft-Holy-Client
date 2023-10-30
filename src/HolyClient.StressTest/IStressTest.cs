@@ -1,6 +1,7 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
+using HolyClient.Core.Infrastructure;
 using McProtoNet;
 using System.ComponentModel;
 
@@ -27,10 +28,16 @@ namespace HolyClient.StressTest
 
 		IObservable<StressTestMetrik> Metrics { get; }
 
-		IStressTestBehavior Behavior { get; set; }
+		IStressTestBehavior Behavior { get; }
+
+		PluginTypeReference BehaviorRef { get; }
+
+		void AddBehavior(IPluginSource pluginSource);
 
 		Task Start(Serilog.ILogger logger);
 		Task Stop();
+
+		Task Initialization(IPluginProvider pluginProvider);
 
 	}
 
