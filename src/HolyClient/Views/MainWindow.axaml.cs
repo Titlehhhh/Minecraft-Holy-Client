@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.PropertyGrid.Controls;
 using FluentAvalonia.UI.Windowing;
 
 namespace HolyClient.Views
@@ -7,7 +8,6 @@ namespace HolyClient.Views
 	{
 		public MainWindow()
 		{
-
 			InitializeComponent();
 #if DEBUG
 			this.AttachDevTools();

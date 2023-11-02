@@ -90,10 +90,10 @@
 							</StackPanel>
 						</Border>
 
-						<Border IsVisible="{Binding SelectedBehavior}" Classes="SettingItem">
+						<Border IsVisible="{Binding CurrentBehavior}" Classes="SettingItem">
 							<StackPanel Spacing="10">
 								<TextBlock Text="Настройки плагина" FontSize="15"/>
-								<pgc:PropertyGrid SelectedObject="{Binding SelectedBehavior}"/>
+								<pgc:PropertyGrid SelectedObject="{Binding CurrentBehavior}"/>
 							</StackPanel>
 						</Border>
 
@@ -249,7 +249,7 @@
 														<Button 
 															Margin="0,10,0,0"
 															Content="Установить"
-															Command="{Binding #BehaviorsList.((vm:StressTestConfigurationViewModel)DataContext).InstallCommand}"/>
+															Command="{Binding #BehaviorsList.((vm:StressTestConfigurationViewModel)DataContext).InstallBehaviorCommand}"/>
 													</StackPanel>
 												</ScrollViewer>
 											</DataTemplate>

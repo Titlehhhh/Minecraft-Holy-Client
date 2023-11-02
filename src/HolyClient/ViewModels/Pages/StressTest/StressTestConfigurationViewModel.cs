@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
@@ -61,7 +62,8 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 	[Reactive]
 	public IStressTestBehavior? CurrentBehavior { get; private set; }
 
-
+	[Reactive]
+	public IPluginSource? InstalledBehavior { get; private set; }
 	#region Proxy
 
 	public ReadOnlyObservableCollection<ProxyInfo> _proxies;
@@ -189,27 +191,47 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 			.AvailableStressTestPlugins
 			.Lookup(state.BehaviorRef);
 
-		if (stateBehavior.HasValue)
+		
+		
+		SelectedBehavior = plugins.FirstOrDefault();
+
+
+		this.WhenActivated(d =>
 		{
-			SelectedBehavior = stateBehavior.Value;
-		}
-		else
-		{
-			SelectedBehavior = plugins.FirstOrDefault();
-		}
+			var canExecuteInstall =
+				this.WhenAnyValue(x => x.SelectedBehavior)
+					.Merge(this.WhenAnyValue(x => x.InstalledBehavior))
+					.Select(x =>
+					{
+						if (x is null)
+							return false;
+						if (InstalledBehavior is not null)
+							if (object.ReferenceEquals(x, this.InstalledBehavior))
+							{
+								return false;
+							}
 
-		var canExecuteInstall =
-			this.WhenAnyValue(x => x.SelectedBehavior)
-				.Select(x => x is not null);
+						return true;
+					});
 
-		InstallBehaviorCommand = ReactiveCommand.Create(() =>
-		{			
-			state.SetBehavior(SelectedBehavior);
+			if (stateBehavior.HasValue)
+			{
+				InstalledBehavior = stateBehavior.Value;
+			}
+			else
+			{
+				InstalledBehavior = null;
+			}
 
-			this.CurrentBehavior = state.Behavior;
+			InstallBehaviorCommand = ReactiveCommand.Create(() =>
+			{
+				state.SetBehavior(SelectedBehavior);
 
-		}, canExecute: canExecuteInstall);
+				this.CurrentBehavior = state.Behavior;
+				InstalledBehavior = SelectedBehavior;
 
+			}, canExecute: canExecuteInstall).DisposeWith(d);
+		});
 
 
 
