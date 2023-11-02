@@ -58,6 +58,9 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 	public ICommand RemoveBehaviorCommand { get; private set; }
 	#endregion
 
+	[Reactive]
+	public IStressTestBehavior? CurrentBehavior { get; private set; }
+
 
 	#region Proxy
 
@@ -200,8 +203,10 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 				.Select(x => x is not null);
 
 		InstallBehaviorCommand = ReactiveCommand.Create(() =>
-		{
-			state.AddBehavior(SelectedBehavior);
+		{			
+			state.SetBehavior(SelectedBehavior);
+
+			this.CurrentBehavior = state.Behavior;
 
 		}, canExecute: canExecuteInstall);
 

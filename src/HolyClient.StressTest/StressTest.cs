@@ -269,27 +269,27 @@ namespace HolyClient.StressTest
 
 			if (plugin.HasValue)
 			{
-				this.AddBehavior(plugin.Value);
+				this.SetBehavior(plugin.Value);
 			}
 
 			return Task.CompletedTask;
 		}
 
-		public void AddBehavior(IPluginSource pluginSource)
+		public void SetBehavior(IPluginSource pluginSource)
 		{
 			if (pluginSource is null)
 				throw new ArgumentException("parameter is null", nameof(pluginSource));
-			try
-			{
-				var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
 
-				this.behavior = behavior;
-			}
-			catch
-			{
 
-			}
+
+			var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
+
+			this.behavior = behavior;
+
+
+
 			this.BehaviorRef = pluginSource.Reference;
+
 		}
 	}
 	class NickProvider : INickProvider

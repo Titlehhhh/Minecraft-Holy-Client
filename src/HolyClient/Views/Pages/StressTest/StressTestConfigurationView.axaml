@@ -7,11 +7,11 @@
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:DataType="vm:StressTestConfigurationViewModel"
 			 x:CompileBindings="True"
+			 xmlns:pgc="using:Avalonia.PropertyGrid.Controls"
 			 xmlns:sg="using:SpacedGridControl.Avalonia"
 			 xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
 			 xmlns:bhvs="using:HolyClient.Behaviors"
 			 xmlns:proxy="using:QuickProxyNet"
-			 
 			 xmlns:core="using:HolyClient.Core.Infrastructure"
 			 xmlns:services="using:HolyClient.Services"
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -88,7 +88,13 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 							</StackPanel>
+						</Border>
 
+						<Border IsVisible="{Binding SelectedBehavior}" Classes="SettingItem">
+							<StackPanel Spacing="10">
+								<TextBlock Text="Настройки плагина" FontSize="15"/>
+								<pgc:PropertyGrid SelectedObject="{Binding SelectedBehavior}"/>
+							</StackPanel>
 						</Border>
 
 					</StackPanel>
@@ -165,20 +171,14 @@
 			<TabItem IsSelected="True" Header="Поведение" FontSize="15">
 				<sg:SpacedGrid
 					RowSpacing="10"
+					
 					RowDefinitions="Auto,*">
 
-					<Grid ColumnDefinitions="*, Auto">
+					<TextBlock
+						VerticalAlignment="Center"
+						Grid.Column="0"
+						Text="Доступные поведения"/>
 
-						<TextBlock 							
-							VerticalAlignment="Center"
-							Grid.Column="0" 
-							Text="Доступные поведения"/>
-
-						<Button 
-							Margin="10,0,0,0"
-							Grid.Column="1"							
-							Content="Установить"/>
-					</Grid>
 
 					<Border
 						CornerRadius="7"
@@ -186,17 +186,79 @@
 						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
 						Grid.Row="1"
 						Grid.Column="0">
-						<ListBox SelectedItem="{Binding SelectedBehavior}" ItemsSource="{Binding AvailableBehaviors}">
-							<ListBox.ItemTemplate>
-								<DataTemplate DataType="services:PluginSource">
-									<TextBlock Text="{Binding Reference.FullName}"/>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
+						<Grid ColumnDefinitions="*,4,350">
+
+							<ListBox Name="BehaviorsList" SelectedItem="{Binding SelectedBehavior}" ItemsSource="{Binding AvailableBehaviors}">
+								<ListBox.ItemTemplate>
+									<DataTemplate DataType="services:PluginSource">
+										<TextBlock Text="{Binding Reference.FullName}"/>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+							<GridSplitter Grid.Column="1" Background="Transparent"/>
+
+							<Border
+								Name="OptionsHost"
+								Margin="0,0,10,10"
+								Padding="20,20,20,20"
+								CornerRadius="{DynamicResource OverlayCornerRadius}"
+								Grid.Column="2"
+								Grid.Row="1"
+								Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+								BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+								BorderThickness="1">
+
+								<Panel>
+									<TextBlock
+										IsVisible="{Binding SelectedBehavior, Converter={x:Static ObjectConverters.IsNull}}"
+										FontStyle="Italic"
+										Foreground="Gray"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Text="Нет выбранного поведения"
+										TextWrapping="WrapWithOverflow"/>
+									<ContentControl
+										IsVisible="{Binding SelectedBehavior, Converter={x:Static ObjectConverters.IsNotNull}}"
+										Content="{Binding SelectedBehavior}">
+
+										<ContentControl.ContentTemplate>
+											<DataTemplate DataType="services:PluginSource">
+												<ScrollViewer>
+													<StackPanel>
+														<TextBlock
+															FontWeight="Bold"
+															Text="{Binding Reference.FullName}"/>
+														<TextBlock
+															Margin="0,20,0,0"
+															FontWeight="Bold"
+															Text="Сборка:"/>
+														<TextBlock
+															Text="{Binding Reference.AssemblyName}"/>
+														<TextBlock
+															Margin="0,10,0,0"
+															FontWeight="Bold"
+															Text="Авторы:"/>
+														<TextBlock
+															Text="{Binding Metadata.Author}"/>
+														<TextBlock
+															Margin="0,10,0,0"
+															FontWeight="Bold"
+															Text="Описание:"/>
+														<TextBlock Text="{Binding Metadata.Description}"/>
+
+														<Button 
+															Margin="0,10,0,0"
+															Content="Установить"
+															Command="{Binding #BehaviorsList.((vm:StressTestConfigurationViewModel)DataContext).InstallCommand}"/>
+													</StackPanel>
+												</ScrollViewer>
+											</DataTemplate>
+										</ContentControl.ContentTemplate>
+									</ContentControl>
+								</Panel>
+							</Border>
+						</Grid>
 					</Border>
-
-
-
 				</sg:SpacedGrid>
 			</TabItem>
 		</TabControl>

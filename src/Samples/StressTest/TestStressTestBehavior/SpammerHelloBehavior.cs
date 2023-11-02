@@ -6,6 +6,8 @@ namespace TestStressTestBehavior
 
 	public class SpammerHelloBehavior : IStressTestBehavior
 	{
+		public string Test { get; set; }
+
 		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
 		{
 			foreach (var bot in bots)

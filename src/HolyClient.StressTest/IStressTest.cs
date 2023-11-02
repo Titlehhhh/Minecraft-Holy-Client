@@ -32,7 +32,7 @@ namespace HolyClient.StressTest
 
 		PluginTypeReference BehaviorRef { get; }
 
-		void AddBehavior(IPluginSource pluginSource);
+		void SetBehavior(IPluginSource pluginSource);
 
 		Task Start(Serilog.ILogger logger);
 		Task Stop();

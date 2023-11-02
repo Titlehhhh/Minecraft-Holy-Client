@@ -17,7 +17,7 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 	{
 		InitializeComponent();
 
-
+		
 
 		this.WhenActivated(d =>
 		{
