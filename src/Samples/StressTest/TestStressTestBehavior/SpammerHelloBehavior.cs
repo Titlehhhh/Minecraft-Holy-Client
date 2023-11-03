@@ -1,12 +1,15 @@
 ﻿using HolyClient.Abstractions.StressTest;
+using PropertyModels.Collections;
+using System.ComponentModel;
 using System.Reactive.Disposables;
 
 namespace TestStressTestBehavior
 {
-
+	
 	public class SpammerHelloBehavior : IStressTestBehavior
 	{
-		public string Test { get; set; }
+		[System.ComponentModel.DisplayName("Текст для спама")]
+		public string Script { get; set; } 
 
 		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
 		{

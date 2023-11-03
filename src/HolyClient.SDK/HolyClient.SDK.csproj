@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
     <PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
+	  <PackageReference Include="bodong.PropertyModels" Version="11.0.4.1" />
   </ItemGroup>
 
   <ItemGroup>

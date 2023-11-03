@@ -1,5 +1,7 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.PropertyGrid.Controls;
+using Avalonia.PropertyGrid.Controls.Factories;
 using FluentAvalonia.UI.Windowing;
 
 namespace HolyClient.Views

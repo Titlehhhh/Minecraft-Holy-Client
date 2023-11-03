@@ -136,8 +136,7 @@
 							Foreground="Gray"
 							HorizontalAlignment="Center"
 							VerticalAlignment="Center"
-							Text="Нет выбранной сборки"
-							TextWrapping="Wrap"/>
+							Text="Нет выбранной сборки"/>
 						<ContentControl
 							IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}"
 							Content="{Binding SelectedItem}">
