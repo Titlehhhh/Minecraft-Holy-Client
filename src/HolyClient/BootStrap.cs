@@ -67,6 +67,8 @@ namespace HolyClient
 
 			   await state.BotManagerState.Initialization();
 
+
+
 			   await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
 
 			   progress.OnNext("Почти готово");

@@ -9,6 +9,7 @@ using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
+using Stateless.Graph;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -48,15 +49,12 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 
 	[Reactive]
-	public IPluginSource? SelectedBehavior { get; set; }
+	public StressTestPluginViewModel? SelectedBehavior { get; set; }
 
 	[Reactive]
-	public ReadOnlyObservableCollection<IPluginSource> AvailableBehaviors { get; private set; }
+	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
 
-	[Reactive]
-	public ICommand InstallBehaviorCommand { get; private set; }
-	[Reactive]
-	public ICommand RemoveBehaviorCommand { get; private set; }
+	
 	#endregion
 
 	[Reactive]
@@ -178,60 +176,29 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 		#region Configure plugins
 
+		Console.WriteLine("CurrBeh: "+state.Behavior);
+
+		this.CurrentBehavior = state.Behavior;
+
+		state.WhenAnyValue(x => x.Behavior)
+			.BindTo(this, x => x.CurrentBehavior);
+
+		
+
+
 		var pluginProvider = Locator.Current.GetService<IPluginProvider>();
 
 		pluginProvider.AvailableStressTestPlugins
 			.Connect()
+			.Transform(x=>new StressTestPluginViewModel(x, state))
 			.Bind(out var plugins)
 			.Subscribe();
 
 		AvailableBehaviors = plugins;
 
-		var stateBehavior = pluginProvider
-			.AvailableStressTestPlugins
-			.Lookup(state.BehaviorRef);
 
-		
-		
 		SelectedBehavior = plugins.FirstOrDefault();
 
-
-		this.WhenActivated(d =>
-		{
-			var canExecuteInstall =
-				this.WhenAnyValue(x => x.SelectedBehavior)
-					.Merge(this.WhenAnyValue(x => x.InstalledBehavior))
-					.Select(x =>
-					{
-						if (x is null)
-							return false;
-						if (InstalledBehavior is not null)
-							if (object.ReferenceEquals(x, this.InstalledBehavior))
-							{
-								return false;
-							}
-
-						return true;
-					});
-
-			if (stateBehavior.HasValue)
-			{
-				InstalledBehavior = stateBehavior.Value;
-			}
-			else
-			{
-				InstalledBehavior = null;
-			}
-
-			InstallBehaviorCommand = ReactiveCommand.Create(() =>
-			{
-				state.SetBehavior(SelectedBehavior);
-
-				this.CurrentBehavior = state.Behavior;
-				InstalledBehavior = SelectedBehavior;
-
-			}, canExecute: canExecuteInstall).DisposeWith(d);
-		});
 
 
 

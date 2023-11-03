@@ -37,7 +37,7 @@ namespace HolyClient.StressTest
 			get => Proxies.Items.ToArray();
 			set => Proxies.AddRange(value);
 		}
-
+		[Reactive]
 		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
 		public PluginTypeReference BehaviorRef { get; set; }
 		#endregion
@@ -52,13 +52,18 @@ namespace HolyClient.StressTest
 
 		[IgnoreMember]
 		public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
+
+
 		[IgnoreMember]
+		[Reactive]
 		public IStressTestBehavior Behavior
 		{
-			get => behavior;
+			get;
+			private set;
 		}
 
 		[Reactive]
+		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
 
 		#endregion
@@ -76,7 +81,6 @@ namespace HolyClient.StressTest
 
 
 		private IDisposable? _cleanUp;
-		private IStressTestBehavior behavior;
 
 		public StressTest()
 		{
@@ -271,23 +275,22 @@ namespace HolyClient.StressTest
 			{
 				this.SetBehavior(plugin.Value);
 			}
-
 			return Task.CompletedTask;
 		}
 
 		public void SetBehavior(IPluginSource pluginSource)
 		{
+			Console.WriteLine("Update Beh");
+
 			if (pluginSource is null)
 				throw new ArgumentException("parameter is null", nameof(pluginSource));
 
-
+			if (this.Behavior is not null)
+				if (pluginSource.Reference.Equals(this.BehaviorRef))
+					return;
 
 			var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
-
-			this.behavior = behavior;
-
-
-
+			this.Behavior = behavior;
 			this.BehaviorRef = pluginSource.Reference;
 
 		}

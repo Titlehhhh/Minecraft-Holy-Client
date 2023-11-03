@@ -190,8 +190,12 @@
 
 							<ListBox Name="BehaviorsList" SelectedItem="{Binding SelectedBehavior}" ItemsSource="{Binding AvailableBehaviors}">
 								<ListBox.ItemTemplate>
-									<DataTemplate DataType="services:PluginSource">
-										<TextBlock Text="{Binding Reference.FullName}"/>
+									<DataTemplate DataType="vm:StressTestPluginViewModel">
+										<DockPanel LastChildFill="False">
+											<TextBlock Text="{Binding Name}" DockPanel.Dock="Left"/>
+											<TextBlock IsVisible="{Binding IsInstalled}" DockPanel.Dock="Right" Text="Текущий" Foreground="Gray" FontStyle="Italic"/>
+										</DockPanel>
+										
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
@@ -222,34 +226,34 @@
 										Content="{Binding SelectedBehavior}">
 
 										<ContentControl.ContentTemplate>
-											<DataTemplate DataType="services:PluginSource">
+											<DataTemplate DataType="vm:StressTestPluginViewModel">
 												<ScrollViewer>
 													<StackPanel>
 														<TextBlock
 															FontWeight="Bold"
-															Text="{Binding Reference.FullName}"/>
+															Text="{Binding Name}"/>
 														<TextBlock
 															Margin="0,20,0,0"
 															FontWeight="Bold"
 															Text="Сборка:"/>
 														<TextBlock
-															Text="{Binding Reference.AssemblyName}"/>
+															Text="{Binding Assembly}"/>
 														<TextBlock
 															Margin="0,10,0,0"
 															FontWeight="Bold"
 															Text="Авторы:"/>
 														<TextBlock
-															Text="{Binding Metadata.Author}"/>
+															Text="{Binding Authors}"/>
 														<TextBlock
 															Margin="0,10,0,0"
 															FontWeight="Bold"
 															Text="Описание:"/>
-														<TextBlock Text="{Binding Metadata.Description}"/>
+														<TextBlock Text="{Binding Description}"/>
 
 														<Button 
 															Margin="0,10,0,0"
 															Content="Установить"
-															Command="{Binding #BehaviorsList.((vm:StressTestConfigurationViewModel)DataContext).InstallBehaviorCommand}"/>
+															Command="{Binding InstallCommand}"/>
 													</StackPanel>
 												</ScrollViewer>
 											</DataTemplate>

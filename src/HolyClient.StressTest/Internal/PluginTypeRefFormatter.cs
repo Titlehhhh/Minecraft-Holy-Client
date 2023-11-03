@@ -6,6 +6,8 @@ namespace HolyClient.StressTest
 {
 	public class PluginTypeRefFormatter : IMessagePackFormatter<PluginTypeReference>
 	{
+		public static PluginTypeRefFormatter Instance { get; } = new();
+
 		public PluginTypeReference Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
 		{
 			if (reader.TryReadNil())
@@ -47,10 +49,11 @@ namespace HolyClient.StressTest
 				writer.WriteNil();
 				return;
 			}	
-
+			
 			writer.WriteArrayHeader(2);
 			writer.Write(value.AssemblyName);
 			writer.Write(value.FullName);
+			writer.Flush();
 		}
 	}
 
