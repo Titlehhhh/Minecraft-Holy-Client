@@ -26,7 +26,8 @@ namespace HolyClient.Services
 			extensionManager.AssemblyManager.Assemblies
 				.Connect()
 				.OnItemAdded(CreatePluginSources)
-				.OnItemRemoved(OnRemovedAssembly);
+				.OnItemRemoved(OnRemovedAssembly)
+				.Subscribe();
 
 		}
 

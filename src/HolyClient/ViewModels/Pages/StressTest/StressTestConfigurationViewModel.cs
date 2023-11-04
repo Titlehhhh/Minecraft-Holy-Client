@@ -54,7 +54,7 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 	[Reactive]
 	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
 
-	
+
 	#endregion
 
 	[Reactive]
@@ -176,22 +176,23 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 		#region Configure plugins
 
-		Console.WriteLine("CurrBeh: "+state.Behavior);
+		Console.WriteLine("CurrBeh: " + state.Behavior);
 
 		this.CurrentBehavior = state.Behavior;
 
 		state.WhenAnyValue(x => x.Behavior)
 			.BindTo(this, x => x.CurrentBehavior);
 
-		
+
 
 
 		var pluginProvider = Locator.Current.GetService<IPluginProvider>();
 
 		pluginProvider.AvailableStressTestPlugins
 			.Connect()
-			.Transform(x=>new StressTestPluginViewModel(x, state))
+			.Transform(x => new StressTestPluginViewModel(x, state))
 			.Bind(out var plugins)
+			.DisposeMany()
 			.Subscribe();
 
 		AvailableBehaviors = plugins;

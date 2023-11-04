@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels
@@ -105,7 +106,7 @@ namespace HolyClient.ViewModels
 
 		public void Dispose()
 		{
-
+			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
 		}
 	}
 

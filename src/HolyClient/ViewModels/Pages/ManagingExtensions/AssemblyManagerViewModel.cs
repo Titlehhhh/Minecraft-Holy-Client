@@ -90,7 +90,7 @@ namespace HolyClient.ViewModels
 
 		private IAssemblyViewModel CreateVM(IAssemblyFile model)
 		{
-			return new AssemblyViewModel(model);
+			return new AssemblyViewModel(model, manager.AssemblyManager);
 		}
 
 		private Func<IAssemblyViewModel, bool> BuildFilter(string filter)

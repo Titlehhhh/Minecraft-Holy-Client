@@ -68,8 +68,10 @@ namespace HolyClient.Models.ManagingExtensions
 			if (assembly.HasValue)
 			{
 				await assembly.Value.UnLoad();
-			}
 
+				this._references.RemoveKey(name);
+				_state.RemoveReference(assembly.Value.FullPath);
+			}
 		}
 
 		public Task RemoveAssembly(IAssemblyFile assembly)
