@@ -117,7 +117,106 @@
       }
     }
   },
-  
+  "StressTest": {
+    "en": "Stress test",
+    "ru": "Стресс тест",
+    "GeneralSettings": {
+      "en": "General settings",
+      "ru": "Основные настройки",
+      "BotsNicknames": {
+        "en": "bot 's nicknames",
+        "ru": "Ники ботам"
+      },
+      "NumberOfBots": {
+        "en": "Number of bots",
+        "ru": "Количество ботов"
+      },
+      "Version": {
+        "en": "Version",
+        "ru": "Версия"
+      },
+      "BehaviorSettings": {
+        "en": "Behavior settings",
+        "ru": "Настройки поведения"
+      }
+    },
+    "Proxy": {
+      "en": "Proxies",
+      "ru": "Прокси",
+
+      "Type": {
+        "en": "Type",
+        "ru": "Тип"
+      },
+      "Host": {
+        "en": "Host",
+        "ru": "Хост"
+      },
+      "Port": {
+        "en": "Port",
+        "ru": "Порт"
+      },
+      "Login": {
+        "en": "Login",
+        "ru": "Логин"
+      },
+      "Password": {
+        "en": "Password",
+        "ru": "Пароль"
+      },
+      "Import": {
+        "en": "Import",
+        "ru": "Импорт"
+      },
+      "Export": {
+        "en": "Export",
+        "ru": "Экспорт"
+      },
+      "Delete": {
+        "en": "Delete",
+        "ru": "Удалить"
+      },
+      "DeleteAll": {
+        "en": "Delete all",
+        "ru": "Удалить все"
+      }
+    },
+    "Behaviors": {
+      "en": "Behaviors",
+      "ru": "Поведения",
+      "AvailableBehaviors": {
+        "en": "Available behaviors",
+        "ru": "Доступные поведения"
+      },
+      "Current": {
+        "en": "Current",
+        "ru": "Текущий"
+      },
+      "NoSelectBehavior": {
+        "en": "No selected behavior",
+        "ru": "Нет выбранного поведения"
+      },
+      "SelectedBehavior": {
+        "Assembly": {
+          "en": "Assembly",
+          "ru": "Сборка"
+        },
+        "Authors": {
+          "en": "Authors",
+          "ru": "Авторы"
+        },
+        "Description": {
+          "en": "Description",
+          "ru": "Описание"
+        },
+        "Put": {
+          "en": "Put",
+          "ru": "Установить"
+        }
+      }
+    }
+
+  },
   "Settings": {
     "en": "Settings",
     "ru": "Настройки",
