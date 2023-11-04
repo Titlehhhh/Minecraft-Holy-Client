@@ -14,6 +14,6 @@ namespace HolyClient.Core.Infrastructure
 		IObservable<Unit> FileUpdated { get; }
 
 		Task Initialization();
-
+		Task UnLoad();
 	}
 }

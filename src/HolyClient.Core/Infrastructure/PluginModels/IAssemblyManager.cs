@@ -10,6 +10,9 @@ namespace HolyClient.Core.Infrastructure
 		IObservable<IAssemblyFile> AssemblyFileUpdated { get; }
 
 		Task AddReference(string path);
+
+		Task RemoveReference(string path);
+		Task RemoveAssembly(IAssemblyFile assembly);
 		Task Initialization();
 	}
 }

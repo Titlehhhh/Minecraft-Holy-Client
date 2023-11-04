@@ -49,24 +49,24 @@ namespace HolyClient.Models.ManagingExtensions
 					.Where(x => !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x))
 					.ToArray();
 			}
-			//this.watcher = new FileSystemWatcher()
-			//{
-			//	Path = directory
-			//};
+			this.watcher = new FileSystemWatcher()
+			{
+				Path = directory
+			};
 
-			//watcher.NotifyFilter = NotifyFilters.LastWrite;
+			watcher.NotifyFilter = NotifyFilters.LastWrite;
 
 
-			//watcher.Changed += OnChanged;
-			//watcher.Created += OnCreated;
-			//watcher.Deleted += OnDeleted;
-			//watcher.Renamed += OnRenamed;
+			watcher.Changed += OnChanged;
+			watcher.Created += OnCreated;
+			watcher.Deleted += OnDeleted;
+			watcher.Renamed += OnRenamed;
 			//watcher.Error += OnError;
 
-			//watcher.Filter = "*.dll";
-			//watcher.IncludeSubdirectories = true;
-			//watcher.EnableRaisingEvents = true;
-			//Console.WriteLine("GG");
+			watcher.Filter = "*.dll";
+			watcher.IncludeSubdirectories = true;
+			watcher.EnableRaisingEvents = true;
+
 
 
 
@@ -78,50 +78,42 @@ namespace HolyClient.Models.ManagingExtensions
 		{
 			try
 			{
-
 				await Task.Run(() =>
 				{
 					var name = AssemblyName.GetAssemblyName(_path);
-					Console.WriteLine(name);
+
 				});
-				Console.WriteLine("Файл изменился, открыть можно");
+				this._fileUpdate.OnNext(default);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Файл изменился но нельзя его открыть: " + ex);
+
 			}
 		}
 
 		private void OnCreated(object sender, FileSystemEventArgs e)
 		{
 
-			string value = $"Created: {e.FullPath}";
-			Console.WriteLine(value);
 		}
 
-		private void OnDeleted(object sender, FileSystemEventArgs e) =>
-			Console.WriteLine($"Deleted: {e.FullPath}");
+		private void OnDeleted(object sender, FileSystemEventArgs e)
+		{
+
+		}
+
 
 		private void OnRenamed(object sender, RenamedEventArgs e)
 		{
-			Console.WriteLine($"Renamed:");
-			Console.WriteLine($"    Old: {e.OldFullPath}");
-			Console.WriteLine($"    New: {e.FullPath}");
 		}
 
-		private void OnError(object sender, ErrorEventArgs e) =>
-			PrintException(e.GetException());
-
-		private void PrintException(Exception? ex)
+		public async Task UnLoad()
 		{
-			if (ex != null)
-			{
-				Console.WriteLine($"Message: {ex.Message}");
-				Console.WriteLine("Stacktrace:");
-				Console.WriteLine(ex.StackTrace);
-				Console.WriteLine();
-				PrintException(ex.InnerException);
-			}
+			await wrapper.UnLoad();
+			watcher.Changed -= OnChanged;
+			watcher.Created -= OnCreated;
+			watcher.Deleted -= OnDeleted;
+			watcher.Renamed -= OnRenamed;
+			watcher.Dispose();
 		}
 	}
 }

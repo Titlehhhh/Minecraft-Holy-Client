@@ -7,6 +7,7 @@ using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
 using Splat;
 using System;
+using System.Linq;
 
 namespace HolyClient.Services
 {
@@ -23,9 +24,19 @@ namespace HolyClient.Services
 			}
 
 			extensionManager.AssemblyManager.Assemblies
-				.Connect()				
-				.OnItemAdded(CreatePluginSources);
+				.Connect()
+				.OnItemAdded(CreatePluginSources)
+				.OnItemRemoved(OnRemovedAssembly);
 
+		}
+
+		private void OnRemovedAssembly(IAssemblyFile assembly)
+		{
+			var keys = assembly.StressTestPlugins
+				.Select(x => new PluginTypeReference(assembly.Name, x.FullName));
+
+
+			_stressTestPlugins.RemoveKeys(keys);
 		}
 
 		private void CreatePluginSources(IAssemblyFile assembly)

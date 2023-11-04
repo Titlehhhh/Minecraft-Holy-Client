@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using DynamicData.Kernel;
 using HolyClient.AppState;
 using HolyClient.Core.Infrastructure;
 using System;
@@ -10,12 +11,13 @@ namespace HolyClient.Models.ManagingExtensions
 {
 	public class AssemblyManager : IAssemblyManager
 	{
-		
+
 		public IObservableCache<IAssemblyFile, string> Assemblies => _references;
 		public IObservable<IAssemblyFile> AssemblyFileUpdated => _fileUpdated;
 
 
 		public SourceCache<IAssemblyFile, string> _references = new(x => x.Name);
+
 		private Subject<IAssemblyFile> _fileUpdated = new();
 		private ExtensionManagerState _state;
 
@@ -57,6 +59,22 @@ namespace HolyClient.Models.ManagingExtensions
 			});
 
 			return file;
+		}
+
+		public async Task RemoveReference(string name)
+		{
+			Optional<IAssemblyFile> assembly = this._references.Lookup(name);
+
+			if (assembly.HasValue)
+			{
+				await assembly.Value.UnLoad();
+			}
+
+		}
+
+		public Task RemoveAssembly(IAssemblyFile assembly)
+		{
+			return RemoveReference(assembly.Name);
 		}
 	}
 }

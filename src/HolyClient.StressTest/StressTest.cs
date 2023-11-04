@@ -45,6 +45,8 @@ namespace HolyClient.StressTest
 		#region NonSerializable
 
 
+
+
 		[IgnoreMember]
 		public ISourceList<ProxyInfo> Proxies { get; } = new SourceList<ProxyInfo>();
 
@@ -62,9 +64,13 @@ namespace HolyClient.StressTest
 			private set;
 		}
 
+
+
 		[Reactive]
 		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
+
+
 
 		#endregion
 
@@ -94,6 +100,7 @@ namespace HolyClient.StressTest
 		public async Task Start(Serilog.ILogger logger)
 		{
 
+			CurrentState = StressTestServiceState.Init;
 			_botsOnlineCounter = 0;
 			_cpsCounter = 0;
 			try
@@ -112,7 +119,7 @@ namespace HolyClient.StressTest
 				}).DisposeWith(_disposables);
 
 
-				CurrentState = StressTestServiceState.Init;
+
 
 				var bots = new List<MinecraftClient>();
 
@@ -232,10 +239,11 @@ namespace HolyClient.StressTest
 
 				if (Behavior is not null)
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
+				CurrentState = StressTestServiceState.Running;
 			}
 			catch
 			{
-				throw;
+				CurrentState = StressTestServiceState.None;
 			}
 		}
 
@@ -260,6 +268,8 @@ namespace HolyClient.StressTest
 		public Task Stop()
 		{
 			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
+
+			CurrentState = StressTestServiceState.None;
 			return Task.CompletedTask;
 		}
 
@@ -280,7 +290,10 @@ namespace HolyClient.StressTest
 
 		public void SetBehavior(IPluginSource pluginSource)
 		{
-			Console.WriteLine("Update Beh");
+			if (CurrentState != StressTestServiceState.None)
+			{
+				throw new InvalidOperationException("you cannot change the plugin while running or loading a stress test");
+			}
 
 			if (pluginSource is null)
 				throw new ArgumentException("parameter is null", nameof(pluginSource));
@@ -293,6 +306,17 @@ namespace HolyClient.StressTest
 			this.Behavior = behavior;
 			this.BehaviorRef = pluginSource.Reference;
 
+		}
+
+		public void DeleteBehavior()
+		{
+			if (CurrentState != StressTestServiceState.None)
+			{
+				throw new InvalidOperationException("you cannot delete the plugin while running or loading a stress test");
+			}
+
+			this.Behavior = null;
+			this.BehaviorRef = default;
 		}
 	}
 	class NickProvider : INickProvider

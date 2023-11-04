@@ -11,6 +11,7 @@ namespace HolyClient.StressTest
 	public interface IStressTest : INotifyPropertyChanged, INotifyPropertyChanging
 	{
 
+
 		string Server { get; set; }
 
 
@@ -29,10 +30,12 @@ namespace HolyClient.StressTest
 		IObservable<StressTestMetrik> Metrics { get; }
 
 		IStressTestBehavior Behavior { get; }
+		StressTestServiceState CurrentState { get; }
 
 		PluginTypeReference BehaviorRef { get; }
 
 		void SetBehavior(IPluginSource pluginSource);
+		void DeleteBehavior();
 
 		Task Start(Serilog.ILogger logger);
 		Task Stop();

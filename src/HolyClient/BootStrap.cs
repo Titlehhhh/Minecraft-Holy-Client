@@ -15,6 +15,7 @@ using HolyClient.Views;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -62,6 +63,8 @@ namespace HolyClient
 
 			   Locator.CurrentMutable.RegisterConstant<ExtensionManager>(extensionManager);
 
+			   Locator.CurrentMutable.RegisterConstant<IAssemblyManager>(extensionManager.AssemblyManager);
+
 			   Locator.CurrentMutable.RegisterConstant<IPluginProvider>(new PluginProvider());
 
 
@@ -97,13 +100,24 @@ namespace HolyClient
 
 				   Locator.CurrentMutable.RegisterConstant<INotificationManager>(notificationManager);
 
+				   List<IAssemblyFile> openFiles = new();
+
 				   extensionManager.AssemblyManager.AssemblyFileUpdated.ObserveOn(RxApp.MainThreadScheduler).Subscribe(x =>
 				   {
+					   if (openFiles.Contains(x))
+						   return;
 
+					   openFiles.Add(x);
 
 					   notificationManager.Show(new Avalonia.Controls.Notifications.Notification(
 						   "Менеджер сборок",
-						   $"Сборка {x.Name} была обновлена"));
+						   $"Сборка {x.Name} была обновлена",onClose: () =>
+						   {
+							   Console.WriteLine("Closed Notification");
+							   openFiles.Remove(x);
+
+
+						   }));
 
 
 
