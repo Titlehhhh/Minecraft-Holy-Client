@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
+using HolyClient.Localization;
 using HolyClient.ViewModels;
 using HolyClient.Views.Pages.StressTest.Dialogs;
 using ReactiveUI;
@@ -30,10 +31,10 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Импорт прокси",
-					PrimaryButtonText = "Импорт",
+					Title = Loc.Tr("StressTest.Configuration.Proxy.Dialog.Title"),
+					PrimaryButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.PrimaryButton"),
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = "Отмена",
+					CloseButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.CloseButton"),
 					Content = new ImportProxyDialogContent()
 					{
 						DataContext = x.Input
@@ -51,10 +52,10 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Вы точно хотите удалить?",
-					PrimaryButtonText = "Да",
+					Title = Loc.Tr("StressTest.Configuration.Proxy.Dialog.ConfirmDeleteQuestion"),
+					PrimaryButtonText = Loc.Tr("Yes"),
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = "Нет"
+					CloseButtonText = Loc.Tr("No")
 
 				};
 
