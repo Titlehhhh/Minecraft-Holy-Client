@@ -6,6 +6,7 @@ using Avalonia.Controls.Templates;
 
 namespace HolyClient.CustomControls
 {
+
 	[TemplatePart("PART_StackPanel", typeof(StackPanel))]
 	public class FillStackPanel : TemplatedControl
 	{
@@ -22,7 +23,7 @@ namespace HolyClient.CustomControls
 		}
 		public FillStackPanel()
 		{
-
+			
 		}
 		private StackPanel _panel;
 		protected override void OnApplyTemplate(TemplateAppliedEventArgs e)

@@ -4,13 +4,71 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
              
-			  xmlns:ui="using:FluentAvalonia.UI.Controls"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="750"
              x:Class="HolyClient.Views.HomeView">
-	
-	<Grid RowDefinitions="Auto,Auto, *" Margin="20,20,0,0">
-		<TextBlock Text="{Tr Home.WhatNew}" FontSize="18" FontWeight="Bold"/>
-		<TextBlock Grid.Row="1" FontSize="16" Text="{Tr Home.Version, {Binding Version}}"/>
-		
+	<UserControl.Resources>
+		<LinearGradientBrush StartPoint="50%,0%"
+                                 EndPoint="50%,100%"
+                                 x:Key="HeaderOpacityMaskBrush">
+			<GradientStop Color="#FFFFFF00" Offset="0" />
+			<GradientStop Color="#ededed00" Offset="0.6" />
+			<GradientStop Color="#cccccc00" Offset="0.63" />
+
+			<GradientStop Color="#8f8f8f00" Offset="0.76" />
+			<GradientStop Color="#82828200" Offset="0.80" />
+			<GradientStop Color="#5e5e5e00" Offset="0.85" />
+
+
+			<GradientStop Color="#05050500" Offset="0.96" />
+			<GradientStop Color="#00000000" Offset="1" />
+		</LinearGradientBrush>
+		<ImageBrush x:Key="PageHeaderBackgroundBrush"
+               Source="avares://HolyClient/Assets/HeaderImage.png"
+               AlignmentY="Top"
+               Stretch="UniformToFill">
+
+		</ImageBrush>
+	</UserControl.Resources>
+
+	<Grid RowDefinitions="396, *">
+
+		<Border Margin="-24,0,0,-24"
+				OpacityMask="{DynamicResource HeaderOpacityMaskBrush}"
+				Background="Black">
+			<Border
+				ClipToBounds="True"
+				Background="{DynamicResource PageHeaderBackgroundBrush}">
+
+			</Border>
+		</Border>
+
+
+		<TextBlock
+				Text="Minecraft Holy Client"
+				FontSize="40"
+				FontWeight="Bold"
+				Margin="30,90,0,0"/>
+
+		<StackPanel Spacing="20" Margin="30,350,0,0" Orientation="Horizontal">
+			<AcrylicContentControl Width="190" Height="220">
+				<Button Content="asdasd"/>
+			</AcrylicContentControl>
+			<AcrylicContentControl Width="190" Height="220">
+				<Button Content="asdasd"/>
+			</AcrylicContentControl>
+			<AcrylicContentControl Width="190" Height="220">
+				<Button Content="asdasd"/>
+			</AcrylicContentControl>
+			<AcrylicContentControl Width="190" Height="220">
+				<Button Content="asdasd"/>
+			</AcrylicContentControl>
+			
+			
+			
+		</StackPanel>
+
+
 	</Grid>
+
 </UserControl>
