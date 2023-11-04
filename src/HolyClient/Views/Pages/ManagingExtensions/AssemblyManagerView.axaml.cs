@@ -30,7 +30,8 @@ public partial class AssemblyManagerView : ReactiveUserControl<AssemblyManagerVi
 		// Start async operation to open the dialog.
 		var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
 		{
-			Title = "Open Text File",
+			Title = "Open assembly File",
+			
 			AllowMultiple = false
 		});
 

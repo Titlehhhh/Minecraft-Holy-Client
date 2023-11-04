@@ -42,7 +42,7 @@ namespace HolyClient
 			   RxApp.SuspensionHost.CreateNewAppState = () => new MainState();
 			   RxApp.SuspensionHost.SetupDefaultSuspendResume();
 
-			   progress.OnNext("Загрузка состояния");
+			   progress.OnNext("Bootstrap.LoadingState.LoadState");
 
 			   startApp.OnNext(Unit.Default);
 
@@ -50,7 +50,7 @@ namespace HolyClient
 
 			   Loc.Instance.CurrentLanguage = state.SettingsState.Language;
 
-			   progress.OnNext("Загрузка плагинов");
+			   progress.OnNext("Bootstrap.LoadingState.LoadPlugins");
 
 
 
@@ -74,7 +74,7 @@ namespace HolyClient
 
 			   await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
 
-			   progress.OnNext("Почти готово");
+			   progress.OnNext("Bootstrap.LoadingState.AlmostDone");
 
 
 			   RegisterAppServices();
@@ -83,7 +83,7 @@ namespace HolyClient
 
 			   RegisterViewModels();
 
-			   progress.OnNext("Готово");
+			   progress.OnNext("Bootstrap.LoadingState.Complete");
 
 
 
@@ -110,13 +110,11 @@ namespace HolyClient
 					   openFiles.Add(x);
 
 					   notificationManager.Show(new Avalonia.Controls.Notifications.Notification(
-						   "Менеджер сборок",
-						   $"Сборка {x.Name} была обновлена",onClose: () =>
+						   Loc.Tr("ManagingExtension.AssemblyUpdatedNotification.Title"),
+						   string.Format(Loc.Tr("ManagingExtension.AssemblyUpdatedNotification"), x.Name),
+						   onClose: () =>
 						   {
-							   Console.WriteLine("Closed Notification");
 							   openFiles.Remove(x);
-
-
 						   }));
 
 

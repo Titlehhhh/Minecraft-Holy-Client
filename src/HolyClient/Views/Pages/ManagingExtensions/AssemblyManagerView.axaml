@@ -23,7 +23,7 @@
 
 			<TextBlock
 				HorizontalAlignment="Center"
-				Text="Нет загруженных сборок"
+				Text="{Tr ManagingExtension.Assemblies.NoAssembliesText}"
 				FontWeight="Thin"
 				Foreground="LightGray"
 				FontSize="16"
@@ -32,7 +32,7 @@
 				HorizontalAlignment="Center"
 				Foreground="LightGray"
 				Command="{Binding AddAssemblyCommand}"
-				Content="Добавить"/>
+				Content="{Tr Add}"/>
 		</StackPanel>
 
 		<sg:SpacedGrid
@@ -44,11 +44,11 @@
 				HorizontalAlignment="Left"
 				Width="250"
 				Text="{Binding Filter}"
-				Watermark="Поиск"/>
+				Watermark="{Tr Search}"/>
 
 			<Button
 				Grid.Column="1"
-				Content="Загрузить сборку"
+				Content="{Tr ManagingExtension.Assemblies.LoadAssembly}"
 				Command="{Binding AddAssemblyCommand}"/>
 
 

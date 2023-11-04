@@ -21,7 +21,7 @@ public partial class AssemblyView : ReactiveUserControl<AssemblyViewModel>
 			{
 				ContentDialog contentDialog = new ContentDialog()
 				{
-					Title = "Удалить сборку? Стресс-тест будет остановлен принудительно.",
+					Title = Loc.Tr("ManagingExtension.Assemblies.DeleteAssemblyDialog.Title"),
 
 					IsSecondaryButtonEnabled = true,
 					IsPrimaryButtonEnabled = true,
@@ -34,10 +34,11 @@ public partial class AssemblyView : ReactiveUserControl<AssemblyViewModel>
 				if (result == ContentDialogResult.Primary)
 				{
 					context.SetOutput(ConfirmDeleteAssemblyAnswer.ForceDelete);
+					return;
 				}
-				else
+				else 
 				{
-					context.SetOutput(ConfirmDeleteAssemblyAnswer.ForceDelete);
+					context.SetOutput(ConfirmDeleteAssemblyAnswer.None);
 					//	throw new System.Exception("Unkown type dialog");
 				}
 			}).DisposeWith(d);

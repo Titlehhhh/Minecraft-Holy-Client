@@ -4,6 +4,27 @@
     "ru": "Русский"
   },
 
+  "Bootstrap": {
+    "LoadingState": {
+      "LoadState": {
+        "en": "Load state",
+        "ru": "Загрузка состояния"
+      },
+      "LoadPlugins": {
+        "en": "Load plugins",
+        "ru": "Загрузка плагинов"
+      },
+      "AlmostDone": {
+        "en": "Almost done",
+        "ru": "Почти готово"
+      },
+      "Complete": {
+        "en": "Complete",
+        "ru": "Готово"
+      }
+    }
+  },
+
   "Home": {
     "en": "Home",
     "ru": "Главная",
@@ -248,6 +269,62 @@
       }
     }
   },
+  "ManagingExtension": {
+    "en": "Managing extensions",
+    "ru": "Управление расширениями",
+    "ReviewNuGet": {
+      "en": "Review NuGet",
+      "ru": "Обзор NuGet"
+    },
+    "InstalledNuGet": {
+      "en": "Installed NuGet packages",
+      "ru": "Установленные пакеты NuGet"
+    },
+    "Assemblies": {
+      "en": "Assemblies",
+      "ru": "Сборки",
+      "DeleteAssemblyDialog": {
+        "Title": {
+          "en": "Delete an assembly? The stress test will be stopped forcibly.",
+          "ru": "Удалить сборку? Стресс-тест будет остановлен принудительно."
+        }
+      },
+      "LoadAssembly": {
+        "en": "Load assembly",
+        "ru": "Загрузить сборку"
+      },
+      "Delete": {
+        "en": "Delete",
+        "ru": "Удалить"
+      },
+      "Path": {
+        "en": "Path",
+        "ru": "Путь"
+      },
+      "TypesFound": {
+        "en": "Types found",
+        "ru": "найденные типы",
+        "StressTest": {
+          "en": "Stress test plugins ({0}):",
+          "ru": "Стресс тест плагины ({0}):"
+        }
+      },
+      "NoAssembliesText": {
+        "en": "No assemblies loaded",
+        "ru": "Нет загруженных сборок"
+      }
+
+    },
+
+    "AssemblyUpdatedNotification": {
+      "Title": {
+        "en": "Assembly manager",
+        "ru": "Менеджер сборок"
+      },
+      "en": "Assembly {0} has been updated",
+      "ru": "Сборка {0} была обновлена"
+    }
+  },
   "Settings": {
     "en": "Settings",
     "ru": "Настройки",
@@ -268,6 +345,10 @@
     "en": "Back",
     "ru": "Назад"
   },
+  "Add": {
+    "en": "Add",
+    "ru": "Добавить"
+  },
   "InDevelopment": {
     "en": "Is in development",
     "ru": "В разработке"
@@ -283,5 +364,9 @@
   "No": {
     "en": "No",
     "ru": "Нет"
+  },
+  "Search": {
+    "en": "Search",
+    "ru": "Поиск"
   }
 }

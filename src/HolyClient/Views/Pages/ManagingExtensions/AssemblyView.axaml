@@ -45,16 +45,19 @@
 				HorizontalAlignment="Stretch"
 				Margin="0,20,0,0"
 				ColumnDefinitions="*,*">
+				<!--
+				
 				<Button
 					HorizontalAlignment="Left"
 					Content="Перезагрузить">
 
 				</Button>
+				-->
 
 				<Button
 					HorizontalAlignment="Right"
 					Command="{Binding DeleteCommand}"					
-					Content="Удалить"
+					Content="{Tr ManagingExtension.Assemblies.Delete}"
 					Grid.Column="1">
 
 				</Button>
@@ -65,7 +68,7 @@
 				FontSize="15"
 				Margin="0,10,0,0"
 											
-				Text="Путь"/>
+				Text="{Tr ManagingExtension.Assemblies.Path}"/>
 			<Grid Margin="0,5,0,0" ColumnDefinitions="*, Auto">
 				<TextBox
 					FontSize="15"
@@ -88,7 +91,7 @@
 			<TextBlock
 				FontSize="15"
 				Margin="0,15,0,0"
-				Text="Найденные типы"/>
+				Text="{Tr ManagingExtension.Assemblies.TypesFound}"/>
 			<StackPanel Margin="0,8,0,0" Orientation="Horizontal">
 				<Rectangle
 					Fill="White"
@@ -97,9 +100,9 @@
 					Height="2"
 					RadiusX="2"
 					RadiusY="2"/>
-				<TextBlock Margin="5,0,0,0" >
-					<Run Text="Стресс-тест плагины"/>
-					<Run Text="{Binding Types.Count,StringFormat='({0}):'}"/>
+				<TextBlock Margin="5,0,0,0" 
+						   Text="{Tr ManagingExtension.Assemblies.TypesFound,{Binding Types.Count}}" >
+					
 				</TextBlock>
 			</StackPanel>
 			<ItemsControl Margin="20,0,0,0" ItemsSource="{Binding Types}">

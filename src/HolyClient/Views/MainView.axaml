@@ -47,14 +47,14 @@
 						</ui:NavigationViewItem.Tag>
 						
 					</ui:NavigationViewItem>
-					<ui:NavigationViewItem  IconSource="{DynamicResource StressTestIcon}"  FontSize="16"  Content="Stress test">
+					<ui:NavigationViewItem  IconSource="{DynamicResource StressTestIcon}"  FontSize="16"  Content="{Tr StressTest}">
 						<ui:NavigationViewItem.Tag>
 							<models:Page>StressTest</models:Page>
 						</ui:NavigationViewItem.Tag>
 						
 					</ui:NavigationViewItem>
 
-					<ui:NavigationViewItem IconSource="{DynamicResource ManagingExtensionsIcon}"  FontSize="16"  Content="Управление расширениями">
+					<ui:NavigationViewItem IconSource="{DynamicResource ManagingExtensionsIcon}"  FontSize="16"  Content="{Tr ManagingExtension}">
 						<ui:NavigationViewItem.Tag>
 							<models:Page>ManagingExtensions</models:Page>
 						</ui:NavigationViewItem.Tag>
