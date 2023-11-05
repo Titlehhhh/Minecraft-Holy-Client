@@ -45,16 +45,16 @@
       },
       "Discord": {
         "Description": {
-          "en": "Join our Discord server to discuss and support the application!",
-          "ru": "Присоединяйтесь к нашему Discord серверу для обсуждения и поддержки программы!"
+          "en": "Join our Discord server to discuss and support the application.",
+          "ru": "Вступайте в наш Discord сервер, что-бы обсуждать программу."
         }
       },
       "Documentation": {
         "en": "Documentation",
         "ru": "Документация",
         "Description": {
-          "en": "Explore our documentation for detailed information about the program.",
-          "ru": "Исследуйте нашу документацию для получения подробной информации о программе."
+          "en": "Learn how to use the app, as well as how to create plugins.",
+          "ru": "Узнайте как пользоваться программой, а также как создавать плагины."
         }
       }
     }
