@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Diagnostics;
 using Avalonia.PropertyGrid.Controls;
 using Avalonia.PropertyGrid.Controls.Factories;
 using FluentAvalonia.UI.Windowing;
@@ -13,7 +14,11 @@ namespace HolyClient.Views
 			InitializeComponent();
 			
 #if DEBUG
-			this.AttachDevTools();
+			
+			this.AttachDevTools(new DevToolsOptions()
+			{
+				
+			});
 #endif
 
 			this.WindowState = Avalonia.Controls.WindowState.Maximized;

@@ -15,6 +15,7 @@ namespace HolyClient.CustomControls
 		private static SKShader? _acrylicNoiseShader;
 
 		private readonly AcrylicContentControl _AcrylicContentControl;
+		private readonly CornerRadius _cornerRadius;
 		private readonly ImmutableExperimentalAcrylicMaterial _material;
 		private readonly int _blur;
 		private readonly Rect _bounds;
@@ -24,6 +25,7 @@ namespace HolyClient.CustomControls
 		public AcrylicContentControlRenderOperation(AcrylicContentControl AcrylicContentControl, ImmutableExperimentalAcrylicMaterial material, int blur, Rect bounds)
 		{
 			_AcrylicContentControl = AcrylicContentControl;
+			_cornerRadius = AcrylicContentControl.CornerRadius;
 			_material = material;
 			_blur = blur;
 			_bounds = bounds;
@@ -70,7 +72,7 @@ namespace HolyClient.CustomControls
 
 			if (lease.SkCanvas.GetLocalClipBounds(out SKRect bounds) && !bounds.Contains(SKRect.Create(bounds.Left, bounds.Top, (float)_AcrylicContentControl.Bounds.Width, (float)_AcrylicContentControl.Bounds.Height)))
 			{
-				Dispatcher.UIThread.Invoke(() => _AcrylicContentControl.InvalidateVisual());
+				//Dispatcher.UIThread.Invoke(() => _AcrylicContentControl.InvalidateVisual());
 			}
 			else
 			{
@@ -88,15 +90,30 @@ namespace HolyClient.CustomControls
 			using (SKImageFilter? filter = SKImageFilter.CreateBlur(_blur, _blur, SKShaderTileMode.Clamp))
 			using (SKPaint blurPaint = new SKPaint { Shader = backdropShader, ImageFilter = filter })
 			{
-				blurred.Canvas.DrawRect(0, 0, (float)_bounds.Width, (float)_bounds.Height, blurPaint);
+				blurred.Canvas.DrawRoundRect(0, 0, (float)_bounds.Width, (float)_bounds.Height,10,10, blurPaint);
 
 				using (SKImage? blurSnap = blurred.Snapshot())
 				using (SKShader? blurSnapShader = SKShader.CreateImage(blurSnap))
 				using (SKPaint blurSnapPaint = new SKPaint { Shader = blurSnapShader, IsAntialias = true })
 				{
+					
+
 					// Rendering twice to reduce opacity
-					lease.SkCanvas.DrawRect(0, 0, (float)_bounds.Width, (float)_bounds.Height, blurSnapPaint);
-					lease.SkCanvas.DrawRect(0, 0, (float)_bounds.Width, (float)_bounds.Height, blurSnapPaint);
+					lease.SkCanvas.DrawRoundRect(
+						0,
+						0, 
+						(float)_bounds.Width, 
+						(float)_bounds.Height,
+						10, 10,
+						blurSnapPaint);
+
+					//lease.SkCanvas.DrawRoundRect(
+					//	0, 
+					//	0,
+					//	(float)_bounds.Width,
+					//	(float)_bounds.Height,
+					//	10,10,
+					//	blurSnapPaint);
 				}
 
 				//return;
@@ -105,7 +122,7 @@ namespace HolyClient.CustomControls
 
 				double opacity = 1;
 
-				const double noiseOpacity = 0.0225;
+				const double noiseOpacity = 0.0125;
 
 				Color tintColor = _material.TintColor;
 				SKColor tint = new SKColor(tintColor.R, tintColor.G, tintColor.B, tintColor.A);
@@ -124,7 +141,14 @@ namespace HolyClient.CustomControls
 				{
 					acrylliPaint.Shader = compose;
 					acrylliPaint.IsAntialias = true;
-					lease.SkCanvas.DrawRect(0, 0, (float)_bounds.Width, (float)_bounds.Height, acrylliPaint);
+					lease.SkCanvas.DrawRoundRect(
+						0, 
+						0, 						
+						(float)_bounds.Width,
+						(float)_bounds.Height,
+						10,
+						10,
+						acrylliPaint);
 				}
 			}
 		}

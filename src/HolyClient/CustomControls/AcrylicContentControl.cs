@@ -8,7 +8,7 @@ namespace HolyClient.CustomControls
 	{
 		private static readonly ImmutableExperimentalAcrylicMaterial DefaultAcrylicMaterial = (ImmutableExperimentalAcrylicMaterial)new ExperimentalAcrylicMaterial()
 		{
-			MaterialOpacity = 0.1,
+			MaterialOpacity = 0.5,
 			TintColor = new Color(255, 7, 7, 7),
 			TintOpacity = 1,
 			PlatformTransparencyCompensationLevel = 0

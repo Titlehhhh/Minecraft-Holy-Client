@@ -35,6 +35,28 @@
     "Version": {
       "en": "Version: {0}",
       "ru": "Версия: {0}"
+    },
+    "Tiles": {
+      "GitHub": {
+        "Description": {
+          "en": "Explore this project on GitHub: code, issues, and improvements.",
+          "ru": "Исследуйте этот проект на GitHub: код, проблемы и улучшения."
+        }
+      },
+      "Discord": {
+        "Description": {
+          "en": "Join our Discord server to discuss and support the application!",
+          "ru": "Присоединяйтесь к нашему Discord серверу для обсуждения и поддержки программы!"
+        }
+      },
+      "Documentation": {
+        "en": "Documentation",
+        "ru": "Документация",
+        "Description": {
+          "en": "Explore our documentation for detailed information about the program.",
+          "ru": "Исследуйте нашу документацию для получения подробной информации о программе."
+        }
+      }
     }
   },
   "BotManager": {

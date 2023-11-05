@@ -29,11 +29,8 @@
 
 
 			<ui:NavigationView  Grid.Row="1" SelectedItem="{Binding SelectedItem}" IsPaneOpen="False" Margin="5,0,0,0"  x:Name="Nav" IsSettingsVisible="False" ItemInvoked="NavigationView_ItemInvoked">
-				<ui:NavigationView.Styles>
-					
-					
-					
-				</ui:NavigationView.Styles>
+
+				
 				<ui:NavigationView.MenuItems>
 					<ui:NavigationViewItem IconSource="{DynamicResource HomeIcon}" Margin="0,5,0,0" FontSize="16" Content="{Tr Home}">
 						<ui:NavigationViewItem.Tag>
