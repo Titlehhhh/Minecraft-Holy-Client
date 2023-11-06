@@ -47,6 +47,12 @@
           "type": "boolean",
           "description": "Disables displaying the NUKE logo"
         },
+        "NugetApiKey": {
+          "type": "string"
+        },
+        "NugetApiUrl": {
+          "type": "string"
+        },
         "Partition": {
           "type": "string",
           "description": "Partition to use on CI"
@@ -75,7 +81,8 @@
               "BuildSDKToLocal",
               "Clean",
               "Compile",
-              "Restore"
+              "Restore",
+              "SDKPublishToNuget"
             ]
           }
         },
@@ -92,7 +99,8 @@
               "BuildSDKToLocal",
               "Clean",
               "Compile",
-              "Restore"
+              "Restore",
+              "SDKPublishToNuget"
             ]
           }
         },
