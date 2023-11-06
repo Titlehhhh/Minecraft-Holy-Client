@@ -238,7 +238,10 @@ namespace HolyClient.StressTest
 
 
 				if (Behavior is not null)
+				{
+					Console.WriteLine("STRESS TEST BEHAVIOR: "+Behavior);
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
+				}
 				CurrentState = StressTestServiceState.Running;
 			}
 			catch
