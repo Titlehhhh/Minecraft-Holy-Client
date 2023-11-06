@@ -18,6 +18,9 @@ class Build : NukeBuild
 	[GitRepository] readonly GitRepository GitRepository;
 	[GitVersion] readonly GitVersion GitVersion;
 
+	[Parameter] string NugetApiUrl = "https://api.nuget.org/v3/index.json";
+	[Parameter] string NugetApiKey;
+
 	public static int Main()
 	{
 		return Execute<Build>(x => x.Compile);
@@ -106,6 +109,61 @@ class Build : NukeBuild
 					  DotNetNuGetPush(s => s
 						  .SetTargetPath(x)
 						  .SetSource(LocalNugetPath)
+					  );
+				  });
+
+		});
+
+	Target SDKPublishToNuget => _ => _
+		.Requires(() => NugetApiUrl)
+		.Requires(() => NugetApiKey)
+		.Requires(() => Configuration.Equals(Configuration.Release))
+		.Executes(() =>
+		{
+
+			NugetDirectory.DeleteDirectory();
+
+			string NuGetVersionCustom = "1.0.0";
+			int commitNum = 0;
+			if (Int32.TryParse(GitVersion.CommitsSinceVersionSource, out commitNum))
+			{
+
+			}
+
+			NuGetVersionCustom = NuGetVersionCustom + "-" + "preview." + commitNum;
+
+			//string outputPackagePath = NugetDirectory / ("HolyClient.SDK." + NuGetVersionCustom + ".nupkg");
+
+
+			DotNetPack(s => s
+			   .SetProject(Solution.GetProject("HolyClient.Abstractions"))
+			   .SetConfiguration(Configuration)
+			   .EnableNoBuild()
+			   .EnableNoRestore()
+			   .SetVersion(NuGetVersionCustom)
+			   .SetNoDependencies(true)
+			   .SetOutputDirectory(NugetDirectory));
+
+			DotNetPack(s => s
+			   .SetProject(Solution.GetProject("HolyClient.SDK"))
+			   .SetConfiguration(Configuration)
+			   .EnableNoBuild()
+			   .EnableNoRestore()
+			   .SetVersion(NuGetVersionCustom)
+			   .SetNoDependencies(true)
+			   .SetOutputDirectory(NugetDirectory));
+
+			LocalNugetPath.CreateDirectory();
+
+			NugetDirectory.GlobFiles("*.nupkg")
+				  .NotEmpty()
+				  // .Where(x => !x.EndsWith("symbols.nupkg"))
+				  .ForEach(x =>
+				  {
+					  DotNetNuGetPush(s => s
+							.SetTargetPath(x)
+						  .SetSource(NugetApiUrl)
+						  .SetApiKey(NugetApiKey)
 					  );
 				  });
 
