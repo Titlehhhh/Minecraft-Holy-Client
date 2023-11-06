@@ -186,6 +186,21 @@
         "BehaviorSettings": {
           "en": "Behavior settings",
           "ru": "Настройки поведения"
+        },
+        "Validation": {
+          "Address": {
+            "en": "Address is empty",
+            "ru": "Поле обязательно для заполнения"
+          },
+          "BotsNickname": {
+            "en": "Nickname is empty",
+            "ru": "Поле обязательно для заполнения",
+            "Long": {
+              "en": "Nickname is long",
+              "ru": "Ник слишком длинный"
+            }
+          }
+          
         }
       },
       "Proxy": {

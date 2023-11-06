@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,25 +15,39 @@ using System.Windows.Input;
 
 namespace HolyClient.Commands
 {
-	public class StartStressTestCommand : ICommand
+	public class StartStressTestCommand : ICommand, IDisposable
 	{
 		public event EventHandler? CanExecuteChanged;
 
 		private IScreen screen;
 		private IStressTest _model;
-		public StartStressTestCommand(IScreen screen, IStressTest model)
+		private IDisposable? _cleanUp = null;
+		private bool _canExecute;
+		public StartStressTestCommand(IScreen screen, IStressTest model, IObservable<bool> canExecute)
 		{
+			CompositeDisposable d = new();
+
 			this.screen = screen;
 			_model = model;
+
+			canExecute.Subscribe(x =>
+			{
+				_canExecute = x;
+				this.CanExecuteChanged?.Invoke(this, new EventArgs());
+			}).DisposeWith(d);
+
+			_cleanUp = d;
 		}
 
 		public bool CanExecute(object? parameter)
 		{
-			return true;
+			return _canExecute;
 		}
-		static TaskScheduler StaScheduler = new StaTaskScheduler(2);
 		public async void Execute(object? parameter)
 		{
+			if (_canExecute)
+				throw new Exception();
+
 			Thread.CurrentThread.Priority = ThreadPriority.Highest;
 			Serilog.ILogger logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 			logger = Logger.None;
@@ -65,6 +80,11 @@ namespace HolyClient.Commands
 
 			}
 
+		}
+
+		public void Dispose()
+		{
+			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
 		}
 	}
 	public sealed class StaTaskScheduler : TaskScheduler, IDisposable

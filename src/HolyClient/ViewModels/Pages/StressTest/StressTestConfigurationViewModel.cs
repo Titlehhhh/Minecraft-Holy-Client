@@ -3,11 +3,15 @@ using HolyClient.Abstractions.StressTest;
 using HolyClient.Commands;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
+using HolyClient.Localization;
 using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Validation.Extensions;
+using ReactiveUI.Validation.Helpers;
+using ReactiveUI.Validation.States;
 using Splat;
 using Stateless.Graph;
 using System;
@@ -20,8 +24,14 @@ using System.Reactive.Subjects;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
-public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewModel, IActivatableViewModel
+public class StressTestConfigurationViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
 {
+
+	private static string GetTr(string key)
+	{
+		return $"StressTest.Configuration.GeneralSettings.Validation.{key}";
+	}
+
 	public string? UrlPathSegment => throw new NotImplementedException();
 	public IScreen HostScreen { get; }
 	public ViewModelActivator Activator { get; } = new();
@@ -93,6 +103,8 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 	public StressTestConfigurationViewModel(IScreen hostScreen, IStressTest state)
 	{
+
+
 		#region Bind to state
 		this.Server = state.Server;
 		this.Version = state.Version;
@@ -112,9 +124,37 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 			.BindTo(state, x => x.NumberOfBots);
 		#endregion
 
+
+		#region Configure validation
+
+
+		this.ValidationRule(
+		   viewModel => viewModel.Server,
+		   name => !string.IsNullOrWhiteSpace(name),
+		   GetTr("Address"));
+
+
+
+		IObservable<IValidationState> botsNickaneValid =
+			this.WhenAnyValue(x => x.BotsNickname)
+				.Select(name => string.IsNullOrEmpty(name)
+					? new ValidationState(false, GetTr("BotsNickname"))
+
+					: (name.Length <= 14 
+							? ValidationState.Valid : 
+							new ValidationState(false,GetTr("BotsNickname.Long"))));
+
+		this.ValidationRule(vm => vm.BotsNickname, botsNickaneValid);
+
+
+		#endregion
+
 		HostScreen = hostScreen;
 
-		StartCommand = new StartStressTestCommand(hostScreen, state);
+
+
+
+		StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
 
 		#region Configure proxies
 

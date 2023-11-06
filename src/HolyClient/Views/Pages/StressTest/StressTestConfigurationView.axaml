@@ -70,14 +70,18 @@
 									HorizontalAlignment="Left"
 									MaxHeight="180"
 									Width="200">
-
+									<TextBox.Styles>
+										<Style Selector="DataValidationErrors">
+											<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+										</Style>
+									</TextBox.Styles>
 								</TextBox>
 							</StackPanel>
 						</Border>
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
 								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.NumberOfBots}" FontSize="15"/>
-								<ui:NumberBox Minimum="1" Value="{Binding NumberOfBots}" Width="200" HorizontalAlignment="Left"/>
+								<ui:NumberBox Minimum="1" Value="{Binding NumberOfBots}" SmallChange="10" SpinButtonPlacementMode="Inline" Width="200" HorizontalAlignment="Left"/>
 							</StackPanel>
 
 						</Border>
