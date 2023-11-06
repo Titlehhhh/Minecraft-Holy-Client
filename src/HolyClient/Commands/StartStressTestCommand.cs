@@ -32,6 +32,7 @@ namespace HolyClient.Commands
 
 			canExecute.Subscribe(x =>
 			{
+				Console.WriteLine("CanExecute: "+_canExecute);
 				_canExecute = x;
 				this.CanExecuteChanged?.Invoke(this, new EventArgs());
 			}).DisposeWith(d);
@@ -45,8 +46,8 @@ namespace HolyClient.Commands
 		}
 		public async void Execute(object? parameter)
 		{
-			if (_canExecute)
-				throw new Exception();
+			if (!_canExecute)
+				return;
 
 			Thread.CurrentThread.Priority = ThreadPriority.Highest;
 			Serilog.ILogger logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();

@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using HolyClient.Commands;
+using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
@@ -25,6 +26,15 @@ namespace HolyClient.ViewModels;
 
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
+	#region Info Panel
+	[Reactive]
+	public string Host { get; private set; }
+	[Reactive]
+	public string Version { get; private set; }
+	[Reactive]
+	public string NumberOfBots { get; private set; }
+	#endregion
+
 	#region Properties
 
 	[Reactive]
@@ -91,6 +101,11 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest)
 	{
 
+		Host = stressTest.Server;
+		Console.WriteLine("Server: " +stressTest.Server);
+		Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
+		NumberOfBots = stressTest.NumberOfBots.ToString();
+
 
 		CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
 
@@ -99,7 +114,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		this.WhenActivated(d =>
 		{
-			System.Console.WriteLine("ActivateVM");
+
 
 			StressTestMetrik currentData = new();
 			stressTest.Metrics.Subscribe(x =>

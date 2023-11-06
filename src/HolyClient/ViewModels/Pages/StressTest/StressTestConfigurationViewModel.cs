@@ -37,7 +37,8 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public ViewModelActivator Activator { get; } = new();
 
 
-	public ICommand StartCommand { get; }
+	[Reactive]
+	public ICommand StartCommand { get; private set; }
 
 
 	#region General Settings
@@ -124,37 +125,43 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 			.BindTo(state, x => x.NumberOfBots);
 		#endregion
 
-
+		HostScreen = hostScreen;
 		#region Configure validation
 
 
-		this.ValidationRule(
-		   viewModel => viewModel.Server,
-		   name => !string.IsNullOrWhiteSpace(name),
-		   GetTr("Address"));
+		this.WhenActivated(d =>
+		{
 
 
 
-		IObservable<IValidationState> botsNickaneValid =
-			this.WhenAnyValue(x => x.BotsNickname)
-				.Select(name => string.IsNullOrEmpty(name)
-					? new ValidationState(false, GetTr("BotsNickname"))
-
-					: (name.Length <= 14 
-							? ValidationState.Valid : 
-							new ValidationState(false,GetTr("BotsNickname.Long"))));
-
-		this.ValidationRule(vm => vm.BotsNickname, botsNickaneValid);
+			this.ValidationRule(
+			   viewModel => viewModel.Server,
+			   name => !string.IsNullOrWhiteSpace(name),
+			   GetTr("Address"));
 
 
+
+			IObservable<IValidationState> botsNicknameValid =
+				this.WhenAnyValue(x => x.BotsNickname)
+					.Select(name => string.IsNullOrEmpty(name)
+						? new ValidationState(false, GetTr("BotsNickname"))
+
+						: (name.Length <= 14
+								? ValidationState.Valid :
+								new ValidationState(false, GetTr("BotsNickname.Long"))));
+
+			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
+
+			StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+		});
 		#endregion
 
-		HostScreen = hostScreen;
 
 
 
 
-		StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+
+
 
 		#region Configure proxies
 

@@ -200,7 +200,7 @@
               "ru": "Ник слишком длинный"
             }
           }
-          
+
         }
       },
       "Proxy": {
@@ -304,6 +304,30 @@
           }
         }
       }
+    },
+    "Process": {
+      "InfoPanel": {
+        "Server": {
+          "en": "Server: {0}",
+          "ru": "Сервер: {0}"
+        },
+        "Version": {
+          "en": "Version: {0}",
+          "ru": "Версия: {0}"
+        },
+        "NumberOfThreads": {
+          "en": "Number of parallels {0}",
+          "ru": "Количество потоков: {0}"
+        }
+      },
+      "CPS": {
+        "en": "Connection per second",
+        "ru": "Подключения в секунду"
+      },
+      "BotsOnline": {
+        "en": "Online bots",
+        "ru": "Ботов онлайн"
+      }
     }
   },
   "ManagingExtension": {
@@ -340,7 +364,7 @@
       },
       "TypesFound": {
         "en": "Types found",
-        "ru": "найденные типы",
+        "ru": "Найденные типы",
         "StressTest": {
           "en": "Stress test plugins ({0}):",
           "ru": "Стресс тест плагины ({0}):"
