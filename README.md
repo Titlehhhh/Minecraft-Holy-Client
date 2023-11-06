@@ -1,6 +1,6 @@
 [![Discord Banner](https://img.shields.io/badge/discord-join%20chat-46BC99)](https://discord.gg/HVDzx4rCgg)
 
-
+Приложение пока в предварительной версии!
 # Minecraft Holy Client
 
 Удобное, высокопроизводительное, легко масштабируемое и кроссплатформенное приложение для создания и управления ботами Minecraft.
@@ -12,4 +12,22 @@
 
 ## Начать пользоваться
 
-На данный момент программа находится на стадии полного рефакторинга и поэтому пока нет стабильных двоичных файлов. Если Вы хотите попробовать программу или помочь в разработке, то вы можете [здесь ознакомится с инструкцией к сборке](docs/build.md).
+Перейдите по этой [ссылке](https://github.com/Titlehhhh/Minecraft-Holy-Client/releases/tag/preview) и скачайте установщик:
+ - Windows - setup.exe
+ - Linux - в ближайшее время будут бинарники
+ - MacOs - в ближайшее время будут бинарники
+
+## Скриншоты
+
+### Home
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/9ea99c5f-423e-4320-a0e2-a8046abe01cf)
+
+### Bot manager (beta)
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/89b32d18-066b-4f25-96c7-61f567aa7728)
+
+### Stress test
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/23df982b-8f20-44a5-9197-82b43c9d8dfd)
+
+
+
+
