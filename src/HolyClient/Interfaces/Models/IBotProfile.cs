@@ -1,7 +1,7 @@
-﻿using HolyClient.Contracts.Services;
-using HolyClient.Core.StressTest;
+﻿using HolyClient.Common;
+using HolyClient.Contracts.Services;
 using HolyClient.Models;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace HolyClient.Contracts.Models
 		void Start(Serilog.ILogger logger);
 
 
-		Task Initialization(IPluginProvider provider);
+		//Task Initialization(IPluginProvider provider);
 
 
 	}

@@ -1,5 +1,5 @@
 ﻿using HolyClient.ViewModels;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;

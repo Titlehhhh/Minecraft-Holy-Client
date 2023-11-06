@@ -1,43 +1,37 @@
-﻿using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-
-
-namespace HolyClient.Core.Helpers
+﻿namespace HolyClient.Core.Helpers
 {
-    public class MapDataHelper
-    {
-        public static Image<Rgba32> CreateImage(byte[] colors)
-        {
-           
-            Image<Rgba32> image = new(128, 128);
-            
-            for (int x = 0; x < 128; ++x)
-            {
-                for (int y = 0; y < 128; ++y)
-                {
-                    int n = y + x * 128;
-                    int n2 = colors[n] & 255;
-                    if (n2 / 4 == 4)
-                    {
-                        image[x, y] = new Rgba32(0, 0, 0, 0);
-                    }
+	public class MapDataHelper
+	{
+		public static Image<Rgba32> CreateImage(byte[] colors)
+		{
 
-                    int rgb = MaterialColor.MATERIAL_COLORS[n2 / 4].calculateRGBColor(n2 & 3);
+			Image<Rgba32> image = new(128, 128);
 
-                    byte[] values = BitConverter.GetBytes(rgb);
+			for (int x = 0; x < 128; ++x)
+			{
+				for (int y = 0; y < 128; ++y)
+				{
+					int n = y + x * 128;
+					int n2 = colors[n] & 255;
+					if (n2 / 4 == 4)
+					{
+						image[x, y] = new Rgba32(0, 0, 0, 0);
+					}
 
-                    if (!BitConverter.IsLittleEndian)
-                        Array.Reverse(values);
+					int rgb = MaterialColor.MATERIAL_COLORS[n2 / 4].calculateRGBColor(n2 & 3);
 
-                    var color = new Rgba32(values[0], values[1], values[2]);
+					byte[] values = BitConverter.GetBytes(rgb);
 
-                    //Console.WriteLine(color.Name);
-                    image[y, x] = color;
-                }
-            }
-            return image;
-        }
-    }
+					if (!BitConverter.IsLittleEndian)
+						Array.Reverse(values);
+
+					var color = new Rgba32(values[0], values[1], values[2]);
+
+					//Console.WriteLine(color.Name);
+					image[y, x] = color;
+				}
+			}
+			return image;
+		}
+	}
 }

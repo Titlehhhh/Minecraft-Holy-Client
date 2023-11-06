@@ -1,4 +1,4 @@
-﻿using McProtoNet.MultiVersion;
+﻿using McProtoNet;
 using ReactiveUI;
 using System;
 

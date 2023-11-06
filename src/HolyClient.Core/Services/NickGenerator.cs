@@ -1,4 +1,4 @@
-﻿using McProtoNet.MultiVersion.Contracts;
+﻿using McProtoNet.Contracts;
 
 namespace HolyClient.Core.Services
 {

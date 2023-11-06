@@ -1,4 +1,6 @@
 ﻿using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.Resolvers;
 using ReactiveUI;
 using System;
 using System.IO;
@@ -16,7 +18,9 @@ namespace HolyClient.Services
 		public DefaultSuspensionDriver()
 		{
 			resolver = MessagePack.Resolvers.CompositeResolver.Create(
-			   MessagePack.Resolvers.BuiltinResolver.Instance,
+				CompositeResolver.Create(new IMessagePackFormatter[] { HolyClient.StressTest.PluginTypeRefFormatter.Instance }),
+				
+				MessagePack.Resolvers.BuiltinResolver.Instance,
 			   MessagePack.Resolvers.AttributeFormatterResolver.Instance,
 
 			   // replace enum resolver

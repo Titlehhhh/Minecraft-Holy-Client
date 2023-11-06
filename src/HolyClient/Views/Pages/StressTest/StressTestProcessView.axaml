@@ -4,7 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
 			 xmlns:designTime="using:HolyClient.DesignTime"
+			 x:CompileBindings="True"
+			 
 			 xmlns:vm="using:HolyClient.ViewModels"
+			 x:DataType="vm:StressTestProcessViewModel"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HolyClient.Views.Pages.StressTest.StressTestProcessView">
 	<Design.DataContext>
@@ -17,11 +20,15 @@
 				CornerRadius="7"
 				Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
 				<StackPanel Spacing="12">
-					<TextBlock Text="Сервер: example.host"/>
-					<TextBlock Text="Версия: 1.16.5"/>
-					<TextBlock Text="Количество ботов: 500"/>
+					<TextBlock Text="{Binding Host, Converter={TrStringFormatConverter TextId = 'StressTest.Process.InfoPanel.Server'}}"/>
+					<TextBlock Text="{Binding Version, Converter={TrStringFormatConverter TextId = 'StressTest.Process.InfoPanel.Version'}}"/>
+					<TextBlock Text="{Binding NumberOfBots, Converter={TrStringFormatConverter TextId = 'StressTest.Process.InfoPanel.NumberOfThreads'}}"/>
 
-					<Button Width="200" HorizontalAlignment="Center" Content="Отмена" Command="{Binding CancelCommand}"/>
+					<Button 
+						Width="200"
+						HorizontalAlignment="Center"
+						Content="{Tr Cancel}"
+						Command="{Binding CancelCommand}"/>
 				</StackPanel>
 			</Border>
 			<Border 
@@ -68,7 +75,7 @@
 					Padding="10"
 					CornerRadius="7"
 					Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
-					<TextBlock  Text="Подключения в секунду"/>
+					<TextBlock Text="Подключения в секунду"/>
 				</Border>
 
 				<Border

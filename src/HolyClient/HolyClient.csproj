@@ -13,6 +13,14 @@
 
   
   <ItemGroup>
+    <AvaloniaXaml Remove="Models\StressTest\**" />
+    <Compile Remove="Models\StressTest\**" />
+    <EmbeddedResource Remove="Models\StressTest\**" />
+    <None Remove="Models\StressTest\**" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
     <None Remove="lang\words.loc.json" />
   </ItemGroup>
 
@@ -35,6 +43,8 @@
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.2" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.2" />
     <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.1" />
+    <PackageReference Include="bodong.Avalonia.PropertyGrid" Version="11.0.4.1" />
+   
     <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0" />
     <PackageReference Include="DialogHost.Avalonia" Version="0.7.5" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.0.4" />
@@ -55,12 +65,16 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
     <PackageReference Include="System.ComponentModel.Composition.Registration" Version="7.0.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" />
+
+	  <PackageReference Include="McProtoNet" Version="1.8.0-experimental.179" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HolyClient.Common\HolyClient.Common.csproj" />
     <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
     <ProjectReference Include="..\HolyClient.SDK\HolyClient.SDK.csproj" />
-    <ProjectReference Include="..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
+    <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
+    
   </ItemGroup>
 
   <ItemGroup>
@@ -70,8 +84,8 @@
     <Compile Update="Views\Pages\BotManager\EmptyProfilesView.axaml.cs">
       <DependentUpon>EmptyProfilesView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\ManagingExtensions\AssembliesView.axaml.cs">
-      <DependentUpon>AssembliesView.axaml</DependentUpon>
+    <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
+      <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\StressTest\Dialogs\ImportProxyDialogContent.axaml.cs">
       <DependentUpon>ImportProxyDialogContent.axaml</DependentUpon>
@@ -80,7 +94,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
-    <Folder Include="Models\StressTest\" />
     <Folder Include="Views\Pages\StressTest\Behavior\" />
   </ItemGroup>
 

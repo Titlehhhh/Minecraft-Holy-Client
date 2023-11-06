@@ -2,10 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using Avalonia.Media.Fonts;
 using Avalonia.Metadata;
-using Avalonia.Platform;
 using Avalonia.Styling;
 using HolyClient.AppState;
 using HolyClient.Localization;
@@ -19,7 +16,7 @@ using System;
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "HolyClient.CustomControls")]
 namespace HolyClient
 {
-	
+
 	public partial class App : Application
 	{
 
@@ -36,8 +33,8 @@ namespace HolyClient
 
 		public override void OnFrameworkInitializationCompleted()
 		{
-			
-			
+
+
 
 			MainViewModel mainViewModel = new();
 			Locator.CurrentMutable.RegisterConstant<MainViewModel>(mainViewModel);

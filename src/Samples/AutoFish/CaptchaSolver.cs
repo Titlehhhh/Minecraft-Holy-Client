@@ -13,7 +13,7 @@ namespace AutoFish
 	{
 		public override void Activate(CompositeDisposable d)
 		{
-			
+
 		}
 	}
 }

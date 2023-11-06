@@ -7,14 +7,17 @@
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:DataType="vm:StressTestConfigurationViewModel"
 			 x:CompileBindings="True"
+			 xmlns:pgc="using:Avalonia.PropertyGrid.Controls"
 			 xmlns:sg="using:SpacedGridControl.Avalonia"
 			 xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
 			 xmlns:bhvs="using:HolyClient.Behaviors"
 			 xmlns:proxy="using:QuickProxyNet"
+			 xmlns:core="using:HolyClient.Core.Infrastructure"
+			 xmlns:services="using:HolyClient.Services"
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 xmlns:converters="using:HolyClient.Converters"
-			 xmlns:minecraft="using:McProtoNet.MultiVersion"
+			 xmlns:minecraft="using:McProtoNet"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 x:Class="HolyClient.Views.Pages.StressTest.StressTestConfigurationView">
 	<UserControl.Resources>
@@ -26,7 +29,11 @@
 
 
 		<StackPanel Spacing="10">
-			<TextBox Text="{Binding Server}"  HorizontalAlignment="Center" Width="200" UseFloatingWatermark="True" Watermark="Адрес">
+			<TextBox Text="{Binding Server}" 
+					 HorizontalAlignment="Center"
+					 Width="200" 
+					 UseFloatingWatermark="True" 
+					 Watermark="{Tr StressTest.Configuration.GeneralSettings.Address}">
 				<TextBox.Styles>
 					<Style Selector="DataValidationErrors">
 						<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
@@ -47,7 +54,7 @@
 		<TabControl Padding="0,10,10,5" Grid.Row="1">
 
 
-			<TabItem Header="Основные настройки" FontSize="15">
+			<TabItem Header="{Tr StressTest.Configuration.GeneralSettings}" FontSize="15">
 
 				<ScrollViewer>
 					<StackPanel Spacing="15">
@@ -56,27 +63,31 @@
 
 
 							<StackPanel Spacing="10">
-								<TextBlock Text="Ники ботам" FontSize="15"/>
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.BotsNicknames}" FontSize="15"/>
 								<TextBox
 									Text="{Binding BotsNickname}"
 									
 									HorizontalAlignment="Left"
 									MaxHeight="180"
 									Width="200">
-
+									<TextBox.Styles>
+										<Style Selector="DataValidationErrors">
+											<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+										</Style>
+									</TextBox.Styles>
 								</TextBox>
 							</StackPanel>
 						</Border>
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
-								<TextBlock Text="Количество ботов" FontSize="15"/>
-								<ui:NumberBox Minimum="1" Value="{Binding NumberOfBots}" Width="200" HorizontalAlignment="Left"/>
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.NumberOfBots}" FontSize="15"/>
+								<ui:NumberBox Minimum="1" Value="{Binding NumberOfBots}" SmallChange="10" SpinButtonPlacementMode="Inline" Width="200" HorizontalAlignment="Left"/>
 							</StackPanel>
 
 						</Border>
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
-								<TextBlock Text="Версия" FontSize="15"/>
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.Version}" FontSize="15"/>
 								<ComboBox SelectedItem="{Binding Version}" ItemsSource="{Binding SupportedVersions}">
 									<ComboBox.ItemTemplate>
 										<DataTemplate DataType="minecraft:MinecraftVersion">
@@ -85,14 +96,22 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 							</StackPanel>
+						</Border>
 
+						<Border IsVisible="{Binding CurrentBehavior}" Classes="SettingItem">
+							<StackPanel Spacing="10">
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.BehaviorSettings}" FontSize="15"/>
+								<pgc:PropertyGrid SelectedObject="{Binding CurrentBehavior}"/>
+							</StackPanel>
 						</Border>
 
 					</StackPanel>
 
 				</ScrollViewer>
 			</TabItem>
-			<TabItem  Header="Прокси" FontSize="15">
+			
+			
+			<TabItem  Header="{Tr StressTest.Configuration.Proxy}" FontSize="15">
 				<ui:FABorder BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
 							 CornerRadius="{DynamicResource ControlCornerRadius}"
@@ -113,11 +132,11 @@
 
 
 							<DataGrid.Columns>
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="Тип"  Binding="{Binding Type}"/>
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="Хост" Binding="{Binding Host}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="Порт" Binding="{Binding Port}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="Логин" Binding="{Binding Login, FallbackValue='Нету'}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="Пароль" Binding="{Binding Password, FallbackValue='Нету'}" />
+								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Type}"  Binding="{Binding Type}"/>
+								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Host}" Binding="{Binding Host}" />
+								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Port}" Binding="{Binding Port}" />
+								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Login}" Binding="{Binding Login}" />
+								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Password}" Binding="{Binding Password}" />
 							</DataGrid.Columns>
 						</DataGrid>
 
@@ -140,30 +159,40 @@
 								<StackPanel Margin="0,5,0,0" Spacing="10">
 									<Button
 										Command="{Binding ImportProxyCommand}"
-										Content="Импорт"
+										Content="{Tr StressTest.Configuration.Proxy.Import}"
 										HorizontalAlignment="Stretch"/>
 
 									<Button
 										Command="{Binding ExportProxyCommand}"
-										Content="Экспорт"
+										Content="{Tr StressTest.Configuration.Proxy.Export}"
 										HorizontalAlignment="Stretch"/>
 									<Button
 										Command="{Binding DeleteProxyCommand}"
 										
-										Content="Удалить"
+										Content="{Tr StressTest.Configuration.Proxy.Delete}"
 										HorizontalAlignment="Stretch"/>
-									<Button Command="{Binding DeleteAllProxyCommand}" Content="Удалить все"  HorizontalAlignment="Stretch"/>
+									
+									<Button 
+										Command="{Binding DeleteAllProxyCommand}" 
+										Content="{Tr StressTest.Configuration.Proxy.DeleteAll}"  
+										HorizontalAlignment="Stretch"/>
 								</StackPanel>
 							</StackPanel>
 						</ui:FABorder>
 					</Grid>
 				</ui:FABorder>
 			</TabItem>
-			<TabItem IsSelected="True" Header="Поведение" FontSize="15">
-				<sg:SpacedGrid ColumnDefinitions="*,*" RowDefinitions="Auto,*,Auto">
+			<TabItem Header="{Tr StressTest.Configuration.Behaviors}" FontSize="15">
+				<sg:SpacedGrid
+					RowSpacing="10"
+					
+					RowDefinitions="Auto,*">
 
-					<TextBlock Grid.Column="0" Grid.Row="0" Text="Доступные поведения"/>
-					<TextBlock Grid.Column="1" Grid.Row="0" Text="Текущее поведение"/>
+					<TextBlock
+						VerticalAlignment="Center"
+						Grid.Column="0"
+						Text="{Tr StressTest.Configuration.Behaviors.AvailableBehaviors}"/>
+
 
 					<Border
 						CornerRadius="7"
@@ -171,9 +200,83 @@
 						Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
 						Grid.Row="1"
 						Grid.Column="0">
-						
+						<Grid ColumnDefinitions="*,4,350">
+
+							<ListBox Name="BehaviorsList" SelectedItem="{Binding SelectedBehavior}" ItemsSource="{Binding AvailableBehaviors}">
+								<ListBox.ItemTemplate>
+									<DataTemplate DataType="vm:StressTestPluginViewModel">
+										<DockPanel LastChildFill="False">
+											<TextBlock Text="{Binding Name}" DockPanel.Dock="Left"/>
+											<TextBlock IsVisible="{Binding IsInstalled}" DockPanel.Dock="Right" Text="{Tr StressTest.Configuration.Behaviors.Current}" Foreground="Gray" FontStyle="Italic"/>
+										</DockPanel>
+										
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+							<GridSplitter Grid.Column="1" Background="Transparent"/>
+
+							<Border
+								Name="OptionsHost"
+								Margin="0,0,10,10"
+								Padding="20,20,20,20"
+								CornerRadius="{DynamicResource OverlayCornerRadius}"
+								Grid.Column="2"
+								Grid.Row="1"
+								Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+								BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+								BorderThickness="1">
+
+								<Panel>
+									<TextBlock
+										IsVisible="{Binding SelectedBehavior, Converter={x:Static ObjectConverters.IsNull}}"
+										FontStyle="Italic"
+										Foreground="Gray"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Text="{Tr StressTest.Configuration.Behaviors.NoSelectBehavior}"
+										TextWrapping="WrapWithOverflow"/>
+									<ContentControl
+										IsVisible="{Binding SelectedBehavior, Converter={x:Static ObjectConverters.IsNotNull}}"
+										Content="{Binding SelectedBehavior}">
+
+										<ContentControl.ContentTemplate>
+											<DataTemplate DataType="vm:StressTestPluginViewModel">
+												<ScrollViewer>
+													<StackPanel>
+														<TextBlock
+															FontWeight="Bold"
+															Text="{Binding Name}"/>
+														<TextBlock
+															Margin="0,20,0,0"
+															FontWeight="Bold"
+															Text="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Assembly}"/>
+														<TextBlock
+															Text="{Binding Assembly}"/>
+														<TextBlock
+															Margin="0,10,0,0"
+															FontWeight="Bold"
+															Text="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Authors}"/>
+														<TextBlock
+															Text="{Binding Authors}"/>
+														<TextBlock
+															Margin="0,10,0,0"
+															FontWeight="Bold"
+															Text="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Description}"/>
+														<TextBlock Text="{Binding Description}"/>
+
+														<Button 
+															Margin="0,10,0,0"
+															Content="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Put}"
+															Command="{Binding InstallCommand}"/>
+													</StackPanel>
+												</ScrollViewer>
+											</DataTemplate>
+										</ContentControl.ContentTemplate>
+									</ContentControl>
+								</Panel>
+							</Border>
+						</Grid>
 					</Border>
-					
 				</sg:SpacedGrid>
 			</TabItem>
 		</TabControl>

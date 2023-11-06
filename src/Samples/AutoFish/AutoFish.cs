@@ -1,12 +1,9 @@
-﻿using HolyClient.Core.Models.BotManager;
-using HolyClient.SDK;
-using Serilog.Core;
-using System.ComponentModel.Composition;
+﻿using HolyClient.SDK;
 using System.Reactive.Disposables;
 
 namespace AutoFish
 {
-	
+
 	public class AutoFish : BotPlugin
 	{
 		public override void Activate(CompositeDisposable d)

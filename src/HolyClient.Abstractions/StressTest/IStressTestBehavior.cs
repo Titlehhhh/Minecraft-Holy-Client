@@ -1,21 +1,10 @@
-﻿using McProtoNet.MultiVersion;
-using System.Reactive;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 
-namespace HolyClient.Abastractions.StressTest
+namespace HolyClient.Abstractions.StressTest
 {
-    /// <summary>
-    /// Интерфейс представляющий поведение для стресс-теста
-    /// </summary>
-    public interface IStressTestBehavior
-    {
-        public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots,CancellationToken cancellationToken);
-    }
+	public interface IStressTestBehavior
+	{
 
-
-
-
-
-
-
+		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken);
+	}
 }

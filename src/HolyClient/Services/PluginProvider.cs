@@ -1,78 +1,58 @@
 ﻿using DynamicData;
 using HolyClient.Contracts.Services;
+using HolyClient.Core.Infrastructure;
 using HolyClient.LoadPlugins;
 using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
-using HolyClient.SDK;
 using Splat;
+using System;
+using System.Linq;
 
 namespace HolyClient.Services
 {
 	public class PluginProvider : IPluginProvider
 	{
-		private SourceCache<IBotPluginCreater, BotPluginReference> _availableBotPlugins = new(x => x.Token);
-		public ISourceCache<IBotPluginCreater, BotPluginReference> AvailableBotPlugins => _availableBotPlugins;
-
 		public PluginProvider()
 		{
 
 			var extensionManager = Locator.Current.GetService<ExtensionManager>();
 
+			foreach (var assembly in extensionManager.AssemblyManager.Assemblies.Items)
+			{
+				CreatePluginSources(assembly);
+			}
+
+			extensionManager.AssemblyManager.Assemblies
+				.Connect()
+				.OnItemAdded(CreatePluginSources)
+				.OnItemRemoved(OnRemovedAssembly)
+				.Subscribe();
+
 		}
 
-		private void OnAddedAssembly(AssemblyWrapper assembly)
+		private void OnRemovedAssembly(IAssemblyFile assembly)
 		{
-			if (assembly.CurrentState == PluginState.Loaded)
+			var keys = assembly.StressTestPlugins
+				.Select(x => new PluginTypeReference(assembly.Name, x.FullName));
+
+
+			_stressTestPlugins.RemoveKeys(keys);
+		}
+
+		private void CreatePluginSources(IAssemblyFile assembly)
+		{
+			foreach (Type stressTestPlugin in assembly.StressTestPlugins)
 			{
+				PluginTypeReference reference = new(assembly.Name, stressTestPlugin.FullName);
+
+				var source = new PluginSource(stressTestPlugin, reference);
+
+				_stressTestPlugins.AddOrUpdate(source);
 
 			}
-			else
-			{
-
-			}
 		}
-		private void OnRemovedAssembly(AssemblyWrapper assembly)
-		{
-
-		}
-
-		public IBotPluginCreater GetPluginCreaterFromReference(BotPluginReference reference)
-		{
-			var pl = this.AvailableBotPlugins.Lookup(reference);
-			if (pl.HasValue)
-			{
-				return pl.Value;
-			}
-			return new NotLoadedBotPluginCreater(reference);
-		}
+		private SourceCache<IPluginSource, PluginTypeReference> _stressTestPlugins = new(x => x.Reference);
+		public IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins => _stressTestPlugins;
 	}
-
-	public class NotLoadedBotPluginCreater : IBotPluginCreater
-	{
-		private BotPluginReference _ref;
-
-		public NotLoadedBotPluginCreater(BotPluginReference @ref)
-		{
-			_ref = @ref;
-		}
-
-		public BotPluginReference Token => _ref;
-
-		public string Name => _ref.Name;
-
-		public string Assembly => _ref.Assembly;
-
-		public string AssemblyFile => "Unkown";
-
-
-
-		public BotPlugin Create()
-		{
-			return null;
-		}
-	}
-
-
-
 }

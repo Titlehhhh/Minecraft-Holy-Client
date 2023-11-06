@@ -31,7 +31,7 @@ public class BotPluginStore : IBotPluginStore
 		_stateRef.Add(plugin.Token);
 		try
 		{
-			bot.AddPlugin(plugin.Create());
+			//bot.AddPlugin(plugin.Create());
 		}
 		catch (Exception ex)
 		{
@@ -46,16 +46,16 @@ public class BotPluginStore : IBotPluginStore
 		return _plugins.ContainsKey(token);
 	}
 
-	public Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references)
-	{
-		return Task.Run(() =>
-		{
-			foreach (var reference in references)
-			{
-				this._plugins.Add(reference, pluginProvider.GetPluginCreaterFromReference(reference));
-			}
-		});
-	}
+	//public Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references)
+	//{
+	//	return Task.Run(() =>
+	//	{
+	//		foreach (var reference in references)
+	//		{
+	//			this._plugins.Add(reference, pluginProvider.GetPluginCreaterFromReference(reference));
+	//		}
+	//	});
+	//}
 
 	public void RemovePlugin(BotPluginReference token)
 	{

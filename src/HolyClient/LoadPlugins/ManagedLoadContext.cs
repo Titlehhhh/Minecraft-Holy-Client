@@ -176,19 +176,24 @@ namespace HolyClient.LoadPlugins
 
 		public Assembly LoadAssemblyFromFilePath(string path)
 		{
-			if (!_loadInMemory)
-			{
-				return LoadFromAssemblyPath(path);
-			}
+			//if (!_loadInMemory)
+			//{
+				
+			//	return LoadFromAssemblyPath(path);
+			//}
 
-			using var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-			var pdbPath = Path.ChangeExtension(path, ".pdb");
-			if (File.Exists(pdbPath))
+			using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
 			{
-				using var pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-				return LoadFromStream(file, pdbFile);
+				var pdbPath = Path.ChangeExtension(path, ".pdb");
+				if (File.Exists(pdbPath))
+				{
+					using (var pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+					{
+						return LoadFromStream(file, pdbFile);
+					}
+				}
+				return LoadFromStream(file);
 			}
-			return LoadFromStream(file);
 
 		}
 

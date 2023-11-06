@@ -1,6 +1,6 @@
 ﻿using HolyClient.Contracts.Models;
-using HolyClient.Core.StressTest;
 using HolyClient.Models;
+using HolyClient.StressTest;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -26,7 +26,7 @@ public class MainState : ReactiveObject
 
 	[Reactive]
 	[Key(3)]
-	public IStressTest StressTestState { get; set; } = new StressTest();
+	public IStressTest StressTestState { get; set; } = new HolyClient.StressTest.StressTest();
 
 
 	[Reactive]

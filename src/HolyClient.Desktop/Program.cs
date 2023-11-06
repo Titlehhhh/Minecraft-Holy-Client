@@ -1,22 +1,13 @@
 ﻿using Avalonia;
-using Avalonia.Media;
-using Avalonia.Media.Fonts;
-using Avalonia.Platform;
+using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
 using HolyClient.AppState;
 using HolyClient.Services;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Loader;
-using System.Threading;
+using System.Diagnostics.Metrics;
 
 namespace HolyClient.Desktop
 {
@@ -25,6 +16,7 @@ namespace HolyClient.Desktop
 		[STAThread]
 		public static void Main(string[] args)
 		{
+			
 
 			BuildAvaloniaApp()
 			.StartWithClassicDesktopLifetime(args);
@@ -34,8 +26,7 @@ namespace HolyClient.Desktop
 		{
 			return AppBuilder.Configure<App>()
 				   .UsePlatformDetect()
-				   .LogToTrace()
-
+			.LogToTrace()
 				   .AfterSetup(x =>
 				   {
 					   var lifetime = App.Current.ApplicationLifetime;
@@ -51,5 +42,5 @@ namespace HolyClient.Desktop
 		}
 
 	}
-	
+
 }

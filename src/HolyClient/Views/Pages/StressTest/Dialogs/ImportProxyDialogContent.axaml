@@ -9,14 +9,14 @@
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
              x:Class="HolyClient.Views.Pages.StressTest.Dialogs.ImportProxyDialogContent">
 	<StackPanel>
-		<TextBlock Text="Путь"/>
+		<TextBlock Text="{Tr StressTest.Configuration.Proxy.Dialog.Path}"/>
 		<Grid Margin="0,4,0,0" ColumnDefinitions="*, Auto">
 			<TextBox Text="{Binding FilePath}"/>
 			<Button x:Name="OpenFileButton" Click="OpenFileButton_Click" Margin="4,0,0,0" Grid.Column="1" Theme="{StaticResource TransparentButton}">
 				<ui:SymbolIcon Symbol="More" FontSize="18" />
 			</Button>
 		</Grid>
-		<TextBlock Margin="0,10,0,0" Text="Тип прокси"/>
+		<TextBlock Margin="0,10,0,0" Text="{Tr StressTest.Configuration.Proxy.Dialog.ProxyType}"/>
 		<ComboBox Margin="0,4,0,0" SelectedItem="{Binding Type}" ItemsSource="{Binding Types}"/>
 	</StackPanel>
 </UserControl>

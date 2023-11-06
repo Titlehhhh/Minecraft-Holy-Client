@@ -1,24 +1,47 @@
 ﻿using DynamicData;
+using HolyClient.Abstractions.StressTest;
 using HolyClient.Commands;
-using HolyClient.Core.StressTest;
-
+using HolyClient.Common;
+using HolyClient.Core.Infrastructure;
+using HolyClient.Localization;
+using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
-using McProtoNet.MultiVersion;
+using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Validation.Extensions;
+using ReactiveUI.Validation.Helpers;
+using ReactiveUI.Validation.States;
+using Splat;
+using Stateless.Graph;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
-public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewModel, IActivatableViewModel
+public class StressTestConfigurationViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
 {
-	[Reactive]
-	public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
 
+	private static string GetTr(string key)
+	{
+		return $"StressTest.Configuration.GeneralSettings.Validation.{key}";
+	}
+
+	public string? UrlPathSegment => throw new NotImplementedException();
+	public IScreen HostScreen { get; }
+	public ViewModelActivator Activator { get; } = new();
+
+
+	[Reactive]
+	public ICommand StartCommand { get; private set; }
+
+
+	#region General Settings
 	[Reactive]
 	public string Server { get; set; }
 	[Reactive]
@@ -26,27 +49,64 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 	[Reactive]
 	public int NumberOfBots { get; set; }
 
-	[Reactive]
-	public bool HasBehavior { get; set; }
+	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
+	[Reactive]
+	public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
+
+	#endregion
+
+	#region Behavior
+
+
+	[Reactive]
+	public StressTestPluginViewModel? SelectedBehavior { get; set; }
+
+	[Reactive]
+	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
+
+
+	#endregion
+
+	[Reactive]
+	public IStressTestBehavior? CurrentBehavior { get; private set; }
+
+	[Reactive]
+	public IPluginSource? InstalledBehavior { get; private set; }
+	#region Proxy
 
 	public ReadOnlyObservableCollection<ProxyInfo> _proxies;
 
 	public ReadOnlyObservableCollection<ProxyInfo> Proxies => _proxies;
+	public Interaction<ImportProxyViewModel, Unit> ImportProxyDialog { get; } = new();
 
-	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
+	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
+	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
 
-	public ICommand StartCommand { get; }
+	[Reactive]
+	public ICommand ImportProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand ExportProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand DeleteProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand DeleteAllProxyCommand { get; private set; }
+
 
 
 	[Reactive]
-	public ICommand AddBehaviorCommand { get; private set; }
+	public ProxyInfo? SelectedProxy { get; set; }
+
 	[Reactive]
-	public ICommand RemoveBehaviorCommand { get; private set; }
+	public ISourceList<ProxyInfo> SelectedProxies { get; set; } = new SourceList<ProxyInfo>();
+
+	#endregion
 
 	public StressTestConfigurationViewModel(IScreen hostScreen, IStressTest state)
 	{
 
+
+		#region Bind to state
 		this.Server = state.Server;
 		this.Version = state.Version;
 		this.BotsNickname = state.BotsNickname;
@@ -63,20 +123,50 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 		this.WhenAnyValue(x => x.NumberOfBots)
 			.BindTo(state, x => x.NumberOfBots);
-
-
-
+		#endregion
 
 		HostScreen = hostScreen;
+		#region Configure validation
 
 
-
-		this.WhenActivated( d =>
+		this.WhenActivated(d =>
 		{
 
 
 
+			this.ValidationRule(
+			   viewModel => viewModel.Server,
+			   name => !string.IsNullOrWhiteSpace(name),
+			   GetTr("Address"));
 
+
+
+			IObservable<IValidationState> botsNicknameValid =
+				this.WhenAnyValue(x => x.BotsNickname)
+					.Select(name => string.IsNullOrEmpty(name)
+						? new ValidationState(false, GetTr("BotsNickname"))
+
+						: (name.Length <= 14
+								? ValidationState.Valid :
+								new ValidationState(false, GetTr("BotsNickname.Long"))));
+
+			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
+
+			StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+		});
+		#endregion
+
+
+
+
+
+
+
+
+		#region Configure proxies
+
+		this.WhenActivated(d =>
+		{
 			state.Proxies.Connect()
 				.ObserveOn(RxApp.MainThreadScheduler)
 				.Transform(x => x)
@@ -85,12 +175,7 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 				.Subscribe()
 				.DisposeWith(d);
 			this.RaisePropertyChanged(nameof(Proxies));
-
-
 		});
-
-
-		StartCommand = new StartStressTestCommand(hostScreen, state);
 
 		this.WhenActivated(d =>
 		{
@@ -116,9 +201,6 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 			}, canExecuteDeleteAll)
 			.DisposeWith(d);
 
-
-
-
 			DeleteProxyCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
 
@@ -133,57 +215,45 @@ public class StressTestConfigurationViewModel : ReactiveObject, IRoutableViewMod
 
 			}, canExecuteDeleteAll).DisposeWith(d);
 
-
-
-
-			AddBehaviorCommand = ReactiveCommand.Create(() =>
-			{
-				HasBehavior = true;
-			}).DisposeWith(d);
-			RemoveBehaviorCommand = ReactiveCommand.Create(() =>
-			{
-				HasBehavior = false;
-			}).DisposeWith(d);
-
-
 		});
+
+
+
+		#endregion
+
+		#region Configure plugins
+
+		Console.WriteLine("CurrBeh: " + state.Behavior);
+
+		this.CurrentBehavior = state.Behavior;
+
+		state.WhenAnyValue(x => x.Behavior)
+			.BindTo(this, x => x.CurrentBehavior);
+
+
+
+
+		var pluginProvider = Locator.Current.GetService<IPluginProvider>();
+
+		pluginProvider.AvailableStressTestPlugins
+			.Connect()
+			.Transform(x => new StressTestPluginViewModel(x, state))
+			.Bind(out var plugins)
+			.DisposeMany()
+			.Subscribe();
+
+		AvailableBehaviors = plugins;
+
+
+		SelectedBehavior = plugins.FirstOrDefault();
+
+
+
+
+		#endregion
 	}
 
 
-	#region Proxy
 
 
-	public Interaction<ImportProxyViewModel, Unit> ImportProxyDialog { get; } = new();
-
-	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
-	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
-
-	[Reactive]
-	public ICommand ImportProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand ExportProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteAllProxyCommand { get; private set; }
-
-
-
-	[Reactive]
-	public ProxyInfo? SelectedProxy { get; set; }
-
-	[Reactive]
-	public ISourceList<ProxyInfo> SelectedProxies { get; set; } = new SourceList<ProxyInfo>();
-
-	#endregion
-
-
-	public string? UrlPathSegment => throw new NotImplementedException();
-
-	public IScreen HostScreen { get; }
-
-	public ViewModelActivator Activator { get; } = new();
 }
-
-
-

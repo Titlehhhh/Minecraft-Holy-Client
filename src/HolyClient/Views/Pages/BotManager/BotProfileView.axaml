@@ -5,7 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:des="using:HolyClient.DesignTime"
 			 xmlns:vm="using:HolyClient.ViewModels"
-			 xmlns:minecraft="using:McProtoNet.MultiVersion"
+			 xmlns:minecraft="using:McProtoNet"
 			 x:CompileBindings="True"
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"

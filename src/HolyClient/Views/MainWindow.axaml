@@ -6,7 +6,8 @@
         x:Class="HolyClient.Views.MainWindow"
         Icon="/Assets/icon.ico"
 		xmlns:reactiveUi="http://reactiveui.net"
-		x:Name="RootWin"		
+		x:Name="RootWin"
+		TransparencyLevelHint="AcrylicBlur"
         Title="Minecraft Holy Client">
 	
 

@@ -1,4 +1,4 @@
-﻿using HolyClient.Abastractions.StressTest;
+﻿using HolyClient.Abstractions.StressTest;
 
 
 namespace HolyClient.Contracts;

@@ -1,6 +1,7 @@
 ﻿using Avalonia.Threading;
 using HolyClient.Commands;
-using HolyClient.Core.StressTest;
+using HolyClient.Converters;
+using HolyClient.StressTest;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -16,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Windows.Input;
 
 
@@ -26,6 +26,15 @@ namespace HolyClient.ViewModels;
 
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
+	#region Info Panel
+	[Reactive]
+	public string Host { get; private set; }
+	[Reactive]
+	public string Version { get; private set; }
+	[Reactive]
+	public string NumberOfBots { get; private set; }
+	#endregion
+
 	#region Properties
 
 	[Reactive]
@@ -92,6 +101,11 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest)
 	{
 
+		Host = stressTest.Server;
+		Console.WriteLine("Server: " +stressTest.Server);
+		Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
+		NumberOfBots = stressTest.NumberOfBots.ToString();
+
 
 		CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
 
@@ -100,7 +114,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		this.WhenActivated(d =>
 		{
-			System.Console.WriteLine("ActivateVM");
+
 
 			StressTestMetrik currentData = new();
 			stressTest.Metrics.Subscribe(x =>
@@ -122,20 +136,20 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 					}
 					TimeSpan delta = DateTime.UtcNow - date.Value;
 
-					
 
-						_cpsPoints.Add(new TimeSpanPoint(delta, metrik.CPS));
-						if (_cpsPoints.Count >= maxPoints)
-						{
-							_cpsPoints.RemoveAt(0);
-						}
 
-						_botsOnlinePoints.Add(new TimeSpanPoint(delta, metrik.BotsOnline));
-						if (_botsOnlinePoints.Count >= maxPoints)
-						{
-							_botsOnlinePoints.RemoveAt(0);
-						}
-				
+					_cpsPoints.Add(new TimeSpanPoint(delta, metrik.CPS));
+					if (_cpsPoints.Count >= maxPoints)
+					{
+						_cpsPoints.RemoveAt(0);
+					}
+
+					_botsOnlinePoints.Add(new TimeSpanPoint(delta, metrik.BotsOnline));
+					if (_botsOnlinePoints.Count >= maxPoints)
+					{
+						_botsOnlinePoints.RemoveAt(0);
+					}
+
 
 				}
 				catch (Exception ex)

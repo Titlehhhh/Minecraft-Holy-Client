@@ -1,6 +1,7 @@
 ﻿using DynamicData;
 using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
+using HolyClient.Core.Infrastructure;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -52,12 +53,13 @@ public class BotManager : ReactiveObject, IBotManager
 
 	public async Task Initialization()
 	{
-		var provider = Locator.Current.GetService<IPluginProvider>();
+		return;
+		//var provider = Locator.Current.GetService<IPluginProvider>();
 
-		foreach (var profile in this.ProfilesStates)
-		{
-			await profile.Initialization(provider);
-		}
+		//foreach (var profile in this.ProfilesStates)
+		//{
+		//	await profile.Initialization(provider);
+		//}
 	}
 
 	public void RemoveBot(Guid id)

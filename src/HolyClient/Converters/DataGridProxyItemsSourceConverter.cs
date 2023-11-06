@@ -1,6 +1,6 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Data.Converters;
-using HolyClient.Core.StressTest;
+using HolyClient.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

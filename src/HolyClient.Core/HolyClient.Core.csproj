@@ -3,9 +3,15 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>		
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Nullable>enable</Nullable>	
+		
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Logging\**" />
+	  <EmbeddedResource Remove="Logging\**" />
+	  <None Remove="Logging\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
@@ -20,14 +26,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Logging\" />
 		<Folder Include="Services\Implementation\" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
 	</ItemGroup>
-	<Import Project="..\LocalNuget.targets"/>
-
-
+	
 </Project>

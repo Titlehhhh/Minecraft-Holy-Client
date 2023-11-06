@@ -4,16 +4,18 @@ using Avalonia.Threading;
 using HolyClient.AppState;
 using HolyClient.Contracts.Models;
 using HolyClient.Contracts.Services;
-using HolyClient.Core.StressTest;
+using HolyClient.Core.Infrastructure;
 using HolyClient.Localization;
 using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
 using HolyClient.Services;
+using HolyClient.StressTest;
 using HolyClient.ViewModels;
 using HolyClient.Views;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -40,7 +42,7 @@ namespace HolyClient
 			   RxApp.SuspensionHost.CreateNewAppState = () => new MainState();
 			   RxApp.SuspensionHost.SetupDefaultSuspendResume();
 
-			   progress.OnNext("Загрузка состояния");
+			   progress.OnNext("Bootstrap.LoadingState.LoadState");
 
 			   startApp.OnNext(Unit.Default);
 
@@ -48,7 +50,7 @@ namespace HolyClient
 
 			   Loc.Instance.CurrentLanguage = state.SettingsState.Language;
 
-			   progress.OnNext("Загрузка плагинов");
+			   progress.OnNext("Bootstrap.LoadingState.LoadPlugins");
 
 
 
@@ -61,12 +63,18 @@ namespace HolyClient
 
 			   Locator.CurrentMutable.RegisterConstant<ExtensionManager>(extensionManager);
 
+			   Locator.CurrentMutable.RegisterConstant<IAssemblyManager>(extensionManager.AssemblyManager);
+
 			   Locator.CurrentMutable.RegisterConstant<IPluginProvider>(new PluginProvider());
 
 
 			   await state.BotManagerState.Initialization();
 
-			   progress.OnNext("Почти готово");
+
+
+			   await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
+
+			   progress.OnNext("Bootstrap.LoadingState.AlmostDone");
 
 
 			   RegisterAppServices();
@@ -75,7 +83,7 @@ namespace HolyClient
 
 			   RegisterViewModels();
 
-			   progress.OnNext("Готово");
+			   progress.OnNext("Bootstrap.LoadingState.Complete");
 
 
 
@@ -92,13 +100,22 @@ namespace HolyClient
 
 				   Locator.CurrentMutable.RegisterConstant<INotificationManager>(notificationManager);
 
+				   List<IAssemblyFile> openFiles = new();
+
 				   extensionManager.AssemblyManager.AssemblyFileUpdated.ObserveOn(RxApp.MainThreadScheduler).Subscribe(x =>
 				   {
+					   if (openFiles.Contains(x))
+						   return;
 
+					   openFiles.Add(x);
 
 					   notificationManager.Show(new Avalonia.Controls.Notifications.Notification(
-						   "Менеджер сборок",
-						   $"Сборка {x.NameWithExtension} была обновлена"));
+						   Loc.Tr("ManagingExtension.AssemblyUpdatedNotification.Title"),
+						   string.Format(Loc.Tr("ManagingExtension.AssemblyUpdatedNotification"), x.Name),
+						   onClose: () =>
+						   {
+							   openFiles.Remove(x);
+						   }));
 
 
 
@@ -144,7 +161,7 @@ namespace HolyClient
 
 			Locator.CurrentMutable.RegisterConstant<INugetClient>(new NugetClient());
 
-			
+
 
 			Locator.CurrentMutable.RegisterConstant<IProxyLoaderService>(new ProxyLoaderService());
 

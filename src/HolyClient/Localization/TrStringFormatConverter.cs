@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 using System;
 using System.Globalization;
 
-namespace HolyClient.Localization.Converters
+namespace HolyClient.Localization
 {
 	public class TrStringFormatConverter : IValueConverter
 	{

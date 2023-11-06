@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
 using DynamicData;
-using HolyClient.Core.StressTest;
+using HolyClient.Common;
 using System.Linq;
 
 namespace HolyClient.Behaviors

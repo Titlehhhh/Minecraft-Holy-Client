@@ -22,7 +22,7 @@ namespace HolyClient.Views
 		public ApplicationSplashScreen(Window owner)
 		{
 			_owner = owner;
-			
+
 
 
 			SplashScreenContent = new SplashContent

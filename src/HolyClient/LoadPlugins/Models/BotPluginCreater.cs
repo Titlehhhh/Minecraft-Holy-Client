@@ -1,5 +1,4 @@
 ﻿using HolyClient.Models;
-using HolyClient.SDK;
 using System;
 
 namespace HolyClient.LoadPlugins.Models
@@ -26,9 +25,9 @@ namespace HolyClient.LoadPlugins.Models
 
 		public BotPluginReference Token => new BotPluginReference(this.Name, this.Assembly);
 
-		public BotPlugin Create()
-		{
-			return (BotPlugin)Activator.CreateInstance(_type);
-		}
+		//public BotPlugin Create()
+		//{
+		//	//return (BotPlugin)Activator.CreateInstance(_type);
+		//}
 	}
 }

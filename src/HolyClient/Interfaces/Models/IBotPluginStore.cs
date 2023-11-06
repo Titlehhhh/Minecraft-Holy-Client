@@ -14,7 +14,7 @@ namespace HolyClient.Contracts.Models
 		void AddPlugin(IBotPluginCreater plugin);
 		void RemovePlugin(BotPluginReference token);
 
-		Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references);
+	//	Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references);
 	}
 }
 
