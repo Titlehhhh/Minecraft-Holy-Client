@@ -8,7 +8,7 @@ namespace TestStressTestBehavior
 	
 	public class SpammerHelloBehavior : IStressTestBehavior
 	{
-		[System.ComponentModel.DisplayName("Текст для спама 10")]
+		[System.ComponentModel.DisplayName("Spam text")]
 		public string SpamText { get; set; } 
 
 		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
