@@ -22,7 +22,8 @@
 
 Как запустить стресс-тест смотрите [здесь](docs/RunStressTest.md).
 
-## Скриншоты
+
+## Screenshots
 
 ### Home
 ![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/9ea99c5f-423e-4320-a0e2-a8046abe01cf)
@@ -32,6 +33,11 @@
 
 ### Stress test
 ![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/23df982b-8f20-44a5-9197-82b43c9d8dfd)
+
+
+## Roadmap
+
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/cee54a39-b6e5-4e10-b329-ec0230eb43b4)
 
 
 
