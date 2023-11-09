@@ -20,7 +20,7 @@ namespace HolyClient.StressTest
 
 		int NumberOfBots { get; set; }
 
-
+		bool UseProxy { get; set; }
 		MinecraftVersion Version { get; set; }
 
 

@@ -49,6 +49,9 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	[Reactive]
 	public int NumberOfBots { get; set; }
 
+	[Reactive]
+	public bool UseProxy { get; set; }
+
 	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
 	[Reactive]
@@ -111,6 +114,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		this.Version = state.Version;
 		this.BotsNickname = state.BotsNickname;
 		this.NumberOfBots = state.NumberOfBots;
+		this.UseProxy = state.UseProxy;
 
 		this.WhenAnyValue(x => x.Server)
 			.BindTo(state, x => x.Server);
@@ -123,6 +127,9 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 		this.WhenAnyValue(x => x.NumberOfBots)
 			.BindTo(state, x => x.NumberOfBots);
+
+		this.WhenAnyValue(x => x.UseProxy)
+			.BindTo(state, x => x.UseProxy);
 		#endregion
 
 		HostScreen = hostScreen;

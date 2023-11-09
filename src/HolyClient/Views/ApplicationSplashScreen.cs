@@ -33,7 +33,7 @@ namespace HolyClient.Views
 
 		public string AppName => "Holy client";
 
-		public IImage AppIcon { get; } = new Bitmap(AssetLoader.Open(new Uri("avares://HolyClient/Assets/icon.ico")));
+		public IImage AppIcon { get; } = new Bitmap(AssetLoader.Open(new Uri("avares://HolyClient/Assets/AppIcon.png")));
 
 		public object SplashScreenContent { get; }
 

@@ -50,14 +50,18 @@ namespace HolyClient.Commands
 				return;
 
 			Thread.CurrentThread.Priority = ThreadPriority.Highest;
-			Serilog.ILogger logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
-			logger = Logger.None;
+			LoggerWrapper loggerWrapper = new LoggerWrapper();
+
+			ILogger logger = loggerWrapper;
+			
 			try
 			{
 
+				
+
 				StressTestLoadingViewModel loadingVM = new StressTestLoadingViewModel(this.screen, _model);
 
-				StressTestProcessViewModel proccess = new StressTestProcessViewModel(this.screen, _model);
+				StressTestProcessViewModel proccess = new StressTestProcessViewModel(this.screen, _model,loggerWrapper);
 				await screen.Router.Navigate.Execute(loadingVM);
 
 

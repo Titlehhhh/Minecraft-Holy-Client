@@ -10,7 +10,11 @@ public partial class StressTestProcessView : ReactiveUserControl<IStressTestProc
 	{
 		InitializeComponent();
 
-		this.WhenActivated((d) => { });
+		this.WhenActivated((d) => {
+
+			this.ViewModel.Logs.CollectionChanged += Logs_CollectionChanged;
+		
+		});
 
 		//ProxyPieChart.LegendPosition = LiveChartsCore.Measure.LegendPosition.Top;
 		//ProxyPieChart.LegendTextPaint = new SolidColorPaint(SKColors.White);
@@ -24,5 +28,10 @@ public partial class StressTestProcessView : ReactiveUserControl<IStressTestProc
 		//	TextSize = 16,
 		//	Paint = new SolidColorPaint(SKColors.White)
 		//};
+	}
+
+	private void Logs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+	{
+		LogsScroll.ScrollToEnd();
 	}
 }

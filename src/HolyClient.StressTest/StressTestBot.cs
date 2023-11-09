@@ -1,7 +1,9 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
 using McProtoNet;
+using QuickProxyNet;
 using Serilog;
+using Serilog.Core;
 using System.Reactive.Subjects;
 
 namespace HolyClient.StressTest
@@ -12,11 +14,11 @@ namespace HolyClient.StressTest
 		public MinecraftClient Client { get; }
 
 		private INickProvider nickProvider;
-		private IProxyProvider proxyProvider;
+		private IProxyProvider? proxyProvider;
 		private ILogger logger;
 		private int number;
 		private CancellationToken cancellationToken;
-		public StressTestBot(MinecraftClient client, INickProvider nickProvider, IProxyProvider proxyProvider, ILogger logger, int number, CancellationToken cancellationToken)
+		public StressTestBot(MinecraftClient client, INickProvider nickProvider, IProxyProvider? proxyProvider, ILogger logger, int number, CancellationToken cancellationToken)
 		{
 			Client = client;
 			this.nickProvider = nickProvider;
@@ -34,29 +36,35 @@ namespace HolyClient.StressTest
 		{
 			if (cancellationToken.IsCancellationRequested)
 				return;
-			logger.Information($"[STRESS TEST] Бот {number} перезапускается");
+			
 			try
 			{
 				Client.Disconnect();
 				if (changeNickAndProxy)
 				{
+					IProxyClient? proxy = null;
+
+					if (proxyProvider is not null)
+						proxy = await this.proxyProvider.GetNextProxy();
+
+
 					this.Client.Config = new ClientConfig
 					{
 						Host = Client.Config.Host,
 						Port = Client.Config.Port,
 						Username = this.nickProvider.GetNextNick(),
 						Version = Client.Config.Version,
-						Proxy = await this.proxyProvider.GetNextProxy()
+						Proxy = proxy
 					};
 				}
 
-				await Client.Login(this.logger);
+				await Client.Login(Logger.None);
 
 			}
 			catch (Exception ex)
 			{
 				_onError.OnNext(ex);
-				logger.Error(ex, $"[STRESS TEST] Во время перезапуска бота {number} произошла ошибка");
+				
 			}
 		}
 	}

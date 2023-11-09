@@ -40,6 +40,8 @@ namespace HolyClient.StressTest
 		[Reactive]
 		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
 		public PluginTypeReference BehaviorRef { get; set; }
+		[Reactive]
+		public bool UseProxy { get; set; } = true;
 		#endregion
 
 		#region NonSerializable
@@ -69,6 +71,7 @@ namespace HolyClient.StressTest
 		[Reactive]
 		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
+
 
 
 
@@ -157,7 +160,9 @@ namespace HolyClient.StressTest
 
 				var nickProvider = new NickProvider(this.BotsNickname);
 
-				var proxyProvider = new ProxyProvider(this.ProxiesState);
+				IProxyProvider? proxyProvider =
+					UseProxy ? new ProxyProvider(this.ProxiesState) : null;
+
 
 				for (int i = 0; i < this.NumberOfBots; i++)
 				{
@@ -239,7 +244,7 @@ namespace HolyClient.StressTest
 
 				if (Behavior is not null)
 				{
-					Console.WriteLine("STRESS TEST BEHAVIOR: "+Behavior);
+					logger.Information("Загружено поведение: " + Behavior.GetType().FullName);
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
 				}
 				CurrentState = StressTestServiceState.Running;
