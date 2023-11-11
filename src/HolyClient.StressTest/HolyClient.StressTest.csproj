@@ -11,8 +11,7 @@
 		<PackageReference Include="MessagePack" Version="2.5.129" />		
 		<PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />
 		<PackageReference Include="Serilog" Version="3.0.1" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-		<PackageReference Include="McProtoNet" Version="1.8.0-experimental.179" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />		
 	</ItemGroup>
 
 	<ItemGroup>

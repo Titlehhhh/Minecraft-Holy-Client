@@ -36,7 +36,7 @@ namespace HolyClient.StressTest
 		{
 			if (cancellationToken.IsCancellationRequested)
 				return;
-			
+
 			try
 			{
 				Client.Disconnect();
@@ -60,11 +60,25 @@ namespace HolyClient.StressTest
 
 				await Client.Login(Logger.None);
 
+
+
 			}
 			catch (Exception ex)
 			{
 				_onError.OnNext(ex);
-				
+
+			}
+		}
+
+		private async void WaitClient()
+		{
+			try
+			{
+				await Client;
+			}
+			catch (Exception ex)
+			{
+				this._onError.OnNext(ex);
 			}
 		}
 	}

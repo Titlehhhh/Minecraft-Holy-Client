@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="HolyClient.SDK" Version="0.1.0-alpha0207-local.207">
+	  <PackageReference Include="HolyClient.SDK" Version="1.0.0-preview.221">
 		  <Private>false</Private>
 		  <ExcludeAssets>runtime</ExcludeAssets>
 	  </PackageReference>

@@ -56,7 +56,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.12" />
     <PackageReference Include="NuGet.Protocol" Version="6.7.0" />
     <PackageReference Include="NuGet.Resolver" Version="6.7.0" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />

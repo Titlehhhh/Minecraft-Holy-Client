@@ -9,8 +9,11 @@
 
 	<ItemGroup>
 	  <Compile Remove="Logging\**" />
+	  <Compile Remove="Services\Implementation\**" />
 	  <EmbeddedResource Remove="Logging\**" />
+	  <EmbeddedResource Remove="Services\Implementation\**" />
 	  <None Remove="Logging\**" />
+	  <None Remove="Services\Implementation\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -26,11 +29,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Services\Implementation\" />
+	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
+	  <Folder Include="Services\" />
 	</ItemGroup>
 	
 </Project>

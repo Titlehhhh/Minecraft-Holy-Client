@@ -65,6 +65,7 @@ namespace HolyClient.Commands
 				await screen.Router.Navigate.Execute(loadingVM);
 
 
+
 				await _model.Start(logger);
 				//await Task.Factory.StartNew(() =>, default, TaskCreationOptions.LongRunning, StaScheduler).Unwrap();
 
