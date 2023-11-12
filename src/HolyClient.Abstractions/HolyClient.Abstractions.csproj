@@ -4,7 +4,17 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
+
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+
+		<PackageOutputPath>..\artifacts\localnuget</PackageOutputPath>
+		<PackageVersion>1.0.0-local.$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;))</PackageVersion>
+
+	</PropertyGroup>
+
 	<ItemGroup>
 		
 		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />

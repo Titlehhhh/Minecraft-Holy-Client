@@ -61,29 +61,75 @@ public class TestBehavior : IStressTestBehavior
 					_firstPositionRotationPacket = false;
 					await bot.Client.SendPositionRotation(_currentPosition, _currentRotation, true);
 
-					StartMoveUp();
+					Nuker();
+
 				}
-
-
-
 				_ = bot.Client.SendTeleportConfirm(x.TeleportId);
 
+			}).DisposeWith(d);
+
+			bot.Client.OnJoinGame.Subscribe(x =>
+			{
+				StartSpam();
 			}).DisposeWith(d);
 
 
 
 		}
-
-		private async void StartMoveUp()
+		private async void Nuker()
 		{
 			try
 			{
-				
+				Vector3 radius = new Vector3(3);
 				while (!_cts.IsCancellationRequested)
 				{
-					await Task.Delay(1000);
-					
-					await _bot.Client.SendChat("Minecraft Holy Client - High performance stress test tool");
+
+					Vector3 start = Vector3.Min(_currentPosition, _currentPosition - radius);
+					Vector3 end = Vector3.Min(_currentPosition, _currentPosition + radius);
+
+					for (double x = start.X; x < end.X; x++)
+					{
+						for (double y = start.Y; y < end.Y; x++)
+						{
+							for (double z = start.Z; y < end.Z; x++)
+							{
+								Vector3 block = new Vector3(x, y, z);
+
+								await _bot.Client.SendAction(0, block, McProtoNet.Core.BlockFace.DOWN);
+
+								await Task.Delay(500, _cts.Token);
+
+								await _bot.Client.SendAction(2, block, McProtoNet.Core.BlockFace.DOWN);
+							}
+
+						}
+					}
+				}
+			}
+			catch
+			{
+
+			}
+		}
+		private async void StartSpam()
+		{
+			try
+			{
+				await Task.Delay(1000);
+				await _bot.Client.SendChat("/register 21qwerty 21qwerty");
+				await _bot.Client.SendChat("/login 21qwerty");
+				while (!_cts.IsCancellationRequested)
+				{
+					await Task.Delay(5000);
+
+					if (Random.Shared.NextDouble() >= 0.5)
+					{
+						await _bot.Client.SendChat("!SOSITE https://discord.gg/HVDzx4rCgg " + Random.Shared.Next());
+					}
+					else
+					{
+						await _bot.Client.SendChat("!гугли Minecraft Holy Client " + Random.Shared.Next());
+					}
 				}
 			}
 			catch

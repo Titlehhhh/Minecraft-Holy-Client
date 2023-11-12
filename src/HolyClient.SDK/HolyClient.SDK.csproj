@@ -1,20 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
-    <PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
-	  <PackageReference Include="bodong.PropertyModels" Version="11.0.4.1" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
 
-  <ItemGroup>
-	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
-  </ItemGroup>
+		<PackageOutputPath>..\artifacts\localnuget</PackageOutputPath>
+		<PackageVersion>1.0.0-local.$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;))</PackageVersion>
+
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
+		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
+		<PackageReference Include="bodong.PropertyModels" Version="11.0.4.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
+	</ItemGroup>
 
 </Project>

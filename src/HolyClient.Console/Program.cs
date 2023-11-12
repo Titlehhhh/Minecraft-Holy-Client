@@ -13,12 +13,15 @@ internal partial class Program
 
 	private static async Task Main(string[] args)
 	{
+
+
+
 		IStressTest stressTest = new StressTest()
 		{
 			BotsNickname = "Title_",
 			Server = args[0],
 			Version = McProtoNet.MinecraftVersion.MC_1_16_5_Version,
-			NumberOfBots = 3000
+			NumberOfBots = 2000
 
 		};
 
@@ -42,11 +45,10 @@ internal partial class Program
 			await proxyLoader.Load(fs, ProxyType.HTTP, proxies);
 		}
 
-		//using (var stream = await httpClient.GetStreamAsync("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"))
-		//{
-		//	await proxyLoader.Load(stream, ProxyType.HTTP, proxies);
-		//}
-		//Console.WriteLine("loaded http");
+		using (var stream = await httpClient.GetStreamAsync("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"))
+		{
+			await proxyLoader.Load(stream, ProxyType.HTTP, proxies);
+		}
 		using (var stream = await httpClient.GetStreamAsync("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"))
 		{
 			await proxyLoader.Load(stream, ProxyType.SOCKS4, proxies);
@@ -55,12 +57,7 @@ internal partial class Program
 		{
 			await proxyLoader.Load(stream, ProxyType.SOCKS4, proxies);
 		}
-		//Console.WriteLine("loaded socks4");
-		//using (var stream = await httpClient.GetStreamAsync("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"))
-		//{
-		//	await proxyLoader.Load(stream, ProxyType.SOCKS5, proxies);
-		//}
-		Console.WriteLine("loaded socks5");
+		
 
 
 

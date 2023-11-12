@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
     <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
 

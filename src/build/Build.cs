@@ -59,9 +59,6 @@ class Build : NukeBuild
 
 		});
 
-	[LatestNuGetVersion(packageId: "McProtoNet", IncludeUnlisted = true, IncludePrerelease = true)]
-	readonly NuGetVersion McProtoNetVersion;
-
 
 	Target BuildSDKToLocal => _ => _
 		.Executes(() =>
@@ -96,10 +93,12 @@ class Build : NukeBuild
 			   .EnableNoBuild()
 			   .EnableNoRestore()
 			   .SetVersion(NuGetVersionCustom)
-			   .SetNoDependencies(true)			   
+			   .SetNoDependencies(true)
 			   .SetOutputDirectory(NugetDirectory));
 
 			LocalNugetPath.CreateDirectory();
+
+			
 
 			NugetDirectory.GlobFiles("*.nupkg")
 				  .NotEmpty()
@@ -114,7 +113,7 @@ class Build : NukeBuild
 
 		});
 
-	Target SDKPublishToNuget => _ => _
+	Target SDKPublishToNuGet => _ => _
 		.Requires(() => NugetApiUrl)
 		.Requires(() => NugetApiKey)
 		.Requires(() => Configuration.Equals(Configuration.Release))
@@ -133,6 +132,7 @@ class Build : NukeBuild
 			NuGetVersionCustom = NuGetVersionCustom + "-" + "preview." + commitNum;
 
 			//string outputPackagePath = NugetDirectory / ("HolyClient.SDK." + NuGetVersionCustom + ".nupkg");
+
 
 
 			DotNetPack(s => s
@@ -161,7 +161,7 @@ class Build : NukeBuild
 				  .ForEach(x =>
 				  {
 					  DotNetNuGetPush(s => s
-							.SetTargetPath(x)
+						.SetTargetPath(x)
 						  .SetSource(NugetApiUrl)
 						  .SetApiKey(NugetApiKey)
 					  );
@@ -170,7 +170,5 @@ class Build : NukeBuild
 		});
 
 
-
-
-
+	
 }
