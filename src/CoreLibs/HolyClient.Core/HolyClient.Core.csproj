@@ -29,11 +29,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
+	  <Folder Include="Services\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Services\" />
+	  <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
 	</ItemGroup>
 	
 </Project>

@@ -14,9 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
-    <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
-
+    <ProjectReference Include="..\..\CoreLibs\HolyClient.Core\HolyClient.Core.csproj" />
+    <ProjectReference Include="..\..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
   </ItemGroup>
 	
 

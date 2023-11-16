@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	 
-	  <ProjectReference Include="..\..\..\HolyClient.SDK\HolyClient.SDK.csproj">
-		  <ExcludeAssets>runtime</ExcludeAssets>
-		  <Private>false</Private>
-	  </ProjectReference>
+    <ProjectReference Include="..\..\..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj" />
   </ItemGroup>
 
 

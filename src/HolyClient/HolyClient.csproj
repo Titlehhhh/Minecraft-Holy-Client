@@ -67,14 +67,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HolyClient.Common\HolyClient.Common.csproj" />
-    <ProjectReference Include="..\HolyClient.Core\HolyClient.Core.csproj" />
-    <ProjectReference Include="..\HolyClient.SDK\HolyClient.SDK.csproj" />
-    <ProjectReference Include="..\HolyClient.StressTest\HolyClient.StressTest.csproj" />
-    
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Views\Pages\BotManager\BotProfileView.axaml.cs">
       <DependentUpon>BotProfileView.axaml</DependentUpon>
     </Compile>
@@ -96,5 +88,12 @@
 
   <ItemGroup>
     <UpToDateCheckInput Remove="Designer\NavigationItemStyles.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreLibs\HolyClient.Common\HolyClient.Common.csproj" />
+    <ProjectReference Include="..\CoreLibs\HolyClient.Core\HolyClient.Core.csproj" />
+    <ProjectReference Include="..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj" />
+    <ProjectReference Include="..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
   </ItemGroup>
 </Project>

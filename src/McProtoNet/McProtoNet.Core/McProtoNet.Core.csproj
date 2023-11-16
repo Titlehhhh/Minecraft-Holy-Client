@@ -21,7 +21,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		
-		<ProjectReference Include="..\..\..\..\QuickProxyNet\QuickProxyNet\QuickProxyNet.csproj" />
+		<ProjectReference Include="..\..\QuickProxyNet\QuickProxyNet.csproj" />
 		
 		<ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
 	</ItemGroup>

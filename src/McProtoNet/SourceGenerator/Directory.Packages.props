@@ -1,6 +1,0 @@
-<Project>
-  <ItemGroup>
-    <PackageVersion Include="AngleSharp" Version="1.0.0" />
-    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-  </ItemGroup>
-</Project>
