@@ -1,5 +1,18 @@
 <Project>
-  <PropertyGroup>
-   
-  </PropertyGroup>
+
+
+	<Target Name="LocalNugetPush" AfterTargets="Pack" Condition="'$(Configuration)' == 'Debug'">
+		<PropertyGroup>
+			<PackageFullPath>$(PackageOutputPath)\$(PackageId).$(PackageVersion).nupkg</PackageFullPath>
+			<LocalNuGetFolder>$(SolutionDir)DebugLocalNuGet</LocalNuGetFolder>
+		</PropertyGroup>
+
+		<Message Text="PackageOutputPath = $(PackageOutputPath)"/>
+
+		<MakeDir Directories="$(LocalNuGetFolder)"/>
+		<Exec Command="dotnet nuget push &quot;$(PackageFullPath)&quot; -s &quot;$(LocalNuGetFolder)&quot;"/>
+		<Delete Files="&quot;$(PackageFullPath)&quot;"/>
+
+	</Target>
+
 </Project>

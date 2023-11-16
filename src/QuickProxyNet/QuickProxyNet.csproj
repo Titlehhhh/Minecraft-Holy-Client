@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>		
+		<LangVersion>11</LangVersion>
+		<VersionPrefix>1.0.0</VersionPrefix>
+		<VersionSuffix Condition="'$(DesignTimeBuild)' != 'true' OR '$(BuildingProject)' == 'true'">beta-$([System.DateTime]::UtcNow.ToString(yyyyMMdd-HHmmss))</VersionSuffix>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PublishAot>true</PublishAot>
+
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<PackageOutputPath>$(SolutionDir)artifacts\DebugLocalNuGet</PackageOutputPath>
+		
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ConfigureAwait.Fody" Version="*" />
+	</ItemGroup>
+
+	
+
+</Project>

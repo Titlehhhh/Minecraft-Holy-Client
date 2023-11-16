@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		
+	</PropertyGroup>
+
+
+
+	<ItemGroup>
+		
+		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
+		<ProjectReference Include="..\McProtoNet\McProtoNet\McProtoNet.csproj" />
+	</ItemGroup>
+
+	<Import Project="..\LocalNuget.props"/>
+	<Import Project="..\LocalNuget.targets"/>
+	
+</Project>

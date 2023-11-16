@@ -1,0 +1,9 @@
+<Project>
+  
+	  <PropertyGroup>
+		  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		  <PackageOutputPath>$(SolutionDir)artifacts\DebugLocalNuGet</PackageOutputPath>
+		  <PackageVersion>1.0.1-local.$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmmss"))</PackageVersion>
+	  </PropertyGroup>
+
+</Project>

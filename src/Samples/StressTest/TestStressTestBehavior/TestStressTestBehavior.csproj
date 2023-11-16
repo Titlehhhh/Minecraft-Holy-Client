@@ -8,10 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="HolyClient.SDK" Version="1.0.0-preview.221">
-		  <Private>false</Private>
+	 
+	  <ProjectReference Include="..\..\..\HolyClient.SDK\HolyClient.SDK.csproj">
 		  <ExcludeAssets>runtime</ExcludeAssets>
-	  </PackageReference>
+		  <Private>false</Private>
+	  </ProjectReference>
   </ItemGroup>
 
 
