@@ -8,8 +8,7 @@
 		<VersionPrefix>1.0.0</VersionPrefix>
 		
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PublishAot>true</PublishAot>
-
+		
 	</PropertyGroup>
 
 
