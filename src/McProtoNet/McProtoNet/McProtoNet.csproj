@@ -22,8 +22,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
-		<PackageReference Include="Serilog" Version="3.0.1" />
-		<PackageReference Include="Stateless" Version="5.13.0" />
+		<PackageReference Include="Serilog" Version="3.1.2-dev-02097" />
+		<PackageReference Include="Stateless" Version="5.14.0" />
 		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
 		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
 		
