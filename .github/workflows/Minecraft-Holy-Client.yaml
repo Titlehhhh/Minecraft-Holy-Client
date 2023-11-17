@@ -38,12 +38,16 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100
-
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
     - name: Restore
       run: dotnet restore
 
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: dotnet publish
-      run: dotnet publish src/Platfroms/HolyClient.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+    
 
