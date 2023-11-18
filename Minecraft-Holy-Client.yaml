@@ -39,7 +39,7 @@ jobs:
         git config --global url."https://user:${{ secrets.GITHUB_TOKEN }}@github".insteadOf https://github
         git config --global user.name github-actions
         git config --global user.email github-actions@github.com
-        
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
@@ -53,7 +53,7 @@ jobs:
     - name: Restore
       run: dotnet restore
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Publish
+      run: dotnet publish src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=bin\preview
     
 

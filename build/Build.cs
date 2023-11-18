@@ -1,46 +1,191 @@
-using System;
 using System.Linq;
+
 using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.Execution;
 using Nuke.Common.IO;
+using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
+using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.EnvironmentInfo;
+using Nuke.Common.CI.GitHubActions;
+
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using System.IO;
+using System.Threading.Tasks;
+using Nuke.Common.Tools.GitHub;
+using Nuke.Common.ChangeLog;
+using System;
+using ParameterAttribute = Nuke.Common.ParameterAttribute;
+using Microsoft.Build.Tasks;
+using Nuke.Common.Tools.MSBuild;
+using Nuke.Common.Utilities;
+using Nuke.Common.Tools.Git;
+using LibGit2Sharp;
 
+
+
+
+[GitHubActions("continuous",
+GitHubActionsImage.UbuntuLatest,
+AutoGenerate = false,
+FetchDepth = 0,
+	OnPushBranches = new[]
+	{
+		"development"
+
+	},
+	OnPullRequestBranches = new[]
+	{
+		"development"
+	},
+	InvokedTargets = new[]
+	{
+		nameof(Preview),
+	},
+	EnableGitHubToken = true,
+	CacheKeyFiles = new[] { "**/global.json", "**/*.csproj" },
+	CacheIncludePatterns = new[] { ".nuke/temp", "~/.nuget/packages" },
+	CacheExcludePatterns = new string[0]
+
+)]
 class Build : NukeBuild
 {
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
 
-    public static int Main () => Execute<Build>(x => x.Compile);
 
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+	public static int Main() => Execute<Build>(x => x.Preview);
 
-    Target Clean => _ => _
-        .Before(Restore)
-        .Executes(() =>
-        {
 
-        });
+	//[Parameter("MyGet Feed Url for Public Access of Pre Releases")]
+	//readonly string MyGetNugetFeed;
+	//[Parameter("MyGet Api Key"), Secret]
+	//readonly string MyGetApiKey;
 
-    Target Restore => _ => _
-        .Executes(() =>
-        {
-        });
+	//[Parameter("Nuget Feed Url for Public Access of Pre Releases")]
+	//readonly string NugetFeed;
+	//[Parameter("Nuget Api Key"), Secret]
+	//readonly string NuGetApiKey;
 
-    Target Compile => _ => _
-        .DependsOn(Restore)
-        .Executes(() =>
-        {
-            
-        });
+	//[Parameter("Copyright Details")]
+	//readonly string Copyright;
+
+	//[Parameter("Artifacts Type")]
+	//readonly string ArtifactsType;
+
+	//[Parameter("Excluded Artifacts Type")]
+	//readonly string ExcludedArtifactsType;
+
+	//[GitVersion]
+	//readonly GitVersion GitVersion;
+
+	//[GitRepository]
+	//readonly GitRepository GitRepository;
+
+	[Solution(GenerateProjects = true)]
+	readonly Solution Solution;
+
+	static GitHubActions GitHubActions => GitHubActions.Instance;
+	static AbsolutePath ArtifactsDirectory => RootDirectory / ".artifacts";
+
+	static readonly string PackageContentType = "application/octet-stream";
+	static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
+
+	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+
+	Target Clean => _ => _
+		.Before(Restore)
+		.Executes(() =>
+		{
+
+		});
+
+	Target Restore => _ => _
+		.Executes(() =>
+		{
+
+		});
+
+	Target Compile => _ => _
+		.DependsOn(Restore)
+
+		.Executes(() =>
+		{
+
+		});
+
+
+	readonly AbsolutePath SetupExe = ArtifactsDirectory / "bin" / "setup.exe";
+	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "bin" / "HolyClient.Desktop.application";
+	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "bin" / "Application Files";
+
+	readonly AbsolutePath ClickOncePreview = RootDirectory / "ClickOnceArtifacts" / "preview";
+
+
+
+	Target Preview => _ => _
+		.DependsOn(Restore)
+		.Executes(() =>
+		{
+
+			MSBuildTasks.MSBuild(s => s
+				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
+				.SetTargets("publish")
+				.SetProperty("PublishProfile", "ClickOnceProfile")
+				.SetProperty("PublishDir", ArtifactsDirectory / "bin"));
+
+			ClickOncePreview.CreateOrCleanDirectory();
+
+
+			SetupExe.MoveToDirectory(ClickOncePreview);
+			HolyClient_Application.MoveToDirectory(ClickOncePreview);
+			ApplicationFiles.MoveToDirectory(ClickOncePreview);
+
+			PushToDeploy();
+
+		});
+
+	private void PushToDeploy()
+	{
+		try
+		{
+			Repository.Init(ClickOncePreview);
+			using (var repo = new Repository(ClickOncePreview))
+			{
+				RepositoryStatus status = repo.RetrieveStatus();
+				var filePaths = status.Modified.Select(mods => mods.FilePath).ToList();
+				foreach (var file in filePaths)
+				{
+					repo.Index.Add(file);
+					repo.Index.Write();
+				}
+				var signature = new Signature("CI/CD", "email@email.com", DateTimeOffset.Now);
+
+				repo.Commit($"Auto generated", signature, signature);
+
+				var remote = repo.Network.Remotes["origin"];
+				var options = new PushOptions
+				{
+					CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+					{
+						Username = GitHubActions.RepositoryOwner,
+						Password = GitHubActions.Token
+					}					
+				};
+
+				var pushRefSpec = $"refs/heads/deploy";
+				repo.Network.Push(remote, pushRefSpec, options); //Push changes to the remote repository
+				
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+
+			Console.WriteLine("Error occured during pushing the changes!");
+			Console.WriteLine("Please manually commit and push the changes!");
+			throw;
+		}
+	}
 
 }
