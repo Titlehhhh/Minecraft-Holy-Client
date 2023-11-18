@@ -61,7 +61,8 @@ jobs:
           git config --global user.email HolyClientDeploy@github.com 
 
       - name: "Git clone"
-        run: git clone $(git config --get remote.origin.url) -b gh-pages --depth 1 --single-branch ClickOnceArtifacts
+        run: git clone $(git config --get remote.origin.url) -b deploy --depth 1 --single-branch ClickOnceArtifacts
+
       - name: 'Run: Preview'
         run: ./build.cmd Preview
         env:
