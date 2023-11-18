@@ -49,6 +49,11 @@ jobs:
 
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.1
+        
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.100
 
       - name: 'Run: Preview'
         run: ./build.cmd Preview
