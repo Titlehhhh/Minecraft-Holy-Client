@@ -34,6 +34,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       
+    - name: Setup Git
+      run: |
+        git config --global url."https://user:${{ secrets.GITHUB_TOKEN }}@github".insteadOf https://github
+        git config --global user.name github-actions
+        git config --global user.email github-actions@github.com
+        
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
