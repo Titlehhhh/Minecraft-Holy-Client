@@ -120,7 +120,7 @@ class Build : NukeBuild
 	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "bin" / "HolyClient.Desktop.application";
 	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "bin" / "Application Files";
 
-	readonly AbsolutePath ClickOncePreview = RootDirectory / "ClickOnceArtifacts" / "preview";
+	readonly AbsolutePath ClickOncePreview = RootDirectory / "ClickOnceArtifacts";
 
 
 
@@ -133,32 +133,33 @@ class Build : NukeBuild
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
 
-			ClickOncePreview.CreateOrCleanDirectory();
+			//ClickOncePreview.CreateOrCleanDirectory();
 
-			Repository.Clone(
-				"https://github.com/Titlehhhh/Minecraft-Holy-Client",
-				ClickOncePreview,
-				new CloneOptions() { 
-				BranchName = "deploy"
-				});
+			//string pathRep = Repository.Clone(
+			//	"https://github.com/Titlehhhh/Minecraft-Holy-Client",
+			//	ClickOncePreview,
+			//	new CloneOptions()
+			//	{
 
-			
+			//		BranchName = "deploy"
+			//	});
+
 
 			MSBuildTasks.MSBuild(s => s
-				
+
 				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
 				.SetTargets("publish")
 				.SetProperty("PublishProfile", "ClickOnceProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory / "bin"));
 
-			
+
 
 
 			SetupExe.MoveToDirectory(ClickOncePreview);
 			HolyClient_Application.MoveToDirectory(ClickOncePreview);
 			ApplicationFiles.MoveToDirectory(ClickOncePreview);
 
-			PushToDeploy();
+			//PushToDeploy();
 
 		});
 
@@ -166,7 +167,7 @@ class Build : NukeBuild
 	{
 		try
 		{
-			
+
 			using (var repo = new Repository(ClickOncePreview))
 			{
 				RepositoryStatus status = repo.RetrieveStatus();
@@ -187,12 +188,12 @@ class Build : NukeBuild
 					{
 						Username = GitHubActions.RepositoryOwner,
 						Password = GitHubActions.Token
-					}					
+					}
 				};
 
 				var pushRefSpec = $"refs/heads/deploy";
 				repo.Network.Push(remote, pushRefSpec, options); //Push changes to the remote repository
-				
+
 			}
 		}
 		catch (Exception ex)
