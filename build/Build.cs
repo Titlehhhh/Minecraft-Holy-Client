@@ -103,7 +103,8 @@ class Build : NukeBuild
 	Target Restore => _ => _
 		.Executes(() =>
 		{
-
+			DotNetRestore(x =>
+				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop));
 		});
 
 	Target Compile => _ => _
@@ -128,7 +129,12 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
+				.EnableNoRestore());
+
 			MSBuildTasks.MSBuild(s => s
+				
 				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
 				.SetTargets("publish")
 				.SetProperty("PublishProfile", "ClickOnceProfile")
