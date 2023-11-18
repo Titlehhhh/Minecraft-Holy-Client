@@ -133,6 +133,17 @@ class Build : NukeBuild
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
 
+			ClickOncePreview.CreateOrCleanDirectory();
+
+			Repository.Clone(
+				"https://github.com/Titlehhhh/Minecraft-Holy-Client",
+				ClickOncePreview,
+				new CloneOptions() { 
+				BranchName = "deploy"
+				});
+
+			
+
 			MSBuildTasks.MSBuild(s => s
 				
 				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
@@ -140,7 +151,7 @@ class Build : NukeBuild
 				.SetProperty("PublishProfile", "ClickOnceProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory / "bin"));
 
-			ClickOncePreview.CreateOrCleanDirectory();
+			
 
 
 			SetupExe.MoveToDirectory(ClickOncePreview);
@@ -155,7 +166,7 @@ class Build : NukeBuild
 	{
 		try
 		{
-			Repository.Init(ClickOncePreview);
+			
 			using (var repo = new Repository(ClickOncePreview))
 			{
 				RepositoryStatus status = repo.RetrieveStatus();
@@ -169,7 +180,7 @@ class Build : NukeBuild
 
 				repo.Commit($"Auto generated", signature, signature);
 
-				var remote = repo.Network.Remotes["origin"];
+				var remote = repo.Network.Remotes["deploy"];
 				var options = new PushOptions
 				{
 					CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
