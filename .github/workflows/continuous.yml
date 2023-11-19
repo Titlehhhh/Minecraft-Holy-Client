@@ -51,7 +51,7 @@ jobs:
     - name: Publish
       run: dotnet publish Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=~/.artifacts
     - name: Upload artifacts
-      uses: actions/upload-artifacts@v3
+      uses: actions/upload-artifact@v3
       with:
         path: .artifacts
         name: .artifacts    
