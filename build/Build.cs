@@ -120,7 +120,7 @@ class Build : NukeBuild
 	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "HolyClient.Desktop.application";
 	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "Application Files";
 
-	readonly AbsolutePath ClickOncePreview = RootDirectory / "ClickOnceArtifacts";
+	readonly AbsolutePath ClickOnceArtifacts = RootDirectory / "ClickOnceArtifacts";
 
 
 
@@ -156,9 +156,9 @@ class Build : NukeBuild
 				.SetProperty("PublishProfile", "ClickOnceProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
 
-			var outDir = ClickOncePreview / "preview";
+			var outDir = ClickOnceArtifacts / "preview";
 
-			outDir.DeleteDirectory();
+			outDir.CreateOrCleanDirectory();
 
 			SetupExe.MoveToDirectory(outDir);
 			HolyClient_Application.MoveToDirectory(outDir);
@@ -173,7 +173,7 @@ class Build : NukeBuild
 		try
 		{
 
-			using (var repo = new Repository(ClickOncePreview))
+			using (var repo = new Repository(ClickOnceArtifacts))
 			{
 				RepositoryStatus status = repo.RetrieveStatus();
 				var filePaths = status.Modified.Select(mods => mods.FilePath).ToList();
