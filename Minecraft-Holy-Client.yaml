@@ -54,6 +54,6 @@ jobs:
       run: dotnet restore
 
     - name: Publish
-      run: dotnet publish src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=bin\preview
+      run: dotnet publish Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=bin\preview
     
 

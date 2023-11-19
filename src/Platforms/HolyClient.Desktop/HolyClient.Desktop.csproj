@@ -5,8 +5,8 @@
     One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-	  <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-	  <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	
   </PropertyGroup>
