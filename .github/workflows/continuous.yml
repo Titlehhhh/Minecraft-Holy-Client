@@ -52,7 +52,7 @@ jobs:
       run: dotnet build src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj --configuration Release --no-restore
 
     - name: Publish
-      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile -r win-x64
+      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile -r win-x64  --self-contained true
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
