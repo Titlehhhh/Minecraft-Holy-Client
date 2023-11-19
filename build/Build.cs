@@ -116,9 +116,9 @@ class Build : NukeBuild
 		});
 
 
-	readonly AbsolutePath SetupExe = ArtifactsDirectory / "bin" / "setup.exe";
-	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "bin" / "HolyClient.Desktop.application";
-	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "bin" / "Application Files";
+	readonly AbsolutePath SetupExe = ArtifactsDirectory / "setup.exe";
+	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "HolyClient.Desktop.application";
+	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "Application Files";
 
 	readonly AbsolutePath ClickOncePreview = RootDirectory / "ClickOnceArtifacts";
 
@@ -133,7 +133,7 @@ class Build : NukeBuild
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
 
-			
+
 
 			//ClickOncePreview.CreateOrCleanDirectory();
 
@@ -147,14 +147,14 @@ class Build : NukeBuild
 			//	});
 
 
-			
+
 
 			MSBuildTasks.MSBuild(s => s
 
 				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
 				.SetTargets("publish")
 				.SetProperty("PublishProfile", "ClickOnceProfile")
-				.SetProperty("PublishDir", ArtifactsDirectory / "bin"));
+				.SetProperty("PublishDir", ArtifactsDirectory));
 
 			var outDir = ClickOncePreview / "preview";
 
