@@ -45,14 +45,9 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
-    - name: Restore
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj --configuration Release --no-restore
-
+   
     - name: Publish
-      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -r win-x64 --self-contained true -p:PublishReadyToRun=true
+      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
