@@ -8,7 +8,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 		<PackageReference Include="MessagePack" Version="2.6.100-alpha" />
 		<PackageReference Include="Polly" Version="8.2.0" />
 		<PackageReference Include="ReactiveUI.Fody" Version="19.5.1" />

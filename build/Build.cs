@@ -42,7 +42,7 @@ FetchDepth = 0,
 	},
 	InvokedTargets = new[]
 	{
-		nameof(Preview),
+		nameof(Publish),
 	},
 	EnableGitHubToken = true,
 	CacheKeyFiles = new[] { "**/global.json", "**/*.csproj" },
@@ -54,7 +54,7 @@ class Build : NukeBuild
 {
 
 
-	public static int Main() => Execute<Build>(x => x.Preview);
+	public static int Main() => Execute<Build>(x => x.Publish);
 
 
 	//[Parameter("MyGet Feed Url for Public Access of Pre Releases")]
@@ -109,10 +109,11 @@ class Build : NukeBuild
 
 	Target Compile => _ => _
 		.DependsOn(Restore)
-
 		.Executes(() =>
 		{
-
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
+				.EnableNoRestore());
 		});
 
 
@@ -120,51 +121,26 @@ class Build : NukeBuild
 	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "HolyClient.Desktop.application";
 	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "Application Files";
 
+
+
 	readonly AbsolutePath ClickOnceArtifacts = RootDirectory / "ClickOnceArtifacts";
 
 
 
-	Target Preview => _ => _
-		.DependsOn(Restore)
+	Target Publish => _ => _
+		.DependsOn(Compile)
+		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
-
-			DotNetBuild(x =>
-				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
-				.EnableNoRestore());
-
-
-
-			//ClickOncePreview.CreateOrCleanDirectory();
-
-			//string pathRep = Repository.Clone(
-			//	"https://github.com/Titlehhhh/Minecraft-Holy-Client",
-			//	ClickOncePreview,
-			//	new CloneOptions()
-			//	{
-
-			//		BranchName = "deploy"
-			//	});
-
-
-
-
-			MSBuildTasks.MSBuild(s => s
-
-				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
-				.SetTargets("publish")
-				.SetProperty("PublishProfile", "ClickOnceProfile")
+			DotNetPublish(x => x
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProperty("DebugType", "None")
+				.SetProperty("DebugSymbols", "False")
+				.SetPublishProfile("FolderProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
 
-			var outDir = ClickOnceArtifacts / "preview";
-
-			outDir.CreateOrCleanDirectory();
-
-			SetupExe.MoveToDirectory(outDir);
-			HolyClient_Application.MoveToDirectory(outDir);
-			ApplicationFiles.MoveToDirectory(outDir);
-
-			//PushToDeploy();
 
 		});
 

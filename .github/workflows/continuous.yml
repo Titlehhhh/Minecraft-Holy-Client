@@ -25,52 +25,26 @@ on:
       - development
 
 jobs:
-  windows-latest:
-    name: windows-latest
-    runs-on: windows-latest
-    env:
-      Solution_Name: HolyClient.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
-      #Test_Project_Path: your-test-project-path                 # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
-      #Wap_Project_Directory: your-wap-project-directory-name    # Replace with the Wap project directory relative to the solution, i.e. MyWpfApp.Package.
-      #Wap_Project_Path: your-wap-project-path
-
-
+  ubuntu-latest:
+    name: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
-      - uses: actions/cache@v3
+      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
+        uses: actions/cache@v3
         with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v1.1
-        
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0.100
-      - name: Setup Git
-        run: |
-          git config --global url."https://user:${{ secrets.GITHUB_TOKEN }}@github".insteadOf https://github
-          git config --global user.name HolyClientDeploy
-          git config --global user.email HolyClientDeploy@github.com 
-
-      - name: "Git clone"
-        run: git clone $(git config --get remote.origin.url) -b deploy --depth 1 --single-branch ClickOnceArtifacts
-
-      - name: 'Run: Preview'
-        run: ./build.cmd Preview
+          path: |
+            .nuke/temp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+      - name: 'Run: Publish'
+        run: ./build.cmd Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Deploy to branch: deploy"
-        run: |
-          cd ClickOnceArtifacts
-          git add -A
-          git commit -m "Test CI/CD"
-          git push
+      - name: 'Publish: .artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: .artifacts
+          path: .artifacts
