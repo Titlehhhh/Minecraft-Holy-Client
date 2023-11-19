@@ -133,6 +133,8 @@ class Build : NukeBuild
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
 
+			
+
 			//ClickOncePreview.CreateOrCleanDirectory();
 
 			//string pathRep = Repository.Clone(
@@ -145,6 +147,8 @@ class Build : NukeBuild
 			//	});
 
 
+			
+
 			MSBuildTasks.MSBuild(s => s
 
 				.SetTargetPath(Solution.Platfroms.HolyClient_Desktop)
@@ -152,12 +156,13 @@ class Build : NukeBuild
 				.SetProperty("PublishProfile", "ClickOnceProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory / "bin"));
 
+			var outDir = ClickOncePreview / "preview";
 
+			outDir.DeleteDirectory();
 
-
-			SetupExe.MoveToDirectory(ClickOncePreview);
-			HolyClient_Application.MoveToDirectory(ClickOncePreview);
-			ApplicationFiles.MoveToDirectory(ClickOncePreview);
+			SetupExe.MoveToDirectory(outDir);
+			HolyClient_Application.MoveToDirectory(outDir);
+			ApplicationFiles.MoveToDirectory(outDir);
 
 			//PushToDeploy();
 
