@@ -28,7 +28,7 @@ using LibGit2Sharp;
 
 
 [GitHubActions("continuous",
-GitHubActionsImage.UbuntuLatest,
+GitHubActionsImage.WindowsLatest,
 AutoGenerate = false,
 FetchDepth = 0,
 	OnPushBranches = new[]
