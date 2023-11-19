@@ -32,19 +32,28 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.100
       - name: 'Cache: .nuke/temp, ~/.nuget/packages'
         uses: actions/cache@v3
         with:
-          path: |
-            .nuke/temp
-            ~/.nuget/packages
+          path: ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: 'Run: Publish'
-        run: ./build.cmd Publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore
+        run: dotnet restore
+
+      -name: Build
+        run: dotnet build --no-restore
+
+      - name: Publish
+        run: dotnet publish ~\Minecraft-Holy-Client\Minecraft-Holy-Client\src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --no-restore --no-build /property:DebugType=None /property:DebugSymbols=False /property:PublishProfile=FolderProfile /property:PublishDir=~\Minecraft-Holy-Client\Minecraft-Holy-Client\.artifacts
+
       - name: 'Publish: .artifacts'
         uses: actions/upload-artifact@v3
         with:
           name: .artifacts
           path: .artifacts
+
+#dotnet.exe publish ~\Minecraft-Holy-Client\Minecraft-Holy-Client\src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --no-restore --no-build /property:DebugType=None /property:DebugSymbols=False /property:PublishProfile=FolderProfile /property:PublishDir=~\Minecraft-Holy-Client\Minecraft-Holy-Client\.artifacts
