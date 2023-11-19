@@ -49,7 +49,7 @@ jobs:
       run: dotnet restore
 
     - name: Publish
-      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=${{ github.workspace }}/.artifacts
+      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj --configuration Release --no-restore -p:PublishDir=${{ github.workspace }}/.artifacts /property:DebugType=None /property:DebugSymbols=False property:PublishProfile=FolderProfile
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
