@@ -178,7 +178,7 @@ class Build : NukeBuild
 		});
 
 	Target Pack => _ => _
-		
+		.DependsOn(Compile)
 		.Executes(() =>
 		{
 
