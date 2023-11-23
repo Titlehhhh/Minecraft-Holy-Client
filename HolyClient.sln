@@ -6,6 +6,11 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreLibs", "CoreLibs", "{00CC44BE-C0E1-44BB-AC5D-EB0656140923}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "McProtoNet", "McProtoNet", "{E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}"
+	ProjectSection(SolutionItems) = preProject
+		src\McProtoNet\Directory.Build.props = src\McProtoNet\Directory.Build.props
+		src\McProtoNet\Directory.Build.targets = src\McProtoNet\Directory.Build.targets
+		src\McProtoNet\Directory.Packages.props = src\McProtoNet\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platfroms", "Platfroms", "{B2F7D8DD-5C70-465C-BE7A-DB2C49DE143F}"
 EndProject
@@ -55,8 +60,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6D56912F-F95F-498D-806A-C0235801020A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D56912F-F95F-498D-806A-C0235801020A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77942BEA-EB0E-47D3-A74A-377E0BA1AA90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{77942BEA-EB0E-47D3-A74A-377E0BA1AA90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77942BEA-EB0E-47D3-A74A-377E0BA1AA90}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -121,6 +124,8 @@ Global
 		{061F3DDC-1CF0-40CD-9DD8-697B95F782F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{061F3DDC-1CF0-40CD-9DD8-697B95F782F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{061F3DDC-1CF0-40CD-9DD8-697B95F782F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D56912F-F95F-498D-806A-C0235801020A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D56912F-F95F-498D-806A-C0235801020A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

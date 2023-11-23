@@ -47,7 +47,7 @@ jobs:
           ${{ runner.os }}-nuget-
    
     - name: Publish
-      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile 
+      run: dotnet pack src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:

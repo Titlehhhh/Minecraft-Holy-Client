@@ -121,6 +121,7 @@ class Build : NukeBuild
 	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "HolyClient.Desktop.application";
 	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "Application Files";
 
+	readonly AbsolutePath NuGetDirectory = RootDirectory / "NuGetArtifacts";
 
 
 	readonly AbsolutePath ClickOnceArtifacts = RootDirectory / "ClickOnceArtifacts";
@@ -132,6 +133,13 @@ class Build : NukeBuild
 		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
+
+
+
+			DotNetPack(x => x
+				.SetProject(Solution.McProtoNet.McProtoNet)
+				.SetOutputDirectory(NuGetDirectory));
+
 			DotNetPublish(x => x
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore()
@@ -144,47 +152,26 @@ class Build : NukeBuild
 
 		});
 
-	private void PushToDeploy()
-	{
-		try
+	Target Pack => _ => _		
+		.Executes(() =>
 		{
 
-			using (var repo = new Repository(ClickOnceArtifacts))
-			{
-				RepositoryStatus status = repo.RetrieveStatus();
-				var filePaths = status.Modified.Select(mods => mods.FilePath).ToList();
-				foreach (var file in filePaths)
-				{
-					repo.Index.Add(file);
-					repo.Index.Write();
-				}
-				var signature = new Signature("CI/CD", "email@email.com", DateTimeOffset.Now);
+			DotNetRestore(x => x
+				.SetProjectFile(Solution.ProxyLib.QuickProxyNet));
 
-				repo.Commit($"Auto generated", signature, signature);
+			DotNetBuild(x => x
+				.EnableNoRestore()
+				.SetProjectFile(Solution.ProxyLib.QuickProxyNet));
 
-				var remote = repo.Network.Remotes["deploy"];
-				var options = new PushOptions
-				{
-					CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-					{
-						Username = GitHubActions.RepositoryOwner,
-						Password = GitHubActions.Token
-					}
-				};
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.ProxyLib.QuickProxyNet)
+				.SetOutputDirectory(NuGetDirectory));
 
-				var pushRefSpec = $"refs/heads/deploy";
-				repo.Network.Push(remote, pushRefSpec, options); //Push changes to the remote repository
 
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex);
+		});
 
-			Console.WriteLine("Error occured during pushing the changes!");
-			Console.WriteLine("Please manually commit and push the changes!");
-			throw;
-		}
-	}
+
 
 }
