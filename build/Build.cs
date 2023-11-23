@@ -104,16 +104,41 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 			DotNetRestore(x =>
-				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop));
+				x.SetProjectFile(Solution));
 		});
 
 	Target Compile => _ => _
 		.DependsOn(Restore)
 		.Executes(() =>
 		{
+			//Build QuickProxy
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.ProxyLib.QuickProxyNet)
+				.EnableNoRestore());
+
+			//Build McProtoNet
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.McProtoNet.McProtoNet)
+				.EnableNoRestore());
+
+			//Build SDK
+
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.CoreLibs.HolyClient_Abstractions)
+				.EnableNoRestore());
+
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
+				.EnableNoRestore());
+
+			//Build HolyClient.Desktop
+
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
+
+
+
 		});
 
 
@@ -152,21 +177,52 @@ class Build : NukeBuild
 
 		});
 
-	Target Pack => _ => _		
+	Target Pack => _ => _
+		
 		.Executes(() =>
 		{
-
-			DotNetRestore(x => x
-				.SetProjectFile(Solution.ProxyLib.QuickProxyNet));
-
-			DotNetBuild(x => x
-				.EnableNoRestore()
-				.SetProjectFile(Solution.ProxyLib.QuickProxyNet));
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
 				.SetProject(Solution.ProxyLib.QuickProxyNet)
+				.SetOutputDirectory(NuGetDirectory));
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_NBT)
+				.SetOutputDirectory(NuGetDirectory));
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_Utils)
+				.SetOutputDirectory(NuGetDirectory));
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_Core)
+				.SetOutputDirectory(NuGetDirectory));
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet)
+				.SetOutputDirectory(NuGetDirectory));
+
+
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.CoreLibs.HolyClient_Abstractions)
+				.SetOutputDirectory(NuGetDirectory));
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.CoreLibs.HolyClient_SDK)
 				.SetOutputDirectory(NuGetDirectory));
 
 

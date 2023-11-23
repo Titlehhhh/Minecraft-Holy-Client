@@ -9,7 +9,6 @@ namespace QuickProxyNet
 		public new ProxyType Type => ProxyType.SOCKS4;
 		public Socks4aClient(string host, int port) : base(host, port)
 		{
-			var t = 2;
 			IsSocks4a = true;
 		}
 
