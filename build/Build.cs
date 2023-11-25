@@ -246,10 +246,10 @@ class Build : NukeBuild
 
 			DotNetPublish(x => x
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)
-				.EnableNoRestore()
+				
 				.SetConfiguration(Configuration)	
-				.EnableNoBuild()
-				.SetRuntime("win-x64")
+				
+				
 				.SetPublishProfile("FolderProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
 
