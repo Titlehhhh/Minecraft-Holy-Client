@@ -73,12 +73,14 @@ class Build : NukeBuild
 	static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
-
+	AbsolutePath SourceDirectory => RootDirectory / "src";
 	Target Clean => _ => _
 		.Before(Restore)
 		.Executes(() =>
 		{
-
+			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x=>x.DeleteDirectory());
+			//TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+			ArtifactsDirectory.CreateOrCleanDirectory();
 		});
 
 	Target Restore => _ => _
@@ -95,27 +97,32 @@ class Build : NukeBuild
 			//Build QuickProxy
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.ProxyLib.QuickProxyNet)
+				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			//Build McProtoNet
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.McProtoNet.McProtoNet)
+				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			//Build SDK
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.CoreLibs.HolyClient_Abstractions)
+				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
+				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			//Build HolyClient.Desktop
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
+				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 
@@ -166,45 +173,52 @@ class Build : NukeBuild
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.ProxyLib.QuickProxyNet)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.McProtoNet.McProtoNet_NBT)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.McProtoNet.McProtoNet_Utils)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.McProtoNet.McProtoNet_Core)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.McProtoNet.McProtoNet)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 
 
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.CoreLibs.HolyClient_Abstractions)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
+				.SetConfiguration(Configuration)
 				.SetProject(Solution.CoreLibs.HolyClient_SDK)
-				.SetOutputDirectory(NuGetDirectory));
+				.SetOutputDirectory(ArtifactsDirectory));
 
 
 
@@ -216,7 +230,7 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 			DotNetNuGetPush(s => s
-						.SetTargetPath($"{NuGetDirectory}/*.nupkg")
+						.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
 						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
 						.SetApiKey(FeedzApiKey)
 					);
