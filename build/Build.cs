@@ -28,6 +28,7 @@ using Nuke.Common.Tools.OctoVersion;
 using Nuke.Common.Tools.MinVer;
 using Octokit.Internal;
 using Octokit;
+using Nuke.Common.Tooling;
 
 
 
@@ -53,6 +54,8 @@ class Build : NukeBuild
 
 	static readonly string PackageContentType = "application/octet-stream";
 	static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
+
+	[Parameter]
 
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 	AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -236,22 +239,31 @@ class Build : NukeBuild
 	Target PublishApp => _ => _
 		.DependsOn(Pack)
 		.Requires(() => Configuration.Equals(Configuration.Release))
-		.Produces(ArtifactsDirectory / "*.exe")
+		
 		.Executes(() =>
 		{
 
 
 
-			
+			var publishCombinations =
+				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
+				from framework in project.GetTargetFrameworks()
+				from runtime in new[] { "win-x64", "osx-x64", "linux-x64" }
+				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
-				.SetProject(Solution.Platfroms.HolyClient_Desktop)
-				
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
 				.SetConfiguration(Configuration)	
-				
-				
-				.SetPublishProfile("FolderProfile")
-				.SetProperty("PublishDir", ArtifactsDirectory));
+				.SetPublishSingleFile(true)
+				.SetOutput(ArtifactsDirectory)
+				.SetPublishReadyToRun(true)
+				.EnableSelfContained()
+				 .CombineWith(publishCombinations, (_, v) => _
+					.SetProject(v.project)
+					.SetFramework(v.framework)
+					.SetRuntime(v.runtime)));
+
+
 
 
 		});
