@@ -248,7 +248,7 @@ class Build : NukeBuild
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
 				from framework in project.GetTargetFrameworks()
-				from runtime in new[] { "win-x64", "osx-x64", "linux-x64" }
+				from runtime in new[] { "win-x64"/*, "osx-x64", "linux-x64"*/ }
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
