@@ -255,7 +255,8 @@ class Build : NukeBuild
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
 				.SetConfiguration(Configuration)	
 				.SetPublishSingleFile(true)
-				
+				.SetProperty("DebugSymbols","False")
+				.SetProperty("DebugType","None")
 				.SetOutput(ArtifactsDirectory)
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
@@ -264,6 +265,7 @@ class Build : NukeBuild
 					.SetFramework(v.framework)
 					.SetRuntime(v.runtime)));
 
+			
 
 
 
@@ -284,7 +286,7 @@ class Build : NukeBuild
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
 		   var releaseTag = MinVer.Version;
-		  // var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
+		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
 		   //var latestChangeLog = changeLogSectionEntries
 			//   .Aggregate((c, n) => c + Environment.NewLine + n);
 
