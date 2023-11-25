@@ -13,12 +13,7 @@
 
 ## Начать пользоваться
 
-Перейдите по этой [ссылке](https://github.com/Titlehhhh/Minecraft-Holy-Client/releases/tag/preview) и скачайте установщик:
- - Windows - setup.exe
- - Linux - в ближайшее время будут бинарники
- - MacOs - в ближайшее время будут бинарники
-
-Далее установите и запустите программу.
+[Скачайте](https://raw.githubusercontent.com/Titlehhhh/HolyClientTestDeploy/main/preview/setup.exe) установщик, установите программу и запустите её.
 
 Как запустить стресс-тест смотрите [здесь](docs/RunStressTest.md).
 
