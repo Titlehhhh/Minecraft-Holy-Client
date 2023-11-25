@@ -255,6 +255,7 @@ class Build : NukeBuild
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
 				.SetConfiguration(Configuration)	
 				.SetPublishSingleFile(true)
+				
 				.SetOutput(ArtifactsDirectory)
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
@@ -273,7 +274,7 @@ class Build : NukeBuild
 	Target CreateRelease => _ => _
 	   .Description($"Creating release for the publishable version.")
 	   .Requires(() => Configuration.Equals(Configuration.Release))
-	   .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch() || GitRepository.IsOnReleaseBranch())
+	   .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch() || GitRepository.IsOnReleaseBranch())
 	   .Executes(async () =>
 	   {
 		   var credentials = new Credentials(GitHubActions.Token);
