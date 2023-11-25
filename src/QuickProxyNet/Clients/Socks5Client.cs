@@ -323,11 +323,11 @@ namespace QuickProxyNet
 
 				int need = 5;
 
-				await networkStream.ReadToEndAsync(buffer.AsMemory(0, need), need, cancellationToken);
+				await networkStream.ReadExactlyAsync(buffer.AsMemory(0, need), cancellationToken);
 
 
 				need = ProcessPartialConnectResponse(host, port, buffer);
-				await networkStream.ReadToEndAsync(buffer.AsMemory(0, need), need, cancellationToken);
+				await networkStream.ReadExactlyAsync(buffer.AsMemory(0, need), cancellationToken);
 			}
 			catch
 			{

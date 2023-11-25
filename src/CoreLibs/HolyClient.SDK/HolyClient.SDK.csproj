@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MinVer" Version="5.0.0-beta.1" PrivateAssets="All" />
 		<PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
 		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
 		<PackageReference Include="bodong.PropertyModels" Version="11.0.4.1" />

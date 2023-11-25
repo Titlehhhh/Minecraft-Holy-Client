@@ -8,6 +8,7 @@ namespace QuickProxyNet
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static async ValueTask<int> ReadToEndAsync(this Stream stream, Memory<byte> buffer, int length, CancellationToken token)
 		{
+
 			int totalRead = 0;
 			while (totalRead < length)
 			{

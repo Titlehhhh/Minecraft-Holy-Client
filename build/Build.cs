@@ -57,30 +57,11 @@ class Build : NukeBuild
 	public static int Main() => Execute<Build>(x => x.Publish);
 
 
-	//[Parameter("MyGet Feed Url for Public Access of Pre Releases")]
-	//readonly string MyGetNugetFeed;
-	//[Parameter("MyGet Api Key"), Secret]
-	//readonly string MyGetApiKey;
+	[GitRepository] readonly GitRepository GitRepository;
 
-	//[Parameter("Nuget Feed Url for Public Access of Pre Releases")]
-	//readonly string NugetFeed;
-	//[Parameter("Nuget Api Key"), Secret]
-	//readonly string NuGetApiKey;
+	[Parameter] readonly string NuGetApiKey;
 
-	//[Parameter("Copyright Details")]
-	//readonly string Copyright;
-
-	//[Parameter("Artifacts Type")]
-	//readonly string ArtifactsType;
-
-	//[Parameter("Excluded Artifacts Type")]
-	//readonly string ExcludedArtifactsType;
-
-	//[GitVersion]
-	//readonly GitVersion GitVersion;
-
-	//[GitRepository]
-	//readonly GitRepository GitRepository;
+	[Parameter] readonly string FeedzApiKey;
 
 	[Solution(GenerateProjects = true)]
 	readonly Solution Solution;
@@ -104,16 +85,41 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 			DotNetRestore(x =>
-				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop));
+				x.SetProjectFile(Solution));
 		});
 
 	Target Compile => _ => _
 		.DependsOn(Restore)
 		.Executes(() =>
 		{
+			//Build QuickProxy
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.ProxyLib.QuickProxyNet)
+				.EnableNoRestore());
+
+			//Build McProtoNet
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.McProtoNet.McProtoNet)
+				.EnableNoRestore());
+
+			//Build SDK
+
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.CoreLibs.HolyClient_Abstractions)
+				.EnableNoRestore());
+
+			DotNetBuild(x =>
+				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
+				.EnableNoRestore());
+
+			//Build HolyClient.Desktop
+
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore());
+
+
+
 		});
 
 
@@ -121,6 +127,7 @@ class Build : NukeBuild
 	readonly AbsolutePath HolyClient_Application = ArtifactsDirectory / "HolyClient.Desktop.application";
 	readonly AbsolutePath ApplicationFiles = ArtifactsDirectory / "Application Files";
 
+	readonly AbsolutePath NuGetDirectory = RootDirectory / "NuGetArtifacts";
 
 
 	readonly AbsolutePath ClickOnceArtifacts = RootDirectory / "ClickOnceArtifacts";
@@ -132,6 +139,13 @@ class Build : NukeBuild
 		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
+
+
+
+			DotNetPack(x => x
+				.SetProject(Solution.McProtoNet.McProtoNet)
+				.SetOutputDirectory(NuGetDirectory));
+
 			DotNetPublish(x => x
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore()
@@ -144,47 +158,68 @@ class Build : NukeBuild
 
 		});
 
-	private void PushToDeploy()
-	{
-		try
+	Target Pack => _ => _
+		.DependsOn(Compile)
+		.Executes(() =>
 		{
 
-			using (var repo = new Repository(ClickOnceArtifacts))
-			{
-				RepositoryStatus status = repo.RetrieveStatus();
-				var filePaths = status.Modified.Select(mods => mods.FilePath).ToList();
-				foreach (var file in filePaths)
-				{
-					repo.Index.Add(file);
-					repo.Index.Write();
-				}
-				var signature = new Signature("CI/CD", "email@email.com", DateTimeOffset.Now);
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.ProxyLib.QuickProxyNet)
+				.SetOutputDirectory(NuGetDirectory));
 
-				repo.Commit($"Auto generated", signature, signature);
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_NBT)
+				.SetOutputDirectory(NuGetDirectory));
 
-				var remote = repo.Network.Remotes["deploy"];
-				var options = new PushOptions
-				{
-					CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-					{
-						Username = GitHubActions.RepositoryOwner,
-						Password = GitHubActions.Token
-					}
-				};
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_Utils)
+				.SetOutputDirectory(NuGetDirectory));
 
-				var pushRefSpec = $"refs/heads/deploy";
-				repo.Network.Push(remote, pushRefSpec, options); //Push changes to the remote repository
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet_Core)
+				.SetOutputDirectory(NuGetDirectory));
 
-			}
-		}
-		catch (Exception ex)
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.McProtoNet.McProtoNet)
+				.SetOutputDirectory(NuGetDirectory));
+
+
+
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.CoreLibs.HolyClient_Abstractions)
+				.SetOutputDirectory(NuGetDirectory));
+			DotNetPack(x => x
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProject(Solution.CoreLibs.HolyClient_SDK)
+				.SetOutputDirectory(NuGetDirectory));
+
+
+
+
+		});
+
+	Target Push => _ => _
+		.DependsOn(Pack)
+		.Executes(() =>
 		{
-			Console.WriteLine(ex);
-
-			Console.WriteLine("Error occured during pushing the changes!");
-			Console.WriteLine("Please manually commit and push the changes!");
-			throw;
-		}
-	}
+			DotNetNuGetPush(s => s
+						.SetTargetPath($"{NuGetDirectory}/*.nupkg")
+						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
+						.SetApiKey(FeedzApiKey)
+					);
+		});
 
 }

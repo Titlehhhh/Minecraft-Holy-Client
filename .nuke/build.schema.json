@@ -66,6 +66,7 @@
             "enum": [
               "Clean",
               "Compile",
+              "Pack",
               "Publish",
               "Restore"
             ]
@@ -83,6 +84,7 @@
             "enum": [
               "Clean",
               "Compile",
+              "Pack",
               "Publish",
               "Restore"
             ]

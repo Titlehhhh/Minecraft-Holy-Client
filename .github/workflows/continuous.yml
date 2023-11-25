@@ -22,6 +22,7 @@ jobs:
     name: Build 
     runs-on: ubuntu-latest
     env:
+      FeedzApiKey: ${{ secrets.FEEDZ_TOKEN }}
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: true
@@ -33,26 +34,28 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100
+
     - uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
-   
+
+    - name: set script permissions
+      run: chmod +x ./build.sh
+
     - name: Publish
-      run: dotnet publish src/Platforms/HolyClient.Desktop/HolyClient.Desktop.csproj -p:PublishDir=${{ github.workspace }}/.artifacts -p:PublishProfile=FolderProfile 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        path: .artifacts
-        name: .artifacts    
+      run: ./build.sh push
+      
+        
 
 
 
