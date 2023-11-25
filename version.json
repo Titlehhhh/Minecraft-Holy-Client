@@ -3,7 +3,7 @@
   "version": "2.0-preview",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
-    "^refs/heads/v\\d+(?:\\.\\d+)?$"
+    "^refs/heads/development$"
   ],
   "release": {
     "firstUnstableTag": "preview"
