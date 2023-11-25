@@ -89,6 +89,7 @@ class Build : NukeBuild
 
 	Target Compile => _ => _
 		.DependsOn(Restore)
+		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
 			//Build QuickProxy
@@ -155,6 +156,7 @@ class Build : NukeBuild
 
 	Target Pack => _ => _
 		 .DependsOn(Clean, Compile)
+		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
 
@@ -219,6 +221,7 @@ class Build : NukeBuild
 
 	Target LibsPush => _ => _
 		.DependsOn(Pack)
+		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
 			DotNetNuGetPush(s => s						
@@ -232,19 +235,19 @@ class Build : NukeBuild
 
 	Target PublishApp => _ => _
 		.DependsOn(Pack)
+		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
 
 
 
-			DotNetPack(x => x
-				.SetProject(Solution.McProtoNet.McProtoNet)
-				.SetOutputDirectory(NuGetDirectory));
+			
 
 			DotNetPublish(x => x
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore()
+				.SetConfiguration(Configuration)	
 				.EnableNoBuild()
 				.SetPublishProfile("FolderProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
