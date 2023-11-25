@@ -231,7 +231,7 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		.DependsOn(LibsPush)
+		.DependsOn(Pack)
 		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
@@ -246,8 +246,6 @@ class Build : NukeBuild
 				.SetProject(Solution.Platfroms.HolyClient_Desktop)
 				.EnableNoRestore()
 				.EnableNoBuild()
-				.SetProperty("DebugType", "None")
-				.SetProperty("DebugSymbols", "False")
 				.SetPublishProfile("FolderProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
 

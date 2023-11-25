@@ -52,7 +52,7 @@ jobs:
     - name: set script permissions
       run: chmod +x ./build.sh
 
-    - name: Run './build.cmd Pack'
+    - name: Run './build.cmd'
       run: ./build.cmd PublishApp
       env:          
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
