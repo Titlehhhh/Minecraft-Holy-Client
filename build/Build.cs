@@ -22,7 +22,9 @@ using Microsoft.Build.Tasks;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities;
 using Nuke.Common.Tools.Git;
-using LibGit2Sharp;
+using Serilog;
+using Nuke.Common.Tools.NerdbankGitVersioning;
+
 
 
 class Build : NukeBuild
@@ -33,6 +35,7 @@ class Build : NukeBuild
 
 
 	[GitRepository] readonly GitRepository GitRepository;
+	
 
 	[Parameter] readonly string NuGetApiKey;
 
@@ -49,6 +52,21 @@ class Build : NukeBuild
 
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 	AbsolutePath SourceDirectory => RootDirectory / "src";
+
+	[GitVersion]
+	readonly GitVersion GitVersion;
+	[NerdbankGitVersioning]
+	readonly NerdbankGitVersioning NerdbankVersioning;
+
+	Target Print => _ => _
+		.Executes(() =>
+		{
+			File.WriteAllText("test.json", NerdbankVersioning.ToJson(new Newtonsoft.Json.JsonSerializerSettings
+			{
+				 Formatting = Newtonsoft.Json.Formatting.Indented
+			}));
+		});
+
 	Target Clean => _ => _
 		.Before(Restore)
 		.Executes(() =>
@@ -94,6 +112,8 @@ class Build : NukeBuild
 				.EnableNoRestore());
 
 			//Build HolyClient.Desktop
+
+
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
@@ -195,7 +215,7 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		.DependsOn(Compile)
+		.DependsOn(LibsPush)
 		.Produces(ArtifactsDirectory / "*.exe")
 		.Executes(() =>
 		{
