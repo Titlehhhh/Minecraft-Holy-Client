@@ -168,7 +168,7 @@ namespace QuickProxyNet
 			buffer[n++] = 1;
 			buffer[n++] = (byte)user.Length;
 			Buffer.BlockCopy(user, 0, buffer, n, user.Length);
-			n += user.Length;
+			n += user.Length; 
 			buffer[n++] = (byte)passwd.Length;
 			Buffer.BlockCopy(passwd, 0, buffer, n, passwd.Length);
 
