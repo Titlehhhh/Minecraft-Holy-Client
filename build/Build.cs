@@ -237,7 +237,7 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		.DependsOn(Pack)
+		.DependsOn(LibsPush)
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Triggers(CreateRelease)
 		.Executes(() =>
