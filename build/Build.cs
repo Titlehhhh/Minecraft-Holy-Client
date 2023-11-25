@@ -239,7 +239,7 @@ class Build : NukeBuild
 	Target PublishApp => _ => _
 		.DependsOn(Pack)
 		.Requires(() => Configuration.Equals(Configuration.Release))
-		
+		.Triggers(CreateRelease)
 		.Executes(() =>
 		{
 
