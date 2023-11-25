@@ -57,30 +57,11 @@ class Build : NukeBuild
 	public static int Main() => Execute<Build>(x => x.Publish);
 
 
-	//[Parameter("MyGet Feed Url for Public Access of Pre Releases")]
-	//readonly string MyGetNugetFeed;
-	//[Parameter("MyGet Api Key"), Secret]
-	//readonly string MyGetApiKey;
+	[GitRepository] readonly GitRepository GitRepository;
 
-	//[Parameter("Nuget Feed Url for Public Access of Pre Releases")]
-	//readonly string NugetFeed;
-	//[Parameter("Nuget Api Key"), Secret]
-	//readonly string NuGetApiKey;
+	[Parameter] readonly string NuGetApiKey;
 
-	//[Parameter("Copyright Details")]
-	//readonly string Copyright;
-
-	//[Parameter("Artifacts Type")]
-	//readonly string ArtifactsType;
-
-	//[Parameter("Excluded Artifacts Type")]
-	//readonly string ExcludedArtifactsType;
-
-	//[GitVersion]
-	//readonly GitVersion GitVersion;
-
-	//[GitRepository]
-	//readonly GitRepository GitRepository;
+	[Parameter] readonly string FeedzApiKey;
 
 	[Solution(GenerateProjects = true)]
 	readonly Solution Solution;
@@ -226,8 +207,19 @@ class Build : NukeBuild
 				.SetOutputDirectory(NuGetDirectory));
 
 
+
+
 		});
 
-
+	Target Push => _ => _
+		.DependsOn(Pack)
+		.Executes(() =>
+		{
+			DotNetNuGetPush(s => s
+						.SetTargetPath($"{NuGetDirectory}/*.nupkg")
+						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
+						.SetApiKey(FeedzApiKey)
+					);
+		});
 
 }
