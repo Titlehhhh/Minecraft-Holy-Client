@@ -25,36 +25,11 @@ using Nuke.Common.Tools.Git;
 using LibGit2Sharp;
 
 
-
-
-[GitHubActions("continuous",
-GitHubActionsImage.WindowsLatest,
-AutoGenerate = false,
-FetchDepth = 0,
-	OnPushBranches = new[]
-	{
-		"development"
-
-	},
-	OnPullRequestBranches = new[]
-	{
-		"development"
-	},
-	InvokedTargets = new[]
-	{
-		nameof(Publish),
-	},
-	EnableGitHubToken = true,
-	CacheKeyFiles = new[] { "**/global.json", "**/*.csproj" },
-	CacheIncludePatterns = new[] { ".nuke/temp", "~/.nuget/packages" },
-	CacheExcludePatterns = new string[0]
-
-)]
 class Build : NukeBuild
 {
 
 
-	public static int Main() => Execute<Build>(x => x.Publish);
+	public static int Main() => Execute<Build>(x => x.PublishApp);
 
 
 	[GitRepository] readonly GitRepository GitRepository;
@@ -141,32 +116,10 @@ class Build : NukeBuild
 
 
 
-	Target Publish => _ => _
-		.DependsOn(Compile)
-		.Produces(ArtifactsDirectory / "*.exe")
-		.Executes(() =>
-		{
-
-
-
-			DotNetPack(x => x
-				.SetProject(Solution.McProtoNet.McProtoNet)
-				.SetOutputDirectory(NuGetDirectory));
-
-			DotNetPublish(x => x
-				.SetProject(Solution.Platfroms.HolyClient_Desktop)
-				.EnableNoRestore()
-				.EnableNoBuild()
-				.SetProperty("DebugType", "None")
-				.SetProperty("DebugSymbols", "False")
-				.SetPublishProfile("FolderProfile")
-				.SetProperty("PublishDir", ArtifactsDirectory));
-
-
-		});
+	
 
 	Target Pack => _ => _
-		.DependsOn(Compile)
+		 .DependsOn(Clean, Compile)
 		.Executes(() =>
 		{
 
@@ -213,6 +166,7 @@ class Build : NukeBuild
 				.SetConfiguration(Configuration)
 				.SetProject(Solution.CoreLibs.HolyClient_Abstractions)
 				.SetOutputDirectory(ArtifactsDirectory));
+
 			DotNetPack(x => x
 				.EnableNoRestore()
 				.EnableNoBuild()
@@ -225,7 +179,9 @@ class Build : NukeBuild
 
 		});
 
-	Target Push => _ => _
+
+
+	Target LibsPush => _ => _
 		.DependsOn(Pack)
 		.Executes(() =>
 		{
@@ -236,4 +192,29 @@ class Build : NukeBuild
 					);
 		});
 
+
+
+	Target PublishApp => _ => _
+		.DependsOn(Compile)
+		.Produces(ArtifactsDirectory / "*.exe")
+		.Executes(() =>
+		{
+
+
+
+			DotNetPack(x => x
+				.SetProject(Solution.McProtoNet.McProtoNet)
+				.SetOutputDirectory(NuGetDirectory));
+
+			DotNetPublish(x => x
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)
+				.EnableNoRestore()
+				.EnableNoBuild()
+				.SetProperty("DebugType", "None")
+				.SetProperty("DebugSymbols", "False")
+				.SetPublishProfile("FolderProfile")
+				.SetProperty("PublishDir", ArtifactsDirectory));
+
+
+		});
 }

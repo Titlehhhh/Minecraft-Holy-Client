@@ -10,6 +10,9 @@
           "type": "boolean",
           "description": "Indicates to continue a previously failed build attempt"
         },
+        "FeedzApiKey": {
+          "type": "string"
+        },
         "Help": {
           "type": "boolean",
           "description": "Shows the help text for this build assembly"
@@ -39,6 +42,9 @@
           "type": "boolean",
           "description": "Disables displaying the NUKE logo"
         },
+        "NuGetApiKey": {
+          "type": "string"
+        },
         "Partition": {
           "type": "string",
           "description": "Partition to use on CI"
@@ -66,8 +72,9 @@
             "enum": [
               "Clean",
               "Compile",
+              "LibsPush",
               "Pack",
-              "Publish",
+              "PublishApp",
               "Restore"
             ]
           }
@@ -84,8 +91,9 @@
             "enum": [
               "Clean",
               "Compile",
+              "LibsPush",
               "Pack",
-              "Publish",
+              "PublishApp",
               "Restore"
             ]
           }
