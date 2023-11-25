@@ -24,6 +24,10 @@ using Nuke.Common.Utilities;
 using Nuke.Common.Tools.Git;
 using Serilog;
 using Nuke.Common.Tools.NerdbankGitVersioning;
+using Nuke.Common.Tools.OctoVersion;
+using Nuke.Common.Tools.MinVer;
+using Octokit.Internal;
+using Octokit;
 
 
 
@@ -31,7 +35,7 @@ class Build : NukeBuild
 {
 
 
-	public static int Main() => Execute<Build>(x => x.PublishApp);
+	public static int Main() => Execute<Build>(x => x.Print);
 
 
 	[GitRepository] readonly GitRepository GitRepository;
@@ -53,17 +57,17 @@ class Build : NukeBuild
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 
-	[GitVersion]
-	readonly GitVersion GitVersion;
-	[NerdbankGitVersioning]
-	readonly NerdbankGitVersioning NerdbankVersioning;
+	
+
+	[MinVer]
+	readonly MinVer MinVer;
 
 	Target Print => _ => _
 		.Executes(() =>
 		{
-			File.WriteAllText("test.json", NerdbankVersioning.ToJson(new Newtonsoft.Json.JsonSerializerSettings
+			Console.WriteLine(MinVer.ToJson(new Newtonsoft.Json.JsonSerializerSettings
 			{
-				 Formatting = Newtonsoft.Json.Formatting.Indented
+				Formatting = Newtonsoft.Json.Formatting.Indented
 			}));
 		});
 
@@ -90,12 +94,16 @@ class Build : NukeBuild
 			//Build QuickProxy
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.ProxyLib.QuickProxyNet)
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			//Build McProtoNet
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.McProtoNet.McProtoNet)
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
@@ -103,11 +111,16 @@ class Build : NukeBuild
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.CoreLibs.HolyClient_Abstractions)
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
+				
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
@@ -117,6 +130,8 @@ class Build : NukeBuild
 
 			DotNetBuild(x =>
 				x.SetProjectFile(Solution.Platfroms.HolyClient_Desktop)
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
@@ -147,6 +162,7 @@ class Build : NukeBuild
 				.EnableNoRestore()
 				.EnableNoBuild()
 				.SetConfiguration(Configuration)
+				
 				.SetProject(Solution.ProxyLib.QuickProxyNet)
 				.SetOutputDirectory(ArtifactsDirectory));
 
@@ -205,7 +221,7 @@ class Build : NukeBuild
 		.DependsOn(Pack)
 		.Executes(() =>
 		{
-			DotNetNuGetPush(s => s
+			DotNetNuGetPush(s => s						
 						.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
 						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
 						.SetApiKey(FeedzApiKey)
@@ -237,4 +253,64 @@ class Build : NukeBuild
 
 
 		});
+
+
+
+	Target CreateRelease => _ => _
+	   .Description($"Creating release for the publishable version.")
+	   .Requires(() => Configuration.Equals(Configuration.Release))
+	   .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch() || GitRepository.IsOnReleaseBranch())
+	   .Executes(async () =>
+	   {
+		   var credentials = new Credentials(GitHubActions.Token);
+		   GitHubTasks.GitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
+			   new InMemoryCredentialStore(credentials));
+
+		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
+
+		   var releaseTag = MinVer.Version;
+		   var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
+		   var latestChangeLog = changeLogSectionEntries
+			   .Aggregate((c, n) => c + Environment.NewLine + n);
+
+		   var newRelease = new NewRelease(releaseTag)
+		   {
+			   //TargetCommitish = ,
+			   Draft = true,
+			   Name = $"v{releaseTag}",
+			   Prerelease = !string.IsNullOrEmpty(MinVer.MinVerPreRelease),
+			   Body = "Test Release"
+		   };
+
+		   var createdRelease = await GitHubTasks
+									   .GitHubClient
+									   .Repository
+									   .Release.Create(owner, name, newRelease);
+
+		   //   GlobFiles(ArtifactsDirectory, ArtifactsType)
+		   //	  .Where(x => !x.EndsWith(ExcludedArtifactsType))
+		   //	  .ForEach(async x => );
+
+		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "HolyClient.Desktop.exe");
+
+		   await GitHubTasks
+					  .GitHubClient
+					  .Repository
+					  .Release
+			  .Edit(owner, name, createdRelease.Id, new ReleaseUpdate { Draft = false });
+	   });
+
+
+	private static async Task UploadReleaseAssetToGithub(Release release, string asset)
+	{
+		await using var artifactStream = File.OpenRead(asset);
+		var fileName = Path.GetFileName(asset);
+		var assetUpload = new ReleaseAssetUpload
+		{
+			FileName = fileName,
+			ContentType = PackageContentType,
+			RawData = artifactStream,
+		};
+		await GitHubTasks.GitHubClient.Repository.Release.UploadAsset(release, assetUpload);
+	}
 }

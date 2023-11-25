@@ -52,8 +52,11 @@ jobs:
     - name: set script permissions
       run: chmod +x ./build.sh
 
-    - name: Publish
-      run: ./build.sh push
+    - name: Run './build.cmd Pack'
+      run: ./build.cmd PublishApp
+      env:          
+          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
         
 
