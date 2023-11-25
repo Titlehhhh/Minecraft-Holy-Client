@@ -53,7 +53,7 @@ class Build : NukeBuild
 	static AbsolutePath ArtifactsDirectory => RootDirectory / ".artifacts";
 
 	static readonly string PackageContentType = "application/octet-stream";
-	static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
+	//static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
 	[Parameter]
 
@@ -284,9 +284,9 @@ class Build : NukeBuild
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
 		   var releaseTag = MinVer.Version;
-		   var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
-		   var latestChangeLog = changeLogSectionEntries
-			   .Aggregate((c, n) => c + Environment.NewLine + n);
+		  // var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
+		   //var latestChangeLog = changeLogSectionEntries
+			//   .Aggregate((c, n) => c + Environment.NewLine + n);
 
 		   var newRelease = new NewRelease(releaseTag)
 		   {
