@@ -249,6 +249,7 @@ class Build : NukeBuild
 				.EnableNoRestore()
 				.SetConfiguration(Configuration)	
 				.EnableNoBuild()
+				.SetRuntime("win-x64")
 				.SetPublishProfile("FolderProfile")
 				.SetProperty("PublishDir", ArtifactsDirectory));
 
