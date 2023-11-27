@@ -3,14 +3,18 @@ name: "Build"
 on:
   push:
     branches:
-      - development
+      - preview
+      - main
+      - rc
     paths-ignore:
       - '**/*.md'
       - '**/*.gitignore'
       - '**/*.gitattributes'
   pull_request:
     branches:
-      - development
+      - preview
+      - main
+      - rc
     paths-ignore:
       - '**/*.md'
       - '**/*.gitignore'

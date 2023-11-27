@@ -40,7 +40,7 @@ class Build : NukeBuild
 
 
 	[GitRepository] readonly GitRepository GitRepository;
-	
+
 
 	[Parameter] readonly string NuGetApiKey;
 
@@ -60,7 +60,7 @@ class Build : NukeBuild
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 
-	
+
 
 	[MinVer]
 	readonly MinVer MinVer;
@@ -78,7 +78,7 @@ class Build : NukeBuild
 		.Before(Restore)
 		.Executes(() =>
 		{
-			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x=>x.DeleteDirectory());
+			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
 			//TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
 			ArtifactsDirectory.CreateOrCleanDirectory();
 		});
@@ -124,7 +124,7 @@ class Build : NukeBuild
 				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
 				.SetAssemblyVersion(MinVer.AssemblyVersion)
 				.SetFileVersion(MinVer.FileVersion)
-				
+
 				.SetConfiguration(Configuration)
 				.EnableNoRestore());
 
@@ -155,7 +155,7 @@ class Build : NukeBuild
 
 
 
-	
+
 
 	Target Pack => _ => _
 		 .DependsOn(Clean, Compile)
@@ -167,7 +167,7 @@ class Build : NukeBuild
 				.EnableNoRestore()
 				.EnableNoBuild()
 				.SetConfiguration(Configuration)
-				
+
 				.SetProject(Solution.ProxyLib.QuickProxyNet)
 				.SetOutputDirectory(ArtifactsDirectory));
 
@@ -227,7 +227,7 @@ class Build : NukeBuild
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
-			DotNetNuGetPush(s => s						
+			DotNetNuGetPush(s => s
 						.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
 						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
 						.SetApiKey(FeedzApiKey)
@@ -243,7 +243,7 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 
-
+			
 
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
@@ -252,11 +252,11 @@ class Build : NukeBuild
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
-				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
-				.SetConfiguration(Configuration)	
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)
+				.SetConfiguration(Configuration)
 				.SetPublishSingleFile(true)
-				.SetProperty("DebugSymbols","False")
-				.SetProperty("DebugType","None")
+				.SetProperty("DebugSymbols", "False")
+				.SetProperty("DebugType", "None")
 				.SetOutput(ArtifactsDirectory)
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
@@ -265,7 +265,7 @@ class Build : NukeBuild
 					.SetFramework(v.framework)
 					.SetRuntime(v.runtime)));
 
-			
+
 
 
 
@@ -288,7 +288,7 @@ class Build : NukeBuild
 		   var releaseTag = MinVer.Version;
 		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
 		   //var latestChangeLog = changeLogSectionEntries
-			//   .Aggregate((c, n) => c + Environment.NewLine + n);
+		   //   .Aggregate((c, n) => c + Environment.NewLine + n);
 
 		   var newRelease = new NewRelease(releaseTag)
 		   {
@@ -310,11 +310,15 @@ class Build : NukeBuild
 
 		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "HolyClient.Desktop.exe");
 
-		   await GitHubTasks
-					  .GitHubClient
-					  .Repository
-					  .Release
-			  .Edit(owner, name, createdRelease.Id, new ReleaseUpdate { Draft = false });
+
+
+		   var release = await GitHubTasks
+					   .GitHubClient
+					   .Repository
+					   .Release
+			   .Edit(owner, name, createdRelease.Id, new ReleaseUpdate { Draft = false });
+
+		   
 	   });
 
 
