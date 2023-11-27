@@ -10,15 +10,15 @@ on:
       - '**/*.md'
       - '**/*.gitignore'
       - '**/*.gitattributes'
-  pull_request:
-    branches:
-      - preview
-      - main
-      - rc
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
+  #pull_request:
+  #  branches:
+  #    - preview
+  #    - main
+  #    - rc
+  #  paths-ignore:
+  #    - '**/*.md'
+  #    - '**/*.gitignore'
+  #    - '**/*.gitattributes'
   workflow_dispatch:
       
 jobs:
