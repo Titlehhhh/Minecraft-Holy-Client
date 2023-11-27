@@ -227,6 +227,8 @@ class Build : NukeBuild
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
+			Console.WriteLine("Version: " + MinVer.Version);
+
 			DotNetNuGetPush(s => s
 						.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
 						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
@@ -243,7 +245,7 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 
-			
+
 
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
@@ -276,7 +278,6 @@ class Build : NukeBuild
 	Target CreateRelease => _ => _
 	   .Description($"Creating release for the publishable version.")
 	   .Requires(() => Configuration.Equals(Configuration.Release))
-	   .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch() || GitRepository.IsOnReleaseBranch())
 	   .Executes(async () =>
 	   {
 		   var credentials = new Credentials(GitHubActions.Token);
@@ -296,7 +297,7 @@ class Build : NukeBuild
 			   Draft = true,
 			   Name = $"v{releaseTag}",
 			   Prerelease = !string.IsNullOrEmpty(MinVer.MinVerPreRelease),
-			   Body = "Test Release"
+			   Body = "Preview release"
 		   };
 
 		   var createdRelease = await GitHubTasks
@@ -318,7 +319,7 @@ class Build : NukeBuild
 					   .Release
 			   .Edit(owner, name, createdRelease.Id, new ReleaseUpdate { Draft = false });
 
-		   
+
 	   });
 
 
