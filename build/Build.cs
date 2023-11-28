@@ -250,7 +250,7 @@ class Build : NukeBuild
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
 				from framework in project.GetTargetFrameworks()
-				from runtime in new[] { "win-x64"/*, "osx-x64", "linux-x64"*/ }
+				from runtime in new[] { "win-x64", "osx-x64", "linux-x64" }
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
@@ -259,11 +259,11 @@ class Build : NukeBuild
 				.SetPublishSingleFile(true)
 				.SetProperty("DebugSymbols", "False")
 				.SetProperty("DebugType", "None")
-				.SetOutput(ArtifactsDirectory)
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
 				 .CombineWith(publishCombinations, (_, v) => _
 					.SetProject(v.project)
+					.SetOutput(ArtifactsDirectory / v.runtime)
 					.SetFramework(v.framework)
 					.SetRuntime(v.runtime)));
 
@@ -309,7 +309,9 @@ class Build : NukeBuild
 		   //	  .Where(x => !x.EndsWith(ExcludedArtifactsType))
 		   //	  .ForEach(async x => );
 
-		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "HolyClient.Desktop.exe");
+		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "win-x64" / "HolyClient.Desktop.exe");
+		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "osx-x64" / "HolyClient.Desktop");
+		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "linux-x64" / "HolyClient.Desktop.app");
 
 
 
