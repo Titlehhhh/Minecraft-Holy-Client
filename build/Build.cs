@@ -154,7 +154,7 @@ class Build : NukeBuild
 	readonly AbsolutePath ClickOnceArtifacts = RootDirectory / "ClickOnceArtifacts";
 
 
-
+	public static string[] Runtimes = { "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm", "linux-arm64", "osx-x64", "osx-arm64" };
 
 
 	Target Pack => _ => _
@@ -250,7 +250,7 @@ class Build : NukeBuild
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
 				from framework in project.GetTargetFrameworks()
-				from runtime in new[] { "win-x64", "osx-x64", "linux-x64" }
+				from runtime in Runtimes
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
@@ -309,9 +309,16 @@ class Build : NukeBuild
 		   //	  .Where(x => !x.EndsWith(ExcludedArtifactsType))
 		   //	  .ForEach(async x => );
 
-		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "win-x64" / "HolyClient.Desktop.exe");
-		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "osx-x64" / "HolyClient.Desktop");
-		   await UploadReleaseAssetToGithub(createdRelease, ArtifactsDirectory / "linux-x64" / "HolyClient.Desktop.app");
+		   foreach (var rid in Runtimes)
+		   {
+			   var folderArtifact = ArtifactsDirectory / rid;
+			   var archiveFile = ArtifactsDirectory / $"Minecraft-Holy-Client-{rid}.zip";
+			   folderArtifact.ZipTo(archiveFile);
+
+			   await UploadReleaseAssetToGithub(createdRelease, archiveFile);
+
+		   }
+
 
 
 
