@@ -1,5 +1,5 @@
-﻿using MessagePack;
-using HolyClient.Core.Infrastructure;
+﻿using HolyClient.Core.Infrastructure;
+using MessagePack;
 using MessagePack.Formatters;
 
 namespace HolyClient.StressTest
@@ -43,13 +43,13 @@ namespace HolyClient.StressTest
 
 		public void Serialize(ref MessagePackWriter writer, PluginTypeReference value, MessagePackSerializerOptions options)
 		{
-			if(string.IsNullOrWhiteSpace(value.AssemblyName)
+			if (string.IsNullOrWhiteSpace(value.AssemblyName)
 				|| string.IsNullOrWhiteSpace(value.FullName))
 			{
 				writer.WriteNil();
 				return;
-			}	
-			
+			}
+
 			writer.WriteArrayHeader(2);
 			writer.Write(value.AssemblyName);
 			writer.Write(value.FullName);

@@ -1,38 +1,38 @@
-﻿using System.Text;
+﻿using System.Globalization;
 using System.Net.Security;
-using System.Globalization;
 //#if SERIALIZABLE
 //using System.Security;
 //using System.Runtime.Serialization;
 //#endif
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace QuickProxyNet
 {
 
-//#if SERIALIZABLE
-//	[Serializable]
-//#endif
+	//#if SERIALIZABLE
+	//	[Serializable]
+	//#endif
 	public class SslHandshakeException : Exception
 	{
 		const string a = "";
 		const string SslHandshakeHelpLink = "https://github.com/jstedfast/MailKit/blob/master/FAQ.md#SslHandshakeException";
 		const string DefaultMessage = "An error occurred while attempting to establish an SSL or TLS connection.";
 
-//#if SERIALIZABLE
-//																								protected SslHandshakeException (SerializationInfo info, StreamingContext context) : base (info, context)
-//		{
-//			var base64 = info.GetString ("ServerCertificate");
+		//#if SERIALIZABLE
+		//																								protected SslHandshakeException (SerializationInfo info, StreamingContext context) : base (info, context)
+		//		{
+		//			var base64 = info.GetString ("ServerCertificate");
 
-//			if (base64 != null)
-//				ServerCertificate = new X509Certificate2 (Convert.FromBase64String (base64));
+		//			if (base64 != null)
+		//				ServerCertificate = new X509Certificate2 (Convert.FromBase64String (base64));
 
-//			base64 = info.GetString ("RootCertificateAuthority");
+		//			base64 = info.GetString ("RootCertificateAuthority");
 
-//			if (base64 != null)
-//				RootCertificateAuthority = new X509Certificate2 (Convert.FromBase64String (base64));
-//		}
-//#endif
+		//			if (base64 != null)
+		//				RootCertificateAuthority = new X509Certificate2 (Convert.FromBase64String (base64));
+		//		}
+		//#endif
 
 		public SslHandshakeException(string message, Exception innerException) : base(message, innerException)
 		{
@@ -59,23 +59,23 @@ namespace QuickProxyNet
 			get; private set;
 		}
 
-//#if SERIALIZABLE
-//																												[SecurityCritical]
-//		public override void GetObjectData (SerializationInfo info, StreamingContext context)
-//		{
-//			base.GetObjectData (info, context);
+		//#if SERIALIZABLE
+		//																												[SecurityCritical]
+		//		public override void GetObjectData (SerializationInfo info, StreamingContext context)
+		//		{
+		//			base.GetObjectData (info, context);
 
-//			if (ServerCertificate != null)
-//				info.AddValue ("ServerCertificate", Convert.ToBase64String (ServerCertificate.GetRawCertData ()));
-//			else
-//				info.AddValue ("ServerCertificate", null, typeof (string));
+		//			if (ServerCertificate != null)
+		//				info.AddValue ("ServerCertificate", Convert.ToBase64String (ServerCertificate.GetRawCertData ()));
+		//			else
+		//				info.AddValue ("ServerCertificate", null, typeof (string));
 
-//			if (RootCertificateAuthority != null)
-//				info.AddValue ("RootCertificateAuthority", Convert.ToBase64String (RootCertificateAuthority.GetRawCertData ()));
-//			else
-//				info.AddValue ("RootCertificateAuthority", null, typeof (string));
-//		}
-//#endif
+		//			if (RootCertificateAuthority != null)
+		//				info.AddValue ("RootCertificateAuthority", Convert.ToBase64String (RootCertificateAuthority.GetRawCertData ()));
+		//			else
+		//				info.AddValue ("RootCertificateAuthority", null, typeof (string));
+		//		}
+		//#endif
 
 		internal static SslHandshakeException Create(ref SslCertificateValidationInfo validationInfo, Exception ex, bool starttls, string protocol, string host, int port, int sslPort, params int[] standardPorts)
 		{

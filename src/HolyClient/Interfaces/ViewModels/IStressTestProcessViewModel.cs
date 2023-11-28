@@ -1,5 +1,4 @@
 ﻿using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -3,7 +3,6 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
-using Avalonia.Threading;
 using SkiaSharp;
 using System;
 using System.IO;
@@ -90,19 +89,19 @@ namespace HolyClient.CustomControls
 			using (SKImageFilter? filter = SKImageFilter.CreateBlur(_blur, _blur, SKShaderTileMode.Clamp))
 			using (SKPaint blurPaint = new SKPaint { Shader = backdropShader, ImageFilter = filter })
 			{
-				blurred.Canvas.DrawRoundRect(0, 0, (float)_bounds.Width, (float)_bounds.Height,10,10, blurPaint);
+				blurred.Canvas.DrawRoundRect(0, 0, (float)_bounds.Width, (float)_bounds.Height, 10, 10, blurPaint);
 
 				using (SKImage? blurSnap = blurred.Snapshot())
 				using (SKShader? blurSnapShader = SKShader.CreateImage(blurSnap))
 				using (SKPaint blurSnapPaint = new SKPaint { Shader = blurSnapShader, IsAntialias = true })
 				{
-					
+
 
 					// Rendering twice to reduce opacity
 					lease.SkCanvas.DrawRoundRect(
 						0,
-						0, 
-						(float)_bounds.Width, 
+						0,
+						(float)_bounds.Width,
 						(float)_bounds.Height,
 						10, 10,
 						blurSnapPaint);
@@ -142,8 +141,8 @@ namespace HolyClient.CustomControls
 					acrylliPaint.Shader = compose;
 					acrylliPaint.IsAntialias = true;
 					lease.SkCanvas.DrawRoundRect(
-						0, 
-						0, 						
+						0,
+						0,
 						(float)_bounds.Width,
 						(float)_bounds.Height,
 						10,

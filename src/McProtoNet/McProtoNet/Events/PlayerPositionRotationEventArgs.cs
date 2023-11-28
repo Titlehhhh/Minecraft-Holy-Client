@@ -13,7 +13,7 @@
 		public byte Flags { get; internal set; }
 		public int TeleportId { get; internal set; }
 
-		
+
 
 		public Vector3 GetPosition(Vector3 current)
 		{

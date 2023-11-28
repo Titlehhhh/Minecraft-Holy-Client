@@ -3,7 +3,6 @@ using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using HolyClient.AppState;
 using HolyClient.Contracts.Models;
-using HolyClient.Contracts.Services;
 using HolyClient.Core.Infrastructure;
 using HolyClient.Localization;
 using HolyClient.Models;

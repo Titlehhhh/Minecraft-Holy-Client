@@ -28,7 +28,7 @@ public partial class ImportProxyDialogContent : ReactiveUserControl<ImportProxyV
 		// Start async operation to open the dialog.
 		var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
 		{
-			Title = "Открыть файл с прокси",
+			Title = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ",
 			AllowMultiple = false
 		});
 		if (files is { Count: 1 })

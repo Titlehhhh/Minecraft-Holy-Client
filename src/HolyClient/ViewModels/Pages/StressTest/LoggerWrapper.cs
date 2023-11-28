@@ -1,14 +1,11 @@
-﻿using Avalonia.Threading;
-using DynamicData;
+﻿using DynamicData;
 using ReactiveUI;
 using Serilog;
 using Serilog.Events;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace HolyClient.ViewModels;
 
@@ -29,9 +26,9 @@ public class LoggerWrapper : ILogger, IDisposable
 	{
 		_cleanUp = _logs
 			.Connect()
-			
+
 			.ObserveOn(RxApp.MainThreadScheduler)
-			.Transform(x=>new LogEventViewModel(x))
+			.Transform(x => new LogEventViewModel(x))
 			.OnItemAdded(x =>
 			{
 				if (Events.Count >= 200)
@@ -39,7 +36,7 @@ public class LoggerWrapper : ILogger, IDisposable
 					Events.RemoveAt(0);
 				}
 				Events.Add(x);
-			})			
+			})
 			.Subscribe();
 
 		//Events = events;
@@ -63,11 +60,11 @@ public class LogEventViewModel
 
 		string ex = "";
 
-		if(logEvent.Exception is not null)
+		if (logEvent.Exception is not null)
 		{
 			ex = $"\n{logEvent.Exception.Message}\n{logEvent.Exception.StackTrace}";
 		}
-		
-		Text = $"[{time} {logEvent.Level}] {logEvent.MessageTemplate}{ex}"; 
+
+		Text = $"[{time} {logEvent.Level}] {logEvent.MessageTemplate}{ex}";
 	}
 }

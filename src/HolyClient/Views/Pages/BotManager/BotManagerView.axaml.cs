@@ -18,11 +18,11 @@ public partial class BotManagerView : ReactiveUserControl<IBotManagerViewModel>
 				ContentDialog contentDialog = new ContentDialog()
 				{
 					Title = Loc.Tr("BotManager.DialogRemoveConfirmRequest"),
-					
+
 					IsSecondaryButtonEnabled = true,
 					IsPrimaryButtonEnabled = true,
 					PrimaryButtonText = Loc.Tr("Yes"),
-					SecondaryButtonText = Loc.Tr("No"),					
+					SecondaryButtonText = Loc.Tr("No"),
 				};
 
 				var result = await contentDialog.ShowAsync();

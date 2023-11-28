@@ -49,7 +49,7 @@ namespace HolyClient.CustomControls
 				}
 				catch
 				{
-					
+
 				}
 			}
 		}

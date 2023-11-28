@@ -31,7 +31,7 @@ public partial class AssemblyManagerView : ReactiveUserControl<AssemblyManagerVi
 		var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
 		{
 			Title = "Open assembly File",
-			
+
 			AllowMultiple = false
 		});
 

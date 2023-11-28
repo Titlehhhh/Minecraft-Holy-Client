@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.ObjectPool;
-using Microsoft.IO;
+﻿using Microsoft.IO;
 using System.Buffers;
 using System.IO.Compression;
 
@@ -12,7 +11,7 @@ namespace McProtoNet.Core.Protocol
 		private Stream _baseStream;
 		private RecyclableMemoryStream fastStream = MSmanager.GetStream() as RecyclableMemoryStream;
 
-		
+
 
 		public MinecraftPacketReader(Stream baseStream, bool disposeStream)
 		{
@@ -221,7 +220,7 @@ namespace McProtoNet.Core.Protocol
 			GC.SuppressFinalize(this);
 		}
 
-		
+
 	}
 }
 

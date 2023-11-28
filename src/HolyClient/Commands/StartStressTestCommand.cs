@@ -2,7 +2,6 @@
 using HolyClient.ViewModels;
 using ReactiveUI;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace HolyClient.Commands
 
 			canExecute.Subscribe(x =>
 			{
-				Console.WriteLine("CanExecute: "+_canExecute);
+				Console.WriteLine("CanExecute: " + _canExecute);
 				_canExecute = x;
 				this.CanExecuteChanged?.Invoke(this, new EventArgs());
 			}).DisposeWith(d);
@@ -53,15 +52,15 @@ namespace HolyClient.Commands
 			LoggerWrapper loggerWrapper = new LoggerWrapper();
 
 			ILogger logger = loggerWrapper;
-			
+
 			try
 			{
 
-				
+
 
 				StressTestLoadingViewModel loadingVM = new StressTestLoadingViewModel(this.screen, _model);
 
-				StressTestProcessViewModel proccess = new StressTestProcessViewModel(this.screen, _model,loggerWrapper);
+				StressTestProcessViewModel proccess = new StressTestProcessViewModel(this.screen, _model, loggerWrapper);
 				await screen.Router.Navigate.Execute(loadingVM);
 
 

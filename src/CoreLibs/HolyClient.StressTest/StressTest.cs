@@ -1,7 +1,9 @@
 ﻿using DynamicData;
+using DynamicData.Kernel;
 using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
+using HolyClient.Core.Infrastructure;
 using McProtoNet;
 using McProtoNet.Utils;
 using MessagePack;
@@ -10,8 +12,6 @@ using ReactiveUI.Fody.Helpers;
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using HolyClient.Core.Infrastructure;
-using DynamicData.Kernel;
 
 namespace HolyClient.StressTest
 {

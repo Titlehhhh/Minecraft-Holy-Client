@@ -1,13 +1,10 @@
 ﻿using Avalonia;
-using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
 using HolyClient.AppState;
 using HolyClient.Services;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 
 namespace HolyClient.Desktop
 {
@@ -16,7 +13,7 @@ namespace HolyClient.Desktop
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			
+
 
 			BuildAvaloniaApp()
 			.StartWithClassicDesktopLifetime(args);

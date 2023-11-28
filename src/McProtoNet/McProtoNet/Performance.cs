@@ -1,7 +1,6 @@
 ﻿using McProtoNet.Core.IO;
 using McProtoNet.Events;
 using Microsoft.Extensions.ObjectPool;
-using System.Collections.Concurrent;
 
 namespace McProtoNet
 {
@@ -29,7 +28,7 @@ namespace McProtoNet
 	{
 		private readonly static DefaultObjectPoolProvider _poolProvider = new();
 
-		public static readonly ObjectPool<ChatMessageEventArgs> ChatPacketPool = 
+		public static readonly ObjectPool<ChatMessageEventArgs> ChatPacketPool =
 			_poolProvider.Create<ChatMessageEventArgs>();
 
 		public static readonly ObjectPool<DisconnectEventArgs> DisconnectEventPool =

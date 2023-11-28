@@ -1,8 +1,6 @@
-﻿using HolyClient.Contracts.Services;
-using HolyClient.LoadPlugins.Models;
+﻿using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace HolyClient.Contracts.Models
 {
@@ -14,7 +12,7 @@ namespace HolyClient.Contracts.Models
 		void AddPlugin(IBotPluginCreater plugin);
 		void RemovePlugin(BotPluginReference token);
 
-	//	Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references);
+		//	Task Initialization(IPluginProvider pluginProvider, IEnumerable<BotPluginReference> references);
 	}
 }
 

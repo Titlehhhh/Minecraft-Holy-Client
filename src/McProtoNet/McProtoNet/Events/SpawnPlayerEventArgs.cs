@@ -11,7 +11,7 @@
 		public byte Yaw { get; internal set; }
 		public byte Pitch { get; internal set; }
 
-		
+
 
 		public Vector3 GetPosition() => new Vector3(X, Y, Z);
 

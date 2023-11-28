@@ -1,6 +1,5 @@
 ﻿using HolyClient.Common;
 using HolyClient.Contracts.Models;
-using HolyClient.Contracts.Services;
 using HolyClient.Core.Models.BotManager;
 using McProtoNet;
 using MessagePack;
@@ -10,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace HolyClient.Models;
 [MessagePackObject(keyAsPropertyName: true)]

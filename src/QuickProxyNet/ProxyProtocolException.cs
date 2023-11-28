@@ -5,17 +5,17 @@
 
 namespace QuickProxyNet
 {
-//#if SERIALIZABLE
-//	[Serializable]
-//#endif
+	//#if SERIALIZABLE
+	//	[Serializable]
+	//#endif
 	public class ProxyProtocolException : Exception
 	{
-//#if SERIALIZABLE
-//																								[SecuritySafeCritical]
-//		protected ProxyProtocolException (SerializationInfo info, StreamingContext context) : base (info, context)
-//		{
-//		}
-//#endif
+		//#if SERIALIZABLE
+		//																								[SecuritySafeCritical]
+		//		protected ProxyProtocolException (SerializationInfo info, StreamingContext context) : base (info, context)
+		//		{
+		//		}
+		//#endif
 
 		public ProxyProtocolException(string message, Exception innerException) : base(message, innerException)
 		{

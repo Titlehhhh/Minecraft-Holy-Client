@@ -1,9 +1,5 @@
 ﻿using DynamicData;
-using HolyClient.Contracts.Services;
 using HolyClient.Core.Infrastructure;
-using HolyClient.LoadPlugins;
-using HolyClient.LoadPlugins.Models;
-using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
 using Splat;
 using System;

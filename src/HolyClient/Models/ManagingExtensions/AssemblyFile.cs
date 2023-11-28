@@ -48,9 +48,9 @@ namespace HolyClient.Models.ManagingExtensions
 					.GetExportedTypes()
 					.Where(x =>
 					{
-						Console.WriteLine("Type: "+x);
+						Console.WriteLine("Type: " + x);
 
-						var g= !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x);
+						var g = !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x);
 						return g;
 					})
 					.ToArray();

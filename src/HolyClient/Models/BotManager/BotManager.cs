@@ -1,11 +1,8 @@
 ﻿using DynamicData;
 using HolyClient.Contracts.Models;
-using HolyClient.Contracts.Services;
-using HolyClient.Core.Infrastructure;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Splat;
 using System;
 using System.Collections.Generic;
 using System.Linq;

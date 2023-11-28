@@ -1,14 +1,10 @@
-﻿using DynamicData;
-using HolyClient.Commands;
+﻿using HolyClient.Commands;
 using HolyClient.Contracts.Models;
-using HolyClient.Contracts.Services;
-using HolyClient.Core.Infrastructure;
 using HolyClient.LoadPlugins.Models;
 using HolyClient.Models;
 using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Splat;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

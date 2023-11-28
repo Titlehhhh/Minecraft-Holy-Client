@@ -10,10 +10,11 @@ public partial class StressTestProcessView : ReactiveUserControl<IStressTestProc
 	{
 		InitializeComponent();
 
-		this.WhenActivated((d) => {
+		this.WhenActivated((d) =>
+		{
 
 			this.ViewModel.Logs.CollectionChanged += Logs_CollectionChanged;
-		
+
 		});
 
 		//ProxyPieChart.LegendPosition = LiveChartsCore.Measure.LegendPosition.Top;
@@ -24,7 +25,7 @@ public partial class StressTestProcessView : ReactiveUserControl<IStressTestProc
 		//ProxyPieChart.Width = 250;
 		//ProxyPieChart.Title = new LabelVisual
 		//{
-		//	Text = "Прокси",
+		//	Text = "пїЅпїЅпїЅпїЅпїЅпїЅ",
 		//	TextSize = 16,
 		//	Paint = new SolidColorPaint(SKColors.White)
 		//};

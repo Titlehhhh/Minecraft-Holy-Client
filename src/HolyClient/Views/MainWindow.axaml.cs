@@ -1,8 +1,5 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Diagnostics;
-using Avalonia.PropertyGrid.Controls;
-using Avalonia.PropertyGrid.Controls.Factories;
 using FluentAvalonia.UI.Windowing;
 
 namespace HolyClient.Views
@@ -12,12 +9,12 @@ namespace HolyClient.Views
 		public MainWindow()
 		{
 			InitializeComponent();
-			
+
 #if DEBUG
-			
+
 			this.AttachDevTools(new DevToolsOptions()
 			{
-				
+
 			});
 #endif
 

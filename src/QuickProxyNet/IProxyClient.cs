@@ -7,7 +7,7 @@ namespace QuickProxyNet
 		NetworkCredential ProxyCredentials { get; }
 
 		string ProxyHost { get; }
-		 
+
 		int ProxyPort { get; }
 
 		ProxyType Type { get; }

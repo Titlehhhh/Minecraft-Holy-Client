@@ -147,9 +147,9 @@ namespace McProtoNet
 
 				WaitTask(t);
 
-				
 
-				
+
+
 			}
 			catch (Exception e) when (e is not OperationCanceledException)
 			{
@@ -172,7 +172,7 @@ namespace McProtoNet
 			{
 				await t;
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				this.State = ClientState.Failed;
 				workTask.TrySetException(e);

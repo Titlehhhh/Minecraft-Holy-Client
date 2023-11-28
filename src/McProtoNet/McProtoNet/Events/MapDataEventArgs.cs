@@ -9,6 +9,6 @@
 		public MapIcon[] Icons { get; internal set; }
 		public MapData? Data { get; internal set; } = new();
 
-		
+
 	}
 }

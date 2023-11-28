@@ -1,10 +1,8 @@
 ﻿using HolyClient.Contracts.Models;
-using HolyClient.Contracts.Services;
 using HolyClient.Core.Models.BotManager;
 using HolyClient.LoadPlugins.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace HolyClient.Models;
 

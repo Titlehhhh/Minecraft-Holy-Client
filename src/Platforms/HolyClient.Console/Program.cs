@@ -1,12 +1,8 @@
 ﻿using DynamicData;
 using HolyClient.Common;
-using HolyClient.Core.Models.BotManager;
 using HolyClient.StressTest;
-using McProtoNet;
-using McProtoNet.Events;
 using QuickProxyNet;
 using Serilog.Core;
-using System.IO;
 
 internal partial class Program
 {
@@ -53,7 +49,7 @@ internal partial class Program
 		{
 			await proxyLoader.Load(stream, ProxyType.SOCKS4, proxies);
 		}
-		
+
 
 
 

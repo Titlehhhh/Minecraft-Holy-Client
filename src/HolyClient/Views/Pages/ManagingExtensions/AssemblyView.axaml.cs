@@ -1,6 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
@@ -36,7 +33,7 @@ public partial class AssemblyView : ReactiveUserControl<AssemblyViewModel>
 					context.SetOutput(ConfirmDeleteAssemblyAnswer.ForceDelete);
 					return;
 				}
-				else 
+				else
 				{
 					context.SetOutput(ConfirmDeleteAssemblyAnswer.None);
 					//	throw new System.Exception("Unkown type dialog");

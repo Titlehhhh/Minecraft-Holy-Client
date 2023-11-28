@@ -49,7 +49,7 @@ namespace HolyClient.Models.ManagingExtensions
 			{
 				await file.Initialization();
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine($"Error loading plugin {file.Name} exception: {ex}");
 			}

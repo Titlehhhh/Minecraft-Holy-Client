@@ -12,7 +12,7 @@
 
 		public bool OnGround { get; internal set; }
 
-		
+
 
 		public Vector3 GetVector()
 		{

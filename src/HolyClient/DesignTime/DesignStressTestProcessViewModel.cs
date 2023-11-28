@@ -1,12 +1,10 @@
 ﻿using HolyClient.ViewModels;
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Linq;
 using System.Windows.Input;
 
@@ -32,7 +30,7 @@ namespace HolyClient.DesignTime
 
 		public string Host => "DDOS: example.org";
 
-		public string Version =>"Version: 1.16.5";
+		public string Version => "Version: 1.16.5";
 
 		public string ParallelCount => "1000";
 
@@ -48,7 +46,7 @@ namespace HolyClient.DesignTime
 
 		public DesignStressTestProcessViewModel()
 		{
-			
+
 		}
 
 	}

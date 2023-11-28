@@ -19,7 +19,7 @@ namespace HolyClient.Services
 		{
 			resolver = MessagePack.Resolvers.CompositeResolver.Create(
 				CompositeResolver.Create(new IMessagePackFormatter[] { HolyClient.StressTest.PluginTypeRefFormatter.Instance }),
-				
+
 				MessagePack.Resolvers.BuiltinResolver.Instance,
 			   MessagePack.Resolvers.AttributeFormatterResolver.Instance,
 

@@ -6,6 +6,6 @@ namespace HolyClient.Core.Infrastructure
 	{
 		IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins { get; }
 
-		
+
 	}
 }

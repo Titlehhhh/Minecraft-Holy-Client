@@ -8,6 +8,6 @@
 		public byte Y { get; internal set; }
 		public byte[] Data { get; internal set; }
 
-		
+
 	}
 }

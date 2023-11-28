@@ -7,7 +7,6 @@ using QuickProxyNet;
 using Serilog;
 using System.IO.Pipelines;
 using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
 
 namespace McProtoNet
 {

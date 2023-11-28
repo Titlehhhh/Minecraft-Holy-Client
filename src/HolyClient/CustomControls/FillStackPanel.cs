@@ -23,7 +23,7 @@ namespace HolyClient.CustomControls
 		}
 		public FillStackPanel()
 		{
-			
+
 		}
 		private StackPanel _panel;
 		protected override void OnApplyTemplate(TemplateAppliedEventArgs e)

@@ -88,15 +88,15 @@ public class TestBehavior : IStressTestBehavior
 				while (!_cts.IsCancellationRequested)
 				{
 
-					
-					Vector3 block = new Vector3(Random.Shared.Next(-20000,2000), Random.Shared.Next(0,255), Random.Shared.Next(0,20000));
+
+					Vector3 block = new Vector3(Random.Shared.Next(-20000, 2000), Random.Shared.Next(0, 255), Random.Shared.Next(0, 20000));
 
 					await _bot.Client.SendAction(0, block, McProtoNet.Core.BlockFace.DOWN);
 
 					await Task.Delay(500, _cts.Token);
 
 					await _bot.Client.SendAction(2, block, McProtoNet.Core.BlockFace.DOWN);
-							
+
 				}
 			}
 			catch
@@ -111,13 +111,13 @@ public class TestBehavior : IStressTestBehavior
 				await Task.Delay(1000);
 				await _bot.Client.SendChat("/reg 21qwerty 21qwerty");
 				await _bot.Client.SendChat("/login 21qwerty");
-				
+
 				while (!_cts.IsCancellationRequested)
 				{
 					await Task.Delay(3000);
 
 					await _bot.Client.SendChat($"!{Random.Shared.Next()} Minecraft Holy Client Best stress tes tool {Random.Shared.Next()}");
-					
+
 				}
 			}
 			catch

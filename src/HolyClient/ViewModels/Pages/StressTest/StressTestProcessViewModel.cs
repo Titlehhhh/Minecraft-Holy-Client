@@ -1,19 +1,10 @@
-﻿using Avalonia.Threading;
-using HolyClient.Commands;
+﻿using HolyClient.Commands;
 using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.VisualElements;
-using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
-using Serilog.Events;
-using SkiaSharp;
-using Splat;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -89,7 +80,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest, LoggerWrapper wrapper)
 	{
-		
+
 		Logs = wrapper.Events;
 		Host = stressTest.Server;
 		Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
