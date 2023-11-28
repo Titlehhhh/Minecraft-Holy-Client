@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>	
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>	
-  </PropertyGroup>
+  </PropertyGroup> 
 
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
