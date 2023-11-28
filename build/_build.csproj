@@ -23,6 +23,14 @@
     <PackageDownload Include="minver-cli" Version="[4.3.0]" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="..\.github\workflows\dotnet-desktop.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="..\.github\workflows\dotnet-desktop.yml" />
+  </ItemGroup>
+
  
 
 </Project>
