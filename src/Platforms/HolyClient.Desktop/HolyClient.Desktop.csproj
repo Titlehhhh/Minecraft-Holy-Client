@@ -6,8 +6,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>	
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-	
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>	
   </PropertyGroup>
 
   <PropertyGroup>
