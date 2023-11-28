@@ -216,10 +216,6 @@ class Build : NukeBuild
 		.Executes(() =>
 		{
 
-			var credentials = new Credentials(GitHubActions.Token);
-			GitHubTasks.GitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
-				new InMemoryCredentialStore(credentials));
-
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
 				from framework in project.GetTargetFrameworks()
@@ -227,11 +223,11 @@ class Build : NukeBuild
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
-				.SetProject(Solution.Platfroms.HolyClient_Desktop)
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
 				.SetConfiguration(Configuration)
 				.SetPublishSingleFile(true)
-				.SetProperty("DebugSymbols", "False")
-				.SetProperty("DebugType", "None")
+				//.SetProperty("DebugSymbols", "False")
+				//.SetProperty("DebugType", "None")
 				//.SetPublishReadyToRun(true)				
 				.EnableSelfContained()
 				.SetOutput(ArtifactsDirectory / Runtime)
