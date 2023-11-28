@@ -2,10 +2,8 @@ name: "Build"
 
 on:
   push:
-    branches:
-      - preview
-      - main
-      - rc
+    branches:      
+      - master
     paths-ignore:
       - '**/*.md'
       - '**/*.gitignore'
