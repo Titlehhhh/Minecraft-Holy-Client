@@ -60,6 +60,7 @@ jobs:
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   App:
+    needs: [build]
     name: "Build HolyClient.Desktop"
     runs-on: ubuntu-latest
     env:     
