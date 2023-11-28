@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>11</LangVersion>
+		<MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
+
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="MinVer" Version="5.0.0-beta.1" PrivateAssets="All" />
+
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
+	</ItemGroup>
+
+
+
+</Project>

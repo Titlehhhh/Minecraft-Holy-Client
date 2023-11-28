@@ -6,17 +6,23 @@
              x:Class="HolyClient.SplashContent">
 	<StackPanel Spacing="10"
 					   VerticalAlignment="Center">
-		<Image Source="/Assets/icon.ico"
-			   Width="150"
-			   Height="150" />
+
+		<Image Source="/Assets/SplashIcon.png"
+		  
+			x:Name="IconControl"
+		   Height="144"
+		   Width="144"/>
 
 
-		<ProgressBar 
+
+
+
+		<ProgressBar
 			Value="{Binding Progress}"
 					 MaxWidth="200"
 					 Margin="0 20"/>
 
-		<TextBlock 
+		<TextBlock
 			Text="{Tr {Binding State}}"
 				   HorizontalAlignment="Center"
 				   FontSize="20"/>

@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1450"
              xmlns:reactiveUi="http://reactiveui.net"
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:DataType="vm:StressTestConfigurationViewModel"
@@ -87,6 +87,15 @@
 						</Border>
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
+								<TextBlock Text="Использование прокси" FontSize="15"/>
+								<ToggleSwitch 
+									IsChecked="{Binding UseProxy}" 
+									OnContent="Использовать" 
+									OffContent="Без прокси"/>
+							</StackPanel>
+						</Border>
+						<Border Classes="SettingItem">
+							<StackPanel Spacing="10">
 								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.Version}" FontSize="15"/>
 								<ComboBox SelectedItem="{Binding Version}" ItemsSource="{Binding SupportedVersions}">
 									<ComboBox.ItemTemplate>
@@ -96,7 +105,7 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 							</StackPanel>
-						</Border>
+						</Border>					
 
 						<Border IsVisible="{Binding CurrentBehavior}" Classes="SettingItem">
 							<StackPanel Spacing="10">
@@ -120,6 +129,7 @@
 
 
 						<DataGrid
+							
 							Name="ProxiesDataGrid"
 							Margin="12 12 0 12"
 							
@@ -157,22 +167,26 @@
 							<StackPanel>
 								<TextBlock FontWeight="SemiBold" Text="Опции"/>
 								<StackPanel Margin="0,5,0,0" Spacing="10">
+									
 									<Button
+										IsEnabled="{Binding UseProxy}"
 										Command="{Binding ImportProxyCommand}"
 										Content="{Tr StressTest.Configuration.Proxy.Import}"
 										HorizontalAlignment="Stretch"/>
 
 									<Button
+										IsEnabled="{Binding UseProxy}"
 										Command="{Binding ExportProxyCommand}"
 										Content="{Tr StressTest.Configuration.Proxy.Export}"
 										HorizontalAlignment="Stretch"/>
 									<Button
 										Command="{Binding DeleteProxyCommand}"
-										
+										IsEnabled="{Binding UseProxy}"
 										Content="{Tr StressTest.Configuration.Proxy.Delete}"
 										HorizontalAlignment="Stretch"/>
 									
 									<Button 
+										IsEnabled="{Binding UseProxy}"
 										Command="{Binding DeleteAllProxyCommand}" 
 										Content="{Tr StressTest.Configuration.Proxy.DeleteAll}"  
 										HorizontalAlignment="Stretch"/>

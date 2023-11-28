@@ -8,10 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="HolyClient.SDK" Version="0.1.0-alpha0207-local.207">
-		  <Private>false</Private>
-		  <ExcludeAssets>runtime</ExcludeAssets>
-	  </PackageReference>
+    <ProjectReference Include="..\..\..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj" />
   </ItemGroup>
 
 

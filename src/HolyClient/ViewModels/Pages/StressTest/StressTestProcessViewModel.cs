@@ -10,7 +10,10 @@ using LiveChartsCore.SkiaSharpView.VisualElements;
 using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
+using Serilog.Events;
 using SkiaSharp;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,37 +35,33 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	[Reactive]
 	public string Version { get; private set; }
 	[Reactive]
-	public string NumberOfBots { get; private set; }
+	public string ParallelCount { get; private set; }
 	#endregion
 
 	#region Properties
+	[Reactive]
+	public int BotsOnline { get; private set; }
+	[Reactive]
+	public int CPS { get; private set; }
 
 	[Reactive]
-	public IEnumerable<ISeries> CPS_Series { get; private set; } = Enumerable.Empty<ISeries>();
+	public int PeakCPS { get; private set; }
 	[Reactive]
-	public IEnumerable<ISeries> BotsOnline_Series { get; private set; } = Enumerable.Empty<ISeries>();
+	public string ProxyQuality { get; private set; }
+
+
 	[Reactive]
 	public IEnumerable<ISeries> Proxy_Series { get; private set; } = Enumerable.Empty<ISeries>();
 
 	[Reactive]
 	public ICommand CancelCommand { get; private set; }
 
-	public LabelVisual ProxyTitle { get; set; } =
-	   new LabelVisual
-	   {
-		   Text = "Прокси",
-		   TextSize = 16,
-		   Padding = new LiveChartsCore.Drawing.Padding(15),
-		   Paint = new SolidColorPaint(SKColors.White)
-	   };
-	public SolidColorPaint LegengTextPaint { get; } = new SolidColorPaint
-	{
-		Color = SKColors.White
-	};
+	public ObservableCollection<LogEventViewModel> Logs { get; private set; }
 
 
 	public Axis[] XAxes { get; set; } =
 	{
+
 		new Axis
 		{
 			Labeler = value => ToReadableString( TimeSpan.FromTicks((long)value)),
@@ -86,30 +85,19 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	public ViewModelActivator Activator { get; } = new();
 	#endregion
 
-	#region Fields
 
-	private readonly ObservableCollection<TimeSpanPoint> _cpsPoints = new();
-	private readonly ObservableCollection<TimeSpanPoint> _botsOnlinePoints = new();
-	private readonly int maxPoints = 15;
-	private TimeSpan index = TimeSpan.Zero;
-	#endregion
 
-	public object CPS_Sync { get; } = new();
-	public object Online_Sync { get; } = new();
-
-	private DateTime? date = null;
-	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest)
+	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest, LoggerWrapper wrapper)
 	{
-
+		
+		Logs = wrapper.Events;
 		Host = stressTest.Server;
-		Console.WriteLine("Server: " +stressTest.Server);
 		Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
-		NumberOfBots = stressTest.NumberOfBots.ToString();
+		ParallelCount = stressTest.NumberOfBots.ToString();
 
 
 		CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
 
-		OnActivate(hostScreen);
 
 
 		this.WhenActivated(d =>
@@ -117,123 +105,23 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 			StressTestMetrik currentData = new();
-			stressTest.Metrics.Subscribe(x =>
-			{
-				currentData = x;
-			}).DisposeWith(d);
-
-
-			DispatcherTimer.Run(() =>
-			{
-				try
+			stressTest.Metrics
+				.SubscribeOn(RxApp.MainThreadScheduler)
+				.Subscribe(x =>
 				{
-					var metrik = currentData;
+					BotsOnline = x.BotsOnline;
+					CPS = x.CPS;
+					PeakCPS = Math.Max(CPS, PeakCPS);
 
-
-					if (date is null)
-					{
-						date = DateTime.UtcNow;
-					}
-					TimeSpan delta = DateTime.UtcNow - date.Value;
+					ProxyQuality = Random.Shared.Next(0, 70) + "%";
+				}).DisposeWith(d);
 
 
 
-					_cpsPoints.Add(new TimeSpanPoint(delta, metrik.CPS));
-					if (_cpsPoints.Count >= maxPoints)
-					{
-						_cpsPoints.RemoveAt(0);
-					}
-
-					_botsOnlinePoints.Add(new TimeSpanPoint(delta, metrik.BotsOnline));
-					if (_botsOnlinePoints.Count >= maxPoints)
-					{
-						_botsOnlinePoints.RemoveAt(0);
-					}
-
-
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine("Exx " + ex);
-				}
-				finally
-				{
-
-				}
-				return true;
-			}, TimeSpan.FromSeconds(1)).DisposeWith(d);
 
 		});
 
 	}
-
-	private void OnActivate(IScreen hostScreen)
-	{
-
-		{
-			var from = SKColor.Parse("d51250");
-			var to = SKColor.Parse("12d549");
-			var start = new SKPoint(0.5f, 1);
-
-			var end = new SKPoint(0.5f, 0);
-			CPS_Series = new ISeries[]
-			{
-			new LineSeries<TimeSpanPoint>
-			{
-				Values = _cpsPoints,
-				Fill = null,
-				GeometrySize = 9,
-				Stroke = new LinearGradientPaint(new[]{ from, to }, start,end) { StrokeThickness = 2 },
-				GeometryStroke = new LinearGradientPaint(new[]{ from,to}, start,end) { StrokeThickness = 2 },
-				Name ="Подключения в секунду"
-			}
-			};
-		}
-		{
-
-			var from = SKColor.Parse("00a8f3");
-			var to = SKColor.Parse("9415d9");
-			var start = new SKPoint(0, 0.5F);
-
-			var end = new SKPoint(1, 0.5F);
-
-			BotsOnline_Series = new ISeries[]
-			{
-				new LineSeries<TimeSpanPoint>
-				{
-					Values = _botsOnlinePoints,
-					GeometrySize = 9,
-					Stroke = new LinearGradientPaint(new[]{ from, to }, start,end) { StrokeThickness = 2 },
-					GeometryStroke = new LinearGradientPaint(new[]{ from,to}, start,end) { StrokeThickness = 2 },
-					Fill = null,
-					Name ="Количество ботов"
-				}
-			};
-		}
-
-		var proxy_series = new List<PieSeries<int>>();
-		foreach (var pr in Enum.GetValues<ProxyType>())
-		{
-
-
-			//proxy_series.Add(new PieSeries<int>()
-			//{
-
-			//	//Values = new int[] { r.Next(1000, 5000) },
-			//	//Name = pr.ToString(),
-			//	//DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Outer,
-
-
-			//}); ;
-		}
-
-		Proxy_Series = proxy_series;
-
-
-		HostScreen = hostScreen;
-
-	}
-
 
 
 

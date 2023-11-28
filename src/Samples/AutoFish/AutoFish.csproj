@@ -6,10 +6,4 @@
 		<Nullable>enable</Nullable>
 		<EnableDynamicLoading>true</EnableDynamicLoading>
 	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="HolyClient.SDK">
-			<Private>False</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
-		</PackageReference>	
-	</ItemGroup>
 </Project>

@@ -1,0 +1,67 @@
+name: "Build"
+
+on:
+  push:
+    branches:      
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+  #pull_request:
+  #  branches:
+  #    - preview
+  #    - main
+  #    - rc
+  #  paths-ignore:
+  #    - '**/*.md'
+  #    - '**/*.gitignore'
+  #    - '**/*.gitattributes'
+  workflow_dispatch:
+      
+jobs:
+  build:
+    name: Build 
+    runs-on: ubuntu-latest
+    env:
+      FeedzApiKey: ${{ secrets.FEEDZ_TOKEN }}
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: true
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
+      DOTNET_MULTILEVEL_LOOKUP: 0
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+      TERM: xterm
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.100
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: set script permissions
+      run: chmod +x ./build.sh
+
+    - name: Run './build.cmd'
+      run: ./build.cmd PublishApp
+      env:          
+          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+        
+
+
+
+#dotnet.exe publish ~\Minecraft-Holy-Client\Minecraft-Holy-Client\src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --no-restore --no-build /property:DebugType=None /property:DebugSymbols=False /property:PublishProfile=FolderProfile /property:PublishDir=~\Minecraft-Holy-Client\Minecraft-Holy-Client\.artifacts

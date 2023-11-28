@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		
+	</PropertyGroup>
+
+
+
+	<ItemGroup>
+		<PackageReference Include="MinVer" Version="5.0.0-beta.1" PrivateAssets="All" />
+		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj" />
+	</ItemGroup>
+
+	
+</Project>

@@ -46,7 +46,13 @@ namespace HolyClient.Models.ManagingExtensions
 			{
 				this.StressTestPlugins = wrapper.CurrentAssembly
 					.GetExportedTypes()
-					.Where(x => !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x))
+					.Where(x =>
+					{
+						Console.WriteLine("Type: "+x);
+
+						var g= !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x);
+						return g;
+					})
 					.ToArray();
 			}
 			this.watcher = new FileSystemWatcher()

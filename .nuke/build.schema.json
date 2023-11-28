@@ -8,7 +8,6 @@
       "properties": {
         "Configuration": {
           "type": "string",
-          "description": "Configuration to build - Default is 'Debug' (local) or 'Release' (server)",
           "enum": [
             "Debug",
             "Release"
@@ -17,6 +16,9 @@
         "Continue": {
           "type": "boolean",
           "description": "Indicates to continue a previously failed build attempt"
+        },
+        "FeedzApiKey": {
+          "type": "string"
         },
         "Help": {
           "type": "boolean",
@@ -47,10 +49,7 @@
           "type": "boolean",
           "description": "Disables displaying the NUKE logo"
         },
-        "NugetApiKey": {
-          "type": "string"
-        },
-        "NugetApiUrl": {
+        "NuGetApiKey": {
           "type": "string"
         },
         "Partition": {
@@ -78,11 +77,14 @@
           "items": {
             "type": "string",
             "enum": [
-              "BuildSDKToLocal",
               "Clean",
               "Compile",
-              "Restore",
-              "SDKPublishToNuget"
+              "CreateRelease",
+              "LibsPush",
+              "Pack",
+              "Print",
+              "PublishApp",
+              "Restore"
             ]
           }
         },
@@ -96,11 +98,14 @@
           "items": {
             "type": "string",
             "enum": [
-              "BuildSDKToLocal",
               "Clean",
               "Compile",
-              "Restore",
-              "SDKPublishToNuget"
+              "CreateRelease",
+              "LibsPush",
+              "Pack",
+              "Print",
+              "PublishApp",
+              "Restore"
             ]
           }
         },

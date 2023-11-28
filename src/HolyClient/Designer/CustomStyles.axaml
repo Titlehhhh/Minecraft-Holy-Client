@@ -12,16 +12,13 @@
 
 	<ControlTheme x:Key="{x:Type Border}" TargetType="Border">
 		<Style Selector="^.SettingItem">
-			<Setter Property="Margin" Value="5,5,20,10"/>
-			<Setter Property="Effect">
-				<Setter.Value>					
-					<DropShadowEffect Color="{DynamicResource SolidBackgroundFillColorSecondary}"  Opacity="0.35" BlurRadius="20"/>
-				</Setter.Value>
-			</Setter>
-
+			<Setter Property="Margin" Value="5,5,20,10"/>			
+			<Setter Property="BorderThickness" Value="0.7"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
 			<Setter Property="Padding" Value="10"/>
 			<Setter Property="CornerRadius" Value="7"/>
 			<Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorQuarternary}"/>
+
 		</Style>
 	</ControlTheme>
 	<ControlTheme x:Key="Shimmer" TargetType="Border">

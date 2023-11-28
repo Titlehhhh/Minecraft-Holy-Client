@@ -5,6 +5,9 @@ using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Linq;
 using System.Windows.Input;
 
 namespace HolyClient.DesignTime
@@ -25,28 +28,27 @@ namespace HolyClient.DesignTime
 
 		public ViewModelActivator Activator { get; set; }
 
-		public IEnumerable<ISeries> Proxy_Series => throw new NotImplementedException();
+		public IEnumerable<ISeries> Proxy_Series => Enumerable.Empty<ISeries>();
+
+		public string Host => "DDOS: example.org";
+
+		public string Version =>"Version: 1.16.5";
+
+		public string ParallelCount => "1000";
+
+		public int BotsOnline => 70;
+
+		public int CPS => 5;
+
+		public int PeakCPS => 0;
+
+		public string ProxyQuality => "100%";
+
+		public ObservableCollection<LogEventViewModel> Logs => throw new NotImplementedException();
 
 		public DesignStressTestProcessViewModel()
 		{
-			var bots = new List<TimeSpanPoint>();
-			var cps = new List<TimeSpanPoint>();
-			TimeSpan time = TimeSpan.Zero;
-			Random r = new();
-			for (int i = 0; i < 30; i++)
-			{
-				bots.Add(new(time, r.Next(0, 100)));
-				cps.Add(new(time, r.Next(0, 10)));
-				time += TimeSpan.FromSeconds(1);
-
-			}
-			BotsOnline_Series = new ISeries[]
-			{
-				new LineSeries<TimeSpanPoint>
-				{
-
-				}
-			};
+			
 		}
 
 	}
