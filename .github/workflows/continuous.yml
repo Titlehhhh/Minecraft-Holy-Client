@@ -101,8 +101,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       
-        
-
 
 
 #dotnet.exe publish ~\Minecraft-Holy-Client\Minecraft-Holy-Client\src\Platforms\HolyClient.Desktop\HolyClient.Desktop.csproj --no-restore --no-build /property:DebugType=None /property:DebugSymbols=False /property:PublishProfile=FolderProfile /property:PublishDir=~\Minecraft-Holy-Client\Minecraft-Holy-Client\.artifacts
