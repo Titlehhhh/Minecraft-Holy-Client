@@ -6,7 +6,8 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>11</LangVersion>
 		<MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
-
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
 	</PropertyGroup>
 
 
