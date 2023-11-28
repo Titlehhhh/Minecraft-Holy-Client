@@ -71,7 +71,7 @@ jobs:
       DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
       DOTNET_MULTILEVEL_LOOKUP: 0
       DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
-      TERM: xterm
+      TERM: xterm 
     strategy:
       matrix:
         target: [win-x86, win-x64, win-arm, win-arm64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
