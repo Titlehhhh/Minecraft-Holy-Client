@@ -241,7 +241,7 @@ class Build : NukeBuild
 	Target PublishApp => _ => _
 		.DependsOn(LibsPush)
 		.Requires(() => Configuration.Equals(Configuration.Release))
-		.Triggers(CreateRelease)
+		//.Triggers(CreateRelease)
 		.Executes(() =>
 		{
 
@@ -269,7 +269,10 @@ class Build : NukeBuild
 
 
 
-
+			foreach (var file in Directory.GetFiles(ArtifactsDirectory,"*.*", SearchOption.AllDirectories))
+			{
+				Console.WriteLine(file);
+			}
 
 		});
 
