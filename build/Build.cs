@@ -95,38 +95,7 @@ class Build : NukeBuild
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
-			//Build QuickProxy
-			DotNetBuild(x =>
-				x.SetProjectFile(Solution.ProxyLib.QuickProxyNet)
-				.SetAssemblyVersion(MinVer.AssemblyVersion)
-				.SetFileVersion(MinVer.FileVersion)
-				.SetConfiguration(Configuration)
-				.EnableNoRestore());
-
-			//Build McProtoNet
-			DotNetBuild(x =>
-				x.SetProjectFile(Solution.McProtoNet.McProtoNet)
-				.SetAssemblyVersion(MinVer.AssemblyVersion)
-				.SetFileVersion(MinVer.FileVersion)
-				.SetConfiguration(Configuration)
-				.EnableNoRestore());
-
-			//Build SDK
-
-			DotNetBuild(x =>
-				x.SetProjectFile(Solution.CoreLibs.HolyClient_Abstractions)
-				.SetAssemblyVersion(MinVer.AssemblyVersion)
-				.SetFileVersion(MinVer.FileVersion)
-				.SetConfiguration(Configuration)
-				.EnableNoRestore());
-
-			DotNetBuild(x =>
-				x.SetProjectFile(Solution.CoreLibs.HolyClient_SDK)
-				.SetAssemblyVersion(MinVer.AssemblyVersion)
-				.SetFileVersion(MinVer.FileVersion)
-
-				.SetConfiguration(Configuration)
-				.EnableNoRestore());
+			
 
 			//Build HolyClient.Desktop
 
