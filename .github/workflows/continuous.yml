@@ -21,7 +21,7 @@ on:
       
 jobs:
   build:
-    name: Build 
+    name: Build and deploy NuGet
     runs-on: ubuntu-latest
     env:
       FeedzApiKey: ${{ secrets.FEEDZ_TOKEN }}
@@ -55,10 +55,47 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
-      run: ./build.cmd PublishApp
+      run: ./build.cmd LibsPush
       env:          
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  App:
+    name: "Build HolyClient.Desktop"
+    runs-on: ubuntu-latest
+    env:     
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: true
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
+      DOTNET_MULTILEVEL_LOOKUP: 0
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+      TERM: xterm
+    strategy:
+      matrix:
+        target: [win-x86, win-x64, win-arm, win-arm64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
+    steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.100 
+
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: set script permissions
+      run: chmod +x ./build.sh
+
+    - name: Run './build.cmd'
+      run: ./build.cmd PublishApp -Runtime ${{ matrix.target }}
+      env:  
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       
         
 

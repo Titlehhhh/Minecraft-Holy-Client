@@ -60,6 +60,8 @@ class Build : NukeBuild
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 
+	[Parameter]
+	readonly string Runtime;
 
 
 	[MinVer]
@@ -95,7 +97,7 @@ class Build : NukeBuild
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		.Executes(() =>
 		{
-			
+
 
 			//Build HolyClient.Desktop
 
@@ -208,13 +210,15 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		.DependsOn(LibsPush)
+		
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		//.Triggers(CreateRelease)
 		.Executes(() =>
 		{
 
-
+			var credentials = new Credentials(GitHubActions.Token);
+			GitHubTasks.GitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
+				new InMemoryCredentialStore(credentials));
 
 			var publishCombinations =
 				from project in new[] { Solution.Platfroms.HolyClient_Desktop }
@@ -228,20 +232,15 @@ class Build : NukeBuild
 				.SetPublishSingleFile(true)
 				.SetProperty("DebugSymbols", "False")
 				.SetProperty("DebugType", "None")
-				.SetPublishReadyToRun(true)
+				//.SetPublishReadyToRun(true)				
 				.EnableSelfContained()
-				 .CombineWith(publishCombinations, (_, v) => _
-					.SetProject(v.project)
-					.SetOutput(ArtifactsDirectory / v.runtime)
-					.SetFramework(v.framework)
-					.SetRuntime(v.runtime)));
+				.SetOutput(ArtifactsDirectory / Runtime)
+				.SetFramework("net8.0")
+				.SetRuntime(Runtime));
 
 
-
-			foreach (var file in Directory.GetFiles(ArtifactsDirectory,"*.*", SearchOption.AllDirectories))
-			{
-				Console.WriteLine(file);
-			}
+			
+			
 
 		});
 
