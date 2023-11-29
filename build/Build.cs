@@ -257,13 +257,14 @@ class Build : NukeBuild
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
-		   var response = await gitHubClient.Actions.Artifacts.ListArtifacts(owner, name);
-
+		   var response = await gitHubClient.Actions.Artifacts.ListWorkflowArtifacts(owner, name, GitHubActions.RunId);
+		   GitHubActions.WriteDebug("List artifacts:");
 
 		   foreach (var artifact in response.Artifacts)
 		   {
-			   Console.WriteLine(artifact.Name);
+			   GitHubActions.WriteDebug(artifact.Name);
 		   }
+		   GitHubActions.WriteDebug("List End:");
 		   return;
 		   var releaseTag = MinVer.Version;
 		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
