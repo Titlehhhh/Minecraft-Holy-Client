@@ -96,6 +96,34 @@ jobs:
       with:
         name: ${{matrix.target}} Artifacts
         path: .artifacts/${{matrix.target}}
+  CreateRelease:
+    name: "CreateRelease"
+    needs: [App]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.100 
+
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: set script permissions
+      run: chmod +x ./build.sh
+
+    - name: Run './build.cmd'
+      run: ./build.cmd CreateRelease
+      env:  
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       
 

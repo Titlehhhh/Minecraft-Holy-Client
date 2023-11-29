@@ -26,9 +26,9 @@ using Serilog;
 using Nuke.Common.Tools.NerdbankGitVersioning;
 using Nuke.Common.Tools.OctoVersion;
 using Nuke.Common.Tools.MinVer;
-using Octokit.Internal;
 using Octokit;
 using Nuke.Common.Tooling;
+using Octokit.Internal;
 
 
 
@@ -208,7 +208,7 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		.DependsOn(Clean,Restore)
+		.DependsOn(Clean, Restore)
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		//.Triggers(CreateRelease)
 		.Executes(() =>
@@ -221,20 +221,20 @@ class Build : NukeBuild
 				select new { project, framework, runtime };
 
 			DotNetPublish(x => x
-				.SetProject(Solution.Platfroms.HolyClient_Desktop)				
+				.SetProject(Solution.Platfroms.HolyClient_Desktop)
 				.SetConfiguration(Configuration)
 				.SetPublishSingleFile(true)
 				.SetProperty("DebugSymbols", "False")
 				.SetProperty("DebugType", "None")
-				.SetPublishReadyToRun(true)				
+				//.SetPublishReadyToRun(true)
 				.EnableSelfContained()
 				.SetOutput(ArtifactsDirectory / Runtime)
 				.SetFramework("net8.0")
 				.SetRuntime(Runtime));
 
 
-			
-			
+
+
 
 		});
 
@@ -245,12 +245,26 @@ class Build : NukeBuild
 	   .Requires(() => Configuration.Equals(Configuration.Release))
 	   .Executes(async () =>
 	   {
+
 		   var credentials = new Credentials(GitHubActions.Token);
-		   GitHubTasks.GitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
-			   new InMemoryCredentialStore(credentials));
+
+		   var gitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
+				new InMemoryCredentialStore(credentials));
+
+
+
+
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
+		   var response = await gitHubClient.Actions.Artifacts.ListWorkflowArtifacts(owner, name, GitHubActions.RunId);
+
+
+		   foreach (var artifact in response.Artifacts)
+		   {
+			   Console.WriteLine(artifact.Name);
+		   }
+		   return;
 		   var releaseTag = MinVer.Version;
 		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
 		   //var latestChangeLog = changeLogSectionEntries
@@ -270,19 +284,7 @@ class Build : NukeBuild
 									   .Repository
 									   .Release.Create(owner, name, newRelease);
 
-		   //   GlobFiles(ArtifactsDirectory, ArtifactsType)
-		   //	  .Where(x => !x.EndsWith(ExcludedArtifactsType))
-		   //	  .ForEach(async x => );
 
-		   foreach (var rid in Runtimes)
-		   {
-			   var folderArtifact = ArtifactsDirectory / rid;
-			   var archiveFile = ArtifactsDirectory / $"Minecraft-Holy-Client-{rid}.zip";
-			   folderArtifact.ZipTo(archiveFile);
-
-			   await UploadReleaseAssetToGithub(createdRelease, archiveFile);
-
-		   }
 
 
 
