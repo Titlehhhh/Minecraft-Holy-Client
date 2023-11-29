@@ -47,7 +47,7 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
-      run: ./build.cmd LibsPush
+      run: ./build.sh LibsPush
       env:          
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,7 +88,7 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
-      run: ./build.cmd PublishApp -Runtime ${{ matrix.target }}
+      run: ./build.sh PublishApp -Runtime ${{ matrix.target }}
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload Artifacts
@@ -96,6 +96,9 @@ jobs:
       with:
         name: ${{matrix.target}} Artifacts
         path: .artifacts/${{matrix.target}}
+
+
+
   CreateRelease:
     name: "CreateRelease"
     needs: [App]
@@ -121,7 +124,7 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
-      run: ./build.cmd CreateRelease
+      run: ./build.sh CreateRelease
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

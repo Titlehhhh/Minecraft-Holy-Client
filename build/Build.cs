@@ -257,7 +257,7 @@ class Build : NukeBuild
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
-		   var response = await gitHubClient.Actions.Artifacts.ListWorkflowArtifacts(owner, name, GitHubActions.RunId);
+		   var response = await gitHubClient.Actions.Artifacts.ListArtifacts(owner, name);
 
 
 		   foreach (var artifact in response.Artifacts)
