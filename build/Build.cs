@@ -245,25 +245,26 @@ class Build : NukeBuild
 	   .Requires(() => Configuration.Equals(Configuration.Release))
 	   .Executes(async () =>
 	   {
-
+		   Console.WriteLine("asdasd");
 		   var credentials = new Credentials(GitHubActions.Token);
 
 		   var gitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
 				new InMemoryCredentialStore(credentials));
 
-
+		   Console.WriteLine("asdasd");
 
 
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
-
+		   Console.WriteLine("asdasd");
 		   var response = await gitHubClient.Actions.Artifacts.ListWorkflowArtifacts(owner, name, GitHubActions.RunId);
 		   GitHubActions.WriteDebug("List artifacts:");
-
+		   Console.WriteLine("asdasd");
 		   foreach (var artifact in response.Artifacts)
 		   {
 			   GitHubActions.WriteDebug(artifact.Name);
 		   }
+		   Console.WriteLine("asdasd");
 		   GitHubActions.WriteDebug("List End:");
 		   return;
 		   var releaseTag = MinVer.Version;
