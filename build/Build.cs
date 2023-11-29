@@ -99,8 +99,6 @@ class Build : NukeBuild
 		{
 
 
-			//Build HolyClient.Desktop
-
 
 
 			DotNetBuild(x =>
@@ -210,7 +208,7 @@ class Build : NukeBuild
 
 
 	Target PublishApp => _ => _
-		
+		.DependsOn(Clean,Restore)
 		.Requires(() => Configuration.Equals(Configuration.Release))
 		//.Triggers(CreateRelease)
 		.Executes(() =>
