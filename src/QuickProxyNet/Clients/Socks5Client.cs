@@ -139,7 +139,7 @@ namespace QuickProxyNet
 			await stream.WriteAsync(buffer.AsMemory(), cancellationToken);
 
 
-			await stream.ReadToEndAsync(buffer.AsMemory(0, 2), 2, cancellationToken);
+			await stream.ReadExactlyAsync(buffer.AsMemory(0, 2), cancellationToken);
 
 
 			VerifySocksVersion(buffer[0]);
@@ -205,7 +205,7 @@ namespace QuickProxyNet
 
 			int nread, n = 0;
 
-			await stream.ReadToEndAsync(buffer.AsMemory(0, 2), 2, cancellationToken);
+			await stream.ReadExactlyAsync(buffer.AsMemory(0, 2), cancellationToken);
 
 
 			if (buffer[1] != (byte)Socks5Reply.Success)

@@ -35,7 +35,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				_baseStream.ReadToEnd(memory.Memory.Slice(0, len).Span, len);
+				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 
 				return new(
 					id,
@@ -51,7 +51,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
 
-				_baseStream.ReadToEnd(memory.Memory.Slice(0, len).Span, len);
+				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
@@ -67,7 +67,7 @@ namespace McProtoNet.Core.Protocol
 
 					sizeUncompressed -= id.GetVarIntLength();
 
-					ReadZlib.ReadToEnd(memory.Memory.Slice(0, sizeUncompressed).Span, sizeUncompressed);
+					ReadZlib.ReadExactly(memory.Memory.Slice(0, sizeUncompressed).Span);
 
 					return new Packet(
 						id,
@@ -85,7 +85,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				_baseStream.ReadToEnd(memory.Memory.Slice(0, len).Span, len);
+				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 				return new(
 					id,
 					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
@@ -106,7 +106,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				await _baseStream.ReadToEndAsync(memory.Memory.Slice(0, len), len, token);
+				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
 				return new(
 					id,
@@ -122,7 +122,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
 
-				await _baseStream.ReadToEndAsync(memory.Memory.Slice(0, len), len, token);
+				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
@@ -138,7 +138,7 @@ namespace McProtoNet.Core.Protocol
 
 					sizeUncompressed -= id.GetVarIntLength();
 
-					await ReadZlib.ReadToEndAsync(memory.Memory.Slice(0, sizeUncompressed), sizeUncompressed, token);
+					await ReadZlib.ReadExactlyAsync(memory.Memory.Slice(0, sizeUncompressed), token);
 
 					return new Packet(
 						id,
@@ -156,7 +156,7 @@ namespace McProtoNet.Core.Protocol
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				await _baseStream.ReadToEndAsync(memory.Memory.Slice(0, len), len, token);
+				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 				return new(
 					id,
 					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),

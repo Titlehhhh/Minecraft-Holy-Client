@@ -176,7 +176,7 @@ namespace McProtoNet.Core.IO
 		public virtual byte[] ReadByteArray(int size)
 		{
 			byte[] data = new byte[size];
-			BaseStream.ReadToEnd(data, size);
+			BaseStream.ReadExactly(data, 0, size);
 			return data;
 		}
 

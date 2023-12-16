@@ -174,7 +174,7 @@ namespace QuickProxyNet
 
 
 
-				await result.ReadToEndAsync(buffer.AsMemory(0, 8), 8, cancellationToken);
+				await result.ReadExactlyAsync(buffer.AsMemory(0, 8), cancellationToken);
 
 
 
