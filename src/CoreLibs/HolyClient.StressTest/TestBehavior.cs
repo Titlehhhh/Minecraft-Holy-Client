@@ -1,10 +1,9 @@
 ﻿using HolyClient.Abstractions.StressTest;
 using System.Reactive.Disposables;
 
-namespace TestStressTestBehavior
+namespace HolyClient.StressTest
 {
-
-	public class SpammerHelloBehavior : IStressTestBehavior
+	public class TestBehavior : IStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
 		public string SpamText { get; set; } = "Hello";
@@ -15,7 +14,7 @@ namespace TestStressTestBehavior
 			{
 				var d = bot.OnError.Subscribe(async x =>
 				{
-					Console.WriteLine(x.Message);
+					//Console.WriteLine(x.Message);
 
 					await Task.Delay(1500);
 					await bot.Restart(true);
@@ -25,10 +24,11 @@ namespace TestStressTestBehavior
 
 				var d2 = bot.Client.OnJoinGame.Subscribe(async x =>
 				{
-					await Task.Delay(1000);
-
 					try
 					{
+						await Task.Delay(500);
+						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
+
 						while (true)
 						{
 							await bot.Client.SendChat(SpamText);

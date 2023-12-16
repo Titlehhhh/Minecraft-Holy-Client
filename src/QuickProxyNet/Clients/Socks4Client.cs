@@ -127,7 +127,7 @@ namespace QuickProxyNet
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public override async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			byte[] addr, domain = null;
+
 
 			ValidateArguments(host, port);
 			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -140,27 +140,6 @@ namespace QuickProxyNet
 				socket.Dispose();
 				throw;
 			}
-			if (IPAddress.TryParse(host, out var ip))
-			{
-				if (ip.AddressFamily != AddressFamily.InterNetwork)
-					throw new ArgumentException("The specified host address must be IPv4.", nameof(host));
-
-				addr = ip.GetAddressBytes();
-			}
-			else
-			{
-				if (IsSocks4a)
-				{
-					domain = Encoding.UTF8.GetBytes(host);
-					addr = InvalidIPAddress;
-				}
-				else
-				{
-
-					addr = await ResolveAsync(host, cancellationToken);
-
-				}
-			}
 
 			cancellationToken.ThrowIfCancellationRequested();
 
@@ -169,27 +148,14 @@ namespace QuickProxyNet
 			NetworkStream result = new NetworkStream(socket, true);
 			try
 			{
-				var buffer = GetConnectCommand(domain, addr, port);
-				await result.WriteAsync(buffer.AsMemory(), cancellationToken);
-
-
-
-				await result.ReadExactlyAsync(buffer.AsMemory(0, 8), cancellationToken);
-
-
-
-				if (buffer[1] != (byte)Socks4Reply.RequestGranted)
-					throw new ProxyProtocolException(string.Format(CultureInfo.InvariantCulture, "Failed to connect to {0}:{1}: {2}", host, port, GetFailureReason(buffer[1])));
-
-
-
-				return result;
+				await SocksHelper.EstablishSocks4TunnelAsync(result, false, host, port, null, true, cancellationToken);
 			}
 			catch
 			{
 				await result.DisposeAsync();
 				throw;
 			}
+			return result;
 		}
 	}
 }

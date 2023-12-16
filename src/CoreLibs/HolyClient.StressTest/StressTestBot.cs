@@ -65,6 +65,8 @@ namespace HolyClient.StressTest
 			}
 			catch (Exception ex)
 			{
+				
+
 				_onError.OnNext(ex);
 
 			}

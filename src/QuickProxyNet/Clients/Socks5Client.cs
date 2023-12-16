@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Resources;
 using System.Security.Authentication;
 using System.Text;
 
@@ -33,6 +34,9 @@ namespace QuickProxyNet
 			UserPassword = 0x02,
 			NotSupported = 0xff
 		}
+
+
+
 
 		enum Socks5Command : byte
 		{
@@ -101,6 +105,7 @@ namespace QuickProxyNet
 
 			buffer[n++] = (byte)SocksVersion;
 			buffer[n++] = (byte)methods.Length;
+
 			for (int i = 0; i < methods.Length; i++)
 				buffer[n++] = (byte)methods[i];
 
@@ -109,6 +114,8 @@ namespace QuickProxyNet
 
 		Socks5AuthMethod NegotiateAuthMethod(Socket socket, CancellationToken cancellationToken, params Socks5AuthMethod[] methods)
 		{
+
+
 			var buffer = GetNegotiateAuthMethodCommand(methods);
 			socket.Send(buffer);
 			//Send(socket, buffer, 0, buffer.Length, cancellationToken);
@@ -136,13 +143,14 @@ namespace QuickProxyNet
 		async ValueTask<Socks5AuthMethod> NegotiateAuthMethodAsync(NetworkStream stream, CancellationToken cancellationToken, params Socks5AuthMethod[] methods)
 		{
 			var buffer = GetNegotiateAuthMethodCommand(methods);
-			await stream.WriteAsync(buffer.AsMemory(), cancellationToken);
+
+			await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
 
 
-			await stream.ReadExactlyAsync(buffer.AsMemory(0, 2), cancellationToken);
+			await stream.ReadExactlyAsync(buffer.AsMemory(0..2), cancellationToken);
 
 
-			VerifySocksVersion(buffer[0]);
+			//VerifySocksVersion(buffer[0]);
 
 			return (Socks5AuthMethod)buffer[1];
 		}
@@ -250,7 +258,7 @@ namespace QuickProxyNet
 
 		int ProcessPartialConnectResponse(string host, int port, byte[] buffer)
 		{
-			VerifySocksVersion(buffer[0]);
+			//VerifySocksVersion(buffer[0]);
 
 			if (buffer[1] != (byte)Socks5Reply.Success)
 				throw new ProxyProtocolException(string.Format(CultureInfo.InvariantCulture, "Failed to connect to {0}:{1}: {2}", host, port, GetFailureReason(buffer[1])));
@@ -284,50 +292,13 @@ namespace QuickProxyNet
 			}
 			catch
 			{
-
-
 				socket.Dispose();
 				throw;
 			}
 			NetworkStream networkStream = new NetworkStream(socket, true);
 			try
 			{
-
-				var addrType = GetAddressType(host, out var ip);
-				byte[] domain = null;
-
-				if (addrType == Socks5AddressType.Domain)
-					domain = Encoding.UTF8.GetBytes(host);
-
-				Socks5AuthMethod method;
-
-				if (ProxyCredentials != null)
-					method = await NegotiateAuthMethodAsync(networkStream, cancellationToken, Socks5AuthMethod.UserPassword, Socks5AuthMethod.Anonymous);
-				else
-					method = await NegotiateAuthMethodAsync(networkStream, cancellationToken, Socks5AuthMethod.Anonymous);
-
-				switch (method)
-				{
-					case Socks5AuthMethod.UserPassword:
-						await AuthenticateAsync(networkStream, cancellationToken);
-						break;
-					case Socks5AuthMethod.Anonymous:
-						break;
-					default:
-						throw new ProxyProtocolException("Failed to negotiate authentication method with the proxy server.");
-				}
-
-				var buffer = GetConnectCommand(addrType, domain, ip, port, out int n);
-
-				await networkStream.WriteAsync(buffer.AsMemory(0, n), cancellationToken);
-
-				int need = 5;
-
-				await networkStream.ReadExactlyAsync(buffer.AsMemory(0, need), cancellationToken);
-
-
-				need = ProcessPartialConnectResponse(host, port, buffer);
-				await networkStream.ReadExactlyAsync(buffer.AsMemory(0, need), cancellationToken);
+				await SocksHelper.EstablishSocks5TunnelAsync(networkStream, host, port, null, true);
 			}
 			catch
 			{
