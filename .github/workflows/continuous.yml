@@ -131,7 +131,9 @@ jobs:
     - name: "Cache Artifacts"
       id: cache-artifacts
       uses: actions/cache@v3
-      with:        
+      with: 
+        path: .artifacts
+        key: ${{ runner.os }}-artifacts-${{ hashFiles('**/*.csproj') }}
         restore-keys: ${{ runner.os }}-artifacts        
 
     - name: set script permissions
