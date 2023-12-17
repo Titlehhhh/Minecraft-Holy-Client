@@ -29,7 +29,7 @@ namespace QuickProxyNet
 			ProxyCredentials = credentials;
 		}
 
-		public NetworkCredential ProxyCredentials
+		public NetworkCredential? ProxyCredentials
 		{
 			get; private set;
 		}
@@ -75,22 +75,17 @@ namespace QuickProxyNet
 		{
 			ValidateArguments(host, port, timeout);
 
+
 			using (var ts = new CancellationTokenSource(timeout))
 			{
+				//ts.CancelAfter(TimeSpan.FromSeconds(10));
 				using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ts.Token))
 				{
-					try
-					{
-						return await ConnectAsync(host, port, linked.Token);
-					}
-					catch (OperationCanceledException)
-					{
-						if (!cancellationToken.IsCancellationRequested)
-							throw new TimeoutException();
-						throw;
-					}
+					return await ConnectAsync(host, port, linked.Token);
 				}
 			}
+
+			//throw new ProxyProtocolException("Deadline Exception");
 		}
 	}
 }

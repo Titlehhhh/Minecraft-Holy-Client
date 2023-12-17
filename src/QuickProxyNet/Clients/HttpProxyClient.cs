@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -89,64 +90,82 @@ namespace QuickProxyNet
 			ValidateArguments(host, port);
 
 			cancellationToken.ThrowIfCancellationRequested();
-
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-			await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-			var networkStream = new NetworkStream(socket, true);
-			var command = GetConnectCommand(host, port, ProxyCredentials);
-
-
-
-
-
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+			{
+				NoDelay = true,
+				LingerState = new LingerOption(true, 0),
+				SendTimeout = 10000,
+				ReceiveTimeout = 10000
+			};
 			try
 			{
-				await networkStream.WriteAsync(command.AsMemory(), cancellationToken);
-
-				var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
-				var builder = new StringBuilder();
-
-				try
-				{
-					var newline = false;
 
 
-					do
-					{
-						int nread = await networkStream.ReadAsync(buffer.AsMemory(0, BufferSize), cancellationToken);
-						if (nread <= 0)
-							throw new EndOfStreamException();
-						int index = 0;
+				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
 
-						if (TryConsumeHeaders(builder, buffer, ref index, nread, ref newline))
-							break;
-					} while (true);
-				}
-				finally
-				{
-					ArrayPool<byte>.Shared.Return(buffer);
-				}
-
-
-				int index1 = 0;
-
-				while (builder[index1] != '\n')
-					index1++;
-
-				if (index1 > 0 && builder[index1 - 1] == '\r')
-					index1--;
-
-				// trim everything beyond the "HTTP/1.1 200 ..." part of the response
-				builder.Length = index1;
-
-				ValidateHttpResponse(builder.ToString(), host, port);
-				return networkStream;
 			}
 			catch
 			{
 				socket.Dispose();
 				throw;
+			}
+
+
+			var stream = new NetworkStream(socket, true);
+			var command = GetConnectCommand(host, port, ProxyCredentials);
+
+			using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
+			{
+
+
+				try
+				{
+					await stream.WriteAsync(command.AsMemory(), cancellationToken);
+
+					var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+					var builder = new StringBuilder();
+
+					try
+					{
+						var newline = false;
+
+
+						do
+						{
+							int nread = await stream.ReadAsync(buffer.AsMemory(0, BufferSize), cancellationToken);
+							if (nread <= 0)
+								throw new EndOfStreamException();
+							int index = 0;
+
+							if (TryConsumeHeaders(builder, buffer, ref index, nread, ref newline))
+								break;
+						} while (true);
+					}
+					finally
+					{
+						ArrayPool<byte>.Shared.Return(buffer);
+					}
+
+
+					int index1 = 0;
+
+					while (builder[index1] != '\n')
+						index1++;
+
+					if (index1 > 0 && builder[index1 - 1] == '\r')
+						index1--;
+
+					// trim everything beyond the "HTTP/1.1 200 ..." part of the response
+					builder.Length = index1;
+
+					ValidateHttpResponse(builder.ToString(), host, port);
+					return stream;
+				}
+				catch
+				{
+					stream.Dispose();
+					throw;
+				}
 			}
 		}
 	}

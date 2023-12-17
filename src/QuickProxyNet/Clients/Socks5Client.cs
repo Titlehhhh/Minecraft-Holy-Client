@@ -30,7 +30,13 @@ namespace QuickProxyNet
 
 
 
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+			{
+				NoDelay = true,
+				LingerState = new LingerOption(true, 0),
+				SendTimeout = 10000,
+				ReceiveTimeout = 10000
+			};
 
 			try
 			{
@@ -46,7 +52,7 @@ namespace QuickProxyNet
 			{
 				try
 				{
-					await SocksHelper.EstablishSocks5TunnelAsync(stream, host, port, null, true);
+					await SocksHelper.EstablishSocks5TunnelAsync(stream, host, port, this.ProxyCredentials, true);
 				}
 				catch
 				{

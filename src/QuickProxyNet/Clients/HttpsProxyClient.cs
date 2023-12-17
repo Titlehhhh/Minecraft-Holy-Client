@@ -110,9 +110,20 @@ namespace QuickProxyNet
 			ValidateArguments(host, port);
 
 			cancellationToken.ThrowIfCancellationRequested();
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+			{
+				NoDelay = true
+			};
 
-			await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
+			try
+			{
+				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
+			}
+			catch
+			{
+				socket.Dispose();
+				throw;
+			}
 			var ssl = new SslStream(new NetworkStream(socket, true), false, ValidateRemoteCertificate);
 
 			try

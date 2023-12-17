@@ -245,7 +245,11 @@ namespace McProtoNet
 				return tcp.GetStream();
 			}
 			_logger.Information($"Подключение к {_proxy.Type} прокси {_proxy.ProxyHost}:{_proxy.ProxyPort}");
-			return await _proxy.ConnectAsync(_host, _port, 10000, cancellation);
+			
+			
+			
+
+			return await _proxy.ConnectAsync(_host, _port,5000, cancellation);
 		}
 
 
