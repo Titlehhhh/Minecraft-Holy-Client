@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System.ComponentModel.DataAnnotations;
+using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet
@@ -32,12 +33,12 @@ namespace McProtoNet
 
 		private MinecraftVersion _protocol;
 		private volatile MinecraftClientCore _core;
-		//	Pipe pipe;
+		Pipe pipe;
 
 
 		public MinecraftClient()
 		{
-			//	pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
+			pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
 			CreateEvents();
 
 		}
@@ -85,7 +86,7 @@ namespace McProtoNet
 				Config.Port,
 				Config.Proxy,
 				CreatePallete(),
-				//	this.pipe,
+					this.pipe,
 				this._logger);
 
 		}
@@ -177,6 +178,11 @@ namespace McProtoNet
 				this.State = ClientState.Failed;
 				workTask.TrySetException(e);
 			}
+			finally
+			{
+
+				pipe?.Reset();
+			}
 		}
 
 
@@ -213,11 +219,8 @@ namespace McProtoNet
 				_core.Dispose();
 			}
 
-			//	if (pipe is { })
-			{
 
-			}
-			//pipe = null;
+			pipe = null;
 
 			_disposed = true;
 

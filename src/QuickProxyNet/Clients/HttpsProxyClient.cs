@@ -105,15 +105,12 @@ namespace QuickProxyNet
 			};
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public override async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
+		public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			ValidateArguments(host, port);
 
-			cancellationToken.ThrowIfCancellationRequested();
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-			await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-			var ssl = new SslStream(new NetworkStream(socket, true), false, ValidateRemoteCertificate);
+			var ssl = new SslStream(stream, false, ValidateRemoteCertificate);
 
 			try
 			{

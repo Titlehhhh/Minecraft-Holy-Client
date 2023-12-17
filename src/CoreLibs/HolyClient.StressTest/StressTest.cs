@@ -247,6 +247,11 @@ namespace HolyClient.StressTest
 					logger.Information("Загружено поведение: " + Behavior.GetType().FullName);
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
 				}
+				else
+				{
+					TestBehavior testBehavior = new();
+					await testBehavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
+				}
 				CurrentState = StressTestServiceState.Running;
 			}
 			catch
@@ -325,32 +330,6 @@ namespace HolyClient.StressTest
 
 			this.Behavior = null;
 			this.BehaviorRef = default;
-		}
-	}
-	class NickProvider : INickProvider
-	{
-		private readonly string _baseNick;
-
-		public NickProvider(string baseNick)
-		{
-			if (baseNick.Length > 16)
-				throw new ArgumentException("Nick long");
-			_baseNick = baseNick;
-
-		}
-		private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		public string GetNextNick()
-		{
-			var stringChars = new char[15 - _baseNick.Length];
-			var random = new Random();
-
-			for (int i = 0; i < stringChars.Length; i++)
-			{
-				stringChars[i] = chars[random.Next(chars.Length)];
-			}
-
-			var finalString = new String(stringChars);
-			return _baseNick + finalString;
 		}
 	}
 

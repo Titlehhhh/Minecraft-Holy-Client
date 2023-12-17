@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -84,69 +85,67 @@ namespace QuickProxyNet
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public override async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
+		public override async ValueTask<Stream> ConnectAsync(Stream stream,string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			ValidateArguments(host, port);
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-			await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-			var networkStream = new NetworkStream(socket, true);
+			
 			var command = GetConnectCommand(host, port, ProxyCredentials);
 
-
-
-
-
-			try
+			using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
 			{
-				await networkStream.WriteAsync(command.AsMemory(), cancellationToken);
 
-				var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
-				var builder = new StringBuilder();
 
 				try
 				{
-					var newline = false;
+					await stream.WriteAsync(command.AsMemory(), cancellationToken);
 
+					var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+					var builder = new StringBuilder();
 
-					do
+					try
 					{
-						int nread = await networkStream.ReadAsync(buffer.AsMemory(0, BufferSize), cancellationToken);
-						if (nread <= 0)
-							throw new EndOfStreamException();
-						int index = 0;
+						var newline = false;
 
-						if (TryConsumeHeaders(builder, buffer, ref index, nread, ref newline))
-							break;
-					} while (true);
+
+						do
+						{
+							int nread = await stream.ReadAsync(buffer.AsMemory(0, BufferSize), cancellationToken);
+							if (nread <= 0)
+								throw new EndOfStreamException();
+							int index = 0;
+
+							if (TryConsumeHeaders(builder, buffer, ref index, nread, ref newline))
+								break;
+						} while (true);
+					}
+					finally
+					{
+						ArrayPool<byte>.Shared.Return(buffer);
+					}
+
+
+					int index1 = 0;
+
+					while (builder[index1] != '\n')
+						index1++;
+
+					if (index1 > 0 && builder[index1 - 1] == '\r')
+						index1--;
+
+					// trim everything beyond the "HTTP/1.1 200 ..." part of the response
+					builder.Length = index1;
+
+					ValidateHttpResponse(builder.ToString(), host, port);
+					return stream;
 				}
-				finally
+				catch
 				{
-					ArrayPool<byte>.Shared.Return(buffer);
+					stream.Dispose();
+					throw;
 				}
-
-
-				int index1 = 0;
-
-				while (builder[index1] != '\n')
-					index1++;
-
-				if (index1 > 0 && builder[index1 - 1] == '\r')
-					index1--;
-
-				// trim everything beyond the "HTTP/1.1 200 ..." part of the response
-				builder.Length = index1;
-
-				ValidateHttpResponse(builder.ToString(), host, port);
-				return networkStream;
-			}
-			catch
-			{
-				socket.Dispose();
-				throw;
 			}
 		}
 	}

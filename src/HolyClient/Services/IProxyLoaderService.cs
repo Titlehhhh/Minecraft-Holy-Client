@@ -29,7 +29,7 @@ public class ProxyComparer : IEqualityComparer<ProxyInfo>
 
 
 
-		return x.Host == y.Host && x.Port == y.Port;
+		return x.Host == y.Host && x.Port == y.Port && x.Type == y.Type;
 	}
 
 	public int GetHashCode([DisallowNull] ProxyInfo obj)

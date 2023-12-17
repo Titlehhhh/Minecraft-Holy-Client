@@ -1,15 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  <EnableDynamicLoading>true</EnableDynamicLoading>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj">
+			<Private>false</Private>
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\..\..\CoreLibs\HolyClient.Abstractions\HolyClient.Abstractions.csproj">
+			<Private>false</Private>
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</ProjectReference>
+		
+	</ItemGroup>
 
 
 </Project>
