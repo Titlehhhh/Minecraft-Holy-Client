@@ -12,10 +12,28 @@ namespace HolyClient.StressTest
 		{
 			foreach (var bot in bots)
 			{
+				CancellationTokenSource cts = null;
+
 				var d = bot.OnError.Subscribe(async x =>
 				{
 					//Console.WriteLine(x.Message);
+					try
+					{
+						if (cts is not null)
+						{
+							cts.Cancel();
+							cts.Dispose();
+							
+						}
+					}
+					catch
+					{
 
+					}
+					finally
+					{
+						cts = null;
+					}
 					await Task.Delay(1500);
 					await bot.Restart(true);
 				});
@@ -24,12 +42,13 @@ namespace HolyClient.StressTest
 
 				var d2 = bot.Client.OnJoinGame.Subscribe(async x =>
 				{
+					cts = new();
 					try
 					{
 						await Task.Delay(500);
 						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
 
-						while (true)
+						while (!cts.IsCancellationRequested)
 						{
 							await bot.Client.SendChat(SpamText);
 							await Task.Delay(1000);

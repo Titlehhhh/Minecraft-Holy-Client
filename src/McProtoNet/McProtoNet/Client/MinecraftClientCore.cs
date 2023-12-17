@@ -104,7 +104,7 @@ namespace McProtoNet
 
 			Task fill = null;
 
-			if (Pipelines)
+			//if (Pipelines)
 			{
 				var readStream = pipe.Reader.AsStream();
 
@@ -117,22 +117,22 @@ namespace McProtoNet
 
 				
 			}
-			else
-			{
+			//else
+			//{
 
 
 
-				fill = Task.CompletedTask;
+			//	fill = Task.CompletedTask;
 
-				PacketReader = new MinecraftPacketReader(minecraftStream, false);
-				PacketReader.SwitchCompression(threshold);
-			}
+			//	PacketReader = new MinecraftPacketReader(minecraftStream, false);
+			//	PacketReader.SwitchCompression(threshold);
+			//}
 			var read = ReadPacketLoop(CTS.Token, packetReceived);
 
 			return Task.WhenAll(read, fill);
 		}
 
-		public static bool Pipelines { get; set; } = true;
+		//internal static bool Pipelines { get; set; } = true;
 
 		private async ValueTask LoginCore(CancellationToken cancellation)
 		{
