@@ -85,7 +85,7 @@ namespace McProtoNet
 
 
 		}
-		internal async ValueTask Login(OnPacketReceived packetReceived)
+		internal async Task<Task> Login(OnPacketReceived packetReceived)
 		{
 			CTS.Token.ThrowIfCancellationRequested();
 
@@ -102,12 +102,14 @@ namespace McProtoNet
 				await LoginCore(CTS.Token);
 			}
 
+			Task fill = null;
+
 			if (Pipelines)
 			{
 				var readStream = pipe.Reader.AsStream();
 
 
-				FillTask = FillPipeAsync(minecraftStream, CTS.Token);
+				fill = FillPipeAsync(minecraftStream, CTS.Token);
 
 				PacketReader = new MinecraftPacketReader(readStream, false);
 				PacketReader.SwitchCompression(threshold);
@@ -120,12 +122,14 @@ namespace McProtoNet
 
 
 
-				FillTask = Task.CompletedTask;
+				fill = Task.CompletedTask;
 
 				PacketReader = new MinecraftPacketReader(minecraftStream, false);
 				PacketReader.SwitchCompression(threshold);
 			}
-			ReadPacketsTask = ReadPacketLoop(CTS.Token, packetReceived);
+			var read = ReadPacketLoop(CTS.Token, packetReceived);
+
+			return Task.WhenAll(read, fill);
 		}
 
 		public static bool Pipelines { get; set; } = true;
@@ -200,7 +204,7 @@ namespace McProtoNet
 		}
 
 
-		private async ValueTask ReadPacketLoop(CancellationToken cancellationToken, OnPacketReceived packetReceived)
+		private async Task ReadPacketLoop(CancellationToken cancellationToken, OnPacketReceived packetReceived)
 		{
 
 			try
@@ -245,7 +249,7 @@ namespace McProtoNet
 		{
 			try
 			{
-				const int minimumBufferSize = 32;
+				const int minimumBufferSize = 512;
 				while (!cancellationToken.IsCancellationRequested)
 				{
 					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
@@ -287,7 +291,7 @@ namespace McProtoNet
 
 
 
-			return await _proxy.ConnectAsync(_host, _port, token);
+			return await _proxy.ConnectAsync(_host, _port,5000, token);
 
 
 		}

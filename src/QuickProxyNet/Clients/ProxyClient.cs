@@ -75,6 +75,8 @@ namespace QuickProxyNet
 		{
 			var socket = SocketHelper.CreateSocket();
 
+			//Cance
+
 			try
 			{
 
@@ -90,8 +92,18 @@ namespace QuickProxyNet
 
 
 			var stream = new NetworkStream(socket, true);
-
-			return await ConnectAsync(stream, host, port, cancellationToken);
+			using (cancellationToken.Register(() => stream.Dispose()))
+			{
+				try
+				{
+					return await ConnectAsync(stream, host, port, cancellationToken);
+				}
+				catch
+				{
+					stream.Dispose();
+					throw;
+				}
+			}
 
 		}
 

@@ -142,11 +142,11 @@ namespace McProtoNet
 				await _core.HandShake();
 
 				State = ClientState.Login;
-				await _core.Login(OnPacket);
+				var t = await _core.Login(OnPacket);
 
 				State = ClientState.Play;
 
-				WaitTask();
+				WaitTask(t);
 
 
 
@@ -167,29 +167,11 @@ namespace McProtoNet
 
 		}
 
-		private async void WaitTask()
+		private async void WaitTask(Task t)
 		{
 			try
 			{
-				List<Exception> exs = new();
-				try
-				{
-
-					await _core.FillTask;
-				}
-				catch(Exception e)
-				{
-					exs.Add(e);
-				}
-				try
-				{
-					await _core.ReadPacketsTask;
-				}
-				catch (Exception e)
-				{
-					exs.Add(e);
-				}
-				throw new AggregateException(exs);
+				await t;
 			}
 			catch (Exception e)
 			{
@@ -198,7 +180,7 @@ namespace McProtoNet
 			}
 			finally
 			{
-				
+
 				pipe?.Reset();
 			}
 		}
@@ -237,7 +219,7 @@ namespace McProtoNet
 				_core.Dispose();
 			}
 
-			
+
 			pipe = null;
 
 			_disposed = true;
