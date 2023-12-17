@@ -31,7 +31,7 @@ namespace QuickProxyNet
 
 		IPEndPoint LocalEndPoint { get; set; }
 
-		ValueTask<NetworkStream> ConnectAsync(CancellationToken token);
+		ValueTask<Stream> EstablishTCPConnectionAsync(CancellationToken token);
 
 		ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken));
 		ValueTask<Stream> ConnectAsync(Stream source,string host, int port, CancellationToken cancellationToken = default(CancellationToken));

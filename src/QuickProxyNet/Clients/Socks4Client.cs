@@ -45,6 +45,8 @@ namespace QuickProxyNet
 
 			await SocksHelper.EstablishSocks4TunnelAsync(stream, IsSocks4a, host, port, this.ProxyCredentials, true, cancellationToken);
 
+			
+
 			return stream;
 		}
 	}

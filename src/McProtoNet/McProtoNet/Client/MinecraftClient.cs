@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System.ComponentModel.DataAnnotations;
+using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet
@@ -32,12 +33,12 @@ namespace McProtoNet
 
 		private MinecraftVersion _protocol;
 		private volatile MinecraftClientCore _core;
-		//	Pipe pipe;
+		Pipe pipe;
 
 
 		public MinecraftClient()
 		{
-			//	pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
+			pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
 			CreateEvents();
 
 		}
@@ -85,7 +86,7 @@ namespace McProtoNet
 				Config.Port,
 				Config.Proxy,
 				CreatePallete(),
-				//	this.pipe,
+					this.pipe,
 				this._logger);
 
 		}
@@ -141,11 +142,11 @@ namespace McProtoNet
 				await _core.HandShake();
 
 				State = ClientState.Login;
-				var t = await _core.Login(OnPacket);
+				await _core.Login(OnPacket);
 
 				State = ClientState.Play;
 
-				WaitTask(t);
+				WaitTask();
 
 
 
@@ -166,16 +167,39 @@ namespace McProtoNet
 
 		}
 
-		private async void WaitTask(Task t)
+		private async void WaitTask()
 		{
 			try
 			{
-				await t;
+				List<Exception> exs = new();
+				try
+				{
+
+					await _core.FillTask;
+				}
+				catch(Exception e)
+				{
+					exs.Add(e);
+				}
+				try
+				{
+					await _core.ReadPacketsTask;
+				}
+				catch (Exception e)
+				{
+					exs.Add(e);
+				}
+				throw new AggregateException(exs);
 			}
 			catch (Exception e)
 			{
 				this.State = ClientState.Failed;
 				workTask.TrySetException(e);
+			}
+			finally
+			{
+				
+				pipe?.Reset();
 			}
 		}
 
@@ -213,11 +237,8 @@ namespace McProtoNet
 				_core.Dispose();
 			}
 
-			//	if (pipe is { })
-			{
-
-			}
-			//pipe = null;
+			
+			pipe = null;
 
 			_disposed = true;
 

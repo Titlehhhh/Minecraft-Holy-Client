@@ -29,7 +29,7 @@ namespace McProtoNet
 
 		private CancellationTokenSource CTS = new();
 
-		public MinecraftClientCore(MinecraftVersion protocol, string nick, string host, ushort port, IProxyClient? proxy, IPacketPallete packetPallete, ILogger logger)
+		public MinecraftClientCore(MinecraftVersion protocol, string nick, string host, ushort port, IProxyClient? proxy, IPacketPallete packetPallete, Pipe pipe, ILogger logger)
 		{
 			_protocol = protocol;
 			_nick = nick;
@@ -37,7 +37,7 @@ namespace McProtoNet
 			_port = port;
 			_proxy = proxy;
 			_packetPallete = packetPallete;
-			//this.pipe = pipe;
+			this.pipe = pipe;
 			_logger = logger;
 		}
 
@@ -50,7 +50,7 @@ namespace McProtoNet
 		#endregion
 
 		#region StateFields
-		Stream tcp;
+		Stream mainStream;
 		private MinecraftStream minecraftStream;
 		internal IMinecraftPacketReader PacketReader;
 		internal IMinecraftPacketSender PacketSender;
@@ -62,9 +62,11 @@ namespace McProtoNet
 		{
 
 
-			tcp = await CreateTcp(CTS.Token);
+			mainStream = await CreateTcp(CTS.Token);
 
-			minecraftStream = new MinecraftStream(tcp);
+
+
+			minecraftStream = new MinecraftStream(mainStream);
 			PacketSender = new MinecraftPacketSender(minecraftStream, true);
 
 
@@ -83,7 +85,7 @@ namespace McProtoNet
 
 
 		}
-		internal async Task<Task> Login(OnPacketReceived packetReceived)
+		internal async ValueTask Login(OnPacketReceived packetReceived)
 		{
 			CTS.Token.ThrowIfCancellationRequested();
 
@@ -99,13 +101,35 @@ namespace McProtoNet
 			{
 				await LoginCore(CTS.Token);
 			}
-			//Task fill = FillPipeAsync(CTS.Token);
-			Task read = ReadPipeAsync(CTS.Token, packetReceived);
+
+			if (Pipelines)
+			{
+				var readStream = pipe.Reader.AsStream();
+
+
+				FillTask = FillPipeAsync(minecraftStream, CTS.Token);
+
+				PacketReader = new MinecraftPacketReader(readStream, false);
+				PacketReader.SwitchCompression(threshold);
+
+
+				
+			}
+			else
+			{
 
 
 
-			return read;
+				FillTask = Task.CompletedTask;
+
+				PacketReader = new MinecraftPacketReader(minecraftStream, false);
+				PacketReader.SwitchCompression(threshold);
+			}
+			ReadPacketsTask = ReadPacketLoop(CTS.Token, packetReceived);
 		}
+
+		public static bool Pipelines { get; set; } = true;
+
 		private async ValueTask LoginCore(CancellationToken cancellation)
 		{
 			bool ok = false;
@@ -176,81 +200,106 @@ namespace McProtoNet
 		}
 
 
-		private async Task ReadPipeAsync(CancellationToken cancellationToken, OnPacketReceived packetReceived)
+		private async ValueTask ReadPacketLoop(CancellationToken cancellationToken, OnPacketReceived packetReceived)
 		{
 
-			PacketReader = new MinecraftPacketReader(minecraftStream, false);
-			PacketReader.SwitchCompression(threshold);
-
-			while (!cancellationToken.IsCancellationRequested)
+			try
 			{
-				using (var packet = await PacketReader.ReadNextPacketAsync(cancellationToken))
+
+
+
+				while (!cancellationToken.IsCancellationRequested)
 				{
-					if (_packetPallete.TryGetIn(packet.Id, out var packetIn))
+					using (var packet = await PacketReader.ReadNextPacketAsync(cancellationToken))
 					{
-						packet.Data.Position = 0;
-
-						var reader = Performance.Readers.Get();
-
-						try
+						if (_packetPallete.TryGetIn(packet.Id, out var packetIn))
 						{
+							packet.Data.Position = 0;
+
+							var reader = Performance.Readers.Get();
+
+							try
+							{
 
 
 
-							reader.BaseStream = packet.Data;
+								reader.BaseStream = packet.Data;
 
-							packetReceived.Invoke(reader, packetIn, cancellationToken);
-						}
-						finally
-						{
-							Performance.Readers.Return(reader);
+								packetReceived.Invoke(reader, packetIn, cancellationToken);
+							}
+							finally
+							{
+								Performance.Readers.Return(reader);
+							}
 						}
 					}
 				}
 			}
+			finally
+			{
+				await pipe.Reader.CompleteAsync();
+			}
 
 		}
-		private async Task FillPipeAsync(CancellationToken cancellationToken)
+		private async Task FillPipeAsync(Stream stream, CancellationToken cancellationToken)
 		{
-			return;
-			const int minimumBufferSize = 512;
-			while (!cancellationToken.IsCancellationRequested)
+			try
 			{
-				Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
-				int bytesRead = await minecraftStream.ReadAsync(memory, cancellationToken);
-
-
-				pipe.Writer.Advance(bytesRead);
-				FlushResult result = await pipe.Writer.FlushAsync();
-				if (result.IsCompleted)
+				const int minimumBufferSize = 32;
+				while (!cancellationToken.IsCancellationRequested)
 				{
-					break;
+					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
+					int bytesRead = await stream.ReadAsync(memory, cancellationToken);
+					//Console.WriteLine("Read Block: " + bytesRead);
+
+					pipe.Writer.Advance(bytesRead);
+					FlushResult result = await pipe.Writer.FlushAsync();
+					if (result.IsCompleted)
+					{
+						break;
+					}
 				}
+			}
+			finally
+			{
+				await pipe.Writer.CompleteAsync();
 			}
 		}
 
 
+		public Task FillTask { get; private set; }
+		public ValueTask ReadPacketsTask { get; private set; }
 
-
-		private async Task<Stream> CreateTcp(CancellationToken cancellation)
+		private async ValueTask<Stream> CreateTcp(CancellationToken token)
 		{
-			cancellation.ThrowIfCancellationRequested();
+			token.ThrowIfCancellationRequested();
 			if (_proxy is null)
 			{
 
 				TcpClient tcp = new TcpClient();
 
 				_logger.Information("Подключение");
-				await tcp.ConnectAsync(_host, _port, cancellation);
+				await tcp.ConnectAsync(_host, _port, token);
 				return tcp.GetStream();
 			}
 			_logger.Information($"Подключение к {_proxy.Type} прокси {_proxy.ProxyHost}:{_proxy.ProxyPort}");
-			
-			
-			
 
-			return await _proxy.ConnectAsync(_host, _port, cancellation);
+
+
+
+			return await _proxy.ConnectAsync(_host, _port, token);
+
+
 		}
+
+
+
+
+		bool _disposed;
+
+
+
+		#region Send
 
 
 
@@ -331,7 +380,10 @@ namespace McProtoNet
 				semaphore.Release();
 			}
 		}
-		bool _disposed;
+		#endregion
+
+		#region Dispose
+
 
 		public void Dispose()
 		{
@@ -375,10 +427,10 @@ namespace McProtoNet
 		{
 			if (_disposed) return;
 
-			//if (pipe is { })
-			{
-				//	pipe = null;
-			}
+			
+				
+				pipe = null;
+			
 			if (PacketSender is { })
 			{
 				await PacketSender.DisposeAsync();
@@ -406,5 +458,115 @@ namespace McProtoNet
 
 			GC.SuppressFinalize(this);
 		}
+
+		#endregion
+	}
+
+
+	internal class ReadWriteStream : Stream
+	{
+		private readonly Stream _write;
+
+		private readonly Stream _read;
+		public ReadWriteStream(Stream write, Stream read)
+		{
+			_write = write;
+			_read = read;
+		}
+
+
+		public override bool CanRead => throw new NotImplementedException();
+
+		public override bool CanSeek => throw new NotImplementedException();
+
+		public override bool CanWrite => throw new NotImplementedException();
+
+		public override long Length => throw new NotImplementedException();
+
+		public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+		public override void Flush()
+		{
+			_write.Flush();
+		}
+
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			return _read.Read(buffer, offset, count);
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void SetLength(long value)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			_write.Write(buffer, offset, count);
+		}
+
+		public override void Write(ReadOnlySpan<byte> buffer)
+		{
+			_write.Write(buffer);
+		}
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			return _write.WriteAsync(buffer, offset, count, cancellationToken);
+		}
+		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+		{
+			return _write.WriteAsync(buffer, cancellationToken);
+		}
+		public override int Read(Span<byte> buffer)
+		{
+			return base.Read(buffer);
+		}
+		public override Task FlushAsync(CancellationToken cancellationToken)
+		{
+			return _write.FlushAsync(cancellationToken);
+		}
+		public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+		{
+			return _read.CopyToAsync(destination, bufferSize, cancellationToken);
+		}
+
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			return _read.ReadAsync(buffer, offset, count, cancellationToken);
+		}
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+		{
+			return _read.ReadAsync(buffer, cancellationToken);
+		}
+
+		public override int ReadByte()
+		{
+			return _read.ReadByte();
+		}
+
+		public override int ReadTimeout { get => _read.ReadTimeout; set => _read.ReadTimeout = value; }
+
+		public override int WriteTimeout { get => _write.WriteTimeout; set => _write.WriteTimeout = value; }
+
+
+		public override void WriteByte(byte value)
+		{
+			_write.WriteByte(value);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+
+			_read.Dispose();
+			_write.Dispose();
+			base.Dispose(disposing);
+		}
+
+
 	}
 }

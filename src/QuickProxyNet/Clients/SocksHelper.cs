@@ -285,15 +285,17 @@ namespace QuickProxyNet
 					buffer[totalLength + hostLength] = 0;
 					totalLength += hostLength + 1;
 				}
-
+				
 				await WriteAsync(stream, buffer.AsMemory(0, totalLength), async).ConfigureAwait(false);
-
+				
 				// +----+----+----+----+----+----+----+----+
 				// | VN | CD | DSTPORT |      DSTIP        |
 				// +----+----+----+----+----+----+----+----+
 				//    1    1      2              4
-				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async).ConfigureAwait(false);
 
+				
+				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async).ConfigureAwait(false);
+				
 				switch (buffer[1])
 				{
 					case Socks4_Success:

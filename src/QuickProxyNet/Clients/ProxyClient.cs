@@ -114,7 +114,7 @@ namespace QuickProxyNet
 
 		public abstract ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default);
 
-		public async ValueTask<NetworkStream> ConnectAsync(CancellationToken token)
+		public async ValueTask<Stream> EstablishTCPConnectionAsync(CancellationToken token)
 		{
 			var socket = SocketHelper.CreateSocket();
 			try
