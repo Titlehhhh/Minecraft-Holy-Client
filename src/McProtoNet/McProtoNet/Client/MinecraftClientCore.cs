@@ -249,7 +249,7 @@ namespace McProtoNet
 			
 			
 
-			return await _proxy.ConnectAsync(_host, _port,5000, cancellation);
+			return await _proxy.ConnectAsync(_host, _port, cancellation);
 		}
 
 

@@ -34,48 +34,17 @@ namespace QuickProxyNet
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public override async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
+		public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
 
 
 			ValidateArguments(host, port);
-			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-			{
-				NoDelay = true,
-				LingerState = new LingerOption(true, 0),
-				SendTimeout = 10000,
-				ReceiveTimeout = 10000
-				
-			};
-			try
-			{
-				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-			}
-			catch
-			{
-				socket.Dispose();
-				throw;
-			}
-
-			
 
 
 
-			NetworkStream stream = new NetworkStream(socket, true);
-			using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
-			{
-				try
-				{
 
+			await SocksHelper.EstablishSocks4TunnelAsync(stream, IsSocks4a, host, port, this.ProxyCredentials, true, cancellationToken);
 
-					await SocksHelper.EstablishSocks4TunnelAsync(stream, IsSocks4a, host, port, this.ProxyCredentials, true, cancellationToken);
-				}
-				catch
-				{
-					stream.Dispose();
-					throw;
-				}
-			}
 			return stream;
 		}
 	}
