@@ -28,7 +28,7 @@ using Nuke.Common.Tools.OctoVersion;
 using Nuke.Common.Tools.MinVer;
 using Octokit;
 using Nuke.Common.Tooling;
-using Octokit.Internal;
+using Octokit.public;
 
 
 

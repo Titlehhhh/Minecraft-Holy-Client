@@ -38,7 +38,10 @@ namespace McProtoNet
 
 		public MinecraftClient()
 		{
-			pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
+			pipe = new Pipe(new PipeOptions(pauseWriterThreshold: 10, resumeWriterThreshold: 5, useSynchronizationContext:false)
+			{
+				 
+			});
 			CreateEvents();
 
 		}
@@ -77,7 +80,15 @@ namespace McProtoNet
 		private void CreateNewCore()
 		{
 			RemoveCore();
-			//pipe.Reset();
+
+			try
+			{
+				pipe.Reset();
+			}
+			catch
+			{
+
+			}
 			//	throw new Exception("CTOR");
 			_core = new MinecraftClientCore(
 				Config.Version,
@@ -181,7 +192,6 @@ namespace McProtoNet
 			finally
 			{
 
-				pipe?.Reset();
 			}
 		}
 
@@ -218,7 +228,14 @@ namespace McProtoNet
 			{
 				_core.Dispose();
 			}
+			try
+			{
+				pipe.Reset();
+			}
+			catch
+			{
 
+			}
 
 			pipe = null;
 

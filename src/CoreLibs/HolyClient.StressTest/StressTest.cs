@@ -85,8 +85,8 @@ namespace HolyClient.StressTest
 		private readonly object _currentInfoLock = new();
 		private StressTestMetrik currentInfo;
 
-		private int _botsOnlineCounter = 0;
-		private int _cpsCounter = 0;
+		private volatile int _botsOnlineCounter = 0;
+		private volatile int _cpsCounter = 0;
 
 
 		private IDisposable? _cleanUp;
