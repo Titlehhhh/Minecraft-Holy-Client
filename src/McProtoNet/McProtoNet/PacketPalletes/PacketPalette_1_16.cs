@@ -1,10 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 namespace McProtoNet
 {
 	public class PacketPalette_1_16 : IPacketPallete
 	{
-		private readonly ConcurrentDictionary<int, PacketIn> typeIn = new(new Dictionary<int, PacketIn>()
+		private readonly FrozenDictionary<int, PacketIn> typeIn = FrozenDictionary.ToFrozenDictionary(new Dictionary<int, PacketIn>()
 		{
 		   { 0x00, PacketIn.SpawnEntity },
 			{ 0x01, PacketIn.SpawnExperienceOrb },
@@ -100,7 +101,7 @@ namespace McProtoNet
 			{ 0x5B, PacketIn.Tags },
 		});
 
-		private readonly ConcurrentDictionary<PacketOut, int> typeOut = new(new Dictionary<PacketOut, int>()
+		private readonly FrozenDictionary<PacketOut, int> typeOut = FrozenDictionary.ToFrozenDictionary(new Dictionary<PacketOut, int>()
 		{
 		   { PacketOut.TeleportConfirm, 0x00 },
 			{ PacketOut.QueryBlockNBT, 0x01 },

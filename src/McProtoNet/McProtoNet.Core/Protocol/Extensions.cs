@@ -1,6 +1,7 @@
 ﻿using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
 using Microsoft.IO;
+using System.Buffers;
 
 namespace McProtoNet.Core
 {
@@ -59,30 +60,37 @@ namespace McProtoNet.Core
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
 		{
-			byte[] buff = new byte[1];
-			int numRead = 0;
-			int result = 0;
-			byte read;
-			do
+			byte[] buff = ArrayPool<byte>.Shared.Rent(1);
+			try
 			{
-				if (stream.Read(buff, 0, 1) <= 0)
+				int numRead = 0;
+				int result = 0;
+				byte read;
+				do
 				{
-					throw new EndOfStreamException();
-				}
-				read = buff[0];
+					if (stream.Read(buff, 0, 1) <= 0)
+					{
+						throw new EndOfStreamException();
+					}
+					read = buff[0];
 
 
-				int value = read & 0b01111111;
-				result |= value << 7 * numRead;
+					int value = read & 0b01111111;
+					result |= value << 7 * numRead;
 
-				numRead++;
-				if (numRead > 5)
-				{
-					throw new InvalidOperationException("VarInt is too big");
-				}
-			} while ((read & 0b10000000) != 0);
+					numRead++;
+					if (numRead > 5)
+					{
+						throw new InvalidOperationException("VarInt is too big");
+					}
+				} while ((read & 0b10000000) != 0);
 
-			return result;
+				return result;
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buff);
+			}
 		}
 
 		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
