@@ -16,7 +16,7 @@ namespace HolyClient.StressTest
 
 				var d = bot.OnError.Subscribe(async x =>
 				{
-					//Console.WriteLine(x.Message);
+					
 					try
 					{
 						if (cts is not null)
@@ -34,8 +34,10 @@ namespace HolyClient.StressTest
 					{
 						cts = null;
 					}
-					await Task.Delay(1500);
-					await bot.Restart(true);
+					
+						await Task.Delay(1500);
+						await bot.Restart(true);
+					
 				});
 
 				disposables.Add(d);
@@ -54,9 +56,13 @@ namespace HolyClient.StressTest
 							await Task.Delay(1000);
 						}
 					}
-					catch
+					catch(Exception ex)
 					{
-
+						Console.WriteLine(ex.Message);
+					}
+					finally
+					{
+						Console.WriteLine("cancel");
 					}
 				});
 

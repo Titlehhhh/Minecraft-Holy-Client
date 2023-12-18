@@ -163,16 +163,12 @@ namespace McProtoNet
 
 
 			}
-			catch (Exception e) when (e is not OperationCanceledException)
+			catch (Exception e)
 			{
 				workTask.TrySetException(e);
 				State = ClientState.Failed;
 				_logger.Error(e, "Во время запуска клиента произошла ошибка");
 				throw e;
-			}
-			catch (TaskCanceledException cancel)
-			{
-
 			}
 
 
