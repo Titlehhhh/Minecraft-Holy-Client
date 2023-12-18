@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 
 namespace McProtoNet
 {

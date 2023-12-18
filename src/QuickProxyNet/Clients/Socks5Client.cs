@@ -1,10 +1,4 @@
-﻿using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Resources;
-using System.Security.Authentication;
-using System.Text;
+﻿using System.Net;
 
 namespace QuickProxyNet
 {

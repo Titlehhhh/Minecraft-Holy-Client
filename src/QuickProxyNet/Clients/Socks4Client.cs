@@ -1,10 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
+﻿using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 
 namespace QuickProxyNet
@@ -45,8 +40,8 @@ namespace QuickProxyNet
 
 			await SocksHelper.EstablishSocks4TunnelAsync(stream, IsSocks4a, host, port, this.ProxyCredentials, true, cancellationToken);
 
-			
-			
+
+
 			return stream;
 		}
 	}

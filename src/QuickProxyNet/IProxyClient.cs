@@ -5,7 +5,7 @@ namespace QuickProxyNet
 {
 	public static class SocketHelper
 	{
-		
+
 		public static Socket CreateSocket()
 		{
 			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -34,7 +34,7 @@ namespace QuickProxyNet
 		ValueTask<Stream> EstablishTCPConnectionAsync(CancellationToken token);
 
 		ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken));
-		ValueTask<Stream> ConnectAsync(Stream source,string host, int port, CancellationToken cancellationToken = default(CancellationToken));
+		ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default(CancellationToken));
 
 		ValueTask<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default(CancellationToken));
 	}

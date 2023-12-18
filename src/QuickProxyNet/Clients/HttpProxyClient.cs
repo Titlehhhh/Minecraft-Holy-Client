@@ -1,8 +1,6 @@
 ﻿using System.Buffers;
 using System.Globalization;
-using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -85,13 +83,13 @@ namespace QuickProxyNet
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public override async ValueTask<Stream> ConnectAsync(Stream stream,string host, int port, CancellationToken cancellationToken = default(CancellationToken))
+		public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			ValidateArguments(host, port);
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			
+
 			var command = GetConnectCommand(host, port, ProxyCredentials);
 
 			using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))

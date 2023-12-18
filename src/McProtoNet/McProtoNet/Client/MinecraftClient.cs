@@ -38,9 +38,9 @@ namespace McProtoNet
 
 		public MinecraftClient()
 		{
-			pipe = new Pipe(new PipeOptions(pauseWriterThreshold: 10, resumeWriterThreshold: 5, useSynchronizationContext:false)
+			pipe = new Pipe(new PipeOptions(pauseWriterThreshold: 10, resumeWriterThreshold: 5, useSynchronizationContext: false)
 			{
-				 
+
 			});
 			CreateEvents();
 

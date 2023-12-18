@@ -256,11 +256,11 @@ namespace McProtoNet
 					int bytesRead = await stream.ReadAsync(memory, cancellationToken);
 					//Console.WriteLine("Read Block: " + bytesRead);
 
-					
+
 
 					pipe.Writer.Advance(bytesRead);
 
-					
+
 					FlushResult result = await pipe.Writer.FlushAsync();
 					if (result.IsCompleted)
 					{
