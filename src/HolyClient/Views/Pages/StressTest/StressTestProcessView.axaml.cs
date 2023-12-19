@@ -2,7 +2,7 @@ using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
 using ReactiveUI;
 
-namespace HolyClient.Views.Pages.StressTest;
+namespace HolyClient.Views;
 
 public partial class StressTestProcessView : ReactiveUserControl<IStressTestProcessViewModel>
 {

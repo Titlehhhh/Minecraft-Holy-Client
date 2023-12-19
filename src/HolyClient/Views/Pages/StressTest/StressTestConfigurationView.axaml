@@ -19,7 +19,7 @@
 			 xmlns:converters="using:HolyClient.Converters"
 			 xmlns:minecraft="using:McProtoNet"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
-			 x:Class="HolyClient.Views.Pages.StressTest.StressTestConfigurationView">
+			 x:Class="HolyClient.Views.StressTestConfigurationView">
 	<UserControl.Resources>
 		<converters:MinecraftVersionToStringConverter x:Key="VersionToStringConverter"/>
 		<converters:DataGridProxyItemsSourceConverter x:Key="DGPISC"/>

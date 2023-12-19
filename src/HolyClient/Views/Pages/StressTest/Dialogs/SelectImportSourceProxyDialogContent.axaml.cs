@@ -5,7 +5,7 @@ using Avalonia.ReactiveUI;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using ReactiveUI;
 
-namespace HolyClient.Views.Pages.StressTest.Dialogs;
+namespace HolyClient.Views;
 
 public partial class SelectImportSourceProxyDialogContent : ReactiveUserControl<SelectImportSourceProxyViewModel>
 {

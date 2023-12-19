@@ -28,6 +28,7 @@ namespace HolyClient
 			GC.KeepAlive(typeof(HolyClient.Localization.Tr).Assembly);
 			Languages.Init();
 			AvaloniaXamlLoader.Load(this);
+			
 		}
 
 

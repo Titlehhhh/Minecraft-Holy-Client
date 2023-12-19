@@ -7,7 +7,7 @@
 			 xmlns:vm="using:HolyClient.ViewModels.Pages.StressTest.Dialogs"
 			 x:DataType="vm:SelectImportSourceProxyViewModel"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
-             x:Class="HolyClient.Views.Pages.StressTest.Dialogs.SelectImportSourceProxyDialogContent">
+             x:Class="HolyClient.Views.SelectImportSourceProxyDialogContent">
 
 	<ListBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}">
 		<ListBox.ItemTemplate>

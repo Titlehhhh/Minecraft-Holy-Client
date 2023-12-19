@@ -4,12 +4,12 @@ using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
-using HolyClient.Views.Pages.StressTest.Dialogs;
+using HolyClient.Views;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
 
-namespace HolyClient.Views.Pages.StressTest;
+namespace HolyClient.Views;
 
 public partial class StressTestConfigurationView : ReactiveUserControl<StressTestConfigurationViewModel>
 {
@@ -27,7 +27,7 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 
 			NotificationManager.Position = Avalonia.Controls.Notifications.NotificationPosition.BottomRight;
 
-			this.ViewModel.ImportProxyDialog.RegisterHandler(async x =>
+			this.ViewModel.SelectProxyImportSourceDialog.RegisterHandler(async x =>
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
@@ -45,7 +45,22 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 
 				x.SetOutput(result == ContentDialogResult.Primary);
 			}).DisposeWith(d);
+			this.ViewModel.ImportProxyDialog.RegisterHandler(async x =>
+			{
+				ContentDialog dialog = new ContentDialog()
+				{
+					Title = "Введите данные",
+					PrimaryButtonText = "Импорт",
+					IsSecondaryButtonEnabled = false,
+					CloseButtonText = "Отмена",
+					Content = x.Input
+					
+				};
+				var result = await dialog.ShowAsync();
 
+
+				x.SetOutput(result == ContentDialogResult.Primary);
+			}).DisposeWith(d);
 
 
 
