@@ -174,7 +174,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 			state.Proxies.Connect()
 				.ObserveOn(RxApp.MainThreadScheduler)
 				.Transform(x => x)
-				.Bind(out _proxies)
+				//.Bind(out _proxies)
 				.DisposeMany()
 				.Subscribe()
 				.DisposeWith(d);
@@ -210,10 +210,10 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 				if (!await ConfirmDeleteProxyDialog.Handle(Unit.Default))
 					return;
-				if (SelectedProxies is { })
-				{
-					state.Proxies.RemoveMany(SelectedProxies.Items);
-				}
+				//if (SelectedProxies is { })
+				//{
+				//	state.Proxies.RemoveMany(SelectedProxies.Items);
+				//}
 
 
 

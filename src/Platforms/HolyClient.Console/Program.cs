@@ -53,7 +53,7 @@ internal partial class Program
 
 
 
-		stressTest.Proxies.AddRange(proxies.Items);
+		//stressTest.Proxies.AddRange(proxies.Items);
 
 		await stressTest.Start(Logger.None);
 

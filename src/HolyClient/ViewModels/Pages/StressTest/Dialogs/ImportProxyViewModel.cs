@@ -45,8 +45,8 @@ namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
 				{
 					await using (var stream = File.Open(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 					{
-						var count = await proxyLoader.Load(stream, Type, state.Proxies);
-
+						//var count = await proxyLoader.Load(stream, Type, state.Proxies);
+						var count = 0;
 						notifi.Show(new Avalonia.Controls.Notifications.Notification("Прокси", $"Загружено {count} {this.Type} прокси.", type: NotificationType.Success));
 					}
 				}

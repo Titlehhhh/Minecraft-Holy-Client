@@ -44,18 +44,18 @@ namespace HolyClient.Services
 				}
 				int count = 0;
 				List<ProxyInfo> uniqueProxies = new();
-				var comparer = new ProxyComparer();
+				
 
 				sourceList.Edit(outProxies =>
 				{
-					var outProxiesHash = outProxies.ToHashSet(comparer);
-					var loadedProxiesHash = loadedProxies.ToHashSet(comparer);
+					var outProxiesHash = outProxies.ToHashSet();
+					var loadedProxiesHash = loadedProxies.ToHashSet();
 
 					foreach (var proxy in loadedProxiesHash)
 					{
 						if (outProxiesHash.Add(proxy))
 						{
-							proxy.Type = type;
+							//proxy.Type = type;
 							count++;
 						}
 						else

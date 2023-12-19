@@ -32,7 +32,7 @@ namespace HolyClient.StressTest
 
 		[Reactive]
 		public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-		public IEnumerable<ProxyInfo> ProxiesState
+		public IEnumerable<IProxySource> ProxiesState
 		{
 			get => Proxies.Items.ToArray();
 			set => Proxies.AddRange(value);
@@ -50,7 +50,7 @@ namespace HolyClient.StressTest
 
 
 		[IgnoreMember]
-		public ISourceList<ProxyInfo> Proxies { get; } = new SourceList<ProxyInfo>();
+		public ISourceList<IProxySource> Proxies { get; } = new SourceList<IProxySource>();
 
 
 
@@ -160,8 +160,8 @@ namespace HolyClient.StressTest
 
 				var nickProvider = new NickProvider(this.BotsNickname);
 
-				IProxyProvider? proxyProvider =
-					UseProxy ? new ProxyProvider(this.ProxiesState) : null;
+				IProxyProvider? proxyProvider = null;
+					//UseProxy ? new ProxyProvider() : null;
 
 
 				for (int i = 0; i < this.NumberOfBots; i++)
@@ -288,6 +288,7 @@ namespace HolyClient.StressTest
 
 		public Task Initialization(IPluginProvider pluginProvider)
 		{
+			
 
 			Optional<IPluginSource> plugin =
 				pluginProvider
@@ -297,6 +298,10 @@ namespace HolyClient.StressTest
 			if (plugin.HasValue)
 			{
 				this.SetBehavior(plugin.Value);
+			}
+			else
+			{
+				
 			}
 			return Task.CompletedTask;
 		}
@@ -333,4 +338,5 @@ namespace HolyClient.StressTest
 		}
 	}
 
+	
 }

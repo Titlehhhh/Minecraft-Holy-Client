@@ -26,7 +26,7 @@ public class StressTestPluginViewModel : ReactiveObject, IDisposable
 
 	public StressTestPluginViewModel(IPluginSource pluginSource, IStressTest stressTest)
 	{
-		Name = pluginSource.Reference.FullName;
+		Name = pluginSource.Metadata.Title ?? pluginSource.Reference.FullName;
 		Assembly = pluginSource.Reference.AssemblyName;
 		Authors = pluginSource.Metadata.Author;
 		Description = pluginSource.Metadata.Description;
