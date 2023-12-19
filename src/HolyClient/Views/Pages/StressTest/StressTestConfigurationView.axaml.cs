@@ -31,22 +31,24 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = Loc.Tr("StressTest.Configuration.Proxy.Dialog.Title"),
-					PrimaryButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.PrimaryButton"),
+					Title = "Выберите источник импорта",
+					PrimaryButtonText = "Далее",
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.CloseButton"),
-					Content = new ImportProxyDialogContent()
+					CloseButtonText = "Отмена",
+					Content = new SelectImportSourceProxyDialogContent()
 					{
 						DataContext = x.Input
-					},
-					PrimaryButtonCommand = x.Input.ImportCommand
-
+					}
 				};
 				var result = await dialog.ShowAsync();
 
 
-				x.SetOutput(Unit.Default);
+				x.SetOutput(result == ContentDialogResult.Primary);
 			}).DisposeWith(d);
+
+
+
+
 
 			this.ViewModel.ConfirmDeleteProxyDialog.RegisterHandler(async x =>
 			{

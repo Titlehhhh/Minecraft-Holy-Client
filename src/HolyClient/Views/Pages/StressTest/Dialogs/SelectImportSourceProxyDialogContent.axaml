@@ -5,18 +5,32 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 x:CompileBindings="True"
 			 xmlns:vm="using:HolyClient.ViewModels.Pages.StressTest.Dialogs"
-			 x:DataType="vm:ImportProxyViewModel"
+			 x:DataType="vm:SelectImportSourceProxyViewModel"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
-             x:Class="HolyClient.Views.Pages.StressTest.Dialogs.ImportProxyDialogContent">
+             x:Class="HolyClient.Views.Pages.StressTest.Dialogs.SelectImportSourceProxyDialogContent">
+
+	<ListBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}">
+		<ListBox.ItemTemplate>
+			<DataTemplate DataType="vm:ImportSourceViewModel">
+				<StackPanel Spacing="5" Orientation="Horizontal">
+					<ui:SymbolIcon FontSize="32" Symbol="{Binding Icon}"/>
+					<TextBlock VerticalAlignment="Center" Text="{Binding Name}"/>
+				</StackPanel>
+			</DataTemplate>
+		</ListBox.ItemTemplate>
+	</ListBox>
+	<!--
+	
 	<StackPanel>
 		<TextBlock Text="{Tr StressTest.Configuration.Proxy.Dialog.Path}"/>
 		<Grid Margin="0,4,0,0" ColumnDefinitions="*, Auto">
 			<TextBox Text="{Binding FilePath}"/>
-			<Button x:Name="OpenFileButton" Click="OpenFileButton_Click" Margin="4,0,0,0" Grid.Column="1" Theme="{StaticResource TransparentButton}">
+			<Button x:Name="OpenFileButton" Margin="4,0,0,0" Grid.Column="1" Theme="{StaticResource TransparentButton}">
 				<ui:SymbolIcon Symbol="More" FontSize="18" />
 			</Button>
 		</Grid>
 		<TextBlock Margin="0,10,0,0" Text="{Tr StressTest.Configuration.Proxy.Dialog.ProxyType}"/>
 		<ComboBox Margin="0,4,0,0" SelectedItem="{Binding Type}" ItemsSource="{Binding Types}"/>
 	</StackPanel>
+	-->
 </UserControl>

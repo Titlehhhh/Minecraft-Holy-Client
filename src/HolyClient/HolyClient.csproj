@@ -76,8 +76,8 @@
     <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
       <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\StressTest\Dialogs\ImportProxyDialogContent.axaml.cs">
-      <DependentUpon>ImportProxyDialogContent.axaml</DependentUpon>
+    <Compile Update="Views\Pages\StressTest\Dialogs\SelectImportSourceProxyDialogContent.axaml.cs">
+      <DependentUpon>SelectImportSourceProxyDialogContent.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

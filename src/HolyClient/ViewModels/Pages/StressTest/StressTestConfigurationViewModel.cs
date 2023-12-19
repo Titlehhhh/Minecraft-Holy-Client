@@ -78,7 +78,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public ReadOnlyObservableCollection<ProxyInfo> _proxies;
 
 	public ReadOnlyObservableCollection<ProxyInfo> Proxies => _proxies;
-	public Interaction<ImportProxyViewModel, Unit> ImportProxyDialog { get; } = new();
+	public Interaction<SelectImportSourceProxyViewModel, bool> ImportProxyDialog { get; } = new();
 
 	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
 	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
@@ -102,6 +102,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 	#endregion
 
+	private SelectImportSourceProxyViewModel _selectProxyImportSourceViewModel = new();
 	public StressTestConfigurationViewModel(IScreen hostScreen, IStressTest state)
 	{
 
@@ -163,10 +164,6 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 
-
-
-
-
 		#region Configure proxies
 
 		this.WhenActivated(d =>
@@ -187,8 +184,12 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 			ImportProxyCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
-				var vm = new ImportProxyViewModel(state);
-				await ImportProxyDialog.Handle(vm);
+				
+				bool ok = await ImportProxyDialog.Handle(_selectProxyImportSourceViewModel);
+				if (ok)
+				{
+
+				}
 
 			});
 
