@@ -74,14 +74,10 @@ namespace QuickProxyNet
 		{
 			var socket = SocketHelper.CreateSocket();
 
-			//Cance
 
 			try
 			{
-
-
 				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-
 			}
 			catch
 			{
@@ -130,8 +126,6 @@ namespace QuickProxyNet
 			var socket = SocketHelper.CreateSocket();
 			try
 			{
-
-
 				await socket.ConnectAsync(ProxyHost, ProxyPort, token);
 
 			}
