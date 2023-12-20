@@ -12,11 +12,6 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="1.0.6" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\CoreLibs\HolyClient.Core\HolyClient.Core.csproj" />
-    <ProjectReference Include="..\..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
-  </ItemGroup>
 	
 
 </Project>

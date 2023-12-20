@@ -1,4 +1,5 @@
 ﻿using HolyClient.Common;
+using MessagePack;
 using QuickProxyNet;
 
 namespace HolyClient.StressTest

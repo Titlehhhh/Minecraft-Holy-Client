@@ -128,27 +128,20 @@
 					<Grid ColumnDefinitions="*, Auto">
 
 
-						<DataGrid
-							
-							Name="ProxiesDataGrid"
+						<ListBox
 							Margin="12 12 0 12"
 							
-							ItemsSource="{Binding Proxies,Converter={StaticResource DGPISC}}"
-							AutoGenerateColumns="False" >
-
-							<i:Interaction.Behaviors>
-								<bhvs:DataGridSelectedItemsBehavior SelectedItems="{Binding SelectedProxies}"/>
-							</i:Interaction.Behaviors>
-
-
-							<DataGrid.Columns>
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Type}"  Binding="{Binding Type}"/>
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Host}" Binding="{Binding Host}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Port}" Binding="{Binding Port}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Login}" Binding="{Binding Login}" />
-								<DataGridTextColumn Width="*" IsReadOnly="True" Header="{Tr StressTest.Configuration.Proxy.Password}" Binding="{Binding Password}" />
-							</DataGrid.Columns>
-						</DataGrid>
+							SelectedItem="{Binding SelectedProxy}"
+							ItemsSource="{Binding Proxies}">
+							<ListBox.ItemTemplate>
+								<DataTemplate DataType="vm:ProxySourceViewModel">
+									<DockPanel LastChildFill="False">
+										<TextBlock Text="Test"/>
+										<TextBlock DockPanel.Dock="Right" Text="{Binding Type}"/>
+									</DockPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
 
 						<ui:FABorder
                                         Margin="12"

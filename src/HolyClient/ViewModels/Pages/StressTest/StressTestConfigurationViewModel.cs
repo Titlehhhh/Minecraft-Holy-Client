@@ -6,6 +6,8 @@ using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using McProtoNet;
+using NuGet.Configuration;
+using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
@@ -75,9 +77,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public IPluginSource? InstalledBehavior { get; private set; }
 	#region Proxy
 
-	public ReadOnlyObservableCollection<IProxySource> _proxies;
-
-	public ReadOnlyObservableCollection<IProxySource> Proxies => _proxies;
+	
 	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
 	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
 	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
@@ -95,9 +95,11 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 	[Reactive]
-	public IProxySource? SelectedProxy { get; set; }
+	public ProxySourceViewModel? SelectedProxy { get; set; }
 
-	
+	public ReadOnlyObservableCollection<ProxySourceViewModel> _proxies;
+
+	public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
 
 	#endregion
 
@@ -161,7 +163,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		#endregion
 
 
-
+		
 
 		#region Configure proxies
 
@@ -169,8 +171,8 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		{
 			state.Proxies.Connect()
 				.ObserveOn(RxApp.MainThreadScheduler)
-				.Transform(x => x)
-				//.Bind(out _proxies)
+				.Transform(x => new ProxySourceViewModel(x))
+				.Bind(out _proxies)
 				.DisposeMany()
 				.Subscribe()
 				.DisposeWith(d);
@@ -219,7 +221,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 					if(proxySource is not null)
 					{
-
+						state.Proxies.Add(proxySource);
 					}
 				}
 
@@ -251,7 +253,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 			}, canExecuteDeleteAll).DisposeWith(d);
-
+			
 		});
 
 
@@ -290,7 +292,16 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		#endregion
 	}
 
+	
+
+}
+public class ProxySourceViewModel : ReactiveObject
+{
 
 
-
+	public ProxyType Type { get; set; }
+	public ProxySourceViewModel(IProxySource proxySource)
+	{
+		Type = proxySource.Type;
+	}
 }
