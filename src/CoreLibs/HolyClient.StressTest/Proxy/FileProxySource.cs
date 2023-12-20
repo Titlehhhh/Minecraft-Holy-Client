@@ -3,6 +3,7 @@ using QuickProxyNet;
 
 namespace HolyClient.StressTest
 {
+	[MessagePackObject(keyAsPropertyName: true)]
 	public class FileProxySource : IProxySource
 	{
 		public ProxyType Type { get; set; }
@@ -17,7 +18,7 @@ namespace HolyClient.StressTest
 					while (!sr.EndOfStream)
 					{
 						var line = await sr.ReadLineAsync();
-						if (ProxyInfo.TryParse(line.Trim(), out var proxy))
+						if (ProxyInfo.TryParse(line.Trim(),this.Type, out var proxy))
 						{
 							proxies.Add(proxy);
 						}
@@ -29,6 +30,15 @@ namespace HolyClient.StressTest
 
 			}
 			return proxies;
+		}
+		public FileProxySource()
+		{
+
+		}
+		public FileProxySource(ProxyType type, string filePath)
+		{
+			Type = type;
+			FilePath = filePath;
 		}
 	}
 

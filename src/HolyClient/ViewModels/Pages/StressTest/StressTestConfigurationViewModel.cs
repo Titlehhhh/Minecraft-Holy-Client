@@ -75,9 +75,9 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public IPluginSource? InstalledBehavior { get; private set; }
 	#region Proxy
 
-	public ReadOnlyObservableCollection<ProxyInfo> _proxies;
+	public ReadOnlyObservableCollection<IProxySource> _proxies;
 
-	public ReadOnlyObservableCollection<ProxyInfo> Proxies => _proxies;
+	public ReadOnlyObservableCollection<IProxySource> Proxies => _proxies;
 	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
 	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
 	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
@@ -95,10 +95,9 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 	[Reactive]
-	public ProxyInfo? SelectedProxy { get; set; }
+	public IProxySource? SelectedProxy { get; set; }
 
-	[Reactive]
-	public ISourceList<ProxyInfo> SelectedProxies { get; set; } = new SourceList<ProxyInfo>();
+	
 
 	#endregion
 
@@ -190,7 +189,38 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 				{
 					ImportSource source = _selectProxyImportSourceViewModel.SelectedSource.SourceType;
 
+					IProxySource proxySource = null;
 
+					if (source == ImportSource.InMemory)
+					{
+						InMemoryImportProxyDialogViewModel vm = new();
+
+						ok = await ImportProxyDialog.Handle(vm);
+
+						proxySource = new InMemoryProxySource(vm.Type, vm.Lines);
+
+					}
+					else if (source == ImportSource.File)
+					{
+						FileImportProxyDialogViewModel vm = new();
+
+						ok = await ImportProxyDialog.Handle(vm);
+
+						proxySource = new FileProxySource(vm.Type, vm.FilePath);
+					}
+					else if (source == ImportSource.Url)
+					{
+						UrlImportProxyDialogViewModel vm = new();
+
+						ok = await ImportProxyDialog.Handle(vm);
+
+						proxySource = new UrlProxySource(vm.Type, vm.URL);
+					}
+
+					if(proxySource is not null)
+					{
+
+					}
 				}
 
 			});

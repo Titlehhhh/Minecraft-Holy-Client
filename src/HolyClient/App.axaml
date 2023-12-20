@@ -38,6 +38,16 @@
 		
 		
 	</Application.Resources>
-	
+	<Application.DataTemplates>
+		<DataTemplate x:DataType="vm:InMemoryImportProxyDialogViewModel">
+			<views:InMemoryImportProxyDialogContent DataContext="{Binding}"/>
+		</DataTemplate>
+		<DataTemplate x:DataType="vm:UrlImportProxyDialogViewModel">
+			<views:UrlImportProxyDialogContent DataContext="{Binding}"/>
+		</DataTemplate>
+		<DataTemplate x:DataType="vm:FileImportProxyDialogViewModel">
+			<views:FileImportProxyDialogContent DataContext="{Binding}"/>
+		</DataTemplate>
+	</Application.DataTemplates>
 	
 </Application>

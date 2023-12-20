@@ -27,12 +27,12 @@ namespace HolyClient.Common
 
 		public string? Password { get; set; }
 
-		public static bool TryParse(string line, out ProxyInfo proxy)
+		public static bool TryParse(string line, ProxyType type, out ProxyInfo proxy)
 		{
-			return TryParse(line, "", out proxy);
+			return TryParse(line, "", type, out proxy);
 		}
 		//host:port
-		public static bool TryParse(string line, string format, out ProxyInfo proxy)
+		public static bool TryParse(string line, string format, ProxyType type, out ProxyInfo proxy)
 		{
 			string[] hostPort = line.Split(':');
 			if (hostPort.Length != 2)
@@ -47,7 +47,8 @@ namespace HolyClient.Common
 				proxy = new ProxyInfo()
 				{
 					Host = hostPort[0],
-					Port = port
+					Port = port,
+					Type = type
 				};
 
 				return true;

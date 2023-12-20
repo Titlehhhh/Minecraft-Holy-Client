@@ -1,8 +1,10 @@
 ﻿using HolyClient.Common;
+using MessagePack;
 using QuickProxyNet;
 
 namespace HolyClient.StressTest
 {
+	[MessagePackObject(keyAsPropertyName: true)]
 	public class UrlProxySource : IProxySource
 	{
 		public ProxyType Type { get; set; }
@@ -32,8 +34,9 @@ namespace HolyClient.StressTest
 						while (!sr.EndOfStream)
 						{
 							var line = await sr.ReadLineAsync();
-							if (ProxyInfo.TryParse(line.Trim(), out var proxy))
+							if (ProxyInfo.TryParse(line.Trim(),this.Type, out var proxy))
 							{
+								
 								proxies.Add(proxy);
 							}
 						}
@@ -47,6 +50,15 @@ namespace HolyClient.StressTest
 
 			}
 			return proxies;
+		}
+		public UrlProxySource()
+		{
+
+		}
+		public UrlProxySource(ProxyType type, string url)
+		{
+			Type = type;
+			Url = url;
 		}
 	}
 

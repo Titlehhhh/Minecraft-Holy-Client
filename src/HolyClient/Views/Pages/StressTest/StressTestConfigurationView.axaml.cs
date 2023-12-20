@@ -31,7 +31,7 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Выберите источник импорта",
+					Title = "Импорт прокси",
 					PrimaryButtonText = "Далее",
 					IsSecondaryButtonEnabled = false,
 					CloseButtonText = "Отмена",
@@ -49,7 +49,7 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Введите данные",
+					Title = "Импорт прокси",
 					PrimaryButtonText = "Импорт",
 					IsSecondaryButtonEnabled = false,
 					CloseButtonText = "Отмена",
