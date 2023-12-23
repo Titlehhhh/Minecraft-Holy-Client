@@ -221,7 +221,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 					if (proxySource is not null)
 					{
-						state.Proxies.Add(proxySource);
+						state.Proxies.AddOrUpdate(proxySource);
 					}
 				}
 
@@ -231,6 +231,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 			var canExecuteDeleteAll = state.Proxies.CountChanged
 				.ObserveOn(RxApp.MainThreadScheduler)
 				.Select(x => x > 0);
+
 			DeleteAllProxyCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
 				if (await ConfirmDeleteProxyDialog.Handle(default))
@@ -245,10 +246,10 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 				if (!await ConfirmDeleteProxyDialog.Handle(Unit.Default))
 					return;
-				//if (SelectedProxies is { })
-				//{
-				//	state.Proxies.RemoveMany(SelectedProxies.Items);
-				//}
+				if (SelectedProxy is { })
+				{
+					state.Proxies.Remove(SelectedProxy.Id);
+				}
 
 
 
@@ -297,8 +298,8 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 }
 public class ProxySourceViewModel : ReactiveObject
 {
-
-	public int AveragePing => Random.Shared.Next(100, 500);
+	public Guid Id { get; private set; }
+	//public int AveragePing => Random.Shared.Next(100, 500);
 
 	public string Name { get; set; }
 
@@ -307,8 +308,11 @@ public class ProxySourceViewModel : ReactiveObject
 	public ProxyType Type { get; set; }
 	public ProxySourceViewModel(IProxySource proxySource)
 	{
-		Type = proxySource.Type;
+		Id = proxySource.Id;
+
 		Name = proxySource.Name;
+
+		Type = proxySource.Type;
 
 		Icon = proxySource switch
 		{
@@ -316,6 +320,6 @@ public class ProxySourceViewModel : ReactiveObject
 			FileProxySource => "FileProxy",
 			InMemoryProxySource => "InMemoryProxy"
 		};
-		Console.WriteLine("Icon: "+Icon);
+		
 	}
 }

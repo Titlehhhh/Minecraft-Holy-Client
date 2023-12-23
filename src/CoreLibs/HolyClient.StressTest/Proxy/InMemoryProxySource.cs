@@ -9,8 +9,8 @@ namespace HolyClient.StressTest
 	{
 		public ProxyType Type { get; set; }
 
-		
 
+		public Guid Id { get; set; } = Guid.NewGuid();
 		public string Proxies { get; set; }
 
 

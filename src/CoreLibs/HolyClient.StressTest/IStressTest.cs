@@ -24,7 +24,7 @@ namespace HolyClient.StressTest
 		MinecraftVersion Version { get; set; }
 
 
-		ISourceList<IProxySource> Proxies { get; }
+		ISourceCache<IProxySource, Guid> Proxies { get; }
 
 
 		IObservable<StressTestMetrik> Metrics { get; }

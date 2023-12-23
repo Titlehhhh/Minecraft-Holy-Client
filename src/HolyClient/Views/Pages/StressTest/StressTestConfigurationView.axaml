@@ -158,7 +158,6 @@
 										<TextBlock Margin="10,0,0,0" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Name}"/>
 										<TextBlock Margin="10,0,0,0" Grid.Column="1" VerticalAlignment="Bottom" FontStyle="Italic" Foreground="Gray" Text="{Binding Type}"/>
 
-										<TextBlock Text="{Binding AveragePing, StringFormat='Средний пинг: {0} ms'}" Grid.Column="1" HorizontalAlignment="Right"/>
 									</Grid>
 
 								</DataTemplate>

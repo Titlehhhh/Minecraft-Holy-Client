@@ -13,6 +13,10 @@ namespace HolyClient.StressTest
 		[IgnoreMember]
 		public string Name => this.FilePath;
 
+		public Guid Id { get; set; } = Guid.NewGuid();
+
+		
+
 		public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
 		{
 			List<ProxyInfo> proxies = new();
@@ -23,7 +27,7 @@ namespace HolyClient.StressTest
 					while (!sr.EndOfStream)
 					{
 						var line = await sr.ReadLineAsync();
-						if (ProxyInfo.TryParse(line.Trim(),this.Type, out var proxy))
+						if (ProxyInfo.TryParse(line.Trim(), this.Type, out var proxy))
 						{
 							proxies.Add(proxy);
 						}

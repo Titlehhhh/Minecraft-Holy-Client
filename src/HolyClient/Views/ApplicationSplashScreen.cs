@@ -37,7 +37,7 @@ namespace HolyClient.Views
 
 		public object SplashScreenContent { get; }
 
-		public int MinimumShowTime => 10000;
+		public int MinimumShowTime => 2000;
 
 		public async Task RunTasks(CancellationToken cancellationToken)
 		{

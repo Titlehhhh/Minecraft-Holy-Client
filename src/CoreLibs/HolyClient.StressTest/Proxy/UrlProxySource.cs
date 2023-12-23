@@ -7,6 +7,7 @@ namespace HolyClient.StressTest
 	[MessagePackObject(keyAsPropertyName: true)]
 	public class UrlProxySource : IProxySource
 	{
+		public Guid Id { get; set; } = Guid.NewGuid();
 		public ProxyType Type { get; set; }
 		public string Url { get; set; }
 

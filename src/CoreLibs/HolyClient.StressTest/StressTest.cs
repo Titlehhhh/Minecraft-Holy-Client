@@ -35,7 +35,7 @@ namespace HolyClient.StressTest
 		public IEnumerable<IProxySource> ProxiesState
 		{
 			get => Proxies.Items.ToArray();
-			set => Proxies.AddRange(value);
+			set => Proxies.AddOrUpdate(value);
 		}
 		[Reactive]
 		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
@@ -50,7 +50,7 @@ namespace HolyClient.StressTest
 
 
 		[IgnoreMember]
-		public ISourceList<IProxySource> Proxies { get; } = new SourceList<IProxySource>();
+		public ISourceCache<IProxySource, Guid> Proxies { get; } = new SourceCache<IProxySource, Guid>(x => x.Id);
 
 
 
@@ -122,7 +122,7 @@ namespace HolyClient.StressTest
 				}).DisposeWith(_disposables);
 
 
-
+				var proxyProvider = await LoadProxy(logger);
 
 				var bots = new List<MinecraftClient>();
 
@@ -160,8 +160,10 @@ namespace HolyClient.StressTest
 
 				var nickProvider = new NickProvider(this.BotsNickname);
 
-				IProxyProvider? proxyProvider = null;
-					//UseProxy ? new ProxyProvider() : null;
+
+
+
+
 
 
 				for (int i = 0; i < this.NumberOfBots; i++)
@@ -278,6 +280,34 @@ namespace HolyClient.StressTest
 			}
 		}
 
+
+		private async Task<IProxyProvider> LoadProxy(Serilog.ILogger logger)
+		{
+			logger.Information("Загрузка прокси");
+			var sources = this.Proxies.Items;
+
+			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
+
+			foreach (var s in sources)
+			{
+				tasks.Add(s.GetProxiesAsync());
+			}
+
+			var result = await Task.WhenAll(tasks);
+
+			var proxies = result.SelectMany(x => x).ToList();
+
+			var provider = new ProxyProvider(proxies);
+
+			var group = proxies.GroupBy(x => x.Type).Select(x=>$"{x.Key} - {x.Count()}");
+
+			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
+
+			return provider;
+		}
+
+
+
 		public Task Stop()
 		{
 			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
@@ -288,7 +318,7 @@ namespace HolyClient.StressTest
 
 		public Task Initialization(IPluginProvider pluginProvider)
 		{
-			
+
 
 			Optional<IPluginSource> plugin =
 				pluginProvider
@@ -301,7 +331,7 @@ namespace HolyClient.StressTest
 			}
 			else
 			{
-				
+
 			}
 			return Task.CompletedTask;
 		}
@@ -338,5 +368,5 @@ namespace HolyClient.StressTest
 		}
 	}
 
-	
+
 }
