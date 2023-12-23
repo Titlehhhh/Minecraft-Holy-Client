@@ -8,6 +8,8 @@ namespace HolyClient.StressTest
 	[MessagePack.Union(2, typeof(UrlProxySource))]
 	public interface IProxySource
 	{
+		string Name { get;}
+
 		ProxyType Type { get; set; }
 		Task<IEnumerable<ProxyInfo>> GetProxiesAsync();
 	}

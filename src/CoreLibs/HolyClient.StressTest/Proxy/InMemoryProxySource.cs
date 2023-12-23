@@ -9,7 +9,22 @@ namespace HolyClient.StressTest
 	{
 		public ProxyType Type { get; set; }
 
+		
+
 		public string Proxies { get; set; }
+
+
+		private int _lines;
+
+
+		[IgnoreMember]
+		public string Name
+		{
+			get
+			{
+				return "Offline source";
+			}
+		}
 
 		public Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
 		{
@@ -41,7 +56,8 @@ namespace HolyClient.StressTest
 		public InMemoryProxySource(ProxyType type, string lines)
 		{
 			Type = type;
-
+			Proxies = lines;
+			
 		}
 	}
 

@@ -3,6 +3,7 @@
             RequestedThemeVariant="Dark"
 			 xmlns:vm="using:HolyClient.ViewModels"
 			xmlns:views="using:HolyClient.Views"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:sty="using:FluentAvalonia.Styling"
              x:Class="HolyClient.App">
 
@@ -35,7 +36,6 @@
 
 		<FontFamily x:Key="ContentControlThemeFontFamily">avares://HolyClient/Assets/Fonts/JetBrains#JetBrains Mono</FontFamily>
 
-		
 		
 	</Application.Resources>
 	<Application.DataTemplates>

@@ -1,5 +1,6 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Data.Converters;
+using Avalonia.Dialogs.Internal;
 using HolyClient.Common;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Linq;
 
 namespace HolyClient.Converters
 {
+	
 	public class DataGridProxyItemsSourceConverter : IValueConverter
 	{
 		public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

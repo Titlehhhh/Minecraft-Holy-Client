@@ -9,6 +9,10 @@ namespace HolyClient.StressTest
 	{
 		public ProxyType Type { get; set; }
 		public string FilePath { get; set; }
+
+		[IgnoreMember]
+		public string Name => this.FilePath;
+
 		public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
 		{
 			List<ProxyInfo> proxies = new();

@@ -7,6 +7,9 @@
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:DataType="vm:StressTestConfigurationViewModel"
 			 x:CompileBindings="True"
+			 
+			 xmlns:internal="using:Avalonia.Dialogs.Internal"
+			 
 			 xmlns:pgc="using:Avalonia.PropertyGrid.Controls"
 			 xmlns:sg="using:SpacedGridControl.Avalonia"
 			 xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
@@ -18,21 +21,30 @@
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 xmlns:converters="using:HolyClient.Converters"
 			 xmlns:minecraft="using:McProtoNet"
+			 xmlns:lottie="clr-namespace:Avalonia.Labs.Lottie;assembly=Avalonia.Labs.Lottie"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 x:Class="HolyClient.Views.StressTestConfigurationView">
 	<UserControl.Resources>
 		<converters:MinecraftVersionToStringConverter x:Key="VersionToStringConverter"/>
 		<converters:DataGridProxyItemsSourceConverter x:Key="DGPISC"/>
-	</UserControl.Resources>
+		<internal:ResourceSelectorConverter x:Key="ResourceConverter">
+			<ui:PathIconSource x:Key="InMemoryProxy" Data="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-62 17-117.5T146-701l-91-91q-12-12-12-28.5T55-849q12-12 28.5-12t28.5 12l736 736q12 12 12 28t-12 28q-12 12-28.5 12T791-57l-90-89q-48 32-103.5 49T480-80Zm-40-82v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm374-99-58-58q21-37 32.5-77.5T800-480q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v45L261-814q48-31 103-48.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 61-17.5 116T814-261Z"/>
+			<ui:PathIconSource x:Key="FileProxy" Data="M200-800v241-1 400-640 200-200Zm120 400h100q9-23 22-43t30-37H320q-17 0-28.5 11.5T280-440q0 17 11.5 28.5T320-400Zm0 160h87q-5-20-6.5-40t.5-40h-81q-17 0-28.5 11.5T280-280q0 17 11.5 28.5T320-240ZM200-80q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h287q16 0 30.5 6t25.5 17l194 194q11 11 17 25.5t6 30.5v67q-19-8-39-12.5t-41-6.5v-41H520q-17 0-28.5-11.5T480-640v-160H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM892-68q-11 11-28 11t-28-11l-80-80q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204l80 80q11 11 11 28t-11 28Z"/>
+			<ui:PathIconSource x:Key="UrlProxy" Data="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-40-82v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm276-102q20-22 36-47.5t26.5-53q10.5-27.5 16-56.5t5.5-59q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v80q0 17-11.5 28.5T400-560h-80v80h240q17 0 28.5 11.5T600-440v120h40q26 0 47 15.5t29 40.5Z"/>
 
+		</internal:ResourceSelectorConverter>
+	</UserControl.Resources>
+	
+
+	
 	<Grid RowDefinitions="Auto, *" Margin="10,10,10,0">
 
 
 		<StackPanel Spacing="10">
-			<TextBox Text="{Binding Server}" 
+			<TextBox Text="{Binding Server}"
 					 HorizontalAlignment="Center"
-					 Width="200" 
-					 UseFloatingWatermark="True" 
+					 Width="200"
+					 UseFloatingWatermark="True"
 					 Watermark="{Tr StressTest.Configuration.GeneralSettings.Address}">
 				<TextBox.Styles>
 					<Style Selector="DataValidationErrors">
@@ -88,9 +100,9 @@
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
 								<TextBlock Text="Использование прокси" FontSize="15"/>
-								<ToggleSwitch 
-									IsChecked="{Binding UseProxy}" 
-									OnContent="Использовать" 
+								<ToggleSwitch
+									IsChecked="{Binding UseProxy}"
+									OnContent="Использовать"
 									OffContent="Без прокси"/>
 							</StackPanel>
 						</Border>
@@ -105,7 +117,7 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 							</StackPanel>
-						</Border>					
+						</Border>
 
 						<Border IsVisible="{Binding CurrentBehavior}" Classes="SettingItem">
 							<StackPanel Spacing="10">
@@ -118,8 +130,8 @@
 
 				</ScrollViewer>
 			</TabItem>
-			
-			
+
+
 			<TabItem  Header="{Tr StressTest.Configuration.Proxy}" FontSize="15">
 				<ui:FABorder BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
@@ -135,10 +147,20 @@
 							ItemsSource="{Binding Proxies}">
 							<ListBox.ItemTemplate>
 								<DataTemplate DataType="vm:ProxySourceViewModel">
-									<DockPanel LastChildFill="False">
-										<TextBlock Text="Test"/>
-										<TextBlock DockPanel.Dock="Right" Text="{Binding Type}"/>
-									</DockPanel>
+
+									<Grid Margin="0,5,0,5" ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
+
+
+										<ui:IconSourceElement Grid.Column="0" Height="48" Width="48" DockPanel.Dock="Left" IconSource="{Binding Icon, Converter={StaticResource ResourceConverter}}" />
+
+
+
+										<TextBlock Margin="10,0,0,0" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Name}"/>
+										<TextBlock Margin="10,0,0,0" Grid.Column="1" VerticalAlignment="Bottom" FontStyle="Italic" Foreground="Gray" Text="{Binding Type}"/>
+
+										<TextBlock Text="{Binding AveragePing, StringFormat='Средний пинг: {0} ms'}" Grid.Column="1" HorizontalAlignment="Right"/>
+									</Grid>
+
 								</DataTemplate>
 							</ListBox.ItemTemplate>
 						</ListBox>
@@ -160,7 +182,7 @@
 							<StackPanel>
 								<TextBlock FontWeight="SemiBold" Text="Опции"/>
 								<StackPanel Margin="0,5,0,0" Spacing="10">
-									
+
 									<Button
 										IsEnabled="{Binding UseProxy}"
 										Command="{Binding ImportProxyCommand}"
@@ -177,11 +199,11 @@
 										IsEnabled="{Binding UseProxy}"
 										Content="{Tr StressTest.Configuration.Proxy.Delete}"
 										HorizontalAlignment="Stretch"/>
-									
-									<Button 
+
+									<Button
 										IsEnabled="{Binding UseProxy}"
-										Command="{Binding DeleteAllProxyCommand}" 
-										Content="{Tr StressTest.Configuration.Proxy.DeleteAll}"  
+										Command="{Binding DeleteAllProxyCommand}"
+										Content="{Tr StressTest.Configuration.Proxy.DeleteAll}"
 										HorizontalAlignment="Stretch"/>
 								</StackPanel>
 							</StackPanel>
@@ -216,7 +238,7 @@
 											<TextBlock Text="{Binding Name}" DockPanel.Dock="Left"/>
 											<TextBlock IsVisible="{Binding IsInstalled}" DockPanel.Dock="Right" Text="{Tr StressTest.Configuration.Behaviors.Current}" Foreground="Gray" FontStyle="Italic"/>
 										</DockPanel>
-										
+
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
@@ -271,7 +293,7 @@
 															Text="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Description}"/>
 														<TextBlock Text="{Binding Description}"/>
 
-														<Button 
+														<Button
 															Margin="0,10,0,0"
 															Content="{Tr StressTest.Configuration.Behaviors.SelectedBehavior.Put}"
 															Command="{Binding InstallCommand}"/>

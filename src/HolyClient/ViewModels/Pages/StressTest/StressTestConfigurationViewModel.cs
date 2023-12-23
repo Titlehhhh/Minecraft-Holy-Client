@@ -77,7 +77,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public IPluginSource? InstalledBehavior { get; private set; }
 	#region Proxy
 
-	
+
 	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
 	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
 	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
@@ -163,7 +163,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		#endregion
 
 
-		
+
 
 		#region Configure proxies
 
@@ -219,7 +219,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						proxySource = new UrlProxySource(vm.Type, vm.URL);
 					}
 
-					if(proxySource is not null)
+					if (proxySource is not null)
 					{
 						state.Proxies.Add(proxySource);
 					}
@@ -253,7 +253,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 			}, canExecuteDeleteAll).DisposeWith(d);
-			
+
 		});
 
 
@@ -292,16 +292,30 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		#endregion
 	}
 
-	
+
 
 }
 public class ProxySourceViewModel : ReactiveObject
 {
 
+	public int AveragePing => Random.Shared.Next(100, 500);
+
+	public string Name { get; set; }
+
+	public string Icon { get; private set; }
 
 	public ProxyType Type { get; set; }
 	public ProxySourceViewModel(IProxySource proxySource)
 	{
 		Type = proxySource.Type;
+		Name = proxySource.Name;
+
+		Icon = proxySource switch
+		{
+			UrlProxySource => "UrlProxy",
+			FileProxySource => "FileProxy",
+			InMemoryProxySource => "InMemoryProxy"
+		};
+		Console.WriteLine("Icon: "+Icon);
 	}
 }
