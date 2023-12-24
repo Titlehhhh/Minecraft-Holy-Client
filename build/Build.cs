@@ -268,6 +268,8 @@ class Build : NukeBuild
 				zip.UnZipTo(publishDir);
 			});
 
+		   if (publishDir.GetFiles().Count() == 0)
+			   throw new Exception("Publish dir is empty");
 		
 			
 		   return;
