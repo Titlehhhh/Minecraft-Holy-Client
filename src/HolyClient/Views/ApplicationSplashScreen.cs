@@ -59,7 +59,7 @@ namespace HolyClient.Views
 					spalshScreenViewModel.Progress = 100;
 				}).DisposeWith(disp);
 
-
+			
 
 			await BootStrap.Run(subject);
 

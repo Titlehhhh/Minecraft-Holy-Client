@@ -1,12 +1,12 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
-using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
 using McProtoNet;
 using System.ComponentModel;
 
 namespace HolyClient.StressTest
 {
+
 	[MessagePack.Union(0, typeof(StressTest))]
 	public interface IStressTest : INotifyPropertyChanged, INotifyPropertyChanging
 	{
@@ -24,7 +24,7 @@ namespace HolyClient.StressTest
 		MinecraftVersion Version { get; set; }
 
 
-		ISourceList<ProxyInfo> Proxies { get; }
+		ISourceCache<IProxySource, Guid> Proxies { get; }
 
 
 		IObservable<StressTestMetrik> Metrics { get; }

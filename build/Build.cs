@@ -13,13 +13,14 @@ using Nuke.Common.Tools.OctoVersion;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using Octokit;
+using Octokit.Internal;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using ParameterAttribute = Nuke.Common.ParameterAttribute;
-public;
+
 
 
 

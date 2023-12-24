@@ -4,12 +4,12 @@ using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
-using HolyClient.Views.Pages.StressTest.Dialogs;
+using HolyClient.Views;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
 
-namespace HolyClient.Views.Pages.StressTest;
+namespace HolyClient.Views;
 
 public partial class StressTestConfigurationView : ReactiveUserControl<StressTestConfigurationViewModel>
 {
@@ -27,26 +27,43 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 
 			NotificationManager.Position = Avalonia.Controls.Notifications.NotificationPosition.BottomRight;
 
-			this.ViewModel.ImportProxyDialog.RegisterHandler(async x =>
+			this.ViewModel.SelectProxyImportSourceDialog.RegisterHandler(async x =>
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = Loc.Tr("StressTest.Configuration.Proxy.Dialog.Title"),
-					PrimaryButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.PrimaryButton"),
+					Title = "Импорт прокси",
+					PrimaryButtonText = "Далее",
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = Loc.Tr("StressTest.Configuration.Proxy.Dialog.CloseButton"),
-					Content = new ImportProxyDialogContent()
+					CloseButtonText = "Отмена",
+					Content = new SelectImportSourceProxyDialogContent()
 					{
 						DataContext = x.Input
-					},
-					PrimaryButtonCommand = x.Input.ImportCommand
-
+					}
 				};
 				var result = await dialog.ShowAsync();
 
 
-				x.SetOutput(Unit.Default);
+				x.SetOutput(result == ContentDialogResult.Primary);
 			}).DisposeWith(d);
+			this.ViewModel.ImportProxyDialog.RegisterHandler(async x =>
+			{
+				ContentDialog dialog = new ContentDialog()
+				{
+					Title = "Импорт прокси",
+					PrimaryButtonText = "Импорт",
+					IsSecondaryButtonEnabled = false,
+					CloseButtonText = "Отмена",
+					Content = x.Input
+					
+				};
+				var result = await dialog.ShowAsync();
+
+
+				x.SetOutput(result == ContentDialogResult.Primary);
+			}).DisposeWith(d);
+
+
+
 
 			this.ViewModel.ConfirmDeleteProxyDialog.RegisterHandler(async x =>
 			{

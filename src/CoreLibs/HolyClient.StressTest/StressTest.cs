@@ -32,10 +32,10 @@ namespace HolyClient.StressTest
 
 		[Reactive]
 		public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-		public IEnumerable<ProxyInfo> ProxiesState
+		public IEnumerable<IProxySource> ProxiesState
 		{
 			get => Proxies.Items.ToArray();
-			set => Proxies.AddRange(value);
+			set => Proxies.AddOrUpdate(value);
 		}
 		[Reactive]
 		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
@@ -50,7 +50,7 @@ namespace HolyClient.StressTest
 
 
 		[IgnoreMember]
-		public ISourceList<ProxyInfo> Proxies { get; } = new SourceList<ProxyInfo>();
+		public ISourceCache<IProxySource, Guid> Proxies { get; } = new SourceCache<IProxySource, Guid>(x => x.Id);
 
 
 
@@ -122,7 +122,7 @@ namespace HolyClient.StressTest
 				}).DisposeWith(_disposables);
 
 
-
+				var proxyProvider = await LoadProxy(logger);
 
 				var bots = new List<MinecraftClient>();
 
@@ -160,8 +160,10 @@ namespace HolyClient.StressTest
 
 				var nickProvider = new NickProvider(this.BotsNickname);
 
-				IProxyProvider? proxyProvider =
-					UseProxy ? new ProxyProvider(this.ProxiesState) : null;
+
+
+
+
 
 
 				for (int i = 0; i < this.NumberOfBots; i++)
@@ -278,6 +280,47 @@ namespace HolyClient.StressTest
 			}
 		}
 
+
+		private async Task<IProxyProvider?> LoadProxy(Serilog.ILogger logger)
+		{
+			if (!UseProxy)
+			{
+				logger.Information("Прокси не используются в стресс-тесте");
+				return null;
+			}
+
+			logger.Information("Загрузка прокси");
+			var sources = this.Proxies.Items.ToList();
+
+			if (sources.Count() == 0)
+			{
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+			}
+			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
+
+			foreach (var s in sources)
+			{
+				tasks.Add(s.GetProxiesAsync());
+			}
+
+			var result = await Task.WhenAll(tasks);
+
+			var proxies = result.SelectMany(x => x).ToList();
+
+			var provider = new ProxyProvider(proxies);
+
+			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
+
+			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
+
+			return provider;
+
+		}
+
+
+
 		public Task Stop()
 		{
 			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
@@ -289,6 +332,7 @@ namespace HolyClient.StressTest
 		public Task Initialization(IPluginProvider pluginProvider)
 		{
 
+
 			Optional<IPluginSource> plugin =
 				pluginProvider
 				.AvailableStressTestPlugins
@@ -297,6 +341,10 @@ namespace HolyClient.StressTest
 			if (plugin.HasValue)
 			{
 				this.SetBehavior(plugin.Value);
+			}
+			else
+			{
+
 			}
 			return Task.CompletedTask;
 		}
@@ -332,5 +380,6 @@ namespace HolyClient.StressTest
 			this.BehaviorRef = default;
 		}
 	}
+
 
 }

@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:CompileBindings="True"
+			 xmlns:vm="using:HolyClient.ViewModels"
+			 x:DataType="vm:UrlImportProxyDialogViewModel"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+             x:Class="HolyClient.Views.UrlImportProxyDialogContent">
+	<StackPanel>
+		<TextBlock Text="Введите адрес"/>
+		<TextBox Margin="0,5,0,0" Text="{Binding URL}"/>
+
+		<TextBlock Margin="0,10,0,0" Text="{Tr StressTest.Configuration.Proxy.Dialog.ProxyType}"/>
+		<ComboBox Margin="0,4,0,0" SelectedItem="{Binding Type}" ItemsSource="{Binding AvailableTypes}"/>
+	</StackPanel>
+</UserControl>

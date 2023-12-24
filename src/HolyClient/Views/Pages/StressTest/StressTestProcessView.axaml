@@ -9,7 +9,7 @@
 			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:DataType="vm:StressTestProcessViewModel"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="HolyClient.Views.Pages.StressTest.StressTestProcessView">
+             x:Class="HolyClient.Views.StressTestProcessView">
 	<Design.DataContext>
 		<designTime:DesignStressTestProcessViewModel/>
 	</Design.DataContext>
