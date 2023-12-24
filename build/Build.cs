@@ -239,7 +239,7 @@ class Build : NukeBuild
 	   .Executes(async () =>
 	   {
 
-		   
+
 		   var credentials = new Credentials(GitHubActions.Token);
 
 		   var gitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),
@@ -250,8 +250,8 @@ class Build : NukeBuild
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
-		   
-		  
+
+
 		   var releaseTag = MinVer.Version;
 		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
 		   //var latestChangeLog = changeLogSectionEntries
@@ -261,16 +261,16 @@ class Build : NukeBuild
 
 		   publishDir.CreateOrCleanDirectory();
 
-		   ArtifactsDirectory.GlobFiles()			
+		   ArtifactsDirectory.GlobFiles()
 			.ForEach(zip =>
 			{
 				zip.UnZipTo(publishDir);
 			});
 
-		   if (publishDir.GetFiles().Count() == 0)
+		   if (publishDir.GetFiles(depth: 100).Count() == 0)
 			   throw new Exception("Publish dir is empty");
-		
-			
+		   Console.WriteLine(string.Join("\n", publishDir.GetFiles(depth: 100)));
+
 		   return;
 
 		   var newRelease = new NewRelease(releaseTag)
@@ -287,7 +287,7 @@ class Build : NukeBuild
 									   .Repository
 									   .Release.Create(owner, name, newRelease);
 
-		   
+
 
 
 
