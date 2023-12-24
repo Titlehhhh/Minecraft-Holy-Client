@@ -43,7 +43,7 @@ class Build : NukeBuild
 
 	static GitHubActions GitHubActions => GitHubActions.Instance;
 	static AbsolutePath ArtifactsDirectory => RootDirectory / ".artifacts";
-
+	static AbsolutePath BuildDirectory => RootDirectory / ".buildArtifacts";
 	static readonly string PackageContentType = "application/octet-stream";
 	//static string ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
@@ -220,11 +220,12 @@ class Build : NukeBuild
 				.SetProperty("DebugType", "None")
 				//.SetPublishReadyToRun(true)
 				.EnableSelfContained()
-				.SetOutput(ArtifactsDirectory / Runtime)
+				.SetOutput(BuildDirectory)
 				.SetFramework("net8.0")
 				.SetRuntime(Runtime));
 
 
+			BuildDirectory.ZipTo(ArtifactsDirectory / $"HolyClient.Desktop.{Runtime}.zip");
 
 
 
