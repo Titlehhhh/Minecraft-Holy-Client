@@ -220,7 +220,7 @@ class Build : NukeBuild
 				.SetPublishSingleFile(true)
 				.SetProperty("DebugSymbols", "False")
 				.SetProperty("DebugType", "None")
-				//.SetPublishReadyToRun(true)
+				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
 				.SetOutput(BuildDirectory)
 				.SetFramework("net8.0")
