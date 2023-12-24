@@ -184,8 +184,8 @@
 
 									<Button
 										IsEnabled="{Binding UseProxy}"
-										Command="{Binding ImportProxyCommand}"
-										Content="{Tr StressTest.Configuration.Proxy.Import}"
+										Command="{Binding AddSourceProxyCommand}"
+										Content="{Tr StressTest.Configuration.Proxy.AddSource}"
 										HorizontalAlignment="Stretch"/>
 
 									<Button

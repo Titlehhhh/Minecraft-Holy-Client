@@ -84,7 +84,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
 
 	[Reactive]
-	public ICommand ImportProxyCommand { get; private set; }
+	public ICommand AddSourceProxyCommand { get; private set; }
 	[Reactive]
 	public ICommand ExportProxyCommand { get; private set; }
 	[Reactive]
@@ -183,7 +183,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 		{
 
 
-			ImportProxyCommand = ReactiveCommand.CreateFromTask(async () =>
+			AddSourceProxyCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
 
 				bool ok = await SelectProxyImportSourceDialog.Handle(_selectProxyImportSourceViewModel);
@@ -193,6 +193,10 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 					IProxySource proxySource = null;
 
+					ImportProxyViewModel importVm = null;
+
+
+
 					if (source == ImportSource.InMemory)
 					{
 						InMemoryImportProxyDialogViewModel vm = new();
@@ -200,6 +204,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						ok = await ImportProxyDialog.Handle(vm);
 
 						proxySource = new InMemoryProxySource(vm.Type, vm.Lines);
+						importVm = vm;
 
 					}
 					else if (source == ImportSource.File)
@@ -209,6 +214,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						ok = await ImportProxyDialog.Handle(vm);
 
 						proxySource = new FileProxySource(vm.Type, vm.FilePath);
+						importVm = vm;
 					}
 					else if (source == ImportSource.Url)
 					{
@@ -217,11 +223,15 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						ok = await ImportProxyDialog.Handle(vm);
 
 						proxySource = new UrlProxySource(vm.Type, vm.URL);
+						importVm = vm;
 					}
-
-					if (proxySource is not null)
+					
+					if (importVm.IsValid())
 					{
-						state.Proxies.AddOrUpdate(proxySource);
+						if (proxySource is not null)
+						{
+							state.Proxies.AddOrUpdate(proxySource);
+						}
 					}
 				}
 
@@ -320,6 +330,6 @@ public class ProxySourceViewModel : ReactiveObject
 			FileProxySource => "FileProxy",
 			InMemoryProxySource => "InMemoryProxy"
 		};
-		
+
 	}
 }

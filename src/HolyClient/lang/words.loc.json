@@ -253,9 +253,9 @@
             "ru": "Вы точно хотите удалить?"
           }
         },
-        "Import": {
-          "en": "Import",
-          "ru": "Импорт"
+        "AddSource": {
+          "en": "Add source",
+          "ru": "Добавить источник"
         },
         "Export": {
           "en": "Export",

@@ -3,6 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Stateless.Graph;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Reactive;
 using System.Windows.Input;
 
@@ -10,7 +11,7 @@ namespace HolyClient.ViewModels;
 
 public sealed class FileImportProxyDialogViewModel : ImportProxyViewModel
 {
-	[Reactive]
+	
 	public string FilePath
 	{
 		get;
@@ -22,5 +23,10 @@ public sealed class FileImportProxyDialogViewModel : ImportProxyViewModel
 	public FileImportProxyDialogViewModel()
 	{
 
+	}
+
+	public override bool IsValid()
+	{
+		return !string.IsNullOrWhiteSpace(FilePath);
 	}
 }
