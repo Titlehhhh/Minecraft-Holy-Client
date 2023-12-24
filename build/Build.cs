@@ -16,6 +16,7 @@ using Nuke.Common.Utilities.Collections;
 using Octokit;
 using Octokit.Internal;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -258,11 +259,11 @@ class Build : NukeBuild
 		   //var latestChangeLog = changeLogSectionEntries
 		   //   .Aggregate((c, n) => c + Environment.NewLine + n);
 
-		   
 
-		   
 
-		   
+
+
+
 
 		   var newRelease = new NewRelease(releaseTag)
 		   {
@@ -276,23 +277,26 @@ class Build : NukeBuild
 		   var createdRelease = await gitHubClient
 									   .Repository
 									   .Release.Create(owner, name, newRelease);
-
-		   ArtifactsDirectory.GlobFiles("**/*")
-		   .ForEach(async zip =>
+		   var tasks = ArtifactsDirectory
+		   .GlobFiles("**/*")
+		   .Select(async zip =>
 		   {
-			   Console.WriteLine("File upload:" +zip);
-				await using var artifactStream = File.OpenRead(zip);
-				var fileName = Path.GetFileName(zip);
-				var assetUpload = new ReleaseAssetUpload
-				{
-					FileName = fileName,
-					ContentType = PackageContentType,
-					RawData = artifactStream,
-				};
-				await gitHubClient.Repository.Release.UploadAsset(createdRelease, assetUpload);
-			});
+
+			   Console.WriteLine("File upload:" + zip);
+			   await using var artifactStream = File.OpenRead(zip);
+			   var fileName = Path.GetFileName(zip);
+			   var assetUpload = new ReleaseAssetUpload
+			   {
+				   FileName = fileName,
+				   ContentType = PackageContentType,
+				   RawData = artifactStream,
+			   };
+			   await gitHubClient.Repository.Release.UploadAsset(createdRelease, assetUpload);
 
 
+		   });
+
+		   await Task.WhenAll(tasks);
 
 
 		   var release = await gitHubClient
@@ -306,6 +310,6 @@ class Build : NukeBuild
 
 	private static async Task UploadReleaseAssetToGithub(Release release, string asset)
 	{
-		
+
 	}
 }
