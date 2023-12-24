@@ -93,17 +93,12 @@ jobs:
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: "Save artifacts"
-      uses: actions/cache/save@v3
-      id: cache
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
       with:
+        name: ${{matrix.target}}
         path: .artifacts/${{matrix.target}}
-        key: ${{ runner.os }}-${{matrix.target}}-Artifact
-    # - name: Upload Artifacts
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: ${{matrix.target}} Artifacts
-    #     path: .artifacts/${{matrix.target}}
 
     
 
@@ -130,13 +125,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: "Cache Artifacts"
-      id: cache-artifacts
-      uses: actions/cache@v3
-      with: 
-        path: .artifacts
-        key: ${{ runner.os }}-artifacts-${{ hashFiles('**/*.csproj') }}
-        restore-keys: ${{ runner.os }}-artifacts        
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+         
 
     - name: set script permissions
       run: chmod +x ./build.sh
