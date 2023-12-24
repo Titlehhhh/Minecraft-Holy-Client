@@ -140,7 +140,7 @@ jobs:
       run: ./build.sh CreateRelease
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: ls -R .publish 
+   
 
       
 
