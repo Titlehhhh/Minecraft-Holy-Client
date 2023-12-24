@@ -96,7 +96,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: my-artifact-${{matrix.target}}
+        name: HolyClient.Desktop-${{matrix.target}}
         path: .artifacts/${{matrix.target}}
     
 
@@ -128,8 +128,8 @@ jobs:
     - name: Download All Artifacts
       uses: actions/download-artifact@v4.1.0
       with:
-        path: my-artifact
-        pattern: my-artifact-*
+        path: .artifacts
+        pattern: HolyClient.Desktop-*
         merge-multiple: true
     - run: ls -R my-artifact    
 
