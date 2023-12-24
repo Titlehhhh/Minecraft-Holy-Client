@@ -242,7 +242,7 @@ class Build : NukeBuild
 		   {
 			   Console.WriteLine(file);
 		   }
-
+		   
 		   var credentials = new Credentials(GitHubActions.Token);
 
 		   var gitHubClient = new GitHubClient(new ProductHeaderValue(nameof(NukeBuild)),

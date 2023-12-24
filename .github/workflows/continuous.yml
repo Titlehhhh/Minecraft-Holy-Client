@@ -85,13 +85,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: "Cache Artifacts"
-      id: cache-artifacts
-      uses: actions/cache@v3
-      with:
-        path: .artifacts/${{ matrix.target }}        
-        key: ${{ runner.os }}-artifacts-${{ matrix.target }}
-
     - name: set script permissions
       run: chmod +x ./build.sh
 
@@ -99,11 +92,18 @@ jobs:
       run: ./build.sh PublishApp -Runtime ${{ matrix.target }}
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+    - uses: actions/cache/save@v3
+      id: cache
       with:
-        name: ${{matrix.target}} Artifacts
         path: .artifacts/${{matrix.target}}
+        key: ${{ runner.os }}-Artifact
+    # - name: Upload Artifacts
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{matrix.target}} Artifacts
+    #     path: .artifacts/${{matrix.target}}
+
+    
 
 
 
