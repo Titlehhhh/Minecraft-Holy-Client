@@ -131,7 +131,7 @@ jobs:
         path: .artifacts
         pattern: HolyClient.Desktop-*
         merge-multiple: true
-    - run: ls -R my-artifact    
+    - run: ls -R .artifacts  
 
     - name: set script permissions
       run: chmod +x ./build.sh
