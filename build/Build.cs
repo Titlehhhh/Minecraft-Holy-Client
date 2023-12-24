@@ -254,14 +254,30 @@ class Build : NukeBuild
 
 		   var (owner, name) = (GitRepository.GetGitHubOwner(), GitRepository.GetGitHubName());
 
-		   var response = await gitHubClient.Actions.Artifacts.ListWorkflowArtifacts(owner, name, GitHubActions.RunId);
-
-		   GitHubActions.WriteDebug("List End:");
-		   return;
+		   
+		  
 		   var releaseTag = MinVer.Version;
 		   //var changeLogSectionEntries = ChangelogTasks.ExtractChangelogSectionNotes(ChangeLogFile);
 		   //var latestChangeLog = changeLogSectionEntries
 		   //   .Aggregate((c, n) => c + Environment.NewLine + n);
+
+
+		   ArtifactsDirectory.GlobFiles()
+			.Where(x => !x.HasExtension("zip"))
+			.ForEach(zip =>
+			{
+				zip.UnZipTo(zip.Parent);
+
+				zip.DeleteFile();
+
+				
+			});
+
+		   foreach (var file in ArtifactsDirectory.GetFiles())
+		   {
+			   Console.WriteLine(file);
+		   }
+		   return;
 
 		   var newRelease = new NewRelease(releaseTag)
 		   {
@@ -277,7 +293,7 @@ class Build : NukeBuild
 									   .Repository
 									   .Release.Create(owner, name, newRelease);
 
-
+		   
 
 
 
