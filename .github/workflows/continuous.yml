@@ -76,9 +76,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100 
-
-
-    - uses: actions/cache@v3
+    
+    - name: Restore NuGet
+      uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
@@ -92,11 +92,13 @@ jobs:
       run: ./build.sh PublishApp -Runtime ${{ matrix.target }}
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/cache/save@v3
+
+    - name: "Save artifacts"
+      uses: actions/cache/save@v3
       id: cache
       with:
         path: .artifacts/${{matrix.target}}
-        key: ${{ runner.os }}-Artifact
+        key: ${{ runner.os }}-${{matrix.target}}-Artifact
     # - name: Upload Artifacts
     #   uses: actions/upload-artifact@v3
     #   with:
@@ -120,8 +122,8 @@ jobs:
       with:
         dotnet-version: 8.0.100 
 
-
-    - uses: actions/cache@v3
+    - name: Restore NuGet
+      uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
