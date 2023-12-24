@@ -126,7 +126,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Download All Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v4.1.0
       with:
         path: my-artifact
         pattern: my-artifact-*
