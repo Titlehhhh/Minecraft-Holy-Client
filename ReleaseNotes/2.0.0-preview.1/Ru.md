@@ -5,92 +5,33 @@
 Этот раздел содержит следующие подразделы:
 
 - [Исправление багов](#исправление-багов)
-- [Производительность]()
-- [Прокси]()
-- [Плагины]()
+- [Производительность](#производительность)
+- [Прокси](#прокси)
+- [Плагины](#плагины)
 
 ### Исправление багов
-asdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdf
-asdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdf
-asdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdf
+
+В Minecraft Holy Client было исправлено несколько багов:
+- Счетчик ботов
+- Рестарт ботов
+- Socks5 прокси
+
 
 ### Производительность
 
-asdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdfasdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdfasdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdfasdslkgfdlkfgjlkdfjgkljdfgkdjf
-gkdfjg;kdfjg
-kfdj
-gkfdj
-gdfk;gjk;dfjg;kdfjg;dfj
-gdfjg
-kdlf;jg;kdfjg;lkdfjg
-dfgj
-d;lkfgj
-d;flkgjdf;gjdfg;ojd
-f;gdf
-g;jdf
+В Minecraft Holy Client была существенно улучшена производительность:
+- Переиспользование памяти
+- Повышена пропускная способность
+
+### Прокси
+
+В Minecraft Holy Client было внесён ряд изменений касающийся прокси:
+
+- Прокси по умолчанию
+- Загрузка прокси из буфера обмена и URL
+
+### Плагины
+
+В Minecraft Holy Client было внесён ряд изменений касающийся плагинов:
+
+- Плагины по умолчанию
