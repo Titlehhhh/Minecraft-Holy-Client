@@ -97,7 +97,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: HolyClient.Desktop-${{matrix.target}}
-        path: .artifacts/${{matrix.target}}
+        path: .artifacts
     
 
     
