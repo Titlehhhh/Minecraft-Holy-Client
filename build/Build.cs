@@ -1,3 +1,4 @@
+using NuGet.ContentModel;
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Git;
@@ -257,21 +258,11 @@ class Build : NukeBuild
 		   //var latestChangeLog = changeLogSectionEntries
 		   //   .Aggregate((c, n) => c + Environment.NewLine + n);
 
-		   var publishDir = RootDirectory / ".publish";
+		   
 
-		   publishDir.CreateOrCleanDirectory();
+		   
 
-		   ArtifactsDirectory.GlobFiles("**/*")
-			.ForEach(zip =>
-			{
-				zip.UnZipTo(publishDir);
-			});
-
-		   if (publishDir.GetFiles(depth: 100).Count() == 0)
-			   throw new Exception("Publish dir is empty");
-		   Console.WriteLine(string.Join("\n", publishDir.GetFiles(depth: 100)));
-
-		   return;
+		   
 
 		   var newRelease = new NewRelease(releaseTag)
 		   {
@@ -282,18 +273,28 @@ class Build : NukeBuild
 			   Body = "Preview release"
 		   };
 
-		   var createdRelease = await GitHubTasks
-									   .GitHubClient
+		   var createdRelease = await gitHubClient
 									   .Repository
 									   .Release.Create(owner, name, newRelease);
 
+		   ArtifactsDirectory.GlobFiles("**/*")
+		   .ForEach(async zip =>
+		   {
+				await using var artifactStream = File.OpenRead(zip);
+				var fileName = Path.GetFileName(zip);
+				var assetUpload = new ReleaseAssetUpload
+				{
+					FileName = fileName,
+					ContentType = PackageContentType,
+					RawData = artifactStream,
+				};
+				await gitHubClient.Repository.Release.UploadAsset(createdRelease, assetUpload);
+			});
 
 
 
 
-
-		   var release = await GitHubTasks
-					   .GitHubClient
+		   var release = await gitHubClient
 					   .Repository
 					   .Release
 			   .Edit(owner, name, createdRelease.Id, new ReleaseUpdate { Draft = false });
@@ -304,14 +305,6 @@ class Build : NukeBuild
 
 	private static async Task UploadReleaseAssetToGithub(Release release, string asset)
 	{
-		await using var artifactStream = File.OpenRead(asset);
-		var fileName = Path.GetFileName(asset);
-		var assetUpload = new ReleaseAssetUpload
-		{
-			FileName = fileName,
-			ContentType = PackageContentType,
-			RawData = artifactStream,
-		};
-		await GitHubTasks.GitHubClient.Repository.Release.UploadAsset(release, assetUpload);
+		
 	}
 }
