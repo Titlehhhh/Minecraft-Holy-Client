@@ -281,11 +281,23 @@ namespace HolyClient.StressTest
 		}
 
 
-		private async Task<IProxyProvider> LoadProxy(Serilog.ILogger logger)
+		private async Task<IProxyProvider?> LoadProxy(Serilog.ILogger logger)
 		{
-			logger.Information("Загрузка прокси");
-			var sources = this.Proxies.Items;
+			if (!UseProxy)
+			{
+				logger.Information("Прокси не используются в стресс-тесте");
+				return null;
+			}
 
+			logger.Information("Загрузка прокси");
+			var sources = this.Proxies.Items.ToList();
+
+			if (sources.Count() == 0)
+			{
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+			}
 			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
 			foreach (var s in sources)
@@ -299,11 +311,12 @@ namespace HolyClient.StressTest
 
 			var provider = new ProxyProvider(proxies);
 
-			var group = proxies.GroupBy(x => x.Type).Select(x=>$"{x.Key} - {x.Count()}");
+			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
 
 			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
 			return provider;
+
 		}
 
 
