@@ -261,8 +261,7 @@ class Build : NukeBuild
 
 		   publishDir.CreateOrCleanDirectory();
 
-		   ArtifactsDirectory.GlobFiles()
-			.Where(x => x.HasExtension(".zip"))
+		   ArtifactsDirectory.GlobFiles()			
 			.ForEach(zip =>
 			{
 				zip.UnZipTo(publishDir);
