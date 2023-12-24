@@ -93,12 +93,12 @@ jobs:
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{matrix.target}}
+        name: my-artifact-${{matrix.target}}
         path: .artifacts/${{matrix.target}}
+    
 
     
 
@@ -125,8 +125,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Download artifacts
+    - name: Download All Artifacts
       uses: actions/download-artifact@v4
+      with:
+        path: my-artifact
+        pattern: my-artifact-*
+        merge-multiple: true
          
 
     - name: set script permissions
