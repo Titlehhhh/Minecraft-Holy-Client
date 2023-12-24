@@ -280,6 +280,7 @@ class Build : NukeBuild
 		   ArtifactsDirectory.GlobFiles("**/*")
 		   .ForEach(async zip =>
 		   {
+			   Console.WriteLine("File upload:" +zip);
 				await using var artifactStream = File.OpenRead(zip);
 				var fileName = Path.GetFileName(zip);
 				var assetUpload = new ReleaseAssetUpload
