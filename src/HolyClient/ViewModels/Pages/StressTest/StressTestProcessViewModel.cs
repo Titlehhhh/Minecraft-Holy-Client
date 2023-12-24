@@ -104,7 +104,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 					CPS = x.CPS;
 					PeakCPS = Math.Max(CPS, PeakCPS);
 
-					ProxyQuality = Random.Shared.Next(0, 70) + "%";
+					//ProxyQuality = Random.Shared.Next(0, 70) + "%";
 				}).DisposeWith(d);
 
 

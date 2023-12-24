@@ -6,6 +6,8 @@
 
 		public NickProvider(string baseNick)
 		{
+			if (string.IsNullOrWhiteSpace(baseNick))
+				baseNick = "";
 			if (baseNick.Length > 16)
 				throw new ArgumentException("Nick long");
 			_baseNick = baseNick;

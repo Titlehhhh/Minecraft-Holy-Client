@@ -183,6 +183,18 @@
           "en": "Version",
           "ru": "Версия"
         },
+        "UseProxy": {
+          "en": "Use proxy",
+          "ru": "Использование прокси",
+          "Off": {
+            "en": "Off",
+            "ru": "Без прокси"
+          },
+          "On": {
+            "en": "On",
+            "ru": "Использовать"
+          }
+        },
         "BehaviorSettings": {
           "en": "Behavior settings",
           "ru": "Настройки поведения"

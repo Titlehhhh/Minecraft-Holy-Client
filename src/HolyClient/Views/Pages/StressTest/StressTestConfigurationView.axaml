@@ -99,11 +99,11 @@
 						</Border>
 						<Border Classes="SettingItem">
 							<StackPanel Spacing="10">
-								<TextBlock Text="Использование прокси" FontSize="15"/>
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.UseProxy}" FontSize="15"/>
 								<ToggleSwitch
 									IsChecked="{Binding UseProxy}"
-									OnContent="Использовать"
-									OffContent="Без прокси"/>
+									OnContent="{Tr StressTest.Configuration.GeneralSettings.UseProxy.On}"
+									OffContent="{Tr StressTest.Configuration.GeneralSettings.UseProxy.Off}"/>
 							</StackPanel>
 						</Border>
 						<Border Classes="SettingItem">
