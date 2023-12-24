@@ -261,19 +261,21 @@ class Build : NukeBuild
 		   //var latestChangeLog = changeLogSectionEntries
 		   //   .Aggregate((c, n) => c + Environment.NewLine + n);
 
+		   var publishDir = RootDirectory / ".publish";
+
+		   publishDir.CreateOrCleanDirectory();
 
 		   ArtifactsDirectory.GlobFiles()
 			.Where(x => !x.HasExtension("zip"))
 			.ForEach(zip =>
 			{
-				zip.UnZipTo(zip.Parent);
-
-				zip.DeleteFile();
-
-				
+				zip.UnZipTo(publishDir);
 			});
 
-		   foreach (var file in ArtifactsDirectory.GetFiles())
+		  // publishDir.GlobFiles()
+			
+
+		   foreach (var file in publishDir.GetFiles())
 		   {
 			   Console.WriteLine(file);
 		   }
