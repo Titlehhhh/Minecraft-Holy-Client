@@ -239,10 +239,6 @@ class Build : NukeBuild
 	   .Executes(async () =>
 	   {
 
-		   foreach (var file in ArtifactsDirectory.GetFiles())
-		   {
-			   Console.WriteLine(file);
-		   }
 		   
 		   var credentials = new Credentials(GitHubActions.Token);
 
@@ -272,13 +268,8 @@ class Build : NukeBuild
 				zip.UnZipTo(publishDir);
 			});
 
-		  // publishDir.GlobFiles()
+		
 			
-
-		   foreach (var file in publishDir.GetFiles())
-		   {
-			   Console.WriteLine(file);
-		   }
 		   return;
 
 		   var newRelease = new NewRelease(releaseTag)
