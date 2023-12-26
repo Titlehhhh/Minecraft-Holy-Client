@@ -1,449 +1,479 @@
 {
-  "LanguageName": {
-    "en": "English",
-    "ru": "Русский"
-  },
+	"LanguageName": {
+		"en": "English",
+		"ru": "Русский"
+	},
 
-  "Bootstrap": {
-    "LoadingState": {
-      "LoadState": {
-        "en": "Load state",
-        "ru": "Загрузка состояния"
-      },
-      "LoadPlugins": {
-        "en": "Load plugins",
-        "ru": "Загрузка плагинов"
-      },
-      "AlmostDone": {
-        "en": "Almost done",
-        "ru": "Почти готово"
-      },
-      "Complete": {
-        "en": "Complete",
-        "ru": "Готово"
-      }
-    }
-  },
+	"Bootstrap": {
+		"LoadingState": {
+			"LoadState": {
+				"en": "Load state",
+				"ru": "Загрузка состояния"
+			},
+			"LoadPlugins": {
+				"en": "Load plugins",
+				"ru": "Загрузка плагинов"
+			},
+			"AlmostDone": {
+				"en": "Almost done",
+				"ru": "Почти готово"
+			},
+			"Complete": {
+				"en": "Complete",
+				"ru": "Готово"
+			}
+		}
+	},
 
-  "Home": {
-    "en": "Home",
-    "ru": "Главная",
-    "WhatNew": {
-      "en": "What's new?",
-      "ru": "Что нового?"
-    },
-    "Version": {
-      "en": "Version: {0}",
-      "ru": "Версия: {0}"
-    },
-    "Tiles": {
-      "GitHub": {
-        "Description": {
-          "en": "Explore this project on GitHub: code, issues, and improvements.",
-          "ru": "Исследуйте этот проект на GitHub: код, проблемы и улучшения."
-        }
-      },
-      "Discord": {
-        "Description": {
-          "en": "Join our Discord server to discuss and support the application.",
-          "ru": "Вступайте в наш Discord сервер, что-бы обсуждать программу."
-        }
-      },
-      "Documentation": {
-        "en": "Documentation",
-        "ru": "Документация",
-        "Description": {
-          "en": "Learn how to use the app, as well as how to create plugins.",
-          "ru": "Узнайте как пользоваться программой, а также как создавать плагины."
-        }
-      }
-    }
-  },
-  "BotManager": {
-    "en": "Bot Manager",
-    "ru": "Менеджер ботов",
-    "ProfilesAbsent": {
-      "en": "You do not have any profiles.",
-      "ru": "У вас отсутсвуют профили."
-    },
-    "CreateProfile": {
-      "en": "Create profile",
-      "ru": "Создать профиль"
-    },
-    "RemoveProfile": {
-      "en": "Remove profile",
-      "ru": "Удалить профиль"
-    },
-    "DialogRemoveConfirmRequest": {
-      "en": "Are you sure you want to remove it?",
-      "ru": "Вы точно хотите удалить?"
-    },
-    "Process": {
-      "BotsCount": {
-        "en": "Number of bots",
-        "ru": "Количество ботов"
-      }
-    },
-    "Validation": {
-      "Enter": {
-        "Address": {
-          "en": "Enter address",
-          "ru": "Введите адрес"
-        },
-        "Port": {
-          "en": "Enter port",
-          "ru": "Введите порт"
-        }
-      },
-      "InvalidFormat": {
-        "en": "Invalid format",
-        "ru": "Неверный формат"
-      },
-      "LongPort": {
-        "en": "Port is too long",
-        "ru": "Порт длинный"
-      },
-      "UnkownVersion": {
-        "en": "Unknown version",
-        "ru": "Неизвестная версия"
-      },
-      "NicknameLong": {
-        "en": "The nickname is too long",
-        "ru": "Ник длинный"
-      }
+	"Home": {
+		"en": "Home",
+		"ru": "Главная",
+		"WhatNew": {
+			"en": "What's new?",
+			"ru": "Что нового?"
+		},
+		"Version": {
+			"en": "Version: {0}",
+			"ru": "Версия: {0}"
+		},
+		"Tiles": {
+			"GitHub": {
+				"Description": {
+					"en": "Explore this project on GitHub: code, issues, and improvements.",
+					"ru": "Исследуйте этот проект на GitHub: код, проблемы и улучшения."
+				}
+			},
+			"Discord": {
+				"Description": {
+					"en": "Join our Discord server to discuss and support the application.",
+					"ru": "Вступайте в наш Discord сервер, что-бы обсуждать программу."
+				}
+			},
+			"Documentation": {
+				"en": "Documentation",
+				"ru": "Документация",
+				"Description": {
+					"en": "Learn how to use the app, as well as how to create plugins.",
+					"ru": "Узнайте как пользоваться программой, а также как создавать плагины."
+				}
+			}
+		}
+	},
+	"BotManager": {
+		"en": "Bot Manager",
+		"ru": "Менеджер ботов",
+		"ProfilesAbsent": {
+			"en": "You do not have any profiles.",
+			"ru": "У вас отсутсвуют профили."
+		},
+		"CreateProfile": {
+			"en": "Create profile",
+			"ru": "Создать профиль"
+		},
+		"RemoveProfile": {
+			"en": "Remove profile",
+			"ru": "Удалить профиль"
+		},
+		"DialogRemoveConfirmRequest": {
+			"en": "Are you sure you want to remove it?",
+			"ru": "Вы точно хотите удалить?"
+		},
+		"Process": {
+			"BotsCount": {
+				"en": "Number of bots",
+				"ru": "Количество ботов"
+			}
+		},
+		"Validation": {
+			"Enter": {
+				"Address": {
+					"en": "Enter address",
+					"ru": "Введите адрес"
+				},
+				"Port": {
+					"en": "Enter port",
+					"ru": "Введите порт"
+				}
+			},
+			"InvalidFormat": {
+				"en": "Invalid format",
+				"ru": "Неверный формат"
+			},
+			"LongPort": {
+				"en": "Port is too long",
+				"ru": "Порт длинный"
+			},
+			"UnkownVersion": {
+				"en": "Unknown version",
+				"ru": "Неизвестная версия"
+			},
+			"NicknameLong": {
+				"en": "The nickname is too long",
+				"ru": "Ник длинный"
+			}
 
-    },
-    "PreVersion": {
-      "en": "Preview version",
-      "ru": "Предварительная версия"
-    },
-    "Address": {
-      "en": "Address",
-      "ru": "Адрес"
-    },
-    "ThreadCount": {
-      "en": "Number of threads",
-      "ru": "Количество потоков"
-    },
-    "Version": {
-      "en": "Version",
-      "ru": "Версия"
-    },
-    "Nickname": {
-      "en": "Nickname",
-      "ru": "Никнейм"
-    },
-    "Start": {
-      "en": "Start",
-      "ru": "Запустить"
-    },
-    "Stop": {
-      "en": "Stop",
-      "ru": "Остановить"
-    },
-    "Error": {
-      "en": "An error occurred during startup:",
-      "ru": "Во время запуска произошла ошибка:"
-    },
-    "Tabs": {
-      "GeneralSettings": {
-        "en": "General settings",
-        "ru": "Основные настройки"
-      },
-      "Plugins": {
-        "en": "Plugins",
-        "ru": "Плагины"
-      },
-      "Console": {
-        "en": "Console",
-        "ru": "Консоль"
-      }
-    }
-  },
-  "StressTest": {
-    "en": "Stress test",
-    "ru": "Стресс тест",
-    "Configuration": {
-      "GeneralSettings": {
-        "en": "General settings",
-        "ru": "Основные настройки",
-        "Address": {
-          "en": "Address",
-          "ru": "Адрес"
-        },
-        "BotsNicknames": {
-          "en": "Bot's nicknames",
-          "ru": "Ники ботам"
-        },
-        "NumberOfBots": {
-          "en": "Number of bots",
-          "ru": "Количество ботов"
-        },
-        "Version": {
-          "en": "Version",
-          "ru": "Версия"
-        },
-        "UseProxy": {
-          "en": "Use proxy",
-          "ru": "Использование прокси",
-          "Off": {
-            "en": "Off",
-            "ru": "Без прокси"
-          },
-          "On": {
-            "en": "On",
-            "ru": "Использовать"
-          }
-        },
-        "BehaviorSettings": {
-          "en": "Behavior settings",
-          "ru": "Настройки поведения"
-        },
-        "Validation": {
-          "Address": {
-            "en": "Address is empty",
-            "ru": "Поле обязательно для заполнения"
-          },
-          "BotsNickname": {
-            "en": "Nickname is empty",
-            "ru": "Поле обязательно для заполнения",
-            "Long": {
-              "en": "Nickname is long",
-              "ru": "Ник слишком длинный"
-            }
-          }
+		},
+		"PreVersion": {
+			"en": "Preview version",
+			"ru": "Предварительная версия"
+		},
+		"Address": {
+			"en": "Address",
+			"ru": "Адрес"
+		},
+		"ThreadCount": {
+			"en": "Number of threads",
+			"ru": "Количество потоков"
+		},
+		"Version": {
+			"en": "Version",
+			"ru": "Версия"
+		},
+		"Nickname": {
+			"en": "Nickname",
+			"ru": "Никнейм"
+		},
+		"Start": {
+			"en": "Start",
+			"ru": "Запустить"
+		},
+		"Stop": {
+			"en": "Stop",
+			"ru": "Остановить"
+		},
+		"Error": {
+			"en": "An error occurred during startup:",
+			"ru": "Во время запуска произошла ошибка:"
+		},
+		"Tabs": {
+			"GeneralSettings": {
+				"en": "General settings",
+				"ru": "Основные настройки"
+			},
+			"Plugins": {
+				"en": "Plugins",
+				"ru": "Плагины"
+			},
+			"Console": {
+				"en": "Console",
+				"ru": "Консоль"
+			}
+		}
+	},
+	"StressTest": {
+		"en": "Stress test",
+		"ru": "Стресс тест",
+		"Configuration": {
+			"GeneralSettings": {
+				"en": "General settings",
+				"ru": "Основные настройки",
+				"Address": {
+					"en": "Address",
+					"ru": "Адрес"
+				},
+				"BotsNicknames": {
+					"en": "Bot's nicknames",
+					"ru": "Ники ботам"
+				},
+				"NumberOfBots": {
+					"en": "Number of bots",
+					"ru": "Количество ботов"
+				},
+				"Version": {
+					"en": "Version",
+					"ru": "Версия"
+				},
+				"UseProxy": {
+					"en": "Use proxy",
+					"ru": "Использование прокси",
+					"Off": {
+						"en": "Off",
+						"ru": "Без прокси"
+					},
+					"On": {
+						"en": "On",
+						"ru": "Использовать"
+					}
+				},
+				"BehaviorSettings": {
+					"en": "Behavior settings",
+					"ru": "Настройки поведения"
+				},
+				"Validation": {
+					"Address": {
+						"en": "Address is empty",
+						"ru": "Поле обязательно для заполнения"
+					},
+					"BotsNickname": {
+						"en": "Nickname is empty",
+						"ru": "Поле обязательно для заполнения",
+						"Long": {
+							"en": "Nickname is long",
+							"ru": "Ник слишком длинный"
+						}
+					}
 
-        }
-      },
-      "Proxy": {
-        "en": "Proxies",
-        "ru": "Прокси",
+				}
+			},
+			"Proxy": {
+				"en": "Proxies",
+				"ru": "Прокси",
 
-        "Type": {
-          "en": "Type",
-          "ru": "Тип"
-        },
-        "Host": {
-          "en": "Host",
-          "ru": "Хост"
-        },
-        "Port": {
-          "en": "Port",
-          "ru": "Порт"
-        },
-        "Login": {
-          "en": "Login",
-          "ru": "Логин"
-        },
-        "Password": {
-          "en": "Password",
-          "ru": "Пароль"
-        },
-        "Dialog": {
-          "Title": {
-            "en": "Import proxies",
-            "ru": "Импорт прокси"
-          },
-          "Path": {
-            "en": "Path",
-            "ru": "Путь"
-          },
-          "ProxyType": {
-            "en": "Proxy type",
-            "ru": "Тип прокси"
-          },
-          "Next": {
-            "en": "Next",
-            "ru": "Далее"
-          },
-          "PrimaryButton": {
-            "en": "Import",
-            "ru": "Импорт"
-          },
-          "CloseButton": {
-            "en": "Cancel",
-            "ru": "Отмена"
-          },
-          "ConfirmDeleteQuestion": {
-            "en": "Are you sure you want to delete?",
-            "ru": "Вы точно хотите удалить?"
-          }
-        },
-        "AddSource": {
-          "en": "Add source",
-          "ru": "Добавить источник"
-        },
-        "Export": {
-          "en": "Export",
-          "ru": "Экспорт"
-        },
-        "Delete": {
-          "en": "Delete",
-          "ru": "Удалить"
-        },
-        "DeleteAll": {
-          "en": "Delete all",
-          "ru": "Удалить все"
-        }
-      },
-      "Behaviors": {
-        "en": "Behaviors",
-        "ru": "Поведения",
-        "AvailableBehaviors": {
-          "en": "Available behaviors",
-          "ru": "Доступные поведения"
-        },
-        "Current": {
-          "en": "Current",
-          "ru": "Текущий"
-        },
-        "NoSelectBehavior": {
-          "en": "No selected behavior",
-          "ru": "Нет выбранного поведения"
-        },
-        "SelectedBehavior": {
-          "Assembly": {
-            "en": "Assembly:",
-            "ru": "Сборка:"
-          },
-          "Authors": {
-            "en": "Authors:",
-            "ru": "Авторы:"
-          },
-          "Description": {
-            "en": "Description:",
-            "ru": "Описание:"
-          },
-          "Put": {
-            "en": "Put",
-            "ru": "Установить"
-          }
-        }
-      }
-    },
-    "Process": {
-      "InfoPanel": {
-        "Server": {
-          "en": "Server: {0}",
-          "ru": "Сервер: {0}"
-        },
-        "Version": {
-          "en": "Version: {0}",
-          "ru": "Версия: {0}"
-        },
-        "NumberOfThreads": {
-          "en": "Number of parallels {0}",
-          "ru": "Количество потоков: {0}"
-        }
-      },
-      "CPS": {
-        "en": "Connection per second",
-        "ru": "Подключения в секунду"
-      },
-      "BotsOnline": {
-        "en": "Online bots",
-        "ru": "Ботов онлайн"
-      }
-    }
-  },
-  "ManagingExtension": {
-    "en": "Managing extensions",
-    "ru": "Управление расширениями",
-    "ReviewNuGet": {
-      "en": "Review NuGet",
-      "ru": "Обзор NuGet"
-    },
-    "InstalledNuGet": {
-      "en": "Installed NuGet packages",
-      "ru": "Установленные пакеты NuGet"
-    },
-    "Assemblies": {
-      "en": "Assemblies",
-      "ru": "Сборки",
-      "DeleteAssemblyDialog": {
-        "Title": {
-          "en": "Delete an assembly? The stress test will be stopped forcibly.",
-          "ru": "Удалить сборку? Стресс-тест будет остановлен принудительно."
-        }
-      },
-      "LoadAssembly": {
-        "en": "Load assembly",
-        "ru": "Загрузить сборку"
-      },
-      "Delete": {
-        "en": "Delete",
-        "ru": "Удалить"
-      },
-      "Path": {
-        "en": "Path",
-        "ru": "Путь"
-      },
-      "TypesFound": {
-        "en": "Types found",
-        "ru": "Найденные типы",
-        "StressTest": {
-          "en": "Stress test plugins ({0}):",
-          "ru": "Стресс тест плагины ({0}):"
-        }
-      },
-      "NoAssembliesText": {
-        "en": "No assemblies loaded",
-        "ru": "Нет загруженных сборок"
-      }
+				"Type": {
+					"en": "Type",
+					"ru": "Тип"
+				},
+				"Host": {
+					"en": "Host",
+					"ru": "Хост"
+				},
+				"Port": {
+					"en": "Port",
+					"ru": "Порт"
+				},
+				"Login": {
+					"en": "Login",
+					"ru": "Логин"
+				},
+				"Password": {
+					"en": "Password",
+					"ru": "Пароль"
+				},
+				"Dialog": {
+					"SelectSource": {
+						"en": "Select source",
+						"ru": "Выберите источник",
+						"ManualEntry": {
+							"en": "Manual entry",
+							"ru": "Ручной ввод",
+							"Description": {
+								"en": "You can enter a list of proxies manually or use the clipboard.",
+								"ru": "Вы можете ввести список прокси вручную или использовать буфер обмена."
+							},
+							"EnterProxies": {
+								"en": "Enter a list of proxies",
+								"ru": "Введите список прокси"
+							}
+						},
+						"File": {
+							"en": "File",
+							"ru": "Файл",
+							"Description": {
+								"en": "You can load a proxy from a text file.",
+								"ru": "Вы можете загрузить прокси из текстового файла."
+							},
+							"EnterPath": {
+								"en": "Enter path",
+								"ru": "Введите путь"
+							}
+						},
+						"Url": {
+							"en": "URL",
+							"ru": "URL",
+							"Description": {
+								"en": "You can download proxies from the Internet, such as open GitHub repositories with proxies.",
+								"ru": "Вы можете загрузить прокси из Интернета, например, открытые репозитории GitHub с прокси."
+							},
+							"EnterAddress": {
+								"en": "Enter address",
+								"ru": "Введите адрес"
+							}
+						}
+					},
+					"Next": {
+						"en": "Next",
+						"ru": "Далее"
+					},
+					"ConfirmDeleteQuestion": {
+						"en": "Are you sure you want to delete?",
+						"ru": "Вы точно хотите удалить?"
+					},
+					"ProxyType": {
+						"en": "Proxy type",
+						"ru": "Тип прокси"
+					}
 
-    },
+				},
+				"AddSource": {
+					"en": "Add source",
+					"ru": "Добавить источник"
+				},
+				"Export": {
+					"en": "Export",
+					"ru": "Экспорт"
+				},
+				"Delete": {
+					"en": "Delete",
+					"ru": "Удалить"
+				},
+				"DeleteAll": {
+					"en": "Delete all",
+					"ru": "Удалить все"
+				}
+			},
+			"Behaviors": {
+				"en": "Behaviors",
+				"ru": "Поведения",
+				"AvailableBehaviors": {
+					"en": "Available behaviors",
+					"ru": "Доступные поведения"
+				},
+				"Current": {
+					"en": "Current",
+					"ru": "Текущий"
+				},
+				"NoSelectBehavior": {
+					"en": "No selected behavior",
+					"ru": "Нет выбранного поведения"
+				},
+				"SelectedBehavior": {
+					"Assembly": {
+						"en": "Assembly:",
+						"ru": "Сборка:"
+					},
+					"Authors": {
+						"en": "Authors:",
+						"ru": "Авторы:"
+					},
+					"Description": {
+						"en": "Description:",
+						"ru": "Описание:"
+					},
+					"Put": {
+						"en": "Put",
+						"ru": "Установить"
+					}
+				}
+			}
+		},
+		"Process": {
+			"InfoPanel": {
+				"Server": {
+					"en": "Server: {0}",
+					"ru": "Сервер: {0}"
+				},
+				"Version": {
+					"en": "Version: {0}",
+					"ru": "Версия: {0}"
+				},
+				"NumberOfThreads": {
+					"en": "Number of parallels {0}",
+					"ru": "Количество потоков: {0}"
+				}
+			},
+			"CPS": {
+				"en": "Connection per second",
+				"ru": "Подключения в секунду"
+			},
+			"BotsOnline": {
+				"en": "Online bots",
+				"ru": "Ботов онлайн"
+			}
+		}
+	},
+	"ManagingExtension": {
+		"en": "Managing extensions",
+		"ru": "Управление расширениями",
+		"ReviewNuGet": {
+			"en": "Review NuGet",
+			"ru": "Обзор NuGet"
+		},
+		"InstalledNuGet": {
+			"en": "Installed NuGet packages",
+			"ru": "Установленные пакеты NuGet"
+		},
+		"Assemblies": {
+			"en": "Assemblies",
+			"ru": "Сборки",
+			"DeleteAssemblyDialog": {
+				"Title": {
+					"en": "Delete an assembly? The stress test will be stopped forcibly.",
+					"ru": "Удалить сборку? Стресс-тест будет остановлен принудительно."
+				}
+			},
+			"LoadAssembly": {
+				"en": "Load assembly",
+				"ru": "Загрузить сборку"
+			},
+			"Delete": {
+				"en": "Delete",
+				"ru": "Удалить"
+			},
+			"Path": {
+				"en": "Path",
+				"ru": "Путь"
+			},
+			"TypesFound": {
+				"en": "Types found",
+				"ru": "Найденные типы",
+				"StressTest": {
+					"en": "Stress test plugins ({0}):",
+					"ru": "Стресс тест плагины ({0}):"
+				}
+			},
+			"NoAssembliesText": {
+				"en": "No assemblies loaded",
+				"ru": "Нет загруженных сборок"
+			}
 
-    "AssemblyUpdatedNotification": {
-      "Title": {
-        "en": "Assembly manager",
-        "ru": "Менеджер сборок"
-      },
-      "en": "Assembly {0} has been updated",
-      "ru": "Сборка {0} была обновлена"
-    }
-  },
-  "Settings": {
-    "en": "Settings",
-    "ru": "Настройки",
-    "Language": {
-      "en": "Language",
-      "ru": "Язык"
-    }
-  },
-  "Loading": {
-    "en": "Loading",
-    "ru": "Загрузка"
-  },
-  "Cancel": {
-    "en": "Cancel",
-    "ru": "Отмена"
-  },
-  "Back": {
-    "en": "Back",
-    "ru": "Назад"
-  },
-  "Add": {
-    "en": "Add",
-    "ru": "Добавить"
-  },
-  "InDevelopment": {
-    "en": "Is in development",
-    "ru": "В разработке"
-  },
-  "Create": {
-    "en": "Create",
-    "ru": "Создать"
-  },
-  "Yes": {
-    "en": "Yes",
-    "ru": "Да"
-  },
-  "No": {
-    "en": "No",
-    "ru": "Нет"
-  },
-  "Search": {
-    "en": "Search",
-    "ru": "Поиск"
-  }
+		},
+
+		"AssemblyUpdatedNotification": {
+			"Title": {
+				"en": "Assembly manager",
+				"ru": "Менеджер сборок"
+			},
+			"en": "Assembly {0} has been updated",
+			"ru": "Сборка {0} была обновлена"
+		}
+	},
+	"Settings": {
+		"en": "Settings",
+		"ru": "Настройки",
+		"Language": {
+			"en": "Language",
+			"ru": "Язык"
+		}
+	},
+	"Loading": {
+		"en": "Loading",
+		"ru": "Загрузка"
+	},
+	
+	"Cancel": {
+		"en": "Cancel",
+		"ru": "Отмена"
+	},
+	"Back": {
+		"en": "Back",
+		"ru": "Назад"
+	},
+	"Add": {
+		"en": "Add",
+		"ru": "Добавить"
+	},
+	"Next": {
+		"en": "Next",
+		"ru": "Далее"
+	},
+	"InDevelopment": {
+		"en": "Is in development",
+		"ru": "В разработке"
+	},
+	"Create": {
+		"en": "Create",
+		"ru": "Создать"
+	},
+	"Yes": {
+		"en": "Yes",
+		"ru": "Да"
+	},
+	"No": {
+		"en": "No",
+		"ru": "Нет"
+	},
+	"Search": {
+		"en": "Search",
+		"ru": "Поиск"
+	}
 }

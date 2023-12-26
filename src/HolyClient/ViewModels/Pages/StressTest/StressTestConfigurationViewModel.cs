@@ -204,7 +204,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 					if (source == ImportSource.InMemory)
 					{
-						InMemoryImportProxyDialogViewModel vm = new();
+						InMemoryImportProxyDialogViewModel vm = new("ManualEntry");
 
 						ok = await ImportProxyDialog.Handle(vm);
 
@@ -214,7 +214,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 					}
 					else if (source == ImportSource.File)
 					{
-						FileImportProxyDialogViewModel vm = new();
+						FileImportProxyDialogViewModel vm = new("File");
 
 						ok = await ImportProxyDialog.Handle(vm);
 
@@ -223,7 +223,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 					}
 					else if (source == ImportSource.Url)
 					{
-						UrlImportProxyDialogViewModel vm = new();
+						UrlImportProxyDialogViewModel vm = new("Url");
 
 						ok = await ImportProxyDialog.Handle(vm);
 

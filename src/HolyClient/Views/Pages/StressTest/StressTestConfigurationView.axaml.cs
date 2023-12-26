@@ -31,10 +31,10 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			{
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Импорт прокси",
-					PrimaryButtonText = "Далее",
+					Title = Loc.Tr("StressTest.Configuration.Proxy.Dialog.SelectSource"),
+					PrimaryButtonText = Loc.Tr("Next"),
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = "Отмена",
+					CloseButtonText = Loc.Tr("Cancel"),
 					Content = new SelectImportSourceProxyDialogContent()
 					{
 						DataContext = x.Input
@@ -47,12 +47,13 @@ public partial class StressTestConfigurationView : ReactiveUserControl<StressTes
 			}).DisposeWith(d);
 			this.ViewModel.ImportProxyDialog.RegisterHandler(async x =>
 			{
+				
 				ContentDialog dialog = new ContentDialog()
 				{
-					Title = "Импорт прокси",
-					PrimaryButtonText = "Импорт",
+					Title = Loc.Tr($"StressTest.Configuration.Proxy.Dialog.SelectSource.{x.Input.Title}"),
+					PrimaryButtonText = Loc.Tr("Add"),
 					IsSecondaryButtonEnabled = false,
-					CloseButtonText = "Отмена",
+					CloseButtonText = Loc.Tr("Cancel"),
 					Content = x.Input
 					
 				};
