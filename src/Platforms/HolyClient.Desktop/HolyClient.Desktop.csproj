@@ -11,13 +11,8 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	</PropertyGroup>
 
-	<Target Name="MyTarget" AfterTargets="MinVer">
-		<PropertyGroup>
-			<AssemblyName>HolyClient.Desktop-$(MinVerVersion)</AssemblyName>
-		</PropertyGroup>
-	</Target>
 
-	<PropertyGroup  Condition="'$(Configuration)' == 'Debug'" >
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'" >
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -31,10 +26,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="MinVer" Version="4.3.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
+		
 
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->

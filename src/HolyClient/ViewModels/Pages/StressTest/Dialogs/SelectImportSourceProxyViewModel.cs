@@ -10,9 +10,9 @@ namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
 
 		public ImportSourceViewModel[] Sources { get; } = new ImportSourceViewModel[]
 		{
-			new ImportSourceViewModel(Symbol.Clipboard,"Буфер обмена", ImportSource.InMemory),
-			new ImportSourceViewModel(Symbol.OpenFile,"Файл", ImportSource.File),
-			new ImportSourceViewModel(Symbol.Link,"URL", ImportSource.Url)
+			new ImportSourceViewModel("ManualEntry","Буфер обмена", ImportSource.InMemory),
+			new ImportSourceViewModel("FileSource","Файл", ImportSource.File),
+			new ImportSourceViewModel("UrlSource","URL", ImportSource.Url)
 		};
 		[Reactive]
 		public ImportSourceViewModel? SelectedSource { get; set; }

@@ -252,6 +252,10 @@
             "en": "Proxy type",
             "ru": "Тип прокси"
           },
+          "Next": {
+            "en": "Next",
+            "ru": "Далее"
+          },
           "PrimaryButton": {
             "en": "Import",
             "ru": "Импорт"
