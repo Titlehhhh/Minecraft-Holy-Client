@@ -232,8 +232,11 @@ class Build : NukeBuild
 				.SetProperty("DebugType", "None")
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
+				.SetProperty("AssemblyName", $"HolyClient.Desktop-{MinVer.Version}")
 				.SetOutput(BuildDirectory)
-				.SetFramework("net8.0")
+				.SetFramework("net8.0")			
 				.SetRuntime(Runtime));
 
 
