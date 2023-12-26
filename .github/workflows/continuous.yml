@@ -16,8 +16,7 @@ on:
 jobs:
   Libs:
     name: Build and deploy NuGet
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest    
     env:
       FeedzApiKey: ${{ secrets.FEEDZ_TOKEN }}
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -50,6 +49,7 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
+      if: github.ref == 'refs/heads/master'
       run: ./build.sh LibsPush
       env:          
           NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
@@ -111,7 +111,7 @@ jobs:
     name: "CreateRelease"
     needs: [build-desktop-app]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    
     steps:
     - uses: actions/checkout@v4
       with:
@@ -141,6 +141,7 @@ jobs:
       run: chmod +x ./build.sh
 
     - name: Run './build.cmd'
+      if: github.ref == 'refs/heads/master'
       run: ./build.sh CreateRelease
       env:  
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
