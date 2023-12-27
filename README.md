@@ -28,7 +28,7 @@
 ![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/fdbab77e-0eed-44ed-bbe3-30e6d100802b)
 
 Нажимаем на зеленую кнопку видим, что боты зашли на сервер и спамят "Hello from Minecraft Holy Client"
-
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/51c89585-1fd5-4351-9677-a59322ececd7)
 
 
 ## Roadmap
