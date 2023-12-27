@@ -251,7 +251,7 @@ namespace HolyClient.StressTest
 				}
 				else
 				{
-					TestBehavior testBehavior = new();
+					DefaultBehavior testBehavior = new();
 					await testBehavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
 				}
 				CurrentState = StressTestServiceState.Running;
