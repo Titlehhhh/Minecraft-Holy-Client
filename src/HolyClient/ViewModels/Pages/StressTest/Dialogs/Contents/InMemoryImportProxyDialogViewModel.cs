@@ -18,7 +18,7 @@ public sealed class InMemoryImportProxyDialogViewModel : ImportProxyViewModel
 
 
 
-	public InMemoryImportProxyDialogViewModel()
+	public InMemoryImportProxyDialogViewModel(string title) : base(title)
 	{
 		
 

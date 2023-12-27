@@ -240,6 +240,7 @@ namespace HolyClient.Localization
 
 			if (IsDynamic)
 			{
+				
 				Binding binding = new(nameof(TrData.TranslatedText))
 				{
 					Source = trData

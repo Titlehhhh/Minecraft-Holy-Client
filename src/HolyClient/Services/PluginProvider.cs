@@ -65,7 +65,7 @@ namespace HolyClient.Services
 
 		public T CreateInstance<T>() where T : IStressTestBehavior
 		{
-			IStressTestBehavior beh = new TestBehavior();
+			IStressTestBehavior beh = new DefaultBehavior();
 			return (T)beh;
 		}
 	}

@@ -7,7 +7,6 @@ using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using McProtoNet;
 using NuGet.Configuration;
-using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
@@ -143,18 +142,24 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 			this.ValidationRule(
 			   viewModel => viewModel.Server,
 			   name => !string.IsNullOrWhiteSpace(name),
-			   GetTr("Address"));
+			   GetTr("Address")).DisposeWith(d);
 
 
 
 			IObservable<IValidationState> botsNicknameValid =
 				this.WhenAnyValue(x => x.BotsNickname)
-					.Select(name => string.IsNullOrEmpty(name)
-						? new ValidationState(false, GetTr("BotsNickname"))
-
-						: (name.Length <= 14
-								? ValidationState.Valid :
-								new ValidationState(false, GetTr("BotsNickname.Long"))));
+					.Select(name =>
+					{
+						if (string.IsNullOrWhiteSpace(name))
+						{
+							return ValidationState.Valid;
+						}
+						if(name.Length >= 14)
+						{
+							return new ValidationState(false, GetTr("BotsNickname.Long"));
+						}
+						return ValidationState.Valid;
+					});
 
 			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
@@ -199,7 +204,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 					if (source == ImportSource.InMemory)
 					{
-						InMemoryImportProxyDialogViewModel vm = new();
+						InMemoryImportProxyDialogViewModel vm = new("ManualEntry");
 
 						ok = await ImportProxyDialog.Handle(vm);
 
@@ -209,7 +214,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 					}
 					else if (source == ImportSource.File)
 					{
-						FileImportProxyDialogViewModel vm = new();
+						FileImportProxyDialogViewModel vm = new("File");
 
 						ok = await ImportProxyDialog.Handle(vm);
 
@@ -218,7 +223,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 					}
 					else if (source == ImportSource.Url)
 					{
-						UrlImportProxyDialogViewModel vm = new();
+						UrlImportProxyDialogViewModel vm = new("Url");
 
 						ok = await ImportProxyDialog.Handle(vm);
 
@@ -305,31 +310,4 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 
 
-}
-public class ProxySourceViewModel : ReactiveObject
-{
-	public Guid Id { get; private set; }
-	//public int AveragePing => Random.Shared.Next(100, 500);
-
-	public string Name { get; set; }
-
-	public string Icon { get; private set; }
-
-	public ProxyType Type { get; set; }
-	public ProxySourceViewModel(IProxySource proxySource)
-	{
-		Id = proxySource.Id;
-
-		Name = proxySource.Name;
-
-		Type = proxySource.Type;
-
-		Icon = proxySource switch
-		{
-			UrlProxySource => "UrlProxy",
-			FileProxySource => "FileProxy",
-			InMemoryProxySource => "InMemoryProxy"
-		};
-
-	}
 }

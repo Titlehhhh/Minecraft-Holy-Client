@@ -9,7 +9,7 @@
              x:Class="HolyClient.Views.InMemoryImportProxyDialogContent">
 	<StackPanel>
 
-		<TextBlock  Text="Введите список прокси"/>
+		<TextBlock  Text="{Tr StressTest.Configuration.Proxy.Dialog.SelectSource.ManualEntry.EnterProxies}"/>
 		<TextBox Margin="0,5,0,0" HorizontalAlignment="Left" Text="{Binding Lines}" Width="300" Height="250" AcceptsReturn="True">
 			
 		</TextBox>

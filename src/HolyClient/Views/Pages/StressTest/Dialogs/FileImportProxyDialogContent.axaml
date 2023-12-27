@@ -9,7 +9,7 @@
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
              x:Class="HolyClient.Views.FileImportProxyDialogContent">
 	<StackPanel>
-		<TextBlock  Text="Введите путь"/>
+		<TextBlock Text="{Tr StressTest.Configuration.Proxy.Dialog.SelectSource.File.EnterPath}"/>
 		<Grid Margin="0,5,0,0" ColumnDefinitions="*, Auto">
 			<TextBox Text="{Binding FilePath}"/>
 			<Button x:Name="OpenFileButton" Click="OpenFileButton_Click" Margin="4,0,0,0" Grid.Column="1" Theme="{StaticResource TransparentButton}">

@@ -1,12 +1,21 @@
 ﻿using HolyClient.Abstractions.StressTest;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace HolyClient.StressTest
 {
-	public class TestBehavior : IStressTestBehavior
+	public class DefaultBehavior : IStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
-		public string SpamText { get; set; } = "Hello";
+		public string SpamText { get; set; } = "!Hello from Minecraft Holy Client";
+
+		[System.ComponentModel.DisplayName("Spam timeout")]
+		public int SpamTimeout { get; set; } = 5000;
+
+
+		private static Regex SayVerifyRegex = new(@"\.say \/verify (\d+)");
 
 		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
 		{
@@ -47,13 +56,40 @@ namespace HolyClient.StressTest
 					cts = new();
 					try
 					{
+
+
 						await Task.Delay(500);
+
 						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
+
+						try
+						{
+							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+							//{
+
+							var m = await bot.Client.OnChatMessage
+								.Where(x => x.Message.Contains("verify"))
+								.Skip(3)
+								.FirstAsync()
+								.ToTask(cts.Token);
+
+							var code = SayVerifyRegex.Match(m.Message).Value;
+
+							await bot.Client.SendChat(code);
+							//}
+						}
+						catch (Exception ex)
+						{
+							//Console.WriteLine(ex);
+						}
 
 						while (!cts.IsCancellationRequested)
 						{
 							await bot.Client.SendChat(SpamText);
-							await Task.Delay(1000);
+							if (SpamTimeout <= 0)
+								await Task.Delay(1000);
+							else
+								await Task.Delay(SpamTimeout);
 						}
 					}
 					catch (Exception ex)

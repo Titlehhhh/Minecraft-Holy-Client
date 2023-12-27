@@ -20,7 +20,7 @@ public sealed class FileImportProxyDialogViewModel : ImportProxyViewModel
 
 	
 
-	public FileImportProxyDialogViewModel()
+	public FileImportProxyDialogViewModel(string title): base(title)
 	{
 
 	}

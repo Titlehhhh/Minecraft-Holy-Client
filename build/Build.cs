@@ -192,11 +192,21 @@ class Build : NukeBuild
 		{
 			Console.WriteLine("Version: " + MinVer.Version);
 
-			DotNetNuGetPush(s => s
+			if (GitRepository.IsOnMasterBranch())
+			{
+				DotNetNuGetPush(s => s
 						.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
-						.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
-						.SetApiKey(FeedzApiKey)
-					);
+						.SetSource("https://api.nuget.org/v3/index.json")
+						.SetApiKey(NuGetApiKey));
+			}
+			else
+			{
+
+				DotNetNuGetPush(s => s
+							.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
+							.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
+							.SetApiKey(FeedzApiKey));				
+			}
 		});
 
 
@@ -222,8 +232,11 @@ class Build : NukeBuild
 				.SetProperty("DebugType", "None")
 				.SetPublishReadyToRun(true)
 				.EnableSelfContained()
+				.SetAssemblyVersion(MinVer.AssemblyVersion)
+				.SetFileVersion(MinVer.FileVersion)
+				
 				.SetOutput(BuildDirectory)
-				.SetFramework("net8.0")
+				.SetFramework("net8.0")			
 				.SetRuntime(Runtime));
 
 
@@ -308,8 +321,4 @@ class Build : NukeBuild
 	   });
 
 
-	private static async Task UploadReleaseAssetToGithub(Release release, string asset)
-	{
-
-	}
 }
