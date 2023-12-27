@@ -7,6 +7,9 @@
 Высокопроизводительная платформа для запуска стресс-тест ботов Minecraft, написанная на C#.
 
 ## Get Started
+
+[Скачайте в релизах](https://github.com/Titlehhhh/Minecraft-Holy-Client/releases) последнюю версию Minecraft Holy Client и запустите её.
+
 После запуска приложения Вас встретит окно с главной страницей.
 ![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/4d582c49-13bd-44c7-81b4-f6ebd5b924cd)
 
