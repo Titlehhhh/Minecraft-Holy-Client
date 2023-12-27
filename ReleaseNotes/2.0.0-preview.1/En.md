@@ -1,7 +1,7 @@
 > [!WARNING]  
 > Disclaimer: This translation was generated using AI.
 
-# What's New in Minecraft Holy Client *2.0.0-preview.1*?
+# What's New in Minecraft Holy Client **2.0.0-preview.1.1**?
 
 ## Major Fixes
 
