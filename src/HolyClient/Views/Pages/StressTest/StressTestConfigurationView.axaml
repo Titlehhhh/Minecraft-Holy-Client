@@ -179,7 +179,7 @@
 								</Transitions>
 							</ui:FABorder.Transitions>
 							<StackPanel>
-								<TextBlock FontWeight="SemiBold" Text="Опции"/>
+								<TextBlock FontWeight="SemiBold" Text="{Tr StressTest.Configuration.Proxy.Options}"/>
 								<StackPanel Margin="0,5,0,0" Spacing="10">
 
 									<Button

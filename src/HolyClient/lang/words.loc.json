@@ -294,6 +294,10 @@
 					}
 
 				},
+				"Options": {
+					"en": "Options",
+					"ru": "Опции"
+				},
 				"AddSource": {
 					"en": "Add source",
 					"ru": "Добавить источник"
@@ -368,6 +372,14 @@
 			"BotsOnline": {
 				"en": "Online bots",
 				"ru": "Ботов онлайн"
+			},
+			"PeakCPS": {
+				"en": "Peak connection per second",
+				"ru": "Пиковые подключения в секунду"
+			},
+			"ProxyQuality": {
+				"en": "Proxy quiality",
+				"ru": "Качество прокси"
 			}
 		}
 	},

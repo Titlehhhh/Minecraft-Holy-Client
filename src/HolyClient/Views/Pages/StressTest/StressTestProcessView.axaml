@@ -21,25 +21,25 @@
 			<Border Grid.Column="0" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Padding="10">
 				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
 					<TextBlock TextAlignment="Right" Text="{Binding BotsOnline}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="Ботов онлайн" Foreground="Gray"/>
+					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.BotsOnline}" Foreground="Gray"/>
 				</StackPanel>
 			</Border>
 			<Border Grid.Column="1" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Padding="10">
 				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
 					<TextBlock TextAlignment="Right" Text="{Binding CPS}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="Подключения в секунду" Foreground="Gray"/>
+					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.CPS}" Foreground="Gray"/>
 				</StackPanel>
 			</Border>
 			<Border Grid.Column="2" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Padding="10">
 				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
 					<TextBlock TextAlignment="Right" Text="{Binding PeakCPS}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="Пиковые подключения в секунду" Foreground="Gray"/>
+					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.PeakCPS}" Foreground="Gray"/>
 				</StackPanel>
 			</Border>
 			<Border Grid.Column="3" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Padding="10">
 				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
 					<TextBlock TextAlignment="Right" Text="{Binding ProxyQuality}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="Качество прокси" Foreground="Gray"/>
+					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.ProxyQuality}" Foreground="Gray"/>
 				</StackPanel>
 			</Border>
 		</sg:SpacedGrid>
