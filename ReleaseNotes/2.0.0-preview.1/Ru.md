@@ -1,4 +1,4 @@
-# Что изменилось в Minecraft Holy Client *2.0.0-preview.1*?
+# Что изменилось в Minecraft Holy Client **2.0.0-preview.1.1**?
 
 ## Основные исправления
 
