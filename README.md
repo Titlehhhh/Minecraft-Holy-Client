@@ -1,4 +1,4 @@
-[![Discord Banner](https://img.shields.io/badge/discord-join%20chat-46BC99)](https://discord.gg/HVDzx4rCgg) [![Github All Releases](https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg)]()
+[![Discord Banner](https://img.shields.io/badge/discord-join%20chat-46BC99)](https://discord.gg/HVDzx4rCgg) [![Github All Releases](https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg)](https://github.com/Titlehhhh/Minecraft-Holy-Client/releases)
 
 *На данный момент программа находится в предварительной версии, поэтому некоторые функции нестабильны. Подробнее можно узнать [здесь](preview.md).*
 
