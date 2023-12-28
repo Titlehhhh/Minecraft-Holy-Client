@@ -9,7 +9,7 @@ namespace McProtoNet.Core.Protocol
 		
 		private readonly bool disposeStream;
 		private Stream _baseStream;
-		private RecyclableMemoryStream fastStream = StaticResources.MSmanager.GetStream() as RecyclableMemoryStream;
+		//private RecyclableMemoryStream fastStream = StaticResources.MSmanager.GetStream() as RecyclableMemoryStream;
 
 
 
@@ -55,24 +55,26 @@ namespace McProtoNet.Core.Protocol
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-				fastStream.Position = 0;
-				fastStream.SetLength(len);
-				var destMemory = fastStream.GetMemory(len);
+				//fastStream.Position = 0;
+				//fastStream.SetLength(len);
+				//var destMemory = fastStream.GetMemory(len);
 
-				compressedData.CopyTo(destMemory);
-
-				using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+				//compressedData.CopyTo(destMemory);
+				using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
 				{
-					int id = ReadZlib.ReadVarInt();
+					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+					{
+						int id = ReadZlib.ReadVarInt();
 
-					sizeUncompressed -= id.GetVarIntLength();
+						sizeUncompressed -= id.GetVarIntLength();
 
-					ReadZlib.ReadExactly(memory.Memory.Slice(0, sizeUncompressed).Span);
+						ReadZlib.ReadExactly(memory.Memory.Slice(0, sizeUncompressed).Span);
 
-					return new Packet(
-						id,
-						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-						memory);
+						return new Packet(
+							id,
+							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
+							memory);
+					}
 				}
 
 
@@ -126,12 +128,12 @@ namespace McProtoNet.Core.Protocol
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-				fastStream.Position = 0;
-				fastStream.SetLength(len);
-				var destMemory = fastStream.GetMemory(len);
+				//fastStream.Position = 0;
+				//fastStream.SetLength(len);
+				//var destMemory = fastStream.GetMemory(len);
 
-				compressedData.CopyTo(destMemory);
-
+				//compressedData.CopyTo(destMemory);
+				using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
 				using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
 				{
 					int id = await ReadZlib.ReadVarIntAsync(token);
@@ -185,8 +187,8 @@ namespace McProtoNet.Core.Protocol
 			if (_disposed)
 				return;
 
-			fastStream?.Dispose();
-			fastStream = null;
+			//fastStream?.Dispose();
+			//fastStream = null;
 			if (disposeStream)
 			{
 				if (_baseStream is not null)
@@ -204,10 +206,10 @@ namespace McProtoNet.Core.Protocol
 			if (_disposed)
 				return;
 			_disposed = true;
-			if (fastStream is not null)
+			//if (fastStream is not null)
 			{
-				await fastStream.DisposeAsync();
-				fastStream = null;
+				//await fastStream.DisposeAsync();
+				//fastStream = null;
 			}
 			if (disposeStream)
 			{
