@@ -1,5 +1,5 @@
 > [!WARNING]  
-> Приложение предназначено для стресс-тестирования своих серверов. Не используйте программу на чужих серверах без согласия владельца. В противном случае ответсвенны за это будете Вы.
+> Приложение предназначено для стресс-тестирования своих серверов. Не используйте программу на чужих серверах без согласия владельца. В противном случае ответственны за это будете Вы.
 
 [![Discord Banner](https://img.shields.io/badge/discord-join%20chat-46BC99)](https://discord.gg/HVDzx4rCgg) [![Github All Releases](https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg)](https://github.com/Titlehhhh/Minecraft-Holy-Client/releases)
 
