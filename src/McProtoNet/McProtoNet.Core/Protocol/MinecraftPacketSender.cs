@@ -22,7 +22,7 @@ namespace McProtoNet.Core.Protocol
 		private readonly byte[] ZERO_VARINT = { 0 };
 		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
-		static RecyclableMemoryStreamManager streamManager = new();
+		
 		public void SendPacket(Packet packet)
 		{
 			semaphore.Wait();
@@ -47,7 +47,7 @@ namespace McProtoNet.Core.Protocol
 					if (uncompressedSize >= _compressionThreshold)
 					{
 
-						using (var compressedPacket = streamManager.GetStream())
+						using (var compressedPacket = StaticResources.MSmanager.GetStream())
 						{
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{
@@ -141,7 +141,7 @@ namespace McProtoNet.Core.Protocol
 					if (uncompressedSize >= _compressionThreshold)
 					{
 
-						using (var compressedPacket = streamManager.GetStream())
+						using (var compressedPacket = StaticResources.MSmanager.GetStream())
 						{
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{

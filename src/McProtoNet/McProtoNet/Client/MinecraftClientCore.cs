@@ -329,7 +329,7 @@ namespace McProtoNet
 			return SendPacket(action, _id);
 		}
 		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-		static RecyclableMemoryStreamManager streamManager = new();
+		
 
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
@@ -337,7 +337,7 @@ namespace McProtoNet
 			await semaphore.WaitAsync();
 			try
 			{
-				using (MemoryStream ms = streamManager.GetStream())
+				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					var writer = Performance.Writers.Get();
 					try
@@ -367,7 +367,7 @@ namespace McProtoNet
 			await semaphore.WaitAsync();
 			try
 			{
-				using (MemoryStream ms = streamManager.GetStream())
+				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					var writer = Performance.Writers.Get();
 					try

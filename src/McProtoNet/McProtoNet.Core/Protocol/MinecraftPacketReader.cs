@@ -6,10 +6,10 @@ namespace McProtoNet.Core.Protocol
 {
 	public class MinecraftPacketReader : IMinecraftPacketReader
 	{
-		private static readonly RecyclableMemoryStreamManager MSmanager = new RecyclableMemoryStreamManager();
+		
 		private readonly bool disposeStream;
 		private Stream _baseStream;
-		private RecyclableMemoryStream fastStream = MSmanager.GetStream() as RecyclableMemoryStream;
+		private RecyclableMemoryStream fastStream = StaticResources.MSmanager.GetStream() as RecyclableMemoryStream;
 
 
 
@@ -39,7 +39,7 @@ namespace McProtoNet.Core.Protocol
 
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
 					memory);
 
 			}
@@ -71,7 +71,7 @@ namespace McProtoNet.Core.Protocol
 
 					return new Packet(
 						id,
-						MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
+						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
 						memory);
 				}
 
@@ -88,7 +88,7 @@ namespace McProtoNet.Core.Protocol
 				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
 					memory);
 			}
 		}
@@ -110,7 +110,7 @@ namespace McProtoNet.Core.Protocol
 
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
+					StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
 					memory);
 
 			}
@@ -142,7 +142,7 @@ namespace McProtoNet.Core.Protocol
 
 					return new Packet(
 						id,
-						MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
+						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
 						memory);
 				}
 
@@ -159,7 +159,7 @@ namespace McProtoNet.Core.Protocol
 				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
 					memory);
 			}
 

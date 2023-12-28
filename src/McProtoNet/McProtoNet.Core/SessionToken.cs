@@ -1,7 +1,6 @@
-﻿
-
-namespace McProtoNet
+﻿namespace McProtoNet
 {
+
 	public struct SessionToken
 	{
 		public string UUID { get; private set; }

@@ -216,12 +216,12 @@ namespace McProtoNet.Core
 			return totalRead;
 		}
 
-		static RecyclableMemoryStreamManager streamManager = new();
+		
 
 		public static void SendPacket(this IMinecraftPacketSender proto, IOutputPacket pack, int id)
 		{
 
-			using (MemoryStream ms = streamManager.GetStream())
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
 				IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 				pack.Write(writer);
@@ -232,7 +232,7 @@ namespace McProtoNet.Core
 
 		public static async Task SendPacketAsync(this IMinecraftPacketSender proto, IOutputPacket pack, int id, CancellationToken cancellationToken = default)
 		{
-			using (MemoryStream ms = streamManager.GetStream())
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
 				IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 				pack.Write(writer);

@@ -60,7 +60,7 @@ namespace HolyClient.StressTest
 
 						await Task.Delay(500);
 
-						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
+						await bot.Client.SendChat("/register 21qwerty 21qwerty");
 
 						try
 						{

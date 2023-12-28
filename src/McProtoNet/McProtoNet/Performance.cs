@@ -1,12 +1,13 @@
 ﻿using McProtoNet.Core.IO;
 using McProtoNet.Events;
 using Microsoft.Extensions.ObjectPool;
+using Microsoft.IO;
 
 namespace McProtoNet
 {
 	internal static class Performance
 	{
-
+		
 		internal static ObjectPool<MinecraftPrimitiveReader> Readers { get; private set; }
 		internal static ObjectPool<MinecraftPrimitiveWriter> Writers { get; private set; }
 

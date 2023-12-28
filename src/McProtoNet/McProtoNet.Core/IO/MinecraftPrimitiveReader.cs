@@ -209,10 +209,10 @@ namespace McProtoNet.Core.IO
 
 			return result;
 		}
-		static RecyclableMemoryStreamManager streamManager = new();
+		
 		public virtual byte[] ReadToEnd()
 		{
-			using (var ms = streamManager.GetStream())
+			using (var ms = StaticResources.MSmanager.GetStream())
 			{
 
 				BaseStream.CopyTo(ms);
