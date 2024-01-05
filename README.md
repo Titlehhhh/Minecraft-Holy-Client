@@ -28,14 +28,10 @@
 
 <p align="center">
   <a href="#installation">Installation</a> •  
-  <a href="#features">Features</a> •
-  <a href="#symbols">Symbols</a> •
-  <a href="#binds">Binds</a> •
-  <a href="#wiki">Wiki</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#deprecated">Deprecated</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#support">Support</a> •
+  <a href="#launch">Launch</a> •  
+  <a href="#features">Features</a> •   
+  <a href="#contributing">Contributing</a> •  
+  <a href="#support">Custom plugin</a> •
   <a href="#license">License</a>
 </p>
 
@@ -83,21 +79,29 @@ _Using Ubuntu as an example_
 1) Open and _extract_ the archive with the program.
 2) Open a terminal where the HolyClient.Desktop file is located and execute `./HolyClient.Desktop` in the console
 
+
+## Launch
+
+When we have launched the app, then we can safely go to the "Stress Test" tab and we can launch bots.
+
+
+  
+![image](https://github.com/Titlehhhh/Minecraft-Holy-Client/assets/93156853/55769ef1-f81d-477d-9027-02dfa0339f80)
+
+
 ## Features
 
-|                            | Enable  | Note
-| -------------------------- | :-----------------:|
-| Multiversion               |         ✔️         |
-| Useful scripts             |         ✔️         |
-| Enabled in-game advantages |         ✔️         | 
-| Documented commands        |         ✔️         |  
-| No misconfigured commands  |         ✔️         |  
-| Professional info sources  |         ✔️         |   
-| Clean sheet/template       |         ✔️         |  
-| Easy to customize          |         ✔️         |    
-| Categorized by functions   |         ✔️         |    
-| New commands/values        |         ✔️         |      
-| No old command leftovers   |         ✔️         |      
+- **Custom proxies**. It is possible to load custom proxies from a link and a file.
+- **Multiverse in bots**. Bots can enter servers from 1.12.2 to 1.19.3. Temporarily not all packets are supported, this is being actively worked on.
+- **Using user behavior for stress testing**. There is a default behavior in the program, but it is not very rich in functionality.
+
+## Contributing
+
+Contributions are always welcome!
+
+## Custom plugin
+
+
 
 
 
