@@ -93,7 +93,7 @@ When we have launched the app, then we can safely go to the "Stress Test" tab an
 
 - **Custom proxies**. It is possible to load custom proxies from a link and a file.
 - **Multiverse in bots**. Bots can enter servers from 1.12.2 to 1.19.3. Temporarily not all packets are supported, this is being actively worked on.
-- **Using user behavior for stress testing**. There is a default behavior in the program, but it is not very rich in functionality.
+- **Using user behavior for stress testing**. 
 
 ## Contributing
 
