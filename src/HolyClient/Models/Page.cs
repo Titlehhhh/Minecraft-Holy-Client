@@ -3,11 +3,9 @@
 
 public enum Page
 {
-	Home,
-	BotManager,
+	Home,	
 	StressTest,
-	ManagingExtensions,
-	Sniffer,
+	ManagingExtensions,	
 	Settings
 }
 

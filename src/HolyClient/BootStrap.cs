@@ -145,8 +145,7 @@ namespace HolyClient
 		private static void RegisterPages()
 		{
 
-			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new HomeViewModel(), nameof(Page.Home));
-			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new BotManagerViewModel(), nameof(Page.BotManager));
+			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new HomeViewModel(), nameof(Page.Home));			
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new SettingsViewModel(), nameof(Page.Settings));
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new StressTestViewModel(), nameof(Page.StressTest));
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new ManagingExtensionsViewModel(), nameof(Page.ManagingExtensions));
