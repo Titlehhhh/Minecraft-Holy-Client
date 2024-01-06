@@ -1,15 +1,23 @@
-﻿using HolyClient.Converters;
+﻿using Avalonia.Threading;
+using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 
@@ -19,6 +27,9 @@ namespace HolyClient.ViewModels;
 
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
+	[Reactive]
+	public ICommand CancelCommand { get; private set; }
+
 	#region Info Panel
 	[Reactive]
 	public string Host { get; private set; }
@@ -43,31 +54,22 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	[Reactive]
 	public IEnumerable<ISeries> Proxy_Series { get; private set; } = Enumerable.Empty<ISeries>();
 
-	[Reactive]
-	public ICommand CancelCommand { get; private set; }
+
 
 	public ObservableCollection<LogEventViewModel> Logs { get; private set; }
 
+	#region Metrics
+	public ObservableCollection<ISeries> BotsOnlineSeries { get; set; }
+	public ObservableCollection<ISeries> CPSSeries { get; set; }
 
-	public Axis[] XAxes { get; set; } =
-	{
+	public object BotsOnline_Sync { get; } = new object();
+	public object CPS_Sync { get; } = new object();
 
-		new Axis
-		{
-			Labeler = value => ToReadableString( TimeSpan.FromTicks((long)value)),
+	public Axis[] BotsAxis { get; set; }
+	public Axis[] CPSAxis { get; set; }
+	public Margin DrawMargin { get; set; }
+	#endregion
 
-
-			UnitWidth = TimeSpan.FromSeconds(1).Ticks,
-
-			MinStep = TimeSpan.FromSeconds(1).Ticks,
-		}
-	};
-	private static string ToReadableString(TimeSpan span)
-	{
-
-
-		return span.ToString(@"mm\:ss");
-	}
 	public string? UrlPathSegment => null;
 
 	public IScreen HostScreen { get; private set; }
@@ -76,9 +78,16 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	#endregion
 
 
+	private readonly DateTimeAxis _botsOnlineAxis;
+	private readonly DateTimeAxis _cpsAxis;
+	private readonly Random _random = new();
+
+	private readonly List<DateTimePoint> _botsOnlineValues = new();
+	private readonly List<DateTimePoint> _cpsValues = new();
 
 	public StressTestProcessViewModel(ICommand cancel, IStressTestProfile stressTest, LoggerWrapper wrapper)
 	{
+
 
 		Logs = wrapper.Events;
 		Host = stressTest.Server;
@@ -90,7 +99,69 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 
-		this.WhenActivated(d =>
+		BotsOnlineSeries = new ObservableCollection<ISeries>
+		{
+			new LineSeries<DateTimePoint>
+			{
+				Values = _botsOnlineValues,
+				Fill = null,
+				//Stroke = new SolidColorPaint(SKColor.Parse("837aff")),
+				GeometryFill = null,
+				GeometryStroke = null
+			}
+		};
+		CPSSeries = new ObservableCollection<ISeries>
+		{
+			new LineSeries<DateTimePoint>
+			{
+				Values = _cpsValues,
+				Fill = null,
+				Stroke = new SolidColorPaint(SKColor.Parse("d97aff")),
+				GeometryFill = null,
+				GeometryStroke = null
+			}
+		};
+
+		var start = 0 - 5;
+		var end = 250 + 5;
+
+		_botsOnlineAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
+		{
+
+			CustomSeparators = GetSeparators(),
+			AnimationsSpeed = TimeSpan.FromMilliseconds(0),
+			SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100)),
+
+		};
+
+		_cpsAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
+		{
+
+			CustomSeparators = GetSeparators(),
+			AnimationsSpeed = TimeSpan.FromMilliseconds(0),
+			SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100)),
+
+		};
+
+
+
+		BotsAxis = new Axis[] {
+
+			_botsOnlineAxis
+
+		};
+		CPSAxis = new Axis[] {
+			_cpsAxis
+
+
+		};
+
+		BotsAxis[0].SharedWith = CPSAxis;
+		CPSAxis[0].SharedWith = BotsAxis;
+
+		DrawMargin = new Margin(70, Margin.Auto, Margin.Auto, Margin.Auto);
+
+		this.WhenActivated(async d =>
 		{
 
 
@@ -104,6 +175,21 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 					PeakCPS = Math.Max(CPS, PeakCPS);
 
 					//ProxyQuality = Random.Shared.Next(0, 70) + "%";
+					var now = DateTime.Now;
+
+					_botsOnlineValues.Add(new DateTimePoint(now, x.BotsOnline));
+					if (_botsOnlineValues.Count > 100) _botsOnlineValues.RemoveAt(0);
+
+					// we need to update the separators every time we add a new point 
+					_botsOnlineAxis.CustomSeparators = GetSeparators();
+
+
+					_cpsValues.Add(new DateTimePoint(now, x.CPS));
+					if (_cpsValues.Count > 100) _cpsValues.RemoveAt(0);
+
+					// we need to update the separators every time we add a new point 
+					_cpsAxis.CustomSeparators = GetSeparators();
+
 				}).DisposeWith(d);
 
 
@@ -111,6 +197,31 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		});
 
+	}
+
+
+	private double[] GetSeparators()
+	{
+		var now = DateTime.Now;
+
+		return new double[]
+		{
+			now.AddMinutes(-5).Ticks,
+			now.AddMinutes(-4).Ticks,
+			now.AddMinutes(-3).Ticks,
+			now.AddMinutes(-2).Ticks,
+			now.AddMinutes(-1).Ticks,
+			now.Ticks
+		};
+	}
+
+	private static string Formatter(DateTime date)
+	{
+		var secsAgo = (DateTime.Now - date).TotalSeconds;
+
+		return secsAgo < 1
+			? "now"
+			: $"{secsAgo:N0}s ago";
 	}
 
 
