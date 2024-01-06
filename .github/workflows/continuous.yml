@@ -9,6 +9,7 @@ on:
       - '**/*.md'
       - '**/*.gitignore'
       - '**/*.gitattributes'
+      - mhc.svg
  
 
   
