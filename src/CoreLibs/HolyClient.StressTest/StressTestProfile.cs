@@ -250,14 +250,10 @@ namespace HolyClient.StressTest
 
 				if (Behavior is not null)
 				{
-					logger.Information("Загружено поведение: " + Behavior.GetType().FullName);
+					
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
 				}
-				else
-				{
-					DefaultBehavior testBehavior = new();
-					await testBehavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
-				}
+				
 				CurrentState = StressTestServiceState.Running;
 			}
 			catch

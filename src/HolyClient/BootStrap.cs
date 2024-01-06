@@ -47,6 +47,11 @@ namespace HolyClient
 
 			   var state = RxApp.SuspensionHost.GetAppState<MainState>();
 
+
+
+
+
+
 			   Loc.Instance.CurrentLanguage = state.SettingsState.Language;
 
 			   progress.OnNext("Bootstrap.LoadingState.LoadPlugins");
@@ -67,11 +72,11 @@ namespace HolyClient
 			   Locator.CurrentMutable.RegisterConstant<IPluginProvider>(new PluginProvider());
 
 
-			  
 
 
 
-			   //await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
+
+			   await state.StressTest.Initialization(Locator.Current.GetService<IPluginProvider>());
 
 			   progress.OnNext("Bootstrap.LoadingState.AlmostDone");
 
@@ -124,12 +129,23 @@ namespace HolyClient
 			   progress.OnCompleted();
 
 		   });
+
+			var mainState = Locator.Current.GetService<MainState>();
+
+			var mainViewModel = new MainViewModel(mainState);
+
+			Locator.CurrentMutable.RegisterConstant<IScreen>(mainViewModel, "Main");
+			Locator.CurrentMutable.RegisterConstant<MainViewModel>(mainViewModel);
+
+			var root = Locator.Current.GetService<IScreen>("Root");
+
+			await root.Router.Navigate.Execute(mainViewModel);
 		}
 
 		private static void RegisterViewModels()
 		{
 
-			Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
+
 
 
 		}
@@ -137,7 +153,6 @@ namespace HolyClient
 		private static void RegisterStates(MainState state)
 		{
 			Locator.CurrentMutable.RegisterConstant<MainState>(state);
-			
 			Locator.CurrentMutable.RegisterConstant<SettingsState>(state.SettingsState);
 			Locator.CurrentMutable.RegisterConstant<StressTestState>(state.StressTest);
 		}
@@ -145,7 +160,7 @@ namespace HolyClient
 		private static void RegisterPages()
 		{
 
-			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new HomeViewModel(), nameof(Page.Home));			
+			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new HomeViewModel(), nameof(Page.Home));
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new SettingsViewModel(), nameof(Page.Settings));
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new StressTestViewModel(), nameof(Page.StressTest));
 			Locator.CurrentMutable.RegisterConstant<IRoutableViewModel>(new ManagingExtensionsViewModel(), nameof(Page.ManagingExtensions));

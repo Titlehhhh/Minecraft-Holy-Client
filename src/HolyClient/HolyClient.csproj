@@ -78,6 +78,9 @@
     <Compile Update="Views\Pages\StressTest\Dialogs\SelectImportSourceProxyDialogContent.axaml.cs">
       <DependentUpon>SelectImportSourceProxyDialogContent.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\RootView.axaml.cs">
+      <DependentUpon>RootView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

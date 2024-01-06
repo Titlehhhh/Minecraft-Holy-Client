@@ -77,7 +77,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 
-	public StressTestProcessViewModel(IScreen hostScreen, IStressTestProfile stressTest, LoggerWrapper wrapper)
+	public StressTestProcessViewModel(ICommand cancel, IStressTestProfile stressTest, LoggerWrapper wrapper)
 	{
 
 		Logs = wrapper.Events;
@@ -86,7 +86,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 		ParallelCount = stressTest.NumberOfBots.ToString();
 
 
-		//CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
+		CancelCommand = cancel;
 
 
 

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
@@ -42,10 +43,13 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 
 	private SelectImportSourceProxyViewModel _selectProxyImportSourceViewModel = new();
+
+	private IStressTestProfile _state;
+
 	public StressTestProfileViewModel(IStressTestProfile state)
 	{
 
-
+		_state = state;
 
 		#region Bind to state
 		this.Id = state.Id;
@@ -61,7 +65,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 		this.WhenAnyValue(x => x.Server)
 			.BindTo(state, x => x.Server);
-		
+
 
 		this.WhenAnyValue(x => x.Version)
 			.BindTo(state, x => x.Version);
@@ -109,7 +113,9 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
-			//StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+
+
+			StartCommand = ReactiveCommand.CreateFromTask(this.StartStressTest, this.IsValid());
 		});
 		#endregion
 
@@ -252,6 +258,52 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 
 		#endregion
+	}
+
+
+	private async Task StartStressTest()
+	{
+
+
+		var rootScreen = Locator.Current.GetService<IScreen>("Root");
+
+		LoggerWrapper loggerWrapper = new LoggerWrapper();
+
+		Serilog.ILogger logger = loggerWrapper;
+
+		try
+		{
+			var cancelCommand = ReactiveCommand.Create(() =>
+			{
+				var mainVM = Locator.Current.GetService<MainViewModel>();
+
+				rootScreen.Router.Navigate.Execute(mainVM);
+
+			});
+
+
+
+			StressTestProcessViewModel proccess = new StressTestProcessViewModel(cancelCommand, _state, loggerWrapper);
+			await rootScreen.Router.Navigate.Execute(proccess);
+
+
+
+			await _state.Start(logger);
+			
+
+		}
+		catch (TaskCanceledException)
+		{
+			logger.Information("[STRESS TEST] Завершился из-за отмены");
+		}
+		catch (Exception ex)
+		{
+			logger.Error(ex, "[STRESS TEST] завершился с ошибкой");
+		}
+		finally
+		{
+
+		}
 	}
 
 

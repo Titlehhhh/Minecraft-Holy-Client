@@ -6,10 +6,13 @@ using Avalonia.Metadata;
 using Avalonia.Styling;
 using HolyClient.AppState;
 using HolyClient.Localization;
+using HolyClient.Models;
 using HolyClient.ViewModels;
 using HolyClient.Views;
+using ReactiveUI;
 using Splat;
 using System;
+using System.Reflection;
 
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "HolyClient.Assets.Fonts.Roboto")]
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "HolyClient.Localization")]
@@ -34,29 +37,33 @@ namespace HolyClient
 
 		public override void OnFrameworkInitializationCompleted()
 		{
+			
 
 
+			
 
-			MainViewModel mainViewModel = new();
-			Locator.CurrentMutable.RegisterConstant<MainViewModel>(mainViewModel);
+
+			RootViewModel root = new();
+			Locator.CurrentMutable.RegisterConstant<IScreen>(root, "Root");
+
+			Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
+
+			
 			try
 			{
-				MainView view = new MainView
+				
+
+				RootView rootView = new()
 				{
-					DataContext = mainViewModel
+					DataContext = root
 				};
-				Locator.CurrentMutable.RegisterConstant(view);
+
 				if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 				{
 					var wnd = new MainWindow()
 					{
-						Content = view
-					};
-					wnd.Opened += (s, e) =>
-					{
-						var state = Locator.Current.GetService<MainState>();
-						mainViewModel.OnLoadState(state);
-					};
+						Content = rootView
+					};					
 
 					desktop.MainWindow = wnd;
 				}

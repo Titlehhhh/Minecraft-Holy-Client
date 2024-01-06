@@ -52,10 +52,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 			.Filter(provider => provider.Id == state.SelectedProfileId)
 			.ObserveOn(RxApp.MainThreadScheduler)
 			.OnItemAdded(provider => SelectedProfile = provider)
-			.Subscribe(x =>
-			{
-				Console.WriteLine("Added");
-			});
+			.Subscribe();
 
 		//outputCollectionChanges
 		//	//.OnItemRemoved(provider => SelectedProfile = null)			
