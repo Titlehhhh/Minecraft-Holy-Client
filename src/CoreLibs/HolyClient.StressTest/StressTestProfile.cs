@@ -9,12 +9,30 @@ using McProtoNet.Utils;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 
 namespace HolyClient.StressTest
 {
+	public class ExceptionCounter
+	{
+		private volatile int _x = 1;
+
+		public int Count => Volatile.Read(ref this._x);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Increment()
+		{
+			Interlocked.Increment(ref _x);
+		}
+
+	}
+
 	[MessagePackObject(keyAsPropertyName: true)]
 	public class StressTestProfile : ReactiveObject, IStressTestProfile
 	{
@@ -76,7 +94,11 @@ namespace HolyClient.StressTest
 		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
 
+		[IgnoreMember]
+		public ISourceCache<ExceptionThrowCount, Type> Exceptions { get; } = new SourceCache<ExceptionThrowCount, Type>(x => x.TypeException);
 
+		[IgnoreMember]
+		public ConcurrentDictionary<Type, ExceptionCounter> ExceptionCounter { get; private set; } = new();
 
 
 		#endregion
@@ -204,9 +226,29 @@ namespace HolyClient.StressTest
 							i,
 							cancellationTokenSource.Token));
 
+					foreach (var b in stressTestBots)
+					{
+						b.OnError.Subscribe(ex =>
+						{
+							var key = ex.GetType() ;
+
+							if (ExceptionCounter.TryGetValue(key, out var counter))
+							{
+								counter.Increment();
+							}
+							else
+							{
+								ExceptionCounter[key] = new ExceptionCounter();
+							}
+
+						}).DisposeWith(_disposables);
+					}
+
 				}
 
-				new Thread(() =>
+
+
+				var metricsThread = new Thread(() =>
 				{
 					try
 					{
@@ -239,7 +281,9 @@ namespace HolyClient.StressTest
 					Name = "Stress test counter",
 
 					IsBackground = true
-				}.Start();
+				};
+
+				
 
 				CompositeDisposable disposables = new();
 				_disposables.Add(disposables);
@@ -247,13 +291,17 @@ namespace HolyClient.StressTest
 
 				_cleanUp = _disposables;
 
-
+				logger.Information("Запуск поведения");
 				if (Behavior is not null)
 				{
-					
 					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
 				}
-				
+				logger.Information("Поведение запущено");
+
+				metricsThread.Start();				
+
+				logger.Information("Запущены потоки чтения метрик");
+
 				CurrentState = StressTestServiceState.Running;
 			}
 			catch

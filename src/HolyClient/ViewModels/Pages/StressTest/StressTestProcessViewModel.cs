@@ -2,11 +2,13 @@
 using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
+using LiveChartsCore.ConditionalDraw;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.Themes;
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -17,13 +19,28 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 
 namespace HolyClient.ViewModels;
 
+public class ExceptionInfo : ObservableValue
+{
+	public ExceptionInfo(string name, int value, SolidColorPaint paint)
+	{
+		Name = name;
+		Paint = paint;
+		// the ObservableValue.Value property is used by the chart
+		Value = value;
+	}
 
+	public string Name { get; set; }
+	public SolidColorPaint Paint { get; set; }
+
+
+}
 
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
@@ -78,6 +95,15 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 	#endregion
 
 
+	#region Exceptions
+
+	public ISeries[] ExceptionsSeries { get; set; }
+
+	public Axis[] ExceptionsXAxes = { new Axis { SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)) } };
+
+	public Axis[] ExceptionsYAxes = { new Axis { IsVisible = false } };
+	#endregion
+
 	private readonly DateTimeAxis _botsOnlineAxis;
 	private readonly DateTimeAxis _cpsAxis;
 	private readonly Random _random = new();
@@ -98,7 +124,9 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 		CancelCommand = cancel;
 
 
+		#region Confirgure charts
 
+		
 		BotsOnlineSeries = new ObservableCollection<ISeries>
 		{
 			new LineSeries<DateTimePoint>
@@ -159,6 +187,37 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		DrawMargin = new Margin(70, Margin.Auto, Margin.Auto, Margin.Auto);
 
+		#endregion
+
+		#region Configure exceptions
+
+		var paints = Enumerable.Range(0, 7)
+		   .Select(i => new SolidColorPaint(ColorPalletes.MaterialDesign500[i].AsSKColor()))
+		   .ToArray();
+
+		var _data = new ObservableCollection<ExceptionInfo>();
+		var asd = new RowSeries<ExceptionInfo>()
+		{
+			Values = _data.OrderBy(x => x.Value).ToArray(),
+			DataLabelsPaint = new SolidColorPaint(new SKColor(245, 245, 245)),
+			DataLabelsPosition = DataLabelsPosition.End,
+			DataLabelsTranslate = new(-1, 0),
+			DataLabelsFormatter = point => $"{point.Model!.Name} {point.Coordinate.PrimaryValue}",
+			MaxBarWidth = 50,
+			Padding = 10,
+		}
+		.OnPointMeasured(point =>
+		{
+			// assign a different color to each point
+			if (point.Visual is null) return;
+			point.Visual.Fill = point.Model!.Paint;
+		});
+
+		ExceptionsSeries = new[] { asd };
+
+
+		#endregion
+
 		this.WhenActivated(async d =>
 		{
 
@@ -190,6 +249,28 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 				}).DisposeWith(d);
 
+			Observable.Interval(TimeSpan.FromSeconds(100), RxApp.TaskpoolScheduler)
+				.Select(x =>
+				{
+					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.ToString(), x.Value.Count, null));
+				})
+				.ObserveOn(RxApp.MainThreadScheduler)
+				.Subscribe(data =>
+				{
+
+					foreach(var except in data)
+					{
+						var clone = _data.FirstOrDefault(x => x.Name == except.Name);
+						if(clone is not null)
+						{
+							clone.Value = except.Value;
+						}
+					}
+
+					ExceptionsSeries[0].Values =
+						_data.OrderBy(x => x.Value).ToArray();
+
+				}).DisposeWith(d);
 
 
 

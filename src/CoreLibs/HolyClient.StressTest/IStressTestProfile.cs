@@ -2,10 +2,20 @@
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
 using McProtoNet;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace HolyClient.StressTest
 {
+	public class ExceptionThrowCount
+	{
+		public Type TypeException { get; set; }
+
+		public int Count { get; set; }
+
+		public Dictionary<string, int> Messages { get; set; }
+	}
+	
 
 	[MessagePack.Union(0, typeof(StressTestProfile))]
 	public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
@@ -31,6 +41,10 @@ namespace HolyClient.StressTest
 
 
 		IObservable<StressTestMetrik> Metrics { get; }
+
+		ISourceCache<ExceptionThrowCount, Type> Exceptions { get; }
+
+		ConcurrentDictionary<Type, ExceptionCounter> ExceptionCounter { get; }
 
 		IStressTestBehavior Behavior { get; }
 		StressTestServiceState CurrentState { get; }
