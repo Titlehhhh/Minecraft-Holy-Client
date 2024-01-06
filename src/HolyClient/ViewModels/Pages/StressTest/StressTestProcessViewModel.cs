@@ -122,8 +122,6 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 			}
 		};
 
-		var start = 0 - 5;
-		var end = 250 + 5;
 
 		_botsOnlineAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
 		{
@@ -205,14 +203,14 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 		var now = DateTime.Now;
 
 		return new double[]
-		{
-			now.AddMinutes(-5).Ticks,
-			now.AddMinutes(-4).Ticks,
-			now.AddMinutes(-3).Ticks,
-			now.AddMinutes(-2).Ticks,
-			now.AddMinutes(-1).Ticks,
+	   {
+			now.AddSeconds(-25).Ticks,
+			now.AddSeconds(-20).Ticks,
+			now.AddSeconds(-15).Ticks,
+			now.AddSeconds(-10).Ticks,
+			now.AddSeconds(-5).Ticks,
 			now.Ticks
-		};
+	   };
 	}
 
 	private static string Formatter(DateTime date)
