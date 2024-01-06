@@ -22,6 +22,7 @@ using System.Reactive.Linq;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
+
 public class StressTestConfigurationViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
 {
 

@@ -137,9 +137,9 @@ namespace HolyClient
 		private static void RegisterStates(MainState state)
 		{
 			Locator.CurrentMutable.RegisterConstant<MainState>(state);
-			Locator.CurrentMutable.RegisterConstant<IBotManager>(state.BotManagerState);
+			
 			Locator.CurrentMutable.RegisterConstant<SettingsState>(state.SettingsState);
-			Locator.CurrentMutable.RegisterConstant<IStressTest>(state.StressTestState);
+			Locator.CurrentMutable.RegisterConstant<StressTestState>(state.StressTest);
 		}
 
 		private static void RegisterPages()

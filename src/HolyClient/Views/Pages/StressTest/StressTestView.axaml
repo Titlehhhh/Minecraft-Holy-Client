@@ -3,7 +3,55 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:reactive="http://reactiveui.net"
+			 
 			 x:Class="HolyClient.Views.StressTestView">
-	<reactive:RoutedViewHost Router="{Binding Router}" PageTransition="{x:Null}"/>
+	<Grid>
+		<StackPanel IsVisible="{Binding !Profiles.Count}" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<TextBlock Text="Нет профилей"/>
+			<Button HorizontalAlignment="Center" Content="{Tr Create}" Command="{Binding Add}"/>
+		</StackPanel>
+
+		<Grid IsVisible="{Binding Profiles.Count}">
+
+			<Grid RowDefinitions="Auto,*">
+				<Border Padding="7" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+
+					<StackPanel Orientation="Horizontal" Spacing="10">
+						<Button ToolTip.ShowDelay="0" Command="{Binding Add}">
+							<ToolTip.Tip>
+								<TextBlock Text="Добавить профиль"/>
+							</ToolTip.Tip>
+							<Button.Content>
+								<ui:SymbolIcon Symbol="Add" FontSize="20"/>
+							</Button.Content>
+						</Button>
+						<Button ToolTip.ShowDelay="0" Command="{Binding Remove}">
+							<ToolTip.Tip>
+								<TextBlock Text="Удалить профиль" />
+							</ToolTip.Tip>
+							<Button.Content>
+								<ui:SymbolIcon Symbol="Delete" Foreground="#ec1c24" FontSize="20"/>
+							</Button.Content>
+						</Button>
+					</StackPanel>
+				</Border>
+				<Border Grid.Row="1" CornerRadius="7" Padding="7"  Margin="0,5,0,0" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+					<ListBox  ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding Name}"/>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</Border>
+			</Grid>
+			<TransitioningContentControl Margin="10,0,0,0" Grid.Column="1" Content="{Binding SelectedProfile}">
+				<TransitioningContentControl.ContentTemplate>
+
+				</TransitioningContentControl.ContentTemplate>
+			</TransitioningContentControl>
+		</Grid>
+	</Grid>
 </UserControl>
