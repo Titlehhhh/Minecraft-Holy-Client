@@ -37,6 +37,6 @@
 - добавить RoadMap
 - Добавить release notes
 
-# Disocrd
+# Discord
 
 - Уведомление о новой версии в дискорд

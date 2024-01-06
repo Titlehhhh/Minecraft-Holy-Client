@@ -1,2 +1,0 @@
-- memory performance
-- default plugin /reg to /regoster
