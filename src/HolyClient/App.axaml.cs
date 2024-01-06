@@ -13,6 +13,7 @@ using ReactiveUI;
 using Splat;
 using System;
 using System.Reflection;
+using System.Threading;
 
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "HolyClient.Assets.Fonts.Roboto")]
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "HolyClient.Localization")]
@@ -37,8 +38,10 @@ namespace HolyClient
 
 		public override void OnFrameworkInitializationCompleted()
 		{
-			
 
+			ThreadPool.GetMinThreads(out var min, out var cpt);
+
+			ThreadPool.SetMinThreads(1, cpt);
 
 			
 

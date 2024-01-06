@@ -273,11 +273,14 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 		try
 		{
-			var cancelCommand = ReactiveCommand.Create(() =>
+			var cancelCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
+				
+
 				var mainVM = Locator.Current.GetService<MainViewModel>();
 
-				rootScreen.Router.Navigate.Execute(mainVM);
+				await rootScreen.Router.Navigate.Execute(mainVM);
+				await _state.Stop();
 
 			});
 
@@ -289,7 +292,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 
 			await _state.Start(logger);
-			
+
 
 		}
 		catch (TaskCanceledException)
