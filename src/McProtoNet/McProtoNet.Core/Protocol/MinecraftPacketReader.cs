@@ -9,8 +9,7 @@ namespace McProtoNet.Core.Protocol
 		
 		private readonly bool disposeStream;
 		private Stream _baseStream;
-		//private RecyclableMemoryStream fastStream = StaticResources.MSmanager.GetStream() as RecyclableMemoryStream;
-
+		
 
 
 		public MinecraftPacketReader(Stream baseStream, bool disposeStream)
@@ -55,11 +54,6 @@ namespace McProtoNet.Core.Protocol
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-				//fastStream.Position = 0;
-				//fastStream.SetLength(len);
-				//var destMemory = fastStream.GetMemory(len);
-
-				//compressedData.CopyTo(destMemory);
 				using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
 				{
 					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
@@ -128,11 +122,6 @@ namespace McProtoNet.Core.Protocol
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-				//fastStream.Position = 0;
-				//fastStream.SetLength(len);
-				//var destMemory = fastStream.GetMemory(len);
-
-				//compressedData.CopyTo(destMemory);
 				using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
 				using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
 				{
