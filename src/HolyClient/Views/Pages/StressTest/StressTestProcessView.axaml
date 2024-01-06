@@ -92,7 +92,16 @@
 				</ScrollViewer>
 			</TabItem>
 			<TabItem  FontSize="16" Header="Errors">
-
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<lvc:CartesianChart
+						Series="{Binding ExceptionsSeries}"
+						XAxes="{Binding ExceptionsXAxes}"
+						YAxes="{Binding ExceptionsYAxes}">
+					</lvc:CartesianChart>
+				</Grid>
 			</TabItem>
 		</TabControl>
 

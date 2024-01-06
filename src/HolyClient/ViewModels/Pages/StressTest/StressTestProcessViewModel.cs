@@ -28,7 +28,7 @@ namespace HolyClient.ViewModels;
 
 public class ExceptionInfo : ObservableValue
 {
-	public ExceptionInfo(string name, int value, SolidColorPaint paint)
+	public ExceptionInfo(string name, double? value, SolidColorPaint paint)
 	{
 		Name = name;
 		Paint = paint;
@@ -99,9 +99,9 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 	public ISeries[] ExceptionsSeries { get; set; }
 
-	public Axis[] ExceptionsXAxes = { new Axis { SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)) } };
+	public Axis[] ExceptionsXAxes { get; } = { new Axis { SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)) } };
 
-	public Axis[] ExceptionsYAxes = { new Axis { IsVisible = false } };
+	public Axis[] ExceptionsYAxes { get; } = { new Axis { IsVisible = false } };
 	#endregion
 
 	private readonly DateTimeAxis _botsOnlineAxis;
@@ -110,6 +110,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 	private readonly List<DateTimePoint> _botsOnlineValues = new();
 	private readonly List<DateTimePoint> _cpsValues = new();
+
+	private int colorId = 0;
 
 	public StressTestProcessViewModel(ICommand cancel, IStressTestProfile stressTest, LoggerWrapper wrapper)
 	{
@@ -126,7 +128,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		#region Confirgure charts
 
-		
+
 		BotsOnlineSeries = new ObservableCollection<ISeries>
 		{
 			new LineSeries<DateTimePoint>
@@ -203,8 +205,9 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 			DataLabelsPosition = DataLabelsPosition.End,
 			DataLabelsTranslate = new(-1, 0),
 			DataLabelsFormatter = point => $"{point.Model!.Name} {point.Coordinate.PrimaryValue}",
-			MaxBarWidth = 50,
-			Padding = 10,
+			
+			
+			Padding = 0,
 		}
 		.OnPointMeasured(point =>
 		{
@@ -249,21 +252,31 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 				}).DisposeWith(d);
 
-			Observable.Interval(TimeSpan.FromSeconds(100), RxApp.TaskpoolScheduler)
+			Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
 				.Select(x =>
 				{
-					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.ToString(), x.Value.Count, null));
+
+					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Name, x.Value.Count, null));
 				})
 				.ObserveOn(RxApp.MainThreadScheduler)
 				.Subscribe(data =>
 				{
 
-					foreach(var except in data)
+
+					foreach (ExceptionInfo except in data)
 					{
 						var clone = _data.FirstOrDefault(x => x.Name == except.Name);
-						if(clone is not null)
+						if (clone is not null)
 						{
 							clone.Value = except.Value;
+						}
+						else
+						{
+							_data.Add(new ExceptionInfo(
+								except.Name, 
+								except.Value,
+								new SolidColorPaint(
+									ColorPalletes.MaterialDesign500[colorId++].AsSKColor())));
 						}
 					}
 
