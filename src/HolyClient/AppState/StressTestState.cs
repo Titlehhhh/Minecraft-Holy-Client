@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using HolyClient.StressTest;
 using MessagePack;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,11 @@ namespace HolyClient.AppState;
 public sealed class StressTestState
 {
 	[IgnoreMember]
-	public SourceCache<StressTestProfileState, Guid> Profiles { get; } = new(x => x.Id);
+	public SourceCache<IStressTestProfile, Guid> Profiles { get; } = new(x => x.Id);
 
 	public Guid SelectedProfileId { get; set; }
 
-	public IEnumerable<StressTestProfileState> ProfilesStates
+	public IEnumerable<IStressTestProfile> ProfilesStates
 	{
 		get => Profiles.Items.ToList();
 		set => Profiles.AddOrUpdate(value);

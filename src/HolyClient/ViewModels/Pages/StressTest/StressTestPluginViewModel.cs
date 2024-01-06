@@ -1,4 +1,5 @@
-﻿using HolyClient.Core.Infrastructure;
+﻿using HolyClient.AppState;
+using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -24,7 +25,7 @@ public class StressTestPluginViewModel : ReactiveObject, IDisposable
 
 	private IDisposable? _cleanUp;
 
-	public StressTestPluginViewModel(IPluginSource pluginSource, IStressTest stressTest)
+	public StressTestPluginViewModel(IPluginSource pluginSource, IStressTestProfile stressTest)
 	{
 		Name = pluginSource.Metadata.Title ?? pluginSource.Reference.FullName;
 		Assembly = pluginSource.Reference.AssemblyName;

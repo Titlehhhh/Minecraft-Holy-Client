@@ -1,11 +1,14 @@
 ﻿using DynamicData;
 using DynamicData.Binding;
 using HolyClient.AppState;
+using HolyClient.StressTest;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Input;
 
@@ -21,6 +24,9 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 
 	private ReadOnlyObservableCollection<StressTestProfileViewModel> _profiles;
 
+	public Interaction<Unit, bool> ConfirmRemoveDialog { get; } = new();
+
+	private static int testId = 0;
 	public StressTestViewModel()
 	{
 		HostScreen = null;
@@ -32,7 +38,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 		state.Profiles
 			.Connect()
 			.Transform(x => new StressTestProfileViewModel(x))
-			.ObserveOn(RxApp.MainThreadScheduler)			
+			.ObserveOn(RxApp.MainThreadScheduler)
 			.Bind(out _profiles)
 			.DisposeMany()
 			.Subscribe();
@@ -46,28 +52,56 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 			.Filter(provider => provider.Id == state.SelectedProfileId)
 			.ObserveOn(RxApp.MainThreadScheduler)
 			.OnItemAdded(provider => SelectedProfile = provider)
-			.Subscribe();
+			.Subscribe(x =>
+			{
+				Console.WriteLine("Added");
+			});
 
-		outputCollectionChanges
-			.OnItemRemoved(provider => SelectedProfile = null)
-			.Subscribe();
+		//outputCollectionChanges
+		//	//.OnItemRemoved(provider => SelectedProfile = null)			
+		//	.Subscribe();
+
+		this.WhenAnyValue(x => x.SelectedProfile)
+			.Subscribe(x =>
+			{
+				Console.WriteLine($"Change Profile {testId++}: {(x is null ? "NULL" : x.Name)}");
+			});
 
 		this.WhenAnyValue(x => x.SelectedProfile)
 			.Skip(1)
-			.Select(provider => provider?.Id ?? Guid.Empty)
+			.Select(profile => profile?.Id ?? Guid.Empty)
 			.Subscribe(id => state.SelectedProfileId = id);
 
 
 		Add = ReactiveCommand.Create(() =>
 		{
-			state.Profiles.AddOrUpdate(new StressTestProfileState());
+			int i = 1;
+			string basename = "New profile ";
+			string name = basename + i;
+			while (state.Profiles.Items.ToArray().Any(x=>x.Name == name))
+			{
+				name = basename + (i++);
+			}
+
+			state.Profiles.AddOrUpdate(new StressTestProfile()
+			{
+				Name = name
+			});
 		});
 
-		Remove = ReactiveCommand.Create(() =>
+		Remove = ReactiveCommand.CreateFromTask(async () =>
 		{
-			if(SelectedProfile is not null)
+			bool ok = await ConfirmRemoveDialog.Handle(Unit.Default);
+
+			if (ok)
 			{
-				state.Profiles.Remove(SelectedProfile.Id);
+				if (SelectedProfile is not null)
+				{
+					var id = SelectedProfile.Id;
+					SelectedProfile = Profiles.FirstOrDefault();
+					state.Profiles.Remove(id);
+					
+				}
 			}
 		});
 

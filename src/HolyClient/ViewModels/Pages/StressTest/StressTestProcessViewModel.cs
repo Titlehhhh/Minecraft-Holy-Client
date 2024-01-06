@@ -77,7 +77,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 
-	public StressTestProcessViewModel(IScreen hostScreen, IStressTest stressTest, LoggerWrapper wrapper)
+	public StressTestProcessViewModel(IScreen hostScreen, IStressTestProfile stressTest, LoggerWrapper wrapper)
 	{
 
 		Logs = wrapper.Events;

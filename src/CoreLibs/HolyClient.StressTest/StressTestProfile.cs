@@ -16,11 +16,15 @@ using System.Reactive.Subjects;
 namespace HolyClient.StressTest
 {
 	[MessagePackObject(keyAsPropertyName: true)]
-	public class StressTest : ReactiveObject, IStressTest
+	public class StressTestProfile : ReactiveObject, IStressTestProfile
 	{
 		#region Properties
 		#region Serializable
 
+		public Guid Id { get; set; } = Guid.NewGuid();
+
+		[Reactive]
+		public string Name { get; set; }
 
 
 		[Reactive]
@@ -91,7 +95,7 @@ namespace HolyClient.StressTest
 
 		private IDisposable? _cleanUp;
 
-		public StressTest()
+		public StressTestProfile()
 		{
 
 		}

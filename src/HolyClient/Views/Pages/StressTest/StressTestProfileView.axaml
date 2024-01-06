@@ -5,14 +5,13 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 xmlns:reactiveUi="http://reactiveui.net"
 			 xmlns:vm="using:HolyClient.ViewModels"
-			 x:DataType="vm:StressTestConfigurationViewModel"
+			 x:DataType="vm:StressTestProfileViewModel"
 			 x:CompileBindings="True"
 			 
 			 xmlns:internal="using:Avalonia.Dialogs.Internal"
 			 
 			 xmlns:pgc="using:Avalonia.PropertyGrid.Controls"
-			 xmlns:sg="using:SpacedGridControl.Avalonia"
-			 xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+			 xmlns:sg="using:SpacedGridControl.Avalonia"			 
 			 xmlns:bhvs="using:HolyClient.Behaviors"
 			 xmlns:proxy="using:QuickProxyNet"
 			 xmlns:core="using:HolyClient.Core.Infrastructure"
@@ -39,11 +38,11 @@
 
 
 		<StackPanel Spacing="10">
-			<TextBox Text="{Binding Server}"
+			<TextBox Text="{Binding Name}"
 					 HorizontalAlignment="Center"
 					 Width="200"
 					 UseFloatingWatermark="True"
-					 Watermark="{Tr StressTest.Configuration.GeneralSettings.Address}">
+					 Watermark="Name">
 				<TextBox.Styles>
 					<Style Selector="DataValidationErrors">
 						<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
@@ -68,7 +67,25 @@
 
 				<ScrollViewer>
 					<StackPanel Spacing="10">
+						<Border Classes="SettingItem">
 
+
+							<StackPanel Spacing="10">
+								<TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.Address}" FontSize="15"/>
+								<TextBox
+									Text="{Binding Server}"
+									
+									HorizontalAlignment="Left"
+									MaxHeight="180"
+									Width="200">
+									<TextBox.Styles>
+										<Style Selector="DataValidationErrors">
+											<Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+										</Style>
+									</TextBox.Styles>
+								</TextBox>
+							</StackPanel>
+						</Border>
 						<Border Classes="SettingItem">
 
 

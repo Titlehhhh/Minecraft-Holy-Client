@@ -7,10 +7,13 @@ using System.ComponentModel;
 namespace HolyClient.StressTest
 {
 
-	[MessagePack.Union(0, typeof(StressTest))]
-	public interface IStressTest : INotifyPropertyChanged, INotifyPropertyChanging
+	[MessagePack.Union(0, typeof(StressTestProfile))]
+	public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
 	{
+		Guid Id { get; set; }
+		string Name { get; set; }
 
+		
 
 		string Server { get; set; }
 
