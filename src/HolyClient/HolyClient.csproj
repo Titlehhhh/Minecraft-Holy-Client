@@ -68,12 +68,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\Pages\BotManager\BotProfileView.axaml.cs">
-      <DependentUpon>BotProfileView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pages\BotManager\EmptyProfilesView.axaml.cs">
-      <DependentUpon>EmptyProfilesView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
       <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
     </Compile>
