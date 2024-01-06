@@ -67,11 +67,11 @@ namespace HolyClient
 			   Locator.CurrentMutable.RegisterConstant<IPluginProvider>(new PluginProvider());
 
 
-			   await state.BotManagerState.Initialization();
+			  
 
 
 
-			   await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
+			   //await state.StressTestState.Initialization(Locator.Current.GetService<IPluginProvider>());
 
 			   progress.OnNext("Bootstrap.LoadingState.AlmostDone");
 

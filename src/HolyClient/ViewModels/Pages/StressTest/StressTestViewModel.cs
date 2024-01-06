@@ -3,6 +3,7 @@ using DynamicData.Binding;
 using HolyClient.AppState;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 using System;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
@@ -20,9 +21,11 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 
 	private ReadOnlyObservableCollection<StressTestProfileViewModel> _profiles;
 
-	public StressTestViewModel(IScreen hostScreen, StressTestState state)
+	public StressTestViewModel()
 	{
-		HostScreen = hostScreen;
+		HostScreen = null;
+
+		var state = Locator.Current.GetService<StressTestState>();
 
 
 
@@ -55,7 +58,18 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 			.Subscribe(id => state.SelectedProfileId = id);
 
 
+		Add = ReactiveCommand.Create(() =>
+		{
+			state.Profiles.AddOrUpdate(new StressTestProfileState());
+		});
 
+		Remove = ReactiveCommand.Create(() =>
+		{
+			if(SelectedProfile is not null)
+			{
+				state.Profiles.Remove(SelectedProfile.Id);
+			}
+		});
 
 
 

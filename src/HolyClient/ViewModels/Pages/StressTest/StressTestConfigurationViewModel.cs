@@ -1,6 +1,5 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
-using HolyClient.Commands;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
@@ -164,7 +163,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
-			StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+			//StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
 		});
 		#endregion
 

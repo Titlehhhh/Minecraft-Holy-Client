@@ -1,5 +1,4 @@
-﻿using HolyClient.Commands;
-using HolyClient.Converters;
+﻿using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -87,7 +86,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 		ParallelCount = stressTest.NumberOfBots.ToString();
 
 
-		CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
+		//CancelCommand = new StopStressTestCommand(hostScreen, stressTest);
 
 
 

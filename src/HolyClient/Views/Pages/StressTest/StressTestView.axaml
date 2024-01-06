@@ -5,7 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:reactive="http://reactiveui.net"
-			 
+			 xmlns:views="using:HolyClient.Views"
 			 x:Class="HolyClient.Views.StressTestView">
 	<Grid>
 		<StackPanel IsVisible="{Binding !Profiles.Count}" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -13,7 +13,7 @@
 			<Button HorizontalAlignment="Center" Content="{Tr Create}" Command="{Binding Add}"/>
 		</StackPanel>
 
-		<Grid IsVisible="{Binding Profiles.Count}">
+		<Grid IsVisible="{Binding Profiles.Count}" Margin="10,10,10,10" ColumnDefinitions="200,*">
 
 			<Grid RowDefinitions="Auto,*">
 				<Border Padding="7" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
@@ -49,7 +49,9 @@
 			</Grid>
 			<TransitioningContentControl Margin="10,0,0,0" Grid.Column="1" Content="{Binding SelectedProfile}">
 				<TransitioningContentControl.ContentTemplate>
-
+					<DataTemplate >
+						<views:StressTestProfileView />
+					</DataTemplate>
 				</TransitioningContentControl.ContentTemplate>
 			</TransitioningContentControl>
 		</Grid>

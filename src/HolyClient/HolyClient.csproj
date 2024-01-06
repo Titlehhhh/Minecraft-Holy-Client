@@ -14,9 +14,13 @@
   
   <ItemGroup>
     <AvaloniaXaml Remove="Models\StressTest\**" />
+    <AvaloniaXaml Remove="Views\Pages\StressTest\Behavior\**" />
     <Compile Remove="Models\StressTest\**" />
+    <Compile Remove="Views\Pages\StressTest\Behavior\**" />
     <EmbeddedResource Remove="Models\StressTest\**" />
+    <EmbeddedResource Remove="Views\Pages\StressTest\Behavior\**" />
     <None Remove="Models\StressTest\**" />
+    <None Remove="Views\Pages\StressTest\Behavior\**" />
   </ItemGroup>
 
   
@@ -78,7 +82,7 @@
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
-    <Folder Include="Views\Pages\StressTest\Behavior\" />
+    <Folder Include="Commands\" />
   </ItemGroup>
 
   <ItemGroup>
