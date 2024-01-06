@@ -30,3 +30,9 @@
 # Future
 
 Сделать генерацию пакетов с помощью codegen
+
+
+# Readme
+
+- добавить RoadMap
+- Добавить release notes
