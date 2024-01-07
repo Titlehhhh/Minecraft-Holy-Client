@@ -54,6 +54,18 @@ namespace HolyClient.StressTest
 			}
 
 		}
+		private bool disposed = false;
+		public void Dispose()
+		{
+			if (disposed)
+				return;
+			disposed = true;
+			foreach (var proxy in _clients)
+			{
+				proxy.Dispose();
+			}
+			GC.SuppressFinalize(this);
+		}
 	}
 
 }

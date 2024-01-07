@@ -15,7 +15,7 @@ namespace TestStressTestBehavior
 			{
 				var d = bot.OnError.Subscribe(async x =>
 				{
-					Console.WriteLine(x.Message);
+					
 
 					await Task.Delay(1500);
 					await bot.Restart(true);

@@ -99,7 +99,11 @@
 					<lvc:CartesianChart
 						Series="{Binding ExceptionsSeries}"
 						XAxes="{Binding ExceptionsXAxes}"
-						YAxes="{Binding ExceptionsYAxes}">
+						YAxes="{Binding ExceptionsYAxes}"
+						LegendPosition="Left"
+						
+						LegendTextSize="16">
+						
 					</lvc:CartesianChart>
 				</Grid>
 			</TabItem>

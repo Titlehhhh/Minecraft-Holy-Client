@@ -150,6 +150,11 @@ namespace HolyClient.StressTest
 
 				var proxyProvider = await LoadProxy(logger);
 
+				if(proxyProvider is not null)
+				{
+					_disposables.Add(proxyProvider);
+				}
+
 				var bots = new List<MinecraftClient>();
 
 				string host = this.Server;
@@ -302,18 +307,20 @@ namespace HolyClient.StressTest
 
 				CurrentState = StressTestServiceState.Running;
 			}
-			catch
+			catch(Exception ex)
 			{
+				logger.Error(ex,"Не удалось запустить стресс тест");
+
 				CurrentState = StressTestServiceState.None;
 			}
 		}
 
 		private void Bot_StateChanged(object? sender, McProtoNet.StateChangedEventArgs e)
 		{
-			//Console.WriteLine(e.NewState);
+		
 			if (e.NewState == ClientState.Play)
 			{
-				//Console.WriteLine("Play");
+				
 				Interlocked.Increment(ref _botsOnlineCounter);
 				Interlocked.Increment(ref _cpsCounter);
 			}
@@ -335,30 +342,31 @@ namespace HolyClient.StressTest
 				return null;
 			}
 
-			logger.Information("Загрузка прокси");
+			
 			var sources = this.Proxies.Items.ToList();
-
+			logger.Information("Загрузка прокси");
 			if (sources.Count() == 0)
 			{
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
 			}
+			logger.Information("Загрузка прокси 1");
 			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
 			foreach (var s in sources)
 			{
 				tasks.Add(s.GetProxiesAsync());
 			}
-
+			logger.Information("Загрузка прокси 2");
 			var result = await Task.WhenAll(tasks);
 
 			var proxies = result.SelectMany(x => x).ToList();
-
+			logger.Information("Загрузка прокси 3");
 			var provider = new ProxyProvider(proxies);
 
 			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
-
+			logger.Information("Загрузка прокси 4");
 			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
 			return provider;

@@ -57,7 +57,6 @@ namespace HolyClient.ViewModels
 			{
 				OnScrollEndCommand = ReactiveCommand.CreateFromTask(async () =>
 				{
-					Console.WriteLine("OnScroll");
 					IsLoadingNewItems = true;
 					await client.LoadNewItems();
 					IsLoadingNewItems = false;
@@ -133,7 +132,7 @@ namespace HolyClient.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Error: " + ex);
+				
 			}
 
 		}

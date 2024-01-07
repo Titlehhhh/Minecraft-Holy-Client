@@ -254,7 +254,7 @@ namespace McProtoNet
 				{
 					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
 					int bytesRead = await stream.ReadAsync(memory, cancellationToken);
-					//Console.WriteLine("Read Block: " + bytesRead);
+					
 
 
 

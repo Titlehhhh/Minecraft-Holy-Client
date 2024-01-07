@@ -65,7 +65,7 @@ namespace HolyClient.StressTest
 						try
 						{
 							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-							//{
+							
 
 							var m = await bot.Client.OnChatMessage
 								.Where(x => x.Message.Contains("verify"))
@@ -76,11 +76,11 @@ namespace HolyClient.StressTest
 							var code = SayVerifyRegex.Match(m.Message).Value;
 
 							await bot.Client.SendChat(code);
-							//}
+							
 						}
 						catch (Exception ex)
 						{
-							//Console.WriteLine(ex);
+							
 						}
 
 						while (!cts.IsCancellationRequested)
@@ -94,11 +94,11 @@ namespace HolyClient.StressTest
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine(ex.Message);
+						
 					}
 					finally
 					{
-						Console.WriteLine("cancel");
+					
 					}
 				});
 

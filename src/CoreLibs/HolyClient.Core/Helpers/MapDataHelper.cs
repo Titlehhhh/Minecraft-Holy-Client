@@ -27,7 +27,7 @@
 
 					var color = new Rgba32(values[0], values[1], values[2]);
 
-					//Console.WriteLine(color.Name);
+					
 					image[y, x] = color;
 				}
 			}

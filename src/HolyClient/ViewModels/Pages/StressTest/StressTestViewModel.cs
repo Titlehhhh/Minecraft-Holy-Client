@@ -61,7 +61,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 		this.WhenAnyValue(x => x.SelectedProfile)
 			.Subscribe(x =>
 			{
-				Console.WriteLine($"Change Profile {testId++}: {(x is null ? "NULL" : x.Name)}");
+				
 			});
 
 		this.WhenAnyValue(x => x.SelectedProfile)

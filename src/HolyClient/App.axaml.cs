@@ -82,7 +82,7 @@ namespace HolyClient
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e);
+				
 				if (ApplicationLifetime is ISingleViewApplicationLifetime single)
 				{
 					single.MainView = new TextBlock()

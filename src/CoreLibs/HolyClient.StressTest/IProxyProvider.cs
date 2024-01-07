@@ -2,7 +2,7 @@
 
 namespace HolyClient.StressTest
 {
-	public interface IProxyProvider
+	public interface IProxyProvider : IDisposable
 	{
 		public ValueTask<IProxyClient> GetNextProxy();
 	}
