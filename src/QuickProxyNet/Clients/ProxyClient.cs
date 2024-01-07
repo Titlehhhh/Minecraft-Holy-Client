@@ -1,8 +1,14 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 
 namespace QuickProxyNet
 {
+	public sealed class ProxyConnectTimeoutException : Exception
+	{
+
+	}
+
 	public abstract class ProxyClient : IProxyClient
 	{
 		public abstract ProxyType Type { get; }
@@ -106,6 +112,9 @@ namespace QuickProxyNet
 		{
 			ValidateArguments(host, port, timeout);
 
+			cancellationToken.ThrowIfCancellationRequested();
+
+			
 
 			using (var ts = new CancellationTokenSource(timeout))
 			{
@@ -116,7 +125,7 @@ namespace QuickProxyNet
 				}
 			}
 
-			//throw new ProxyProtocolException("Deadline Exception");
+
 		}
 
 		public abstract ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default);

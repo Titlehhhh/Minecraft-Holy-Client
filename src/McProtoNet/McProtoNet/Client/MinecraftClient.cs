@@ -90,7 +90,7 @@ namespace McProtoNet
 
 			}
 			//	throw new Exception("CTOR");
-			_core = new MinecraftClientCore(
+			var newCore = new MinecraftClientCore(
 				Config.Version,
 				Config.Username,
 				Config.Host,
@@ -99,6 +99,8 @@ namespace McProtoNet
 				CreatePallete(),
 					this.pipe,
 				this._logger);
+
+			Interlocked.Exchange(ref _core, newCore);
 
 		}
 		private async void RemoveCore()

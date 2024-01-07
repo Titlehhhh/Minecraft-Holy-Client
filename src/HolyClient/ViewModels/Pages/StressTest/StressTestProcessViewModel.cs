@@ -204,7 +204,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 			DataLabelsPaint = new SolidColorPaint(new SKColor(245, 245, 245)),
 			DataLabelsPosition = DataLabelsPosition.End,
 			DataLabelsTranslate = new(-1, 0),
-			DataLabelsFormatter = point => $"{point.Model!.Name} {point.Coordinate.PrimaryValue}",
+			DataLabelsFormatter = point => $"{point.Model!.Name} {point.Model.Value}",
 			
 			
 			Padding = 0,

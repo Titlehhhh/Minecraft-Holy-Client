@@ -217,32 +217,30 @@ namespace HolyClient.StressTest
 					}));
 
 
-
-
-					stressTestBots.Add(
-						new StressTestBot(
+					var b = new StressTestBot(
 							bot, nickProvider, proxyProvider,
 							logger,
 							i,
-							cancellationTokenSource.Token));
+							cancellationTokenSource.Token);
 
-					foreach (var b in stressTestBots)
+					b.OnError.Subscribe(ex =>
 					{
-						b.OnError.Subscribe(ex =>
+						var key = ex.GetType();
+
+						if (ExceptionCounter.TryGetValue(key, out var counter))
 						{
-							var key = ex.GetType() ;
+							counter.Increment();
+						}
+						else
+						{
+							ExceptionCounter[key] = new ExceptionCounter();
+						}
 
-							if (ExceptionCounter.TryGetValue(key, out var counter))
-							{
-								counter.Increment();
-							}
-							else
-							{
-								ExceptionCounter[key] = new ExceptionCounter();
-							}
+					}).DisposeWith(_disposables);
 
-						}).DisposeWith(_disposables);
-					}
+					stressTestBots.Add(b);
+
+					
 
 				}
 
