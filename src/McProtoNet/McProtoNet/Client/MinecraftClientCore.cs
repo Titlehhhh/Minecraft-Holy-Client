@@ -56,7 +56,10 @@ namespace McProtoNet
 		public IMinecraftPacketSender PacketSender;
 		#endregion
 
+		public void Reset()
+		{
 
+		}
 
 		public async Task Connect()
 		{
@@ -245,7 +248,7 @@ namespace McProtoNet
 			}
 
 		}
-		private async Task FillPipeAsync(Stream stream, CancellationToken cancellationToken)
+		private async ValueTask FillPipeAsync(Stream stream, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -254,7 +257,7 @@ namespace McProtoNet
 				{
 					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
 					int bytesRead = await stream.ReadAsync(memory, cancellationToken);
-					
+
 
 
 
@@ -279,10 +282,8 @@ namespace McProtoNet
 		}
 
 
-		public Task FillTask { get; private set; }
-		public ValueTask ReadPacketsTask { get; private set; }
 
-		private async ValueTask<Stream> CreateTcp(CancellationToken token)
+		private async Task<Stream> CreateTcp(CancellationToken token)
 		{
 			token.ThrowIfCancellationRequested();
 			if (_proxy is null)
@@ -328,45 +329,41 @@ namespace McProtoNet
 			int _id = _packetPallete.GetOut(id);
 			return SendPacket(action, _id);
 		}
-		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-		
+		//private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+
 
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
-			await semaphore.WaitAsync();
-			try
+			//await semaphore.WaitAsync();
+
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
-				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+				var writer = Performance.Writers.Get();
+				try
 				{
-					var writer = Performance.Writers.Get();
-					try
-					{
 
 
-						writer.BaseStream = ms;
-						action(writer);
-						ms.Position = 0;
-					}
-					finally
-					{
-						Performance.Writers.Return(writer);
-					}
-					await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
-
+					writer.BaseStream = ms;
+					action(writer);
+					ms.Position = 0;
 				}
+				finally
+				{
+					Performance.Writers.Return(writer);
+				}
+				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+
 			}
-			catch { }
-			finally
-			{
-				semaphore.Release();
-			}
+
+
+			//semaphore.Release();
+
 		}
 		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
-			await semaphore.WaitAsync();
-			try
-			{
+			//await semaphore.WaitAsync();
+			
 				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					var writer = Performance.Writers.Get();
@@ -385,12 +382,7 @@ namespace McProtoNet
 					ms.Position = 0;
 					await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
 				}
-			}
-			catch { }
-			finally
-			{
-				semaphore.Release();
-			}
+			
 		}
 		#endregion
 

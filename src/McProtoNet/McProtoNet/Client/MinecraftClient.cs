@@ -42,6 +42,16 @@ namespace McProtoNet
 			{
 
 			});
+
+			_core = new MinecraftClientCore(
+				Config.Version,
+				Config.Username,
+				Config.Host,
+				Config.Port,
+				Config.Proxy,
+				CreatePallete(),
+					this.pipe,
+				this._logger);
 			CreateEvents();
 
 		}
@@ -77,32 +87,7 @@ namespace McProtoNet
 			//    packetPallete = new PacketPalette1193();
 			return packetPallete;
 		}
-		private void CreateNewCore()
-		{
-			RemoveCore();
-
-			try
-			{
-				pipe.Reset();
-			}
-			catch
-			{
-
-			}
-			//	throw new Exception("CTOR");
-			var newCore = new MinecraftClientCore(
-				Config.Version,
-				Config.Username,
-				Config.Host,
-				Config.Port,
-				Config.Proxy,
-				CreatePallete(),
-					this.pipe,
-				this._logger);
-
-			Interlocked.Exchange(ref _core, newCore);
-
-		}
+		
 		private async void RemoveCore()
 		{
 			Interlocked.Exchange(ref _core, null)?.DisposeAsync();
@@ -124,25 +109,14 @@ namespace McProtoNet
 			}
 		}
 		private TaskCompletionSource workTask;
-		public TaskAwaiter GetAwaiter()
-		{
-			if (workTask is null)
-			{
-				return Task.CompletedTask.GetAwaiter();
-			}
-			return workTask.Task.GetAwaiter();
-		}
+		
 
 		public async Task Login(Serilog.ILogger logger)
 		{
-			if (workTask is not null)
-			{
-				workTask.TrySetResult();
-			}
-			workTask = new();
+			
 			_logger = logger;
 
-			_startDisconnect = false;
+			
 			ValidateConfig();
 			CreateNewCore();
 			_protocol = Config.Version;

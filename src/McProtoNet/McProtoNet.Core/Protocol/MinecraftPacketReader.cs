@@ -1,6 +1,7 @@
 ﻿using Microsoft.IO;
 using System.Buffers;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Core.Protocol
 {
@@ -21,6 +22,7 @@ namespace McProtoNet.Core.Protocol
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public Packet ReadNextPacket()
 		{
 			ThrowIfDisposed();
@@ -38,8 +40,7 @@ namespace McProtoNet.Core.Protocol
 
 				return new(
 					id,
-					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span));
 
 			}
 
@@ -66,8 +67,7 @@ namespace McProtoNet.Core.Protocol
 
 						return new Packet(
 							id,
-							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-							memory);
+							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span));
 					}
 				}
 
@@ -84,11 +84,11 @@ namespace McProtoNet.Core.Protocol
 				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 				return new(
 					id,
-					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span));
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token)
 		{
 			ThrowIfDisposed();
@@ -106,8 +106,7 @@ namespace McProtoNet.Core.Protocol
 
 				return new(
 					id,
-					StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)));
 
 			}
 
@@ -133,8 +132,7 @@ namespace McProtoNet.Core.Protocol
 
 					return new Packet(
 						id,
-						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-						memory);
+						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span));
 				}
 
 
@@ -150,8 +148,7 @@ namespace McProtoNet.Core.Protocol
 				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 				return new(
 					id,
-					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span));
 			}
 
 		}

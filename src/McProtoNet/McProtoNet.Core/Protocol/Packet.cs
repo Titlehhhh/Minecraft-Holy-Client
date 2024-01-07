@@ -6,17 +6,12 @@
 		public MemoryStream Data;
 		private IDisposable? memory;
 
-		public Packet(int id, MemoryStream data, IDisposable? memory)
-		{
-			Id = id;
-			Data = data;
-			this.memory = memory;
-		}
 		public Packet(int id, MemoryStream data)
 		{
 			Id = id;
-			Data = data;
+			Data = data;			
 		}
+		
 		private bool _disposed = false;
 		public void Dispose()
 		{
@@ -24,9 +19,8 @@
 				return;
 			_disposed = true;
 			Data.Dispose();
-			memory.Dispose();
-			Data = null;
-			memory = null;
+			
+			
 			GC.SuppressFinalize(this);
 		}
 	}
