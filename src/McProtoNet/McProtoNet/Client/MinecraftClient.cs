@@ -14,7 +14,7 @@ using System.Threading;
 namespace McProtoNet
 {
 
-	
+
 	public partial class MinecraftClient : IDisposable
 	{
 
@@ -133,12 +133,17 @@ namespace McProtoNet
 
 		private void ResetFields()
 		{
+			if (CTS is not null)
+				if (!CTS.IsCancellationRequested)
+				{
+					CTS.Cancel();
+				}
 			CTS = new();
 			_canceling = 0;
 			_isActive = 1;
 			_currentState = 0;
 			_errorInvoked = 0;
-			
+
 			PacketReader.SwitchCompression(0);
 			PacketSender.SwitchCompression(0);
 
@@ -181,7 +186,7 @@ namespace McProtoNet
 				PacketReader.BaseStream = readStream;
 
 
-				
+
 				var fill = FillPipeAsync();
 				var read = ReadPacketLoop();
 				var combined = Task.WhenAll(fill, read);
@@ -260,13 +265,12 @@ namespace McProtoNet
 					CTS.Dispose();
 					CTS = null;
 				}
-				minecraftStream?.Dispose();
-				minecraftStream = null;
 
 				this.mainStream?.Dispose();
 				this.mainStream = null;
 
-				
+				minecraftStream?.Dispose();
+				minecraftStream = null;
 
 
 
@@ -275,11 +279,16 @@ namespace McProtoNet
 		private int _errorInvoked = 0;
 		private void InvokeError()
 		{
-			OnErrored?.Invoke(this._error);			
+			OnErrored?.Invoke(this._error);
 		}
 
 		public void Disconnect()
 		{
+			this.mainStream?.Dispose();
+			this.mainStream = null;
+			minecraftStream?.Dispose();
+			minecraftStream = null;
+
 
 		}
 
@@ -297,11 +306,33 @@ namespace McProtoNet
 			if (_disposed) return;
 			_disposed = true;
 
-			minecraftStream?.Dispose();
-			minecraftStream = null;
+
+			if (CTS is not null)
+			{
+				
+				CTS.Dispose();
+				CTS = null;
+			}
+
+
 
 			mainStream?.Dispose();
 			mainStream = null;
+
+			minecraftStream?.Dispose();
+			minecraftStream = null;
+
+			try
+			{
+				pipe.Reader.Complete();
+				pipe.Writer.Complete();
+				pipe.Reset();
+			}
+			catch
+			{
+
+			}
+			pipe = null;
 
 
 			GC.SuppressFinalize(this);
@@ -323,7 +354,7 @@ namespace McProtoNet
 
 
 
-		
+
 
 
 

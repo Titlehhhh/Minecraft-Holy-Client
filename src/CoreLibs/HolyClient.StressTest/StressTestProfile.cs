@@ -269,7 +269,6 @@ namespace HolyClient.StressTest
 					stressTestBots.Add(b);
 					bot.DisposeWith(_disposables);
 
-
 				}
 
 

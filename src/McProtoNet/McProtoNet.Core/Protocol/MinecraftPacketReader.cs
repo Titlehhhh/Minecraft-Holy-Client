@@ -100,22 +100,14 @@ namespace McProtoNet.Core.Protocol
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
 
-				//var memory = MemoryPool<byte>.Shared.Rent(len);
+				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-
-
-				var stream = StaticResources.MSmanager.GetStream(null, len);
-
-				var memory = stream.GetMemory(len);
-
-				await BaseStream.ReadExactlyAsync(memory.Slice(0, len), token);
-
-				stream.Advance(len);
-				stream.Position = 0;
+				await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
 				return new(
 					id,
-					stream);
+					StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
+					memory);
 
 			}
 
@@ -124,41 +116,33 @@ namespace McProtoNet.Core.Protocol
 			{
 				len -= sizeUncompressed.GetVarIntLength();
 
-				using var compressedData = StaticResources.MSmanager.GetStream(null, len);
+				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
 
-
-				var memory = compressedData.GetMemory(sizeUncompressed);
-
-				await BaseStream.ReadExactlyAsync(memory.Slice(0, len), token);
-
-				compressedData.Advance(len);
-
-				compressedData.Position = 0;
-
-				using (var ReadZlib = new ZLibStream(compressedData, CompressionMode.Decompress, true))
+				try
 				{
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
+					Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
+					using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
+					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+					{
+						int id = await ReadZlib.ReadVarIntAsync(token);
 
+						sizeUncompressed -= id.GetVarIntLength();
 
-					int id = await ReadZlib.ReadVarIntAsync(token);
+						await ReadZlib.ReadExactlyAsync(memory.Memory.Slice(0, sizeUncompressed), token);
 
-					sizeUncompressed -= id.GetVarIntLength();
-
-					var uncompressedStream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
-
-
-
-					await ReadZlib.ReadExactlyAsync(uncompressedStream
-						.GetMemory(sizeUncompressed)
-						.Slice(0, sizeUncompressed), token);
-
-					uncompressedStream.Advance(sizeUncompressed);
-					uncompressedStream.Position = 0;
-
-					return new Packet(
-						id,
-						uncompressedStream);
+						return new Packet(
+							id,
+							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
+							memory);
+					}
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
 				}
 
 
@@ -169,20 +153,20 @@ namespace McProtoNet.Core.Protocol
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
 
-
-
-				var stream = StaticResources.MSmanager.GetStream(null, len);
-
-				await BaseStream.ReadExactlyAsync(stream
-					.GetMemory(len)
-					.Slice(0, len), token);
-
-				stream.Advance(len);
-				stream.Position = 0;
-
-				return new(
-					id,
-					stream);
+				var memory = MemoryPool<byte>.Shared.Rent(len);
+				try
+				{
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
+					return new(
+						id,
+						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
+						memory);
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
+				}
 			}
 
 		}

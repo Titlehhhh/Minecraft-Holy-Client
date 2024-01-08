@@ -60,43 +60,40 @@ namespace McProtoNet.Core
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
 		{
-			byte[] buff = ArrayPool<byte>.Shared.Rent(1);
-			try
+			using var memory = MemoryPool<byte>.Shared.Rent(1);
+
+			var buff = memory.Memory.Slice(0, 1).Span;
+
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do
 			{
-				int numRead = 0;
-				int result = 0;
-				byte read;
-				do
+				if (stream.Read(buff) <= 0)
 				{
-					if (stream.Read(buff, 0, 1) <= 0)
-					{
-						throw new EndOfStreamException();
-					}
-					read = buff[0];
+					throw new EndOfStreamException();
+				}
+				read = buff[0];
 
 
-					int value = read & 0b01111111;
-					result |= value << 7 * numRead;
+				int value = read & 0b01111111;
+				result |= value << 7 * numRead;
 
-					numRead++;
-					if (numRead > 5)
-					{
-						throw new InvalidOperationException("VarInt is too big");
-					}
-				} while ((read & 0b10000000) != 0);
+				numRead++;
+				if (numRead > 5)
+				{
+					throw new InvalidOperationException("VarInt is too big");
+				}
+			} while ((read & 0b10000000) != 0);
 
-				return result;
-			}
-			finally
-			{
-				ArrayPool<byte>.Shared.Return(buff);
-			}
+			return result;
+
 		}
 
 		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
 		{
-			byte[] buff = new byte[1];
-
+			using var memory = MemoryPool<byte>.Shared.Rent(1);
+			var buff = memory.Memory.Slice(0, 1);
 			int numRead = 0;
 			int result = 0;
 			byte read;
@@ -106,7 +103,7 @@ namespace McProtoNet.Core
 				{
 					throw new EndOfStreamException();
 				}
-				read = buff[0];
+				read = buff.Span[0];
 
 
 				int value = read & 0b01111111;
