@@ -224,8 +224,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 			exceptions
 				.Connect()				
-				.Sort(SortExpressionComparer<ExceptionInfo>.Descending(p => p.Count))	
-				
+				.Sort(SortExpressionComparer<ExceptionInfo>.Descending(p => p.Count))				
 				.Bind(out var _exceptions)
 				.Subscribe()
 				.DisposeWith(d);
