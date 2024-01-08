@@ -6,17 +6,17 @@ namespace McProtoNet.Core.Protocol
 {
 	public class MinecraftPacketSender : IMinecraftPacketSender
 	{
-		private Stream _baseStream;
-		private readonly bool disposedStream;
-		public MinecraftPacketSender(Stream baseStream, bool disposedStream)
-		{
-			_baseStream = baseStream;
-			this.disposedStream = disposedStream;
-		}
-		public MinecraftPacketSender(Stream baseStream) : this(baseStream, true)
-		{
+		public Stream BaseStream { get; set; }
 
+		public MinecraftPacketSender(Stream baseStream)
+		{
+			BaseStream = baseStream;			
 		}
+		public MinecraftPacketSender()
+		{
+			
+		}
+		
 
 		private const int ZERO_VARLENGTH = 1;//default(int).GetVarIntLength();
 		private readonly byte[] ZERO_VARINT = { 0 };
@@ -58,12 +58,12 @@ namespace McProtoNet.Core.Protocol
 
 							int fullSize = uncompressedSizeLength + (int)compressedPacket.Length;
 
-							_baseStream.WriteVarInt(fullSize);
+							BaseStream.WriteVarInt(fullSize);
 
-							_baseStream.WriteVarInt(uncompressedSize);
+							BaseStream.WriteVarInt(uncompressedSize);
 
 							compressedPacket.Position = 0;
-							compressedPacket.CopyTo(_baseStream);
+							compressedPacket.CopyTo(BaseStream);
 
 						}
 
@@ -73,13 +73,13 @@ namespace McProtoNet.Core.Protocol
 						#region Short                    
 						uncompressedSize++;
 
-						_baseStream.WriteVarInt(uncompressedSize);
+						BaseStream.WriteVarInt(uncompressedSize);
 
-						_baseStream.Write(ZERO_VARINT);
+						BaseStream.Write(ZERO_VARINT);
 
-						_baseStream.Write(idData.Slice(0, idLen));
+						BaseStream.Write(idData.Slice(0, idLen));
 
-						data.CopyTo(_baseStream);
+						data.CopyTo(BaseStream);
 						#endregion
 					}
 				}
@@ -87,7 +87,7 @@ namespace McProtoNet.Core.Protocol
 				{
 					SendPacketWithoutCompression(packet.Data, id);
 				}
-				_baseStream.Flush();
+				BaseStream.Flush();
 			}
 			finally
 			{
@@ -106,12 +106,12 @@ namespace McProtoNet.Core.Protocol
 			Packetlength += id.GetVarIntLength();
 
 			//Записываем длину всего пакета           
-			_baseStream.WriteVarInt(Packetlength);
+			BaseStream.WriteVarInt(Packetlength);
 			//Записываем ID пакета
-			_baseStream.WriteVarInt(id);
+			BaseStream.WriteVarInt(id);
 
 			//Все данные пакета перекидваем в интернет
-			packet.CopyTo(_baseStream);
+			packet.CopyTo(BaseStream);
 
 
 		}
@@ -154,12 +154,12 @@ namespace McProtoNet.Core.Protocol
 
 
 
-							await _baseStream.WriteVarIntAsync(fullSize, token);
+							await BaseStream.WriteVarIntAsync(fullSize, token);
 
-							await _baseStream.WriteVarIntAsync(uncompressedSize, token);
+							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
 
 							compressedPacket.Position = 0;
-							await compressedPacket.CopyToAsync(_baseStream, token);
+							await compressedPacket.CopyToAsync(BaseStream, token);
 
 						}
 					}
@@ -167,11 +167,11 @@ namespace McProtoNet.Core.Protocol
 					{
 						uncompressedSize++;
 
-						await _baseStream.WriteVarIntAsync(uncompressedSize, token);
-						await _baseStream.WriteAsync(ZERO_VARINT, token);
-						await _baseStream.WriteAsync(idData.AsMemory(0, idLen), token);
+						await BaseStream.WriteVarIntAsync(uncompressedSize, token);
+						await BaseStream.WriteAsync(ZERO_VARINT, token);
+						await BaseStream.WriteAsync(idData.AsMemory(0, idLen), token);
 
-						await data.CopyToAsync(_baseStream);
+						await data.CopyToAsync(BaseStream);
 
 
 					}
@@ -180,7 +180,7 @@ namespace McProtoNet.Core.Protocol
 				{
 					await SendPacketWithoutCompressionAsync(packet.Data, id, token);
 				}
-				await _baseStream.FlushAsync(token);
+				await BaseStream.FlushAsync(token);
 			}
 			finally
 			{
@@ -197,13 +197,13 @@ namespace McProtoNet.Core.Protocol
 			byte[] idData = new byte[5];
 			int len = id.GetVarIntLength(idData);
 			//Записываем длину всего пакета
-			await _baseStream.WriteVarIntAsync(Packetlength + len, token);
+			await BaseStream.WriteVarIntAsync(Packetlength + len, token);
 			//Записываем ID пакета
-			await _baseStream.WriteAsync(idData, 0, len, token);
+			await BaseStream.WriteAsync(idData, 0, len, token);
 
 
 			//Все данные пакета перекидваем в интернет
-			await packet.CopyToAsync(_baseStream, token);
+			await packet.CopyToAsync(BaseStream, token);
 
 
 		}
@@ -235,14 +235,14 @@ namespace McProtoNet.Core.Protocol
 				semaphore.Dispose();
 				semaphore = null;
 			}
-			if (disposedStream)
-			{
-				if (_baseStream is { })
-				{
-					_baseStream.Dispose();
-					_baseStream = null;
-				}
-			}
+			//if (disposedStream)
+			//{
+			//	if (BaseStream is { })
+			//	{
+			//		BaseStream.Dispose();
+			//		BaseStream = null;
+			//	}
+			//}
 			_disposed = true;
 			GC.SuppressFinalize(this);
 		}
@@ -256,14 +256,14 @@ namespace McProtoNet.Core.Protocol
 				semaphore.Dispose();
 				semaphore = null;
 			}
-			if (disposedStream)
-			{
-				if (_baseStream is not null)
-				{
-					await _baseStream.DisposeAsync();
-					_baseStream = null;
-				}
-			}
+			//if (disposedStream)
+			//{
+			//	if (BaseStream is not null)
+			//	{
+			//		await BaseStream.DisposeAsync();
+			//		BaseStream = null;
+			//	}
+			//}
 			GC.SuppressFinalize(this);
 		}
 	}

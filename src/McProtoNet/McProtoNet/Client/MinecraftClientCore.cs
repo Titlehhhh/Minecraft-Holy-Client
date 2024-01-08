@@ -12,7 +12,7 @@ namespace McProtoNet
 {
 	public delegate void OnPacketReceived(MinecraftPrimitiveReader reader, PacketIn id, CancellationToken cancellation);
 
-	public class MinecraftClientCore : IDisposable, IAsyncDisposable
+	public class MinecraftClientCore : IDisposable
 	{
 		#region ReadOnlyFields
 
@@ -39,6 +39,11 @@ namespace McProtoNet
 			_packetPallete = packetPallete;
 			this.pipe = pipe;
 			_logger = logger;
+
+
+			PacketReader = new();
+			PacketSender = new();
+
 		}
 
 
@@ -52,33 +57,51 @@ namespace McProtoNet
 		#region StateFields
 		Stream mainStream;
 		private MinecraftStream minecraftStream;
-		public IMinecraftPacketReader PacketReader;
-		public IMinecraftPacketSender PacketSender;
+		public MinecraftPacketReader PacketReader;
+		public MinecraftPacketSender PacketSender;
 		#endregion
 
 		public void Reset()
 		{
 
 		}
-
-		public async Task Connect()
+		private async Task<Stream> CreateTcp(CancellationToken token)
 		{
+			token.ThrowIfCancellationRequested();
+			if (_proxy is null)
+			{
+
+				TcpClient tcp = new TcpClient();
+
+				_logger.Information("Подключение");
+				await tcp.ConnectAsync(_host, _port, token);
+				return tcp.GetStream();
+			}
+			_logger.Information($"Подключение к {_proxy.Type} прокси {_proxy.ProxyHost}:{_proxy.ProxyPort}");
 
 
-			mainStream = await CreateTcp(CTS.Token);
 
 
-
-			minecraftStream = new MinecraftStream(mainStream);
-			PacketSender = new MinecraftPacketSender(minecraftStream, true);
+			return await _proxy.ConnectAsync(_host, _port, 5000, token);
 
 
 		}
-		public async Task HandShake()
+
+		public async Task Connect()
+		{
+			mainStream = await CreateTcp(CTS.Token);
+
+			minecraftStream = new MinecraftStream(mainStream);
+
+			PacketSender.BaseStream = minecraftStream;
+			PacketReader.BaseStream = minecraftStream;
+
+		}
+		public ValueTask HandShake()
 		{
 			_subProtocol = SubProtocol.HandShake;
 			_logger.Information("Рукопожатие");
-			await PacketSender.SendPacketAsync(
+			return PacketSender.SendPacketAsync(
 					 new HandShakePacket(
 						 HandShakeIntent.LOGIN,
 						 (int)_protocol,
@@ -88,51 +111,38 @@ namespace McProtoNet
 
 
 		}
-		public async Task<Task> Login(OnPacketReceived packetReceived)
+		public async ValueTask Login(OnPacketReceived packetReceived)
 		{
 			CTS.Token.ThrowIfCancellationRequested();
 
 			_subProtocol = SubProtocol.Login;
-			_logger.Information("Логинизация");
+
+
+
+
 			await this.SendPacket(w =>
 			{
 				w.WriteString(this._nick);
 			}, 0x00);
 
 
-			await using (PacketReader = new MinecraftPacketReader(minecraftStream, false))
-			{
-				await LoginCore(CTS.Token);
-			}
-
-			Task fill = null;
-
-			//if (Pipelines)
-			{
-				var readStream = pipe.Reader.AsStream();
-
-
-				fill = FillPipeAsync(minecraftStream, CTS.Token);
-
-				PacketReader = new MinecraftPacketReader(readStream, false);
-				PacketReader.SwitchCompression(threshold);
+			await LoginCore(CTS.Token);
 
 
 
-			}
-			//else
-			//{
+
+			var readStream = pipe.Reader.AsStream();
 
 
 
-			//	fill = Task.CompletedTask;
 
-			//	PacketReader = new MinecraftPacketReader(minecraftStream, false);
-			//	PacketReader.SwitchCompression(threshold);
-			//}
+
+
+
+			var fill = FillPipeAsync(minecraftStream, CTS.Token);
 			var read = ReadPacketLoop(CTS.Token, packetReceived);
 
-			return Task.WhenAll(read, fill);
+			//return Task.WhenAll(read, fill);
 		}
 
 		//public static bool Pipelines { get; set; } = true;
@@ -283,32 +293,9 @@ namespace McProtoNet
 
 
 
-		private async Task<Stream> CreateTcp(CancellationToken token)
-		{
-			token.ThrowIfCancellationRequested();
-			if (_proxy is null)
-			{
-
-				TcpClient tcp = new TcpClient();
-
-				_logger.Information("Подключение");
-				await tcp.ConnectAsync(_host, _port, token);
-				return tcp.GetStream();
-			}
-			_logger.Information($"Подключение к {_proxy.Type} прокси {_proxy.ProxyHost}:{_proxy.ProxyPort}");
+		
 
 
-
-
-			return await _proxy.ConnectAsync(_host, _port, 5000, token);
-
-
-		}
-
-
-
-
-		bool _disposed;
 
 
 
@@ -329,13 +316,13 @@ namespace McProtoNet
 			int _id = _packetPallete.GetOut(id);
 			return SendPacket(action, _id);
 		}
-		//private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+		
 
 
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
-			//await semaphore.WaitAsync();
+			
 
 			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
@@ -357,38 +344,40 @@ namespace McProtoNet
 			}
 
 
-			//semaphore.Release();
+			
 
 		}
 		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
-			//await semaphore.WaitAsync();
 			
-				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+			{
+				var writer = Performance.Writers.Get();
+				try
 				{
-					var writer = Performance.Writers.Get();
-					try
-					{
 
-						writer.BaseStream = ms;
+					writer.BaseStream = ms;
 
-						packet.Write(writer);
+					packet.Write(writer);
 
-					}
-					finally
-					{
-						Performance.Writers.Return(writer);
-					}
-					ms.Position = 0;
-					await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
 				}
-			
+				finally
+				{
+					Performance.Writers.Return(writer);
+				}
+				ms.Position = 0;
+				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+			}
+
 		}
 		#endregion
 
 		#region Dispose
 
 
+
+		bool _disposed;
 		public void Dispose()
 		{
 			if (_disposed) return;
@@ -427,40 +416,7 @@ namespace McProtoNet
 			GC.SuppressFinalize(this);
 
 		}
-		public async ValueTask DisposeAsync()
-		{
-			if (_disposed) return;
-
-
-			pipe = null;
-
-			if (PacketSender is { })
-			{
-				await PacketSender.DisposeAsync();
-			}
-			PacketSender = null;
-			if (PacketReader is { })
-			{
-				await PacketReader.DisposeAsync();
-			}
-			PacketReader = null;
-			_proxy = null;
-			_packetPallete = null;
-			_disposed = true;
-
-			_logger = null;
-
-
-			if (!CTS.IsCancellationRequested)
-			{
-				await CTS.CancelAsync();
-			}
-			CTS.Dispose();
-
-
-
-			GC.SuppressFinalize(this);
-		}
+		
 
 		#endregion
 	}

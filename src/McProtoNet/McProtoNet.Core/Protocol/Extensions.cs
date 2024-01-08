@@ -216,7 +216,7 @@ namespace McProtoNet.Core
 			return totalRead;
 		}
 
-		
+
 
 		public static void SendPacket(this IMinecraftPacketSender proto, IOutputPacket pack, int id)
 		{
@@ -230,14 +230,14 @@ namespace McProtoNet.Core
 			}
 		}
 
-		public static async Task SendPacketAsync(this IMinecraftPacketSender proto, IOutputPacket pack, int id, CancellationToken cancellationToken = default)
+		public static ValueTask SendPacketAsync(this IMinecraftPacketSender proto, IOutputPacket pack, int id, CancellationToken cancellationToken = default)
 		{
 			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
 				IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 				pack.Write(writer);
 				ms.Position = 0;
-				await proto.SendPacketAsync(new(id, ms), cancellationToken);
+				return proto.SendPacketAsync(new(id, ms), cancellationToken);
 			}
 		}
 	}
