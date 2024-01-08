@@ -112,7 +112,11 @@ namespace HolyClient.StressTest
 		private readonly object _currentInfoLock = new();
 		private StressTestMetrik currentInfo;
 
-		private volatile int _botsOnlineCounter = 0;
+		private volatile int _botsConnectionCounter = 0;
+		private volatile int _botsHandshakeCounter = 0;
+		private volatile int _botsLoginCounter = 0;
+		private volatile int _botsPlayCounter = 0;
+
 		private volatile int _cpsCounter = 0;
 
 
@@ -131,7 +135,10 @@ namespace HolyClient.StressTest
 		{
 
 			CurrentState = StressTestServiceState.Init;
-			_botsOnlineCounter = 0;
+			_botsConnectionCounter = 0;
+			_botsHandshakeCounter = 0;
+			_botsLoginCounter = 0;
+			_botsPlayCounter = 0;
 			_cpsCounter = 0;
 			try
 			{
@@ -230,14 +237,45 @@ namespace HolyClient.StressTest
 						if (state.NewValue == ClientState.Play)
 						{
 							Interlocked.Increment(ref _cpsCounter);
-							Interlocked.Increment(ref _botsOnlineCounter);
+
+
+							Interlocked.Increment(ref _botsPlayCounter);
+						}
+						else if (state.NewValue == ClientState.Connecting)
+						{
+							Interlocked.Increment(ref _botsConnectionCounter);
+						}
+						else if (state.NewValue == ClientState.HandShake)
+						{
+							Interlocked.Increment(ref _botsHandshakeCounter);
+						}
+						else if (state.NewValue == ClientState.Login)
+						{
+							Interlocked.Increment(ref _botsLoginCounter);
 						}
 					};
 
 					Action<Exception> onError = (exc) =>
 					{
-						if (b.Client.CurrentState == ClientState.Play)
-							Interlocked.Decrement(ref _botsOnlineCounter);
+
+						var state = b.Client.CurrentState;
+
+						if (state == ClientState.Play)
+						{
+							Interlocked.Decrement(ref _botsPlayCounter);
+						}
+						else if (state == ClientState.Connecting)
+						{
+							Interlocked.Decrement(ref _botsConnectionCounter);
+						}
+						else if (state == ClientState.HandShake)
+						{
+							Interlocked.Decrement(ref _botsHandshakeCounter);
+						}
+						else if (state == ClientState.Login)
+						{
+							Interlocked.Decrement(ref _botsLoginCounter);
+						}
 
 						//Console.WriteLine(ex.GetType().Name);
 						//Console.WriteLine(ex.Message);
@@ -275,14 +313,14 @@ namespace HolyClient.StressTest
 
 				var metricsThread = new Thread(() =>
 				{
-
 					Stopwatch stopwatch = new();
+
 					while (!cancellationTokenSource.IsCancellationRequested)
 					{
 						stopwatch.Start();
 						var cps = Interlocked.Exchange(ref _cpsCounter, 0);
 
-						var botsOnline = Volatile.Read(ref _botsOnlineCounter);
+						var botsOnline = Volatile.Read(ref _botsPlayCounter);
 
 						_dataPerSecond.OnNext(new StressTestMetrik(cps, botsOnline));
 
@@ -295,11 +333,9 @@ namespace HolyClient.StressTest
 						}
 						stopwatch.Reset();
 					}
-
 				})
 				{
 					Name = "Stress test counter",
-
 					IsBackground = true
 				};
 
