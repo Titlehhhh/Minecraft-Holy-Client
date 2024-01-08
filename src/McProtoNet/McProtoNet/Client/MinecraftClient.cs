@@ -14,13 +14,12 @@ using System.Threading;
 namespace McProtoNet
 {
 
-
+	
 	public partial class MinecraftClient : IDisposable
 	{
 
 		#region Fields
 		private ILogger _logger;
-		private Subject<ClientStateChanged> _state = new();
 
 		private Pipe pipe;
 
@@ -42,7 +41,8 @@ namespace McProtoNet
 		private MinecraftVersion _protocol;
 		#endregion
 		#region Properties
-		public IObservable<ClientStateChanged> State => _state;
+		public event Action<ClientStateChanged> OnStateChanged;
+		public event Action<Exception> OnErrored;
 
 		public ClientState CurrentState => (ClientState)_currentState;
 
@@ -66,6 +66,7 @@ namespace McProtoNet
 			{
 
 			});
+
 
 
 			PacketReader = new();
@@ -137,6 +138,7 @@ namespace McProtoNet
 			_isActive = 1;
 			_currentState = 0;
 			_errorInvoked = 0;
+			
 			PacketReader.SwitchCompression(0);
 			PacketSender.SwitchCompression(0);
 
@@ -201,10 +203,14 @@ namespace McProtoNet
 					}
 					catch
 					{
-						new Thread(() =>
-						{
-							throw new Exception("Fatal");
-						}).Start();
+						//new Thread(() =>
+						//{
+						//	throw new Exception("Fatal");
+						//}).Start();
+					}
+					finally
+					{
+						//Console.WriteLine("ok");
 					}
 
 
@@ -239,13 +245,13 @@ namespace McProtoNet
 
 			ClientStateChanged changed = new((ClientState)old, state);
 
-			_state.OnNext(changed);
+			OnStateChanged?.Invoke(changed);
 		}
 		private int _canceling = 0;
 		private Exception _error;
 		private void CancelAll(Exception exception)
 		{
-			if (Interlocked.CompareExchange(ref _canceling, 1, 0) == 1)
+			if (Interlocked.CompareExchange(ref _canceling, 1, 0) == 0)
 			{
 				_error = exception;
 				if (CTS is not null)
@@ -269,9 +275,7 @@ namespace McProtoNet
 		private int _errorInvoked = 0;
 		private void InvokeError()
 		{
-			
-			_state.OnError(this._error);
-			_state.OnCompleted();
+			OnErrored?.Invoke(this._error);			
 		}
 
 		public void Disconnect()

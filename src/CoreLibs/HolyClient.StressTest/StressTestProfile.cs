@@ -9,6 +9,7 @@ using McProtoNet.Utils;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Stateless.Graph;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -224,16 +225,16 @@ namespace HolyClient.StressTest
 							i,
 							cancellationTokenSource.Token);
 
-					b.Client.State.Subscribe(state =>
+					Action<ClientStateChanged> onState = (state) =>
 					{
-
 						if (state.NewValue == ClientState.Play)
 						{
 							Interlocked.Increment(ref _cpsCounter);
 							Interlocked.Increment(ref _botsOnlineCounter);
 						}
+					};
 
-					}, (Exception ex) =>
+					Action<Exception> onError = (exc) =>
 					{
 						if (b.Client.CurrentState == ClientState.Play)
 							Interlocked.Decrement(ref _botsOnlineCounter);
@@ -242,7 +243,7 @@ namespace HolyClient.StressTest
 						//Console.WriteLine(ex.Message);
 						//Console.WriteLine(ex.StackTrace);
 
-						var key = ex.GetType();
+						var key = exc.GetType();
 
 						if (ExceptionCounter.TryGetValue(key, out var counter))
 						{
@@ -252,11 +253,18 @@ namespace HolyClient.StressTest
 						{
 							ExceptionCounter[key] = new ExceptionCounter();
 						}
+					};
 
-					}, () =>
+					b.Client.OnStateChanged += onState;
+					b.Client.OnErrored += onError;
+
+					_disposables.Add(Disposable.Create(() =>
 					{
+						b.Client.OnStateChanged -= onState;
+						b.Client.OnErrored -= onError;
+					}));
 
-					}).DisposeWith(_disposables);
+
 
 					stressTestBots.Add(b);
 					bot.DisposeWith(_disposables);
@@ -268,27 +276,27 @@ namespace HolyClient.StressTest
 
 				var metricsThread = new Thread(() =>
 				{
-					
-						Stopwatch stopwatch = new();
-						while (!cancellationTokenSource.IsCancellationRequested)
+
+					Stopwatch stopwatch = new();
+					while (!cancellationTokenSource.IsCancellationRequested)
+					{
+						stopwatch.Start();
+						var cps = Interlocked.Exchange(ref _cpsCounter, 0);
+
+						var botsOnline = Volatile.Read(ref _botsOnlineCounter);
+
+						_dataPerSecond.OnNext(new StressTestMetrik(cps, botsOnline));
+
+
+						stopwatch.Stop();
+
+						if (stopwatch.Elapsed.Microseconds < 1000)
 						{
-							stopwatch.Start();
-							var cps = Interlocked.Exchange(ref _cpsCounter, 0);
-
-							var botsOnline = Volatile.Read(ref _botsOnlineCounter);
-
-							_dataPerSecond.OnNext(new StressTestMetrik(cps, botsOnline));
-
-
-							stopwatch.Stop();
-
-							if (stopwatch.Elapsed.Microseconds < 1000)
-							{
-								Thread.Sleep(1000 - stopwatch.Elapsed.Microseconds);
-							}
-							stopwatch.Reset();
+							Thread.Sleep(1000 - stopwatch.Elapsed.Microseconds);
 						}
-					
+						stopwatch.Reset();
+					}
+
 				})
 				{
 					Name = "Stress test counter",

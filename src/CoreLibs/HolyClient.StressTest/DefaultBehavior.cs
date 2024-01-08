@@ -23,47 +23,38 @@ namespace HolyClient.StressTest
 			{
 				CancellationTokenSource cts = null;
 
-				var d = bot.Client.State.Subscribe(s =>
+
+				Action<Exception> onErr = async (exc) =>
 				{
-
-				}, async ex =>
-				{
-				
-
-						try
-						{
-							if (cts is not null)
-							{
-								cts.Cancel();
-								cts.Dispose();
-
-							}
-						}
-						catch
-						{
-
-						}
-						finally
-						{
-							cts = null;
-						}
 					try
 					{
-						await Task.Delay(1500);
-						await bot.Restart(true);
+						if (cts is not null)
+						{
+							cts.Cancel();
+							cts.Dispose();
+
+						}
 					}
-					catch(Exception exx)
+					catch
 					{
-						Console.WriteLine(exx);
+
+					}
+					finally
+					{
+						cts = null;
 					}
 
+					await Task.Delay(1500);
+					await bot.Restart(true);
+				};
 
-				}, () =>
+				bot.Client.OnErrored += onErr;
+
+
+				disposables.Add(Disposable.Create(() =>
 				{
-
-				});
-
-				disposables.Add(d);
+					bot.Client.OnErrored -= onErr;
+				}));
 
 				var d2 = bot.Client.OnJoinGame.Subscribe(async x =>
 				{
