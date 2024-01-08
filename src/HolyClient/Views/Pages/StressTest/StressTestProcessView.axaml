@@ -100,9 +100,9 @@
 						   
 						   GridLinesVisibility="All">
 					<DataGrid.Columns>
-						<DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-						<DataGridTextColumn Header="Message" Binding="{Binding Message}" />
-						<DataGridTextColumn Header="Count" Binding="{Binding Count}" />
+						<DataGridTextColumn Width="1*" Header="Type" Binding="{Binding Type}"/>
+						<DataGridTextColumn Width="3*" Header="Message" Binding="{Binding Message}" />
+						<DataGridTextColumn Width="1" Header="Count" Binding="{Binding Count}" />
 					</DataGrid.Columns>
 				</DataGrid>
 			</TabItem>

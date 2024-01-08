@@ -315,7 +315,8 @@ namespace McProtoNet
 			}
 
 
-
+			semaphore?.Dispose();
+			semaphore = null;
 			mainStream?.Dispose();
 			mainStream = null;
 
@@ -395,13 +396,13 @@ namespace McProtoNet
 		{
 
 			_logger.Information("Рукопожатие");
-			return PacketSender.SendPacketAsync(
+			return SendPacketAsync(
 					 new HandShakePacket(
 						 HandShakeIntent.LOGIN,
 						 (int)_protocol,
 						 Config.Host,
 						 Config.Port),
-					 0x00, CTS.Token);
+					 0x00);
 
 
 		}

@@ -6,6 +6,7 @@ namespace McProtoNet
 {
 	public partial class MinecraftClient : IMinecraftClientEvents, IMinecraftClientActions
 	{
+		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 		public ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, PacketOut id)
 		{
 
@@ -15,9 +16,10 @@ namespace McProtoNet
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
+			
 			try
 			{
-
+				await semaphore.WaitAsync(CTS.Token);
 				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					var writer = Performance.Writers.Get();
@@ -37,10 +39,14 @@ namespace McProtoNet
 
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				CancelAll(ex);
 				throw;
+			}
+			finally
+			{
+				semaphore.Release();
 			}
 
 
@@ -49,9 +55,10 @@ namespace McProtoNet
 		}
 		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
+		
 			try
 			{
-
+				await semaphore.WaitAsync(CTS.Token);
 				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					var writer = Performance.Writers.Get();
@@ -75,6 +82,10 @@ namespace McProtoNet
 			{
 				CancelAll(ex);
 				throw;
+			}
+			finally
+			{
+				semaphore.Release();
 			}
 
 		}

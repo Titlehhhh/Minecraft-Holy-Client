@@ -36,13 +36,12 @@ namespace HolyClient.StressTest
 		bool UseProxy { get; set; }
 		MinecraftVersion Version { get; set; }
 
-
+		
 		ISourceCache<IProxySource, Guid> Proxies { get; }
 
 
 		IObservable<StressTestMetrik> Metrics { get; }
 
-		ISourceCache<ExceptionThrowCount, Type> Exceptions { get; }
 
 		ConcurrentDictionary<Tuple<string,string>, ExceptionCounter> ExceptionCounter { get; }
 
@@ -50,6 +49,7 @@ namespace HolyClient.StressTest
 		StressTestServiceState CurrentState { get; }
 
 		PluginTypeReference BehaviorRef { get; }
+		bool CheckDNS { get; set; }
 
 		void SetBehavior(IPluginSource pluginSource);
 		void DeleteBehavior();

@@ -13,10 +13,13 @@ using Stateless.Graph;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Net.Sockets;
+using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace HolyClient.StressTest
 {
@@ -65,6 +68,9 @@ namespace HolyClient.StressTest
 		public PluginTypeReference BehaviorRef { get; set; }
 		[Reactive]
 		public bool UseProxy { get; set; } = true;
+
+		[Reactive]
+		public bool CheckDNS { get; set; } = false;
 		#endregion
 
 		#region NonSerializable
@@ -95,9 +101,7 @@ namespace HolyClient.StressTest
 		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
 
-		[IgnoreMember]
-		public ISourceCache<ExceptionThrowCount, Type> Exceptions { get; } = new SourceCache<ExceptionThrowCount, Type>(x => x.TypeException);
-
+		
 		[IgnoreMember]
 		public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; private set; } = new();
 
@@ -133,7 +137,7 @@ namespace HolyClient.StressTest
 		[ConfigureAwait(false)]
 		public async Task Start(Serilog.ILogger logger)
 		{
-
+			ExceptionCounter.Clear();
 			CurrentState = StressTestServiceState.Init;
 			_botsConnectionCounter = 0;
 			_botsHandshakeCounter = 0;
@@ -192,8 +196,25 @@ namespace HolyClient.StressTest
 						logger.Error($"[STRESS TEST] Ошибка поиска srv для {this.Server}");
 					}
 				}
+				logger.Information($"[STRESS TEST] Поиск DNS для {this.Server}");
+				if (CheckDNS)
+				{
+					try
+					{
+						var result = await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationTokenSource.Token).ConfigureAwait(false);
+
+						host = result[0].ToString();
+						logger.Information($"[STRESS TEST] DNS IP for {this.Server} - {host}");
+					}
+					catch
+					{
+						logger.Error($"[STRESS TEST] Ошибка поиска DNS для {this.Server}");
+					}
+				}
 
 				logger.Information($"[STRESS TEST] Запущен стресс тест на {this.NumberOfBots} ботов на сервер {host}:{port}");
+
+
 
 				var stressTestBots = new List<IStressTestBot>();
 
@@ -387,22 +408,22 @@ namespace HolyClient.StressTest
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
 			}
-			logger.Information("Загрузка прокси 1");
+			
 			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
 			foreach (var s in sources)
 			{
 				tasks.Add(s.GetProxiesAsync());
 			}
-			logger.Information("Загрузка прокси 2");
+		
 			var result = await Task.WhenAll(tasks);
 
 			var proxies = result.SelectMany(x => x).ToList();
-			logger.Information("Загрузка прокси 3");
+			
 			var provider = new ProxyProvider(proxies);
 
 			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
-			logger.Information("Загрузка прокси 4");
+			
 			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
 			return provider;

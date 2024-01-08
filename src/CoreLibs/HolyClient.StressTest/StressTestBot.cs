@@ -62,7 +62,7 @@ namespace HolyClient.StressTest
 			}
 			catch
 			{
-
+				throw;
 			}
 
 

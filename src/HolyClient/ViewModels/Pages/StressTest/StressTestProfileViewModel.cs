@@ -59,9 +59,13 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 		this.BotsNickname = state.BotsNickname;
 		this.NumberOfBots = state.NumberOfBots;
 		this.UseProxy = state.UseProxy;
+		this.CheckDNS = state.CheckDNS;
 
 		this.WhenAnyValue(x => x.Name)
 			.BindTo(state, x => x.Name);
+
+		this.WhenAnyValue(x => x.CheckDNS)
+			.BindTo(state, x => x.CheckDNS);
 
 		this.WhenAnyValue(x => x.Server)
 			.BindTo(state, x => x.Server);
@@ -322,7 +326,8 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 	[Reactive]
 	public bool UseProxy { get; set; }
-
+	[Reactive]
+	public bool CheckDNS { get;  set; }
 	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
 	[Reactive]
