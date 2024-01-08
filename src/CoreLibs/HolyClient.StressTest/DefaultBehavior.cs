@@ -47,11 +47,17 @@ namespace HolyClient.StressTest
 						{
 							cts = null;
 						}
-
+					try
+					{
 						await Task.Delay(1500);
 						await bot.Restart(true);
+					}
+					catch(Exception exx)
+					{
+						Console.WriteLine(exx);
+					}
 
-					
+
 				}, () =>
 				{
 

@@ -111,6 +111,7 @@ namespace McProtoNet.Core.Protocol
 				await BaseStream.ReadExactlyAsync(memory.Slice(0, len), token);
 
 				stream.Advance(len);
+				stream.Position = 0;
 
 				return new(
 					id,
@@ -123,7 +124,7 @@ namespace McProtoNet.Core.Protocol
 			{
 				len -= sizeUncompressed.GetVarIntLength();
 
-				using var compressedData = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
+				using var compressedData = StaticResources.MSmanager.GetStream(null, len);
 
 
 				var memory = compressedData.GetMemory(sizeUncompressed);
@@ -131,8 +132,6 @@ namespace McProtoNet.Core.Protocol
 				await BaseStream.ReadExactlyAsync(memory.Slice(0, len), token);
 
 				compressedData.Advance(len);
-
-
 
 				compressedData.Position = 0;
 

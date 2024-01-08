@@ -9,6 +9,7 @@ using System.IO.Pipelines;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace McProtoNet
 {
@@ -16,20 +17,10 @@ namespace McProtoNet
 
 	public partial class MinecraftClient : IDisposable
 	{
+
+		#region Fields
 		private ILogger _logger;
-
-
-
 		private Subject<ClientStateChanged> _state = new();
-		public IObservable<ClientStateChanged> State => _state;
-
-		public bool IsActive => _isActive == 1;
-
-		private int _isActive = 0;
-
-		public ClientConfig Config { get; set; } = new();
-
-		private MinecraftVersion _protocol;
 
 		private Pipe pipe;
 
@@ -42,8 +33,32 @@ namespace McProtoNet
 
 		Stream mainStream;
 		private MinecraftStream minecraftStream;
-		public MinecraftPacketReader PacketReader;
-		public MinecraftPacketSender PacketSender;
+		private MinecraftPacketReader PacketReader;
+		private MinecraftPacketSender PacketSender;
+
+
+
+		private int _isActive = 0;
+		private MinecraftVersion _protocol;
+		#endregion
+		#region Properties
+		public IObservable<ClientStateChanged> State => _state;
+
+		public ClientState CurrentState => (ClientState)_currentState;
+
+		public bool IsActive => _isActive == 1;
+
+
+		public ClientConfig Config { get; set; } = new();
+		#endregion
+
+
+
+
+
+
+
+
 
 		public MinecraftClient()
 		{
@@ -65,7 +80,7 @@ namespace McProtoNet
 
 		private static IPacketPallete _cache754 = new PacketPalette_1_16();
 
-		
+
 
 		private IPacketPallete CreatePallete()
 		{
@@ -115,9 +130,23 @@ namespace McProtoNet
 		}
 
 
+		private void ResetFields()
+		{
+			CTS = new();
+			_canceling = 0;
+			_isActive = 1;
+			_currentState = 0;
+			_errorInvoked = 0;
+			PacketReader.SwitchCompression(0);
+			PacketSender.SwitchCompression(0);
+
+			PacketSender.BaseStream = null;
+			PacketReader.BaseStream = null;
+		}
+
 		public async Task Start(Serilog.ILogger logger)
 		{
-			Interlocked.Exchange(ref _isActive, 1);
+			ResetFields();
 
 			_logger = logger;
 			_packetPallete = CreatePallete();
@@ -125,6 +154,7 @@ namespace McProtoNet
 			ValidateConfig();
 
 			_protocol = Config.Version;
+			bool runLoop = false;
 			try
 			{
 				ChangeState(ClientState.Connecting);
@@ -134,31 +164,76 @@ namespace McProtoNet
 				await HandShake();
 
 				ChangeState(ClientState.Login);
-				await Login();
 
-				ChangeState(ClientState.Play);
+				await this.SendPacket(w =>
+				{
+					w.WriteString(this.Config.Username);
+				}, 0x00);
 
 
+				await LoginCore(CTS.Token);
+
+
+
+				var readStream = pipe.Reader.AsStream();
+				PacketReader.BaseStream = readStream;
+
+
+				
+				var fill = FillPipeAsync();
+				var read = ReadPacketLoop();
+				var combined = Task.WhenAll(fill, read);
+
+				_ = combined.ContinueWith(t =>
+				{
+					try
+					{
+						if (t.IsFaulted)
+						{
+							CancelAll(t.Exception);
+						}
+						else
+						{
+							CancelAll(new TaskCanceledException());
+						}
+						this.pipe.Reset();
+						this.InvokeError();
+					}
+					catch
+					{
+						new Thread(() =>
+						{
+							throw new Exception("Fatal");
+						}).Start();
+					}
+
+
+				});
+				runLoop = true;
 
 
 			}
 			catch (Exception e)
 			{
-				ErrorState(e);
+
+				CancelAll(e);
+				if (!runLoop)
+				{
+					InvokeError();
+				}
 				_logger.Error(e, "Во время запуска клиента произошла ошибка");
-				throw e;
+				//throw e;
 			}
 
 
 		}
 
-		
 
-		public ClientState CurrentState => (ClientState)_currentState;
+
+
 
 		private void ChangeState(ClientState state)
 		{
-
 
 			var old = Interlocked.Exchange(ref _currentState, (int)state);
 
@@ -166,28 +241,41 @@ namespace McProtoNet
 
 			_state.OnNext(changed);
 		}
-
-		private void ErrorState(Exception exception)
+		private int _canceling = 0;
+		private Exception _error;
+		private void CancelAll(Exception exception)
 		{
-			if (Interlocked.CompareExchange(ref _isActive, 0, 1) == 1)
+			if (Interlocked.CompareExchange(ref _canceling, 1, 0) == 1)
 			{
-				_state.OnError(exception);
-				_state.OnCompleted();
+				_error = exception;
+				if (CTS is not null)
+				{
+					CTS.Cancel();
+					CTS.Dispose();
+					CTS = null;
+				}
+				minecraftStream?.Dispose();
+				minecraftStream = null;
+
+				this.mainStream?.Dispose();
+				this.mainStream = null;
+
+				
+
+
 
 			}
 		}
-		private void OnComplete()
+		private int _errorInvoked = 0;
+		private void InvokeError()
 		{
-			if (Interlocked.CompareExchange(ref _isActive, 0, 1) == 1)
-			{
-				_state.OnCompleted();
-
-			}
+			
+			_state.OnError(this._error);
+			_state.OnCompleted();
 		}
 
 		public void Disconnect()
 		{
-			OnComplete();
 
 		}
 
@@ -203,19 +291,18 @@ namespace McProtoNet
 		{
 
 			if (_disposed) return;
-
-
-
-
 			_disposed = true;
+
+			minecraftStream?.Dispose();
+			minecraftStream = null;
+
+			mainStream?.Dispose();
+			mainStream = null;
+
 
 			GC.SuppressFinalize(this);
 		}
-		public ValueTask DisposeAsync()
-		{
 
-			return ValueTask.CompletedTask;
-		}
 
 
 		#region Core
@@ -223,21 +310,16 @@ namespace McProtoNet
 
 
 
-		private int threshold;
+		//private int threshold;
+
+
+
 
 
 
 
 
 		
-
-
-		private void Reset()
-		{
-			CTS.Cancel();
-			minecraftStream.Dispose();
-			minecraftStream = null;
-		}
 
 
 
@@ -276,7 +358,7 @@ namespace McProtoNet
 		}
 		public ValueTask HandShake()
 		{
-			
+
 			_logger.Information("Рукопожатие");
 			return PacketSender.SendPacketAsync(
 					 new HandShakePacket(
@@ -288,41 +370,9 @@ namespace McProtoNet
 
 
 		}
-		public async ValueTask Login()
-		{
-			CTS.Token.ThrowIfCancellationRequested();
-
-		
 
 
 
-
-			await this.SendPacket(w =>
-			{
-				w.WriteString(this.Config.Username);
-			}, 0x00);
-
-
-			await LoginCore(CTS.Token);
-
-
-
-
-			var readStream = pipe.Reader.AsStream();
-
-
-
-
-
-
-
-			var fill = FillPipeAsync();
-			var read = ReadPacketLoop();
-
-			//return Task.WhenAll(read, fill);
-		}
-
-		
 
 		private async ValueTask LoginCore(CancellationToken cancellation)
 		{
@@ -353,13 +403,13 @@ namespace McProtoNet
 
 			if (id == 0x02)
 			{
-
+				ChangeState(ClientState.Play);
 				_logger.Information("Переход в Play режим");
 				return true;
 			}
 			else if (id == 0x03)
 			{
-				threshold = reader.ReadVarInt();
+				var threshold = reader.ReadVarInt();
 				_logger.Information($"Включаем сжатие: {threshold}");
 				PacketReader.SwitchCompression(threshold);
 				PacketSender.SwitchCompression(threshold);
@@ -393,18 +443,14 @@ namespace McProtoNet
 			return false;
 		}
 
-
-		private async Task ReadPacketLoop(CancellationToken cancellationToken)
+		private async Task ReadPacketLoop()
 		{
 
 			try
 			{
-
-
-
-				while (!cancellationToken.IsCancellationRequested)
+				while (!CTS.IsCancellationRequested)
 				{
-					using (var packet = await PacketReader.ReadNextPacketAsync(cancellationToken))
+					using (var packet = await PacketReader.ReadNextPacketAsync(CTS.Token))
 					{
 						if (_packetPallete.TryGetIn(packet.Id, out var packetIn))
 						{
@@ -418,8 +464,8 @@ namespace McProtoNet
 
 
 								reader.BaseStream = packet.Data;
+								OnPacket(reader, packetIn);
 
-								//packetReceived.Invoke(reader, packetIn, cancellationToken);
 							}
 							finally
 							{
@@ -428,19 +474,30 @@ namespace McProtoNet
 						}
 					}
 				}
+
 			}
 			catch (Exception ex)
 			{
+
+				await pipe.Reader.CompleteAsync(ex);
+
+
+				CancelAll(ex);
+
+				throw;
 				//OnError?.Invoke(ex);
 				//throw;
 			}
 			finally
 			{
-				await pipe.Reader.CompleteAsync();
+
 			}
 
+			await pipe.Reader.CompleteAsync();
+
+
 		}
-		private async ValueTask FillPipeAsync()
+		private async Task FillPipeAsync()
 		{
 			try
 			{
@@ -448,7 +505,7 @@ namespace McProtoNet
 				while (!CTS.IsCancellationRequested)
 				{
 					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
-					int bytesRead = await stream.ReadAsync(memory, CTS.Token);
+					int bytesRead = await minecraftStream.ReadAsync(memory, CTS.Token);
 
 
 
@@ -456,11 +513,12 @@ namespace McProtoNet
 					pipe.Writer.Advance(bytesRead);
 
 
-					FlushResult result = await pipe.Writer.FlushAsync();
+					FlushResult result = await pipe.Writer.FlushAsync(CTS.Token);
 					if (result.IsCompleted)
 					{
 						break;
 					}
+
 					if (bytesRead <= 0)
 					{
 						throw new EndOfStreamException();
@@ -469,14 +527,21 @@ namespace McProtoNet
 			}
 			catch (Exception ex)
 			{
-				//OnError?.Invoke(ex);
-				//throw;
+
+				await pipe.Writer.CompleteAsync(ex);
+
+				CancelAll(ex);
+				throw;
 			}
 			finally
 			{
-				await pipe.Writer.CompleteAsync();
+
 			}
+
+			await pipe.Writer.CompleteAsync();
+
 		}
+
 
 
 

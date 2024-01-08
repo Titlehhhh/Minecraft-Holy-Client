@@ -63,7 +63,7 @@ namespace McProtoNet
 		public IObservable<SpawnPlayerEventArgs> OnSpawnPlayer => _spawnPlayerEvent;
 
 
-		private void OnPacket(IMinecraftPrimitiveReader reader, PacketIn id, CancellationToken cancellation)
+		private void OnPacket(IMinecraftPrimitiveReader reader, PacketIn id)
 		{
 
 

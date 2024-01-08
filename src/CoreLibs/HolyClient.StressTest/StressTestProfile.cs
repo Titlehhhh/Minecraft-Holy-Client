@@ -227,11 +227,20 @@ namespace HolyClient.StressTest
 					b.Client.State.Subscribe(state =>
 					{
 
+						if (state.NewValue == ClientState.Play)
+						{
+							Interlocked.Increment(ref _cpsCounter);
+							Interlocked.Increment(ref _botsOnlineCounter);
+						}
+
 					}, (Exception ex) =>
 					{
-						Console.WriteLine(ex.GetType().Name);
-						Console.WriteLine(ex.Message);
-						Console.WriteLine(ex.StackTrace);
+						if (b.Client.CurrentState == ClientState.Play)
+							Interlocked.Decrement(ref _botsOnlineCounter);
+
+						//Console.WriteLine(ex.GetType().Name);
+						//Console.WriteLine(ex.Message);
+						//Console.WriteLine(ex.StackTrace);
 
 						var key = ex.GetType();
 
@@ -250,7 +259,7 @@ namespace HolyClient.StressTest
 					}).DisposeWith(_disposables);
 
 					stressTestBots.Add(b);
-
+					bot.DisposeWith(_disposables);
 
 
 				}
@@ -259,8 +268,7 @@ namespace HolyClient.StressTest
 
 				var metricsThread = new Thread(() =>
 				{
-					try
-					{
+					
 						Stopwatch stopwatch = new();
 						while (!cancellationTokenSource.IsCancellationRequested)
 						{
@@ -280,11 +288,7 @@ namespace HolyClient.StressTest
 							}
 							stopwatch.Reset();
 						}
-					}
-					catch
-					{
-
-					}
+					
 				})
 				{
 					Name = "Stress test counter",

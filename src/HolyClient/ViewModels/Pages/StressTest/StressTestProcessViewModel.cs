@@ -269,38 +269,38 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 				}).DisposeWith(d);
 
-			Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
-				.Select(x =>
-				{
+			//Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
+			//	.Select(x =>
+			//	{
 
-					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Name, x.Value.Count, null));
-				})
-				.ObserveOn(RxApp.MainThreadScheduler)
-				.Subscribe(data =>
-				{
+			//		return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Name, x.Value.Count, null));
+			//	})
+			//	.ObserveOn(RxApp.MainThreadScheduler)
+			//	.Subscribe(data =>
+			//	{
 
 
-					foreach (ExceptionInfo except in data)
-					{
-						var clone = _data.FirstOrDefault(x => x.Name == except.Name);
-						if (clone is not null)
-						{
-							clone.Value = except.Value;
-						}
-						else
-						{
-							_data.Add(new ExceptionInfo(
-								except.Name, 
-								except.Value,
-								new SolidColorPaint(
-									ColorPalletes.MaterialDesign500[colorId++].AsSKColor())));
-						}
-					}
+			//		foreach (ExceptionInfo except in data)
+			//		{
+			//			var clone = _data.FirstOrDefault(x => x.Name == except.Name);
+			//			if (clone is not null)
+			//			{
+			//				clone.Value = except.Value;
+			//			}
+			//			else
+			//			{
+			//				_data.Add(new ExceptionInfo(
+			//					except.Name,
+			//					except.Value,
+			//					new SolidColorPaint(
+			//						ColorPalletes.MaterialDesign500[colorId++].AsSKColor())));
+			//			}
+			//		}
 
-					ExceptionsSeries[0].Values =
-						_data.OrderBy(x => x.Value).ToArray();
+			//		ExceptionsSeries[0].Values =
+			//			_data.OrderBy(x => x.Value).ToArray();
 
-				}).DisposeWith(d);
+			//	}).DisposeWith(d);
 
 
 

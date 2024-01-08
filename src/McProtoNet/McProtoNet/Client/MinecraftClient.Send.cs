@@ -6,40 +6,41 @@ namespace McProtoNet
 {
 	public partial class MinecraftClient : IMinecraftClientEvents, IMinecraftClientActions
 	{
-		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, PacketOut id)
+		public ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, PacketOut id)
 		{
-			try
-			{
-				await SendPacket(action, id);
-			}
-			catch(Exception ex)
-			{
 
-				throw;
-			}
+			return SendPacket(action, _packetPallete.GetOut(id));
+
 		}
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
-
-
-			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+			try
 			{
-				var writer = Performance.Writers.Get();
-				try
+
+				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
+					var writer = Performance.Writers.Get();
+					try
+					{
 
 
-					writer.BaseStream = ms;
-					action(writer);
-					ms.Position = 0;
+						writer.BaseStream = ms;
+						action(writer);
+						ms.Position = 0;
+					}
+					finally
+					{
+						Performance.Writers.Return(writer);
+					}
+					await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+
 				}
-				finally
-				{
-					Performance.Writers.Return(writer);
-				}
-				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
-
+			}
+			catch(Exception ex)
+			{
+				CancelAll(ex);
+				throw;
 			}
 
 
@@ -48,25 +49,32 @@ namespace McProtoNet
 		}
 		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
-
-
-			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+			try
 			{
-				var writer = Performance.Writers.Get();
-				try
+
+				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
+					var writer = Performance.Writers.Get();
+					try
+					{
 
-					writer.BaseStream = ms;
+						writer.BaseStream = ms;
 
-					packet.Write(writer);
+						packet.Write(writer);
 
+					}
+					finally
+					{
+						Performance.Writers.Return(writer);
+					}
+					ms.Position = 0;
+					await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
 				}
-				finally
-				{
-					Performance.Writers.Return(writer);
-				}
-				ms.Position = 0;
-				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+			}
+			catch (Exception ex)
+			{
+				CancelAll(ex);
+				throw;
 			}
 
 		}
