@@ -135,6 +135,7 @@ namespace McProtoNet.Core.Protocol
 
 
 				compressedData.Position = 0;
+
 				using (var ReadZlib = new ZLibStream(compressedData, CompressionMode.Decompress, true))
 				{
 

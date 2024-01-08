@@ -67,7 +67,7 @@ namespace McProtoNet
 		{
 
 
-			if (id == PacketIn.Disconnect)
+			if (_disconnectEvent.HasObservers && id == PacketIn.Disconnect)
 			{
 				string reason = reader.ReadString();
 				var dis = PacketPool.DisconnectEventPool.Get();
@@ -83,7 +83,7 @@ namespace McProtoNet
 				}
 				throw new DisconnectException(reason);
 			}
-			if (id == PacketIn.JoinGame)
+			if (_joinGameEvent.HasObservers && id == PacketIn.JoinGame)
 			{
 				var join = PacketPool.JoinGamePacketPool.Get();
 
@@ -96,8 +96,9 @@ namespace McProtoNet
 					PacketPool.JoinGamePacketPool.Return(join);
 				}
 			}
-			else if (id == PacketIn.MapData)
+			else if ( id == PacketIn.MapData)
 			{
+				return;
 				int mapid = reader.ReadVarInt();
 				byte scale = reader.ReadUnsignedByte();
 				// 1.9 +
@@ -198,12 +199,12 @@ namespace McProtoNet
 
 				//_mapDataEvent.OnNext(eventArgs);
 			}
-			else if (id == PacketIn.KeepAlive)
+			else if ( id == PacketIn.KeepAlive)
 			{
 				long pingId = reader.ReadLong();
 				SendPacket(w => w.WriteLong(pingId), PacketOut.KeepAlive);
 			}
-			else if (id == PacketIn.PlayerPositionRotation)
+			else if (_playerPositionRotationEvent.HasObservers && id == PacketIn.PlayerPositionRotation)
 			{
 				var x = reader.ReadDouble();
 				var y = reader.ReadDouble();
@@ -239,7 +240,7 @@ namespace McProtoNet
 
 
 			}
-			else if (id == PacketIn.Respawn)
+			else if (_respawnEvent.HasObservers && id == PacketIn.Respawn)
 			{
 				var respawn = PacketPool.RespawnPacketPool.Get();
 
@@ -254,7 +255,7 @@ namespace McProtoNet
 					PacketPool.RespawnPacketPool.Return(respawn);
 				}
 			}
-			else if (id == PacketIn.ChatMessage)
+			else if (_chatEvent.HasObservers && id == PacketIn.ChatMessage)
 			{
 				string message = reader.ReadString();
 
@@ -270,7 +271,7 @@ namespace McProtoNet
 					PacketPool.ChatPacketPool.Return(chatPacket);
 				}
 			}
-			else if (id == PacketIn.SpawnEntity)
+			else if ( id == PacketIn.SpawnEntity)
 			{
 				int entityID = reader.ReadVarInt();
 				Guid entityUUID = reader.ReadUUID();
@@ -306,11 +307,11 @@ namespace McProtoNet
 				reader.ReadShort();
 				reader.ReadShort();
 
-				var spawnEntity = PacketPool.SpawnEntityPacketPool.Get();
+				//var spawnEntity = PacketPool.SpawnEntityPacketPool.Get();
 				try
 				{
-					spawnEntity.Id = entityID;
-					spawnEntity.UUID = entityUUID;
+					//spawnEntity.Id = entityID;
+					//spawnEntity.UUID = entityUUID;
 				}
 				catch
 				{
@@ -318,7 +319,7 @@ namespace McProtoNet
 				}
 
 			}
-			else if (id == PacketIn.SpawnPlayer)
+			else if ( id == PacketIn.SpawnPlayer)
 			{
 				//int EntityID = reader.ReadVarInt();
 				//Guid UUID = reader.ReadUUID();
@@ -337,7 +338,7 @@ namespace McProtoNet
 
 
 			}
-			else if (id == PacketIn.EntityPosition)
+			else if ( id == PacketIn.EntityPosition)
 			{
 
 				//int EntityID = reader.ReadVarInt();
@@ -357,11 +358,11 @@ namespace McProtoNet
 				//var args = new EntityPositionEventArgs(EntityID, DeltaX, DeltaY, DeltaZ, OnGround);
 
 			}
-			else if (id == PacketIn.EntityRotation)
+			else if ( id == PacketIn.EntityRotation)
 			{
 
 			}
-			else if (id == PacketIn.EntityPositionRotation)
+			else if ( id == PacketIn.EntityPositionRotation)
 			{
 				//int EntityID = reader.ReadVarInt();
 

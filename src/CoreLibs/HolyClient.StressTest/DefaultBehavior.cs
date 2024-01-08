@@ -23,29 +23,37 @@ namespace HolyClient.StressTest
 			{
 				CancellationTokenSource cts = null;
 
-				var d = bot.OnError.Subscribe(async x =>
+				var d = bot.Client.State.Subscribe(s =>
 				{
 
-					try
-					{
-						if (cts is not null)
+				}, async ex =>
+				{
+				
+
+						try
 						{
-							cts.Cancel();
-							cts.Dispose();
+							if (cts is not null)
+							{
+								cts.Cancel();
+								cts.Dispose();
+
+							}
+						}
+						catch
+						{
 
 						}
-					}
-					catch
-					{
+						finally
+						{
+							cts = null;
+						}
 
-					}
-					finally
-					{
-						cts = null;
-					}
+						await Task.Delay(1500);
+						await bot.Restart(true);
 
-					await Task.Delay(1500);
-					await bot.Restart(true);
+					
+				}, () =>
+				{
 
 				});
 

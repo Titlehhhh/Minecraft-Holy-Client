@@ -150,7 +150,7 @@ namespace HolyClient.StressTest
 
 				var proxyProvider = await LoadProxy(logger);
 
-				if(proxyProvider is not null)
+				if (proxyProvider is not null)
 				{
 					_disposables.Add(proxyProvider);
 				}
@@ -213,13 +213,9 @@ namespace HolyClient.StressTest
 					};
 
 
-					bot.StateChanged += Bot_StateChanged;
 
-					_disposables.Add(Disposable.Create(() =>
-					{
-						bot.StateChanged -= Bot_StateChanged;
-						bot.Dispose();
-					}));
+
+
 
 
 					var b = new StressTestBot(
@@ -228,8 +224,15 @@ namespace HolyClient.StressTest
 							i,
 							cancellationTokenSource.Token);
 
-					b.OnError.Subscribe(ex =>
+					b.Client.State.Subscribe(state =>
 					{
+
+					}, (Exception ex) =>
+					{
+						Console.WriteLine(ex.GetType().Name);
+						Console.WriteLine(ex.Message);
+						Console.WriteLine(ex.StackTrace);
+
 						var key = ex.GetType();
 
 						if (ExceptionCounter.TryGetValue(key, out var counter))
@@ -241,11 +244,14 @@ namespace HolyClient.StressTest
 							ExceptionCounter[key] = new ExceptionCounter();
 						}
 
+					}, () =>
+					{
+
 					}).DisposeWith(_disposables);
 
 					stressTestBots.Add(b);
 
-					
+
 
 				}
 
@@ -286,7 +292,7 @@ namespace HolyClient.StressTest
 					IsBackground = true
 				};
 
-				
+
 
 				CompositeDisposable disposables = new();
 				_disposables.Add(disposables);
@@ -301,37 +307,20 @@ namespace HolyClient.StressTest
 				}
 				logger.Information("Поведение запущено");
 
-				metricsThread.Start();				
+				metricsThread.Start();
 
 				logger.Information("Запущены потоки чтения метрик");
 
 				CurrentState = StressTestServiceState.Running;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
-				logger.Error(ex,"Не удалось запустить стресс тест");
+				logger.Error(ex, "Не удалось запустить стресс тест");
 
 				CurrentState = StressTestServiceState.None;
 			}
 		}
 
-		private void Bot_StateChanged(object? sender, McProtoNet.StateChangedEventArgs e)
-		{
-		
-			if (e.NewState == ClientState.Play)
-			{
-				
-				Interlocked.Increment(ref _botsOnlineCounter);
-				Interlocked.Increment(ref _cpsCounter);
-			}
-			else if (e.NewState == ClientState.Failed)
-			{
-				if (e.OldState == ClientState.Play)
-				{
-					Interlocked.Decrement(ref _botsOnlineCounter);
-				}
-			}
-		}
 
 
 		private async Task<IProxyProvider?> LoadProxy(Serilog.ILogger logger)
@@ -342,7 +331,7 @@ namespace HolyClient.StressTest
 				return null;
 			}
 
-			
+
 			var sources = this.Proxies.Items.ToList();
 			logger.Information("Загрузка прокси");
 			if (sources.Count() == 0)

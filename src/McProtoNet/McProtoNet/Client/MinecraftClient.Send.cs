@@ -6,29 +6,69 @@ namespace McProtoNet
 {
 	public partial class MinecraftClient : IMinecraftClientEvents, IMinecraftClientActions
 	{
-		public ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, PacketOut id)
+		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, PacketOut id)
 		{
-			if (_core is null)
-				return ValueTask.CompletedTask;
+			try
+			{
+				await SendPacket(action, id);
+			}
+			catch(Exception ex)
+			{
 
-
-
-			return _core.SendPacket(action, id);
+				throw;
+			}
 		}
 
-		public ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
+		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
-			if (_core is null)
-				return ValueTask.CompletedTask;
 
-			return _core.SendPacket(action, id);
+
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+			{
+				var writer = Performance.Writers.Get();
+				try
+				{
+
+
+					writer.BaseStream = ms;
+					action(writer);
+					ms.Position = 0;
+				}
+				finally
+				{
+					Performance.Writers.Return(writer);
+				}
+				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+
+			}
+
+
+
+
 		}
-		private ValueTask SendPacketAsync(IOutputPacket packet, int id)
+		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
-			if (_core is null)
-				return ValueTask.CompletedTask;
 
-			return _core.SendPacketAsync(packet, id);
+
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
+			{
+				var writer = Performance.Writers.Get();
+				try
+				{
+
+					writer.BaseStream = ms;
+
+					packet.Write(writer);
+
+				}
+				finally
+				{
+					Performance.Writers.Return(writer);
+				}
+				ms.Position = 0;
+				await PacketSender.SendPacketAsync(new(id, ms), CTS.Token);
+			}
+
 		}
 
 		public ValueTask SendChat(string text)

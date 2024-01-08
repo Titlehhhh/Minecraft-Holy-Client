@@ -1,6 +1,13 @@
-﻿using Serilog;
+﻿using McProtoNet.Core;
+using McProtoNet.Core.IO;
+using McProtoNet.Core.Protocol;
+using McProtoNet.Utils;
+using Serilog;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO.Pipelines;
+using System.Net.Sockets;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet
@@ -11,30 +18,32 @@ namespace McProtoNet
 	{
 		private ILogger _logger;
 
-		private enum Trigger
-		{
-			Starting,
-			Stop,
-			Restart
-		}
-		public event EventHandler<StateChangedEventArgs> StateChanged;
 
-		public ClientState State
-		{
-			get => state;
-			private set
-			{
-				var old = this.state;
-				this.state = value;
-				StateChanged?.Invoke(this, new(old, value));
-			}
-		}
+
+		private Subject<ClientStateChanged> _state = new();
+		public IObservable<ClientStateChanged> State => _state;
+
+		public bool IsActive => _isActive == 1;
+
+		private int _isActive = 0;
+
 		public ClientConfig Config { get; set; } = new();
 
 		private MinecraftVersion _protocol;
-		private volatile MinecraftClientCore _core;
-		Pipe pipe;
 
+		private Pipe pipe;
+
+		private CancellationTokenSource CTS;
+
+		private IPacketPallete _packetPallete;
+
+		private int _currentState = 0;
+
+
+		Stream mainStream;
+		private MinecraftStream minecraftStream;
+		public MinecraftPacketReader PacketReader;
+		public MinecraftPacketSender PacketSender;
 
 		public MinecraftClient()
 		{
@@ -43,20 +52,20 @@ namespace McProtoNet
 
 			});
 
-			_core = new MinecraftClientCore(
-				Config.Version,
-				Config.Username,
-				Config.Host,
-				Config.Port,
-				Config.Proxy,
-				CreatePallete(),
-					this.pipe,
-				this._logger);
+
+			PacketReader = new();
+			PacketSender = new();
+
+
+
 			CreateEvents();
 
 		}
 
+
 		private static IPacketPallete _cache754 = new PacketPalette_1_16();
+
+		
 
 		private IPacketPallete CreatePallete()
 		{
@@ -87,11 +96,7 @@ namespace McProtoNet
 			//    packetPallete = new PacketPalette1193();
 			return packetPallete;
 		}
-		
-		private async void RemoveCore()
-		{
-			Interlocked.Exchange(ref _core, null)?.DisposeAsync();
-		}
+
 		private void ValidateConfig()
 		{
 			if (string.IsNullOrWhiteSpace(Config.Username))
@@ -108,32 +113,30 @@ namespace McProtoNet
 				//ToDO login
 			}
 		}
-		private TaskCompletionSource workTask;
-		
 
-		public async Task Login(Serilog.ILogger logger)
+
+		public async Task Start(Serilog.ILogger logger)
 		{
-			
-			_logger = logger;
+			Interlocked.Exchange(ref _isActive, 1);
 
-			
+			_logger = logger;
+			_packetPallete = CreatePallete();
+
 			ValidateConfig();
-			CreateNewCore();
+
 			_protocol = Config.Version;
 			try
 			{
-				State = ClientState.Connecting;
-				await _core.Connect();
+				ChangeState(ClientState.Connecting);
+				await Connect();
 
-				State = ClientState.HandShake;
-				await _core.HandShake();
+				ChangeState(ClientState.HandShake);
+				await HandShake();
 
-				State = ClientState.Login;
-				var t = await _core.Login(OnPacket);
+				ChangeState(ClientState.Login);
+				await Login();
 
-				State = ClientState.Play;
-
-				WaitTask(t);
+				ChangeState(ClientState.Play);
 
 
 
@@ -141,8 +144,7 @@ namespace McProtoNet
 			}
 			catch (Exception e)
 			{
-				workTask.TrySetException(e);
-				State = ClientState.Failed;
+				ErrorState(e);
 				_logger.Error(e, "Во время запуска клиента произошла ошибка");
 				throw e;
 			}
@@ -150,33 +152,43 @@ namespace McProtoNet
 
 		}
 
-		private async void WaitTask(Task t)
+		
+
+		public ClientState CurrentState => (ClientState)_currentState;
+
+		private void ChangeState(ClientState state)
 		{
-			try
+
+
+			var old = Interlocked.Exchange(ref _currentState, (int)state);
+
+			ClientStateChanged changed = new((ClientState)old, state);
+
+			_state.OnNext(changed);
+		}
+
+		private void ErrorState(Exception exception)
+		{
+			if (Interlocked.CompareExchange(ref _isActive, 0, 1) == 1)
 			{
-				await t;
+				_state.OnError(exception);
+				_state.OnCompleted();
+
 			}
-			catch (Exception e)
+		}
+		private void OnComplete()
+		{
+			if (Interlocked.CompareExchange(ref _isActive, 0, 1) == 1)
 			{
-				this.State = ClientState.Failed;
-				workTask.TrySetException(e);
-			}
-			finally
-			{
+				_state.OnCompleted();
 
 			}
 		}
 
-
-		private bool _startDisconnect = false;
-		public async void Disconnect()
+		public void Disconnect()
 		{
-			if (_startDisconnect)
-				return;
-			workTask?.TrySetCanceled();
-			_startDisconnect = true;
-			if (_core is not null)
-				await _core.DisposeAsync();
+			OnComplete();
+
 		}
 
 
@@ -187,8 +199,6 @@ namespace McProtoNet
 		}
 
 		private bool _disposed = false;
-		private ClientState state;
-
 		public void Dispose()
 		{
 
@@ -196,20 +206,6 @@ namespace McProtoNet
 
 
 
-			if (_core is { })
-			{
-				_core.Dispose();
-			}
-			try
-			{
-				pipe.Reset();
-			}
-			catch
-			{
-
-			}
-
-			pipe = null;
 
 			_disposed = true;
 
@@ -220,6 +216,292 @@ namespace McProtoNet
 
 			return ValueTask.CompletedTask;
 		}
+
+
+		#region Core
+
+
+
+
+		private int threshold;
+
+
+
+
+
+		
+
+
+		private void Reset()
+		{
+			CTS.Cancel();
+			minecraftStream.Dispose();
+			minecraftStream = null;
+		}
+
+
+
+		private async Task<Stream> CreateTcp(CancellationToken token)
+		{
+			token.ThrowIfCancellationRequested();
+			if (Config.Proxy is null)
+			{
+
+				TcpClient tcp = new TcpClient();
+
+				_logger.Information("Подключение");
+				await tcp.ConnectAsync(Config.Host, Config.Port, token);
+				return tcp.GetStream();
+			}
+			_logger.Information($"Подключение к {Config.Proxy.Type} прокси {Config.Proxy.ProxyHost}:{Config.Proxy.ProxyPort}");
+
+
+
+
+			return await Config.Proxy.ConnectAsync(Config.Host, Config.Port, 5000, token);
+
+
+		}
+
+		public async Task Connect()
+		{
+			CTS = new();
+			mainStream = await CreateTcp(CTS.Token);
+
+			minecraftStream = new MinecraftStream(mainStream);
+
+			PacketSender.BaseStream = minecraftStream;
+			PacketReader.BaseStream = minecraftStream;
+
+		}
+		public ValueTask HandShake()
+		{
+			
+			_logger.Information("Рукопожатие");
+			return PacketSender.SendPacketAsync(
+					 new HandShakePacket(
+						 HandShakeIntent.LOGIN,
+						 (int)_protocol,
+						 Config.Host,
+						 Config.Port),
+					 0x00, CTS.Token);
+
+
+		}
+		public async ValueTask Login()
+		{
+			CTS.Token.ThrowIfCancellationRequested();
+
+		
+
+
+
+
+			await this.SendPacket(w =>
+			{
+				w.WriteString(this.Config.Username);
+			}, 0x00);
+
+
+			await LoginCore(CTS.Token);
+
+
+
+
+			var readStream = pipe.Reader.AsStream();
+
+
+
+
+
+
+
+			var fill = FillPipeAsync();
+			var read = ReadPacketLoop();
+
+			//return Task.WhenAll(read, fill);
+		}
+
+		
+
+		private async ValueTask LoginCore(CancellationToken cancellation)
+		{
+			bool ok = false;
+			do
+			{
+				using (Packet readData = await PacketReader.ReadNextPacketAsync(cancellation))
+				{
+					var reader = Performance.Readers.Get();
+					try
+					{
+						reader.BaseStream = readData.Data;
+
+
+						ok = await HandleLogin(reader, readData.Id);
+					}
+					finally
+					{
+						Performance.Readers.Return(reader);
+					}
+				}
+
+			} while (!ok);
+
+		}
+		private async Task<bool> HandleLogin(MinecraftPrimitiveReader reader, int id)
+		{
+
+			if (id == 0x02)
+			{
+
+				_logger.Information("Переход в Play режим");
+				return true;
+			}
+			else if (id == 0x03)
+			{
+				threshold = reader.ReadVarInt();
+				_logger.Information($"Включаем сжатие: {threshold}");
+				PacketReader.SwitchCompression(threshold);
+				PacketSender.SwitchCompression(threshold);
+			}
+			else if (id == 0x01)
+			{
+				reader.ReadString();
+				byte[] publicKey = reader.ReadByteArray();
+				byte[] verifyToken = reader.ReadByteArray();
+				var RSAService = CryptoHandler.DecodeRSAPublicKey(publicKey);
+				byte[] secretKey = CryptoHandler.GenerateAESPrivateKey();
+
+				byte[] g = RSAService.Encrypt(secretKey, false);
+				byte[] token = RSAService.Encrypt(verifyToken, false);
+				_logger.Information("Включаем шифрование");
+				await SendEncrypt(g, token);
+				minecraftStream.SwitchEncryption(secretKey);
+
+			}
+			else if (id == 0x00)
+			{
+				var r = reader.ReadString();
+
+				throw new LoginRejectedException(r);
+			}
+			else
+			{
+				throw new Exception("Unkown packet: " + id);
+			}
+
+			return false;
+		}
+
+
+		private async Task ReadPacketLoop(CancellationToken cancellationToken)
+		{
+
+			try
+			{
+
+
+
+				while (!cancellationToken.IsCancellationRequested)
+				{
+					using (var packet = await PacketReader.ReadNextPacketAsync(cancellationToken))
+					{
+						if (_packetPallete.TryGetIn(packet.Id, out var packetIn))
+						{
+							packet.Data.Position = 0;
+
+							var reader = Performance.Readers.Get();
+
+							try
+							{
+
+
+
+								reader.BaseStream = packet.Data;
+
+								//packetReceived.Invoke(reader, packetIn, cancellationToken);
+							}
+							finally
+							{
+								Performance.Readers.Return(reader);
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				//OnError?.Invoke(ex);
+				//throw;
+			}
+			finally
+			{
+				await pipe.Reader.CompleteAsync();
+			}
+
+		}
+		private async ValueTask FillPipeAsync()
+		{
+			try
+			{
+				const int minimumBufferSize = 128;
+				while (!CTS.IsCancellationRequested)
+				{
+					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
+					int bytesRead = await stream.ReadAsync(memory, CTS.Token);
+
+
+
+
+					pipe.Writer.Advance(bytesRead);
+
+
+					FlushResult result = await pipe.Writer.FlushAsync();
+					if (result.IsCompleted)
+					{
+						break;
+					}
+					if (bytesRead <= 0)
+					{
+						throw new EndOfStreamException();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				//OnError?.Invoke(ex);
+				//throw;
+			}
+			finally
+			{
+				await pipe.Writer.CompleteAsync();
+			}
+		}
+
+
+
+
+
+
+
+
+
+		#region Send
+
+
+
+		private ValueTask SendEncrypt(byte[] key, byte[] token)
+		{
+			return SendPacket(w =>
+			{
+				w.WriteByteArray(key);
+				w.WriteByteArray(token);
+			}, 0x01);
+		}
+
+		#endregion
+
+		#endregion
 
 
 
