@@ -80,7 +80,7 @@
 				</Grid>
 
 			</TabItem>
-			<TabItem  FontSize="16" Header="Log">
+			<TabItem IsSelected="True"  FontSize="16" Header="Log">
 				<ScrollViewer Margin="10" x:Name="LogsScroll">
 					<ItemsControl  ItemsSource="{Binding Logs}">
 						<ItemsControl.ItemTemplate>
@@ -92,20 +92,19 @@
 				</ScrollViewer>
 			</TabItem>
 			<TabItem  FontSize="16" Header="Errors">
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
-					<lvc:CartesianChart
-						Series="{Binding ExceptionsSeries}"
-						XAxes="{Binding ExceptionsXAxes}"
-						YAxes="{Binding ExceptionsYAxes}"
-						LegendPosition="Left"
-						
-						LegendTextSize="16">
-						
-					</lvc:CartesianChart>
-				</Grid>
+				<DataGrid  ItemsSource="{Binding Exceptions}"
+						   IsReadOnly="True"
+						   CanUserReorderColumns="True"
+						   CanUserResizeColumns="True"
+						   CanUserSortColumns="False"
+						   
+						   GridLinesVisibility="All">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+						<DataGridTextColumn Header="Message" Binding="{Binding Message}" />
+						<DataGridTextColumn Header="Count" Binding="{Binding Count}" />
+					</DataGrid.Columns>
+				</DataGrid>
 			</TabItem>
 		</TabControl>
 

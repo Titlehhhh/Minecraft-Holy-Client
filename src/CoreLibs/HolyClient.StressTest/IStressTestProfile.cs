@@ -44,7 +44,7 @@ namespace HolyClient.StressTest
 
 		ISourceCache<ExceptionThrowCount, Type> Exceptions { get; }
 
-		ConcurrentDictionary<Type, ExceptionCounter> ExceptionCounter { get; }
+		ConcurrentDictionary<Tuple<string,string>, ExceptionCounter> ExceptionCounter { get; }
 
 		IStressTestBehavior Behavior { get; }
 		StressTestServiceState CurrentState { get; }

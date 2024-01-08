@@ -99,7 +99,7 @@ namespace HolyClient.StressTest
 		public ISourceCache<ExceptionThrowCount, Type> Exceptions { get; } = new SourceCache<ExceptionThrowCount, Type>(x => x.TypeException);
 
 		[IgnoreMember]
-		public ConcurrentDictionary<Type, ExceptionCounter> ExceptionCounter { get; private set; } = new();
+		public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; private set; } = new();
 
 
 		#endregion
@@ -281,7 +281,7 @@ namespace HolyClient.StressTest
 						//Console.WriteLine(ex.Message);
 						//Console.WriteLine(ex.StackTrace);
 
-						var key = exc.GetType();
+						var key = Tuple.Create(exc.GetType().FullName, exc.Message);
 
 						if (ExceptionCounter.TryGetValue(key, out var counter))
 						{

@@ -1,4 +1,6 @@
 ﻿using Avalonia.Threading;
+using DynamicData;
+using DynamicData.Binding;
 using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
@@ -32,21 +34,24 @@ using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
 
-public class ExceptionInfo : ObservableValue
+
+public sealed class ExceptionInfo
 {
-	public ExceptionInfo(string name, double? value, SolidColorPaint paint)
+	public string Type { get; private set; }
+	public string Message { get; private set; }
+	public int Count { get; private set; }
+
+	public Tuple<string, string> Key { get; private set; }
+
+	public ExceptionInfo(string type, string message, int count)
 	{
-		Name = name;
-		Paint = paint;
-		// the ObservableValue.Value property is used by the chart
-		Value = value;
+		Type = type;
+		Message = message;
+		Count = count;
+		Key = Tuple.Create<string, string>(Type, Message);
 	}
-
-	public string Name { get; set; }
-	public SolidColorPaint Paint { get; set; }
-
-
 }
+
 
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
@@ -102,12 +107,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 	#region Exceptions
-
-	public ISeries[] ExceptionsSeries { get; set; }
-
-	public Axis[] ExceptionsXAxes { get; } = { new Axis { SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)) } };
-
-	public Axis[] ExceptionsYAxes { get; } = { new Axis { IsVisible = false } };
+	[Reactive]
+	public ReadOnlyObservableCollection<ExceptionInfo> Exceptions { get; private set; }
 	#endregion
 
 	private readonly DateTimeAxis _botsOnlineAxis;
@@ -209,38 +210,27 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		#region Configure exceptions
 
-		var paints = Enumerable.Range(0, 7)
-		   .Select(i => new SolidColorPaint(ColorPalletes.MaterialDesign500[i].AsSKColor()))
-		   .ToArray();
 
-		var _data = new ObservableCollection<ExceptionInfo>();
-		var asd = new RowSeries<ExceptionInfo>()
-		{
-			Values = _data.OrderBy(x => x.Value).ToArray(),
-			DataLabelsPaint = new SolidColorPaint(new SKColor(245, 245, 245)),
-			DataLabelsPadding = new Padding(0),
-			DataLabelsTranslate = new(-1, 0),
-			//ClippingMode = ClipMode.None,
-			DataLabelsFormatter = point => $"{point.Model!.Name} {point.Model.Value}",
-			
-			
-			Padding = 0,
-		}
-		.OnPointMeasured(point =>
-		{
-			// assign a different color to each point
-			if (point.Visual is null) return;
-			point.Visual.Fill = point.Model!.Paint;
-		});
 
-		ExceptionsSeries = new[] { asd };
 
 
 		#endregion
 
 		this.WhenActivated(async d =>
 		{
+			SourceCache<ExceptionInfo, Tuple<string, string>> exceptions = new(x => x.Key);
 
+
+
+			exceptions
+				.Connect()				
+				.Sort(SortExpressionComparer<ExceptionInfo>.Descending(p => p.Count))	
+				
+				.Bind(out var _exceptions)
+				.Subscribe()
+				.DisposeWith(d);
+
+			Exceptions = _exceptions;
 
 			StressTestMetrik currentData = new();
 			stressTest.Metrics
@@ -269,38 +259,19 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 				}).DisposeWith(d);
 
-			//Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
-			//	.Select(x =>
-			//	{
+			Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
+				.Select(x =>
+				{
 
-			//		return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Name, x.Value.Count, null));
-			//	})
-			//	.ObserveOn(RxApp.MainThreadScheduler)
-			//	.Subscribe(data =>
-			//	{
+					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Item1, x.Key.Item2, x.Value.Count));
 
-
-			//		foreach (ExceptionInfo except in data)
-			//		{
-			//			var clone = _data.FirstOrDefault(x => x.Name == except.Name);
-			//			if (clone is not null)
-			//			{
-			//				clone.Value = except.Value;
-			//			}
-			//			else
-			//			{
-			//				_data.Add(new ExceptionInfo(
-			//					except.Name,
-			//					except.Value,
-			//					new SolidColorPaint(
-			//						ColorPalletes.MaterialDesign500[colorId++].AsSKColor())));
-			//			}
-			//		}
-
-			//		ExceptionsSeries[0].Values =
-			//			_data.OrderBy(x => x.Value).ToArray();
-
-			//	}).DisposeWith(d);
+				})
+				.ObserveOn(RxApp.MainThreadScheduler)
+				.Subscribe(data =>
+				{
+					//Console.WriteLine("Second");
+					exceptions.AddOrUpdate(data);
+				}).DisposeWith(d);
 
 
 
