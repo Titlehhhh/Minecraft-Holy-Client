@@ -2,6 +2,7 @@
 using McProtoNet.Core.Protocol;
 using Microsoft.IO;
 using System.Buffers;
+using System.Threading;
 
 namespace McProtoNet.Core
 {
@@ -37,6 +38,8 @@ namespace McProtoNet.Core
 			while (unsigned != 0);
 			return len;
 		}
+
+		
 
 		public static int GetVarIntLength(this int value, Span<byte> data)
 		{
@@ -118,6 +121,9 @@ namespace McProtoNet.Core
 
 			return result;
 		}
+
+
+
 		public static int ReadVarInt(this Stream stream, out int len)
 		{
 			byte[] buff = new byte[1];
@@ -235,6 +241,23 @@ namespace McProtoNet.Core
 				pack.Write(writer);
 				ms.Position = 0;
 				return proto.SendPacketAsync(new(id, ms), cancellationToken);
+			}
+		}
+
+		public static async ValueTask CopyToFromMemoryStreamAsync(this MemoryStream source, Stream destination, CancellationToken cancellationToken)
+		{
+			byte[] buffer = ArrayPool<byte>.Shared.Rent(64);
+			try
+			{
+				int bytesRead;
+				while ((bytesRead = await source.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false)) != 0)
+				{
+					await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+				}
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buffer);
 			}
 		}
 	}

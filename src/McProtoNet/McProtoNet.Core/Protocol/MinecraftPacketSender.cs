@@ -1,4 +1,5 @@
 ﻿using Microsoft.IO;
+using System.Buffers;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 
@@ -10,19 +11,19 @@ namespace McProtoNet.Core.Protocol
 
 		public MinecraftPacketSender(Stream baseStream)
 		{
-			BaseStream = baseStream;			
+			BaseStream = baseStream;
 		}
 		public MinecraftPacketSender()
 		{
-			
+
 		}
-		
+
 
 		private const int ZERO_VARLENGTH = 1;//default(int).GetVarIntLength();
 		private readonly byte[] ZERO_VARINT = { 0 };
 		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
-		
+
 		public void SendPacket(Packet packet)
 		{
 			semaphore.Wait();
@@ -30,7 +31,7 @@ namespace McProtoNet.Core.Protocol
 			var data = packet.Data;
 			try
 			{
-				ThrowIfDisposed();
+				//ThrowIfDisposed();
 
 
 
@@ -98,7 +99,7 @@ namespace McProtoNet.Core.Protocol
 		private void SendPacketWithoutCompression(MemoryStream packet, int id)
 		{
 
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 			// packet.Write(writer);
 			int Packetlength = (int)packet.Length;
 
@@ -120,7 +121,7 @@ namespace McProtoNet.Core.Protocol
 		public async ValueTask SendPacketAsync(Packet packet, CancellationToken token = default)
 		{
 
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 			int id = packet.Id;
 			var data = packet.Data;
 			//await semaphore.WaitAsync(token);
@@ -145,8 +146,8 @@ namespace McProtoNet.Core.Protocol
 						{
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{
-								await zlibStream.WriteVarIntAsync(id);
-								await data.CopyToAsync(zlibStream, token);
+								await zlibStream.WriteVarIntAsync(id, token);
+								await data.CopyToFromMemoryStreamAsync(zlibStream, token);
 							}
 							int uncompressedSizeLength = uncompressedSize.GetVarIntLength();
 
@@ -159,7 +160,7 @@ namespace McProtoNet.Core.Protocol
 							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
 
 							compressedPacket.Position = 0;
-							await compressedPacket.CopyToAsync(BaseStream, token);
+							await compressedPacket.CopyToFromMemoryStreamAsync(BaseStream, token);
 
 						}
 					}
@@ -171,7 +172,7 @@ namespace McProtoNet.Core.Protocol
 						await BaseStream.WriteAsync(ZERO_VARINT, token);
 						await BaseStream.WriteAsync(idData.AsMemory(0, idLen), token);
 
-						await data.CopyToAsync(BaseStream);
+						await data.CopyToAsync(BaseStream, token);
 
 
 					}
@@ -188,84 +189,86 @@ namespace McProtoNet.Core.Protocol
 			}
 		}
 
-		private async Task SendPacketWithoutCompressionAsync(MemoryStream packet, int id, CancellationToken token)
+		private async ValueTask SendPacketWithoutCompressionAsync(MemoryStream packet, int id, CancellationToken token)
 		{
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 			// packet.Write(writer);
 			int Packetlength = (int)packet.Length;
 
-			byte[] idData = new byte[5];
-			int len = id.GetVarIntLength(idData);
+			using var idDataMemory = MemoryPool<byte>.Shared.Rent(5);
+
+
+			int len = id.GetVarIntLength(idDataMemory.Memory.Span);
 			//Записываем длину всего пакета
 			await BaseStream.WriteVarIntAsync(Packetlength + len, token);
 			//Записываем ID пакета
-			await BaseStream.WriteAsync(idData, 0, len, token);
+			await BaseStream.WriteAsync(idDataMemory.Memory.Slice(0, len), token);
 
 
-			//Все данные пакета перекидваем в интернет
-			await packet.CopyToAsync(BaseStream, token);
+			//Все данные пакета перекидываем в интернет
+			await packet.CopyToFromMemoryStreamAsync(BaseStream, token);
 
 
 		}
 		#endregion
-		~MinecraftPacketSender()
-		{
-			Dispose();
-		}
+		//~MinecraftPacketSender()
+		//{
+		//	Dispose();
+		//}
 		private int _compressionThreshold;
 		public void SwitchCompression(int threshold)
 		{
 			_compressionThreshold = threshold;
 		}
 
-		private bool _disposed;
-		private void ThrowIfDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException(nameof(MinecraftPacketSender));
-		}
+		//private bool _disposed;
+		//private void ThrowIfDisposed()
+		//{
+		//	if (_disposed)
+		//		throw new ObjectDisposedException(nameof(MinecraftPacketSender));
+		//}
 
-		public void Dispose()
-		{
+		//public void Dispose()
+		//{
 
-			if (_disposed)
-				return;
-			if (semaphore is not null)
-			{
-				semaphore.Dispose();
-				semaphore = null;
-			}
-			//if (disposedStream)
-			//{
-			//	if (BaseStream is { })
-			//	{
-			//		BaseStream.Dispose();
-			//		BaseStream = null;
-			//	}
-			//}
-			_disposed = true;
-			GC.SuppressFinalize(this);
-		}
+		//	if (_disposed)
+		//		return;
+		//	if (semaphore is not null)
+		//	{
+		//		semaphore.Dispose();
+		//		semaphore = null;
+		//	}
+		//	//if (disposedStream)
+		//	//{
+		//	//	if (BaseStream is { })
+		//	//	{
+		//	//		BaseStream.Dispose();
+		//	//		BaseStream = null;
+		//	//	}
+		//	//}
+		//	_disposed = true;
+		//	GC.SuppressFinalize(this);
+		//}
 
-		public async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				_disposed = true;
-			if (semaphore is not null)
-			{
-				semaphore.Dispose();
-				semaphore = null;
-			}
-			//if (disposedStream)
-			//{
-			//	if (BaseStream is not null)
-			//	{
-			//		await BaseStream.DisposeAsync();
-			//		BaseStream = null;
-			//	}
-			//}
-			GC.SuppressFinalize(this);
-		}
+		//public async ValueTask DisposeAsync()
+		//{
+		//	if (_disposed)
+		//		_disposed = true;
+		//	if (semaphore is not null)
+		//	{
+		//		semaphore.Dispose();
+		//		semaphore = null;
+		//	}
+		//	//if (disposedStream)
+		//	//{
+		//	//	if (BaseStream is not null)
+		//	//	{
+		//	//		await BaseStream.DisposeAsync();
+		//	//		BaseStream = null;
+		//	//	}
+		//	//}
+		//	GC.SuppressFinalize(this);
+		//}
 	}
 }
 

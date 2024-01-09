@@ -25,7 +25,7 @@ namespace McProtoNet.Core.Protocol
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public Packet ReadNextPacket()
 		{
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 
 			int len = BaseStream.ReadVarInt();
 			if (_compressionThreshold <= 0)
@@ -91,7 +91,7 @@ namespace McProtoNet.Core.Protocol
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token)
 		{
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 
 			int len = await BaseStream.ReadVarIntAsync(token);
 			if (_compressionThreshold <= 0)
@@ -184,26 +184,26 @@ namespace McProtoNet.Core.Protocol
 		}
 		private bool _disposed = false;
 
-		private void ThrowIfDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException(nameof(MinecraftPacketReader));
-		}
-		~MinecraftPacketReader()
-		{
-			Dispose();
-		}
-		public void Dispose()
-		{
-			if (_disposed)
-				return;
+		//private void ThrowIfDisposed()
+		//{
+		//	if (_disposed)
+		//		throw new ObjectDisposedException(nameof(MinecraftPacketReader));
+		//}
+		//~MinecraftPacketReader()
+		//{
+		//	Dispose();
+		//}
+		//public void Dispose()
+		//{
+		//	if (_disposed)
+		//		return;
 
-			//fastStream?.Dispose();
-			//fastStream = null;
+		//	//fastStream?.Dispose();
+		//	//fastStream = null;
 
-			_disposed = true;
-			GC.SuppressFinalize(this);
-		}
+		//	_disposed = true;
+		//	GC.SuppressFinalize(this);
+		//}
 
 
 

@@ -359,7 +359,7 @@ namespace McProtoNet
 
 		private TcpClient tcpClient;
 
-		private async Task<Stream> CreateTcp(CancellationToken token)
+		private async ValueTask<Stream> CreateTcp(CancellationToken token)
 		{
 			token.ThrowIfCancellationRequested();
 			if (Config.Proxy is null)
@@ -408,7 +408,7 @@ namespace McProtoNet
 
 		}
 
-		public async Task Connect()
+		public async ValueTask Connect()
 		{
 			CTS = new();
 			mainStream = await CreateTcp(CTS.Token);
