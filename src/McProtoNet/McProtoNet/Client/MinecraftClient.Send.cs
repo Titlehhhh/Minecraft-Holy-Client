@@ -16,7 +16,7 @@ namespace McProtoNet
 
 		public async ValueTask SendPacket(Action<IMinecraftPrimitiveWriter> action, int id)
 		{
-			
+
 			try
 			{
 				await semaphore.WaitAsync(CTS.Token);
@@ -55,7 +55,7 @@ namespace McProtoNet
 		}
 		public async ValueTask SendPacketAsync(IOutputPacket packet, int id)
 		{
-		
+
 			try
 			{
 				await semaphore.WaitAsync(CTS.Token);

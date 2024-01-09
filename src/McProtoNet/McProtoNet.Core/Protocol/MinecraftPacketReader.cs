@@ -101,13 +101,20 @@ namespace McProtoNet.Core.Protocol
 				len -= id.GetVarIntLength();
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
+				try
+				{
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
-				await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-
-				return new(
-					id,
-					StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
-					memory);
+					return new(
+						id,
+						StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
+						memory);
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
+				}
 
 			}
 

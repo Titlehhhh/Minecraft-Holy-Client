@@ -3,13 +3,9 @@ using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
 using McProtoNet.Utils;
 using Serilog;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO.Pipelines;
 using System.Net.Sockets;
-using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace McProtoNet
 {
@@ -30,7 +26,7 @@ namespace McProtoNet
 		private int _currentState = 0;
 
 
-		Stream mainStream;
+		private Stream mainStream;
 		private MinecraftStream minecraftStream;
 		private MinecraftPacketReader PacketReader;
 		private MinecraftPacketSender PacketSender;
@@ -79,7 +75,7 @@ namespace McProtoNet
 		}
 
 
-		private static IPacketPallete _cache754 = new PacketPalette_1_16();
+
 
 
 
@@ -87,23 +83,23 @@ namespace McProtoNet
 		{
 			IPacketPallete? packetPallete = null;
 			if (Config.Version <= MinecraftVersion.MC_1_12_2_Version)
-				packetPallete = new PacketPalette_1_12_2();
+				packetPallete = PacketPalette_1_12_2.Instance;
 			else if (Config.Version < MinecraftVersion.MC_1_14_Version)
-				packetPallete = new PacketPalette_1_13();
+				packetPallete = PacketPalette_1_13.Instance;
 			else if (Config.Version <= MinecraftVersion.MC_1_15_Version)
-				packetPallete = new PacketPalette_1_14();
+				packetPallete = PacketPalette_1_14.Instance;
 			else if (Config.Version <= MinecraftVersion.MC_1_15_2_Version)
-				packetPallete = new PacketPalette_1_15();
+				packetPallete = PacketPalette_1_15.Instance;
 			else if (Config.Version <= MinecraftVersion.MC_1_16_1_Version)
 			{
-				packetPallete = _cache754;
+				packetPallete = PacketPalette_1_16.Instance;
 			}
 			else if (Config.Version <= MinecraftVersion.MC_1_16_5_Version)
-				packetPallete = new PacketPalette_1_16_2();
+				packetPallete = PacketPalette_1_16_2.Instance;
 			else if (Config.Version <= MinecraftVersion.MC_1_17_1_Version)
-				packetPallete = new PacketPalette_1_17();
+				packetPallete = PacketPalette_1_17.Instance;
 			else if (Config.Version <= MinecraftVersion.MC_1_18_2_Version)
-				packetPallete = new PacketPalette_1_18();
+				packetPallete = PacketPalette_1_18.Instance;
 			// else if (protocol <= MC_1_19_Version)
 			//     packetPallete = new PacketPalette_1_19();
 			//   else if (protocol <= MC_1_19_2_Version)
@@ -266,6 +262,9 @@ namespace McProtoNet
 					CTS = null;
 				}
 
+				tcpClient?.Dispose();
+				tcpClient = null;
+
 				this.mainStream?.Dispose();
 				this.mainStream = null;
 
@@ -309,12 +308,13 @@ namespace McProtoNet
 
 			if (CTS is not null)
 			{
-				
+
 				CTS.Dispose();
 				CTS = null;
 			}
 
-
+			tcpClient?.Dispose();
+			tcpClient = null;
 			semaphore?.Dispose();
 			semaphore = null;
 			mainStream?.Dispose();
@@ -357,7 +357,7 @@ namespace McProtoNet
 
 
 
-
+		private TcpClient tcpClient;
 
 		private async Task<Stream> CreateTcp(CancellationToken token)
 		{
@@ -365,18 +365,45 @@ namespace McProtoNet
 			if (Config.Proxy is null)
 			{
 
-				TcpClient tcp = new TcpClient();
+				tcpClient = new TcpClient();
 
 				_logger.Information("Подключение");
-				await tcp.ConnectAsync(Config.Host, Config.Port, token);
-				return tcp.GetStream();
+				await tcpClient.ConnectAsync(Config.Host, Config.Port, token);
+				return tcpClient.GetStream();
 			}
 			_logger.Information($"Подключение к {Config.Proxy.Type} прокси {Config.Proxy.ProxyHost}:{Config.Proxy.ProxyPort}");
 
 
+			tcpClient = new();
+			try
+			{
 
+				await tcpClient.ConnectAsync(Config.Proxy.ProxyHost, Config.Proxy.ProxyPort, token);
 
-			return await Config.Proxy.ConnectAsync(Config.Host, Config.Port, 5000, token);
+				var tcpStream = tcpClient.GetStream();
+
+				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+				{
+
+					using var combined = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, token);
+
+					using var reg = combined.Token.Register(() => tcpStream.Dispose());
+
+					var stream = await Config.Proxy.ConnectAsync(
+						tcpStream,
+						Config.Host,
+						Config.Port,
+						combined.Token);
+
+					return stream;
+				}
+
+			}
+			catch
+			{
+				tcpClient.Dispose();
+				throw;
+			}
 
 
 		}

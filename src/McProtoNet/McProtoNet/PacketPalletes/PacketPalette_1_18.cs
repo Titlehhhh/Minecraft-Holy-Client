@@ -1,8 +1,11 @@
-﻿namespace McProtoNet
+﻿using System.Collections.Frozen;
+
+namespace McProtoNet
 {
 	public class PacketPalette_1_18 : IPacketPallete
 	{
-		private readonly Dictionary<int, PacketIn> typeIn = new()
+		public static PacketPalette_1_18 Instance { get; } = new();
+		private readonly FrozenDictionary<int, PacketIn> typeIn = FrozenDictionary.ToFrozenDictionary(new Dictionary<int, PacketIn>()
 		{
 			  { 0x00, PacketIn.SpawnEntity },
 			{ 0x01, PacketIn.SpawnExperienceOrb },
@@ -108,9 +111,9 @@
 			{ 0x65, PacketIn.EntityEffect },
 			{ 0x66, PacketIn.DeclareRecipes },
 			{ 0x67, PacketIn.Tags },
-		};
+		});
 
-		private readonly Dictionary<PacketOut, int> typeOut = new()
+		private readonly FrozenDictionary<PacketOut, int> typeOut = FrozenDictionary.ToFrozenDictionary(new Dictionary<PacketOut, int>()
 		{
 		 { PacketOut.TeleportConfirm, 0x00 },
 			{ PacketOut.QueryBlockNBT, 0x01 },
@@ -160,7 +163,7 @@
 			{ PacketOut.Spectate, 0x2D },
 			{ PacketOut.PlayerBlockPlacement, 0x2E },
 			{ PacketOut.UseItem, 0x2F },
-		};
+		});
 
 		public int GetOut(PacketOut packet)
 		{

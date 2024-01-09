@@ -96,7 +96,7 @@ namespace McProtoNet
 					PacketPool.JoinGamePacketPool.Return(join);
 				}
 			}
-			else if ( id == PacketIn.MapData)
+			else if (id == PacketIn.MapData)
 			{
 				return;
 				int mapid = reader.ReadVarInt();
@@ -199,7 +199,7 @@ namespace McProtoNet
 
 				//_mapDataEvent.OnNext(eventArgs);
 			}
-			else if ( id == PacketIn.KeepAlive)
+			else if (id == PacketIn.KeepAlive)
 			{
 				long pingId = reader.ReadLong();
 				SendPacket(w => w.WriteLong(pingId), PacketOut.KeepAlive);
@@ -271,7 +271,7 @@ namespace McProtoNet
 					PacketPool.ChatPacketPool.Return(chatPacket);
 				}
 			}
-			else if ( id == PacketIn.SpawnEntity)
+			else if (id == PacketIn.SpawnEntity)
 			{
 				int entityID = reader.ReadVarInt();
 				Guid entityUUID = reader.ReadUUID();
@@ -319,7 +319,7 @@ namespace McProtoNet
 				}
 
 			}
-			else if ( id == PacketIn.SpawnPlayer)
+			else if (id == PacketIn.SpawnPlayer)
 			{
 				//int EntityID = reader.ReadVarInt();
 				//Guid UUID = reader.ReadUUID();
@@ -338,7 +338,7 @@ namespace McProtoNet
 
 
 			}
-			else if ( id == PacketIn.EntityPosition)
+			else if (id == PacketIn.EntityPosition)
 			{
 
 				//int EntityID = reader.ReadVarInt();
@@ -358,11 +358,11 @@ namespace McProtoNet
 				//var args = new EntityPositionEventArgs(EntityID, DeltaX, DeltaY, DeltaZ, OnGround);
 
 			}
-			else if ( id == PacketIn.EntityRotation)
+			else if (id == PacketIn.EntityRotation)
 			{
 
 			}
-			else if ( id == PacketIn.EntityPositionRotation)
+			else if (id == PacketIn.EntityPositionRotation)
 			{
 				//int EntityID = reader.ReadVarInt();
 

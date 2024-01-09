@@ -1,17 +1,6 @@
-﻿using McProtoNet.Core;
-using McProtoNet.Core.IO;
-using McProtoNet.Core.Protocol;
-using McProtoNet.Utils;
-using Microsoft.IO;
-using QuickProxyNet;
-using Serilog;
-using System.IO.Pipelines;
-using System.Net.Sockets;
-using System.Reactive.Subjects;
-
-namespace McProtoNet
+﻿namespace McProtoNet
 {
-	
+
 	public class ReadWriteStream : Stream
 	{
 		private readonly Stream _write;

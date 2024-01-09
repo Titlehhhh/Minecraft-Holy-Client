@@ -4,6 +4,9 @@ namespace McProtoNet
 {
 	public class PacketPalette_1_16 : IPacketPallete
 	{
+
+		public static PacketPalette_1_16 Instance { get; } = new();
+
 		private readonly FrozenDictionary<int, PacketIn> typeIn = FrozenDictionary.ToFrozenDictionary(new Dictionary<int, PacketIn>()
 		{
 		   { 0x00, PacketIn.SpawnEntity },

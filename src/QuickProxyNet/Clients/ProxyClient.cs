@@ -96,7 +96,7 @@ namespace QuickProxyNet
 				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
 
 
-				var stream = new NetworkStream(socket, false);
+				var stream = new NetworkStream(socket, true);
 				try
 				{
 					
@@ -145,7 +145,10 @@ namespace QuickProxyNet
 
 		public async Task<Stream> EstablishTCPConnectionAsync(CancellationToken token)
 		{
-			//var socket = await SocketHelper.CreateSocket();
+
+			throw new NotImplementedException();
+			//TcpClient tcpClient = new();
+
 			try
 			{
 				await socket.ConnectAsync(ProxyHost, ProxyPort, token);
