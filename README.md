@@ -14,10 +14,7 @@
          alt="GitHub issues">
     <a href="https://github.com/Titlehhhh/Minecraft-Holy-Client/pulls">
     <img src="https://img.shields.io/github/issues-pr-raw/Titlehhhh/Minecraft-Holy-Client.svg?style=flat-square&logo=github&logoColor=white"
-         alt="GitHub pull requests">
-    <a href="https://discord.gg/HVDzx4rCgg">
-    <img src="https://img.shields.io/badge/discord-join%20chat-46BC99"
-         alt="Discord">
+         alt="GitHub pull requests">    
     <a href="https://github.com/Titlehhhh/Minecraft-Holy-Client/releases">
     <img src="https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg"
          alt="Download">
