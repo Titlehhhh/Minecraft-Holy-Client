@@ -2,6 +2,7 @@
 using McProtoNet.Core.Protocol;
 using Microsoft.IO;
 using System.Buffers;
+using System.Threading;
 
 namespace McProtoNet.Core
 {
@@ -38,6 +39,8 @@ namespace McProtoNet.Core
 			return len;
 		}
 
+		
+
 		public static int GetVarIntLength(this int value, Span<byte> data)
 		{
 			var unsigned = (uint)value;
@@ -60,49 +63,16 @@ namespace McProtoNet.Core
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
 		{
-			byte[] buff = ArrayPool<byte>.Shared.Rent(1);
-			try
-			{
-				int numRead = 0;
-				int result = 0;
-				byte read;
-				do
-				{
-					if (stream.Read(buff, 0, 1) <= 0)
-					{
-						throw new EndOfStreamException();
-					}
-					read = buff[0];
+			using var memory = MemoryPool<byte>.Shared.Rent(1);
 
-
-					int value = read & 0b01111111;
-					result |= value << 7 * numRead;
-
-					numRead++;
-					if (numRead > 5)
-					{
-						throw new InvalidOperationException("VarInt is too big");
-					}
-				} while ((read & 0b10000000) != 0);
-
-				return result;
-			}
-			finally
-			{
-				ArrayPool<byte>.Shared.Return(buff);
-			}
-		}
-
-		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
-		{
-			byte[] buff = new byte[1];
+			var buff = memory.Memory.Slice(0, 1).Span;
 
 			int numRead = 0;
 			int result = 0;
 			byte read;
 			do
 			{
-				if (await stream.ReadAsync(buff, token) <= 0)
+				if (stream.Read(buff) <= 0)
 				{
 					throw new EndOfStreamException();
 				}
@@ -120,7 +90,40 @@ namespace McProtoNet.Core
 			} while ((read & 0b10000000) != 0);
 
 			return result;
+
 		}
+
+		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
+		{
+			using var memory = MemoryPool<byte>.Shared.Rent(1);
+			var buff = memory.Memory.Slice(0, 1);
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do
+			{
+				if (await stream.ReadAsync(buff, token) <= 0)
+				{
+					throw new EndOfStreamException();
+				}
+				read = buff.Span[0];
+
+
+				int value = read & 0b01111111;
+				result |= value << 7 * numRead;
+
+				numRead++;
+				if (numRead > 5)
+				{
+					throw new InvalidOperationException("VarInt is too big");
+				}
+			} while ((read & 0b10000000) != 0);
+
+			return result;
+		}
+
+
+
 		public static int ReadVarInt(this Stream stream, out int len)
 		{
 			byte[] buff = new byte[1];
@@ -216,12 +219,12 @@ namespace McProtoNet.Core
 			return totalRead;
 		}
 
-		static RecyclableMemoryStreamManager streamManager = new();
+
 
 		public static void SendPacket(this IMinecraftPacketSender proto, IOutputPacket pack, int id)
 		{
 
-			using (MemoryStream ms = streamManager.GetStream())
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
 				IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 				pack.Write(writer);
@@ -230,14 +233,31 @@ namespace McProtoNet.Core
 			}
 		}
 
-		public static async Task SendPacketAsync(this IMinecraftPacketSender proto, IOutputPacket pack, int id, CancellationToken cancellationToken = default)
+		public static ValueTask SendPacketAsync(this IMinecraftPacketSender proto, IOutputPacket pack, int id, CancellationToken cancellationToken = default)
 		{
-			using (MemoryStream ms = streamManager.GetStream())
+			using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 			{
 				IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 				pack.Write(writer);
 				ms.Position = 0;
-				await proto.SendPacketAsync(new(id, ms), cancellationToken);
+				return proto.SendPacketAsync(new(id, ms), cancellationToken);
+			}
+		}
+
+		public static async ValueTask CopyToFromMemoryStreamAsync(this MemoryStream source, Stream destination, CancellationToken cancellationToken)
+		{
+			byte[] buffer = ArrayPool<byte>.Shared.Rent(64);
+			try
+			{
+				int bytesRead;
+				while ((bytesRead = await source.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false)) != 0)
+				{
+					await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+				}
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buffer);
 			}
 		}
 	}

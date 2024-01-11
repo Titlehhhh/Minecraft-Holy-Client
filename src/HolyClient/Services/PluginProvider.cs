@@ -29,6 +29,12 @@ namespace HolyClient.Services
 
 			_stressTestPlugins.AddOrUpdate(new DefaultPluginSource());
 
+			_stressTestPlugins.AddOrUpdate(new CustomPluginSource(() =>
+			{
+				return new TidePVPBehaviorAttack();
+			}, new PluginMetadata("Titlehhhh","TidePVP Loader","TidePVP"),
+			new PluginTypeReference("HolyClient","TidePVP")));
+
 		}
 
 		private void OnRemovedAssembly(IAssemblyFile assembly)
@@ -61,12 +67,33 @@ namespace HolyClient.Services
 		
 		public PluginMetadata Metadata { get; private set; } = new PluginMetadata("Titlehhhh", "Spam hello bots", "HolyClient default behavior");
 
-		public PluginTypeReference Reference => default(PluginTypeReference);
+		public PluginTypeReference Reference { get; } = new PluginTypeReference();
 
 		public T CreateInstance<T>() where T : IStressTestBehavior
 		{
 			IStressTestBehavior beh = new DefaultBehavior();
 			return (T)beh;
+		}
+	}
+
+	public sealed class CustomPluginSource : IPluginSource
+	{
+		private readonly Func<IStressTestBehavior> _factory;
+
+		public CustomPluginSource(Func<IStressTestBehavior> factory, PluginMetadata metadata, PluginTypeReference reference)
+		{
+			_factory = factory;
+			Metadata = metadata;
+			Reference = reference;
+		}
+
+		public PluginMetadata Metadata { get; private set; } 
+
+		public PluginTypeReference Reference { get; private set; }
+
+		public T CreateInstance<T>() where T : IStressTestBehavior
+		{
+			return (T)_factory();
 		}
 	}
 }

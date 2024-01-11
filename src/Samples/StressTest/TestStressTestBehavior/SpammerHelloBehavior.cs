@@ -13,15 +13,15 @@ namespace TestStressTestBehavior
 		{
 			foreach (var bot in bots)
 			{
-				var d = bot.OnError.Subscribe(async x =>
-				{
-					Console.WriteLine(x.Message);
+				//var d = bot.OnError.Subscribe(async x =>
+				//{
+					
 
-					await Task.Delay(1500);
-					await bot.Restart(true);
-				});
+				//	await Task.Delay(1500);
+				//	await bot.Restart(true);
+				//});
 
-				disposables.Add(d);
+				//disposables.Add(d);
 
 				var d2 = bot.Client.OnJoinGame.Subscribe(async x =>
 				{

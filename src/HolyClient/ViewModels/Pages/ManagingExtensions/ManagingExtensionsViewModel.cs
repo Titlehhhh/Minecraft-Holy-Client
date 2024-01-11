@@ -31,7 +31,6 @@ namespace HolyClient.ViewModels
 
 		public ManagingExtensionsViewModel()
 		{
-			System.Console.WriteLine("CTOR MEVM");
 			HostScreen = Locator.Current.GetService<IScreen>("Main");
 		}
 

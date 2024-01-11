@@ -62,10 +62,10 @@ namespace HolyClient.Services
 						var state = MessagePackSerializer.Deserialize<TAppState>(data);
 						if (state is null)
 						{
-							Console.WriteLine("State null");
+							
 							throw new NullReferenceException("App State is null");
 						}
-						Console.WriteLine("Состояние упешно загружено");
+						
 						return Observable.Return(state);
 
 					}
@@ -75,7 +75,7 @@ namespace HolyClient.Services
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("SuspendErr: " + ex);
+				
 				return Observable.Throw<object>(ex);
 			}
 

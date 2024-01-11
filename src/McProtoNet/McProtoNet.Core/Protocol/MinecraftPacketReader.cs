@@ -1,78 +1,74 @@
 ﻿using Microsoft.IO;
 using System.Buffers;
 using System.IO.Compression;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Core.Protocol
 {
 	public class MinecraftPacketReader : IMinecraftPacketReader
 	{
-		private static readonly RecyclableMemoryStreamManager MSmanager = new RecyclableMemoryStreamManager();
-		private readonly bool disposeStream;
-		private Stream _baseStream;
-		private RecyclableMemoryStream fastStream = MSmanager.GetStream() as RecyclableMemoryStream;
+		public Stream BaseStream { get; set; }
 
 
 
-		public MinecraftPacketReader(Stream baseStream, bool disposeStream)
+		public MinecraftPacketReader(Stream baseStream)
 		{
-			_baseStream = baseStream;
+			BaseStream = baseStream;
 		}
-		public MinecraftPacketReader(Stream baseStream) : this(baseStream, true)
+		public MinecraftPacketReader()
 		{
 
 		}
 
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public Packet ReadNextPacket()
 		{
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 
-			int len = _baseStream.ReadVarInt();
+			int len = BaseStream.ReadVarInt();
 			if (_compressionThreshold <= 0)
 			{
 
-				int id = _baseStream.ReadVarInt();
+				int id = BaseStream.ReadVarInt();
 				len -= id.GetVarIntLength();
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
+				BaseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span));
 
 			}
 
-			int sizeUncompressed = _baseStream.ReadVarInt();
+			int sizeUncompressed = BaseStream.ReadVarInt();
 			if (sizeUncompressed > 0)
 			{
 				len -= sizeUncompressed.GetVarIntLength();
 
 				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
 
-				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
+				BaseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 
 				Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-				fastStream.Position = 0;
-				fastStream.SetLength(len);
-				var destMemory = fastStream.GetMemory(len);
-
-				compressedData.CopyTo(destMemory);
-
-				using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+				using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
 				{
-					int id = ReadZlib.ReadVarInt();
+					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+					{
+						int id = ReadZlib.ReadVarInt();
 
-					sizeUncompressed -= id.GetVarIntLength();
+						sizeUncompressed -= id.GetVarIntLength();
 
-					ReadZlib.ReadExactly(memory.Memory.Slice(0, sizeUncompressed).Span);
+						ReadZlib.ReadExactly(memory.Memory.Slice(0, sizeUncompressed).Span);
 
-					return new Packet(
-						id,
-						MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-						memory);
+						return new Packet(
+							id,
+							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span));
+					}
 				}
 
 
@@ -80,70 +76,80 @@ namespace McProtoNet.Core.Protocol
 			}
 			{
 
-				int id = _baseStream.ReadVarInt();
+				int id = BaseStream.ReadVarInt();
 				len -= id.GetVarIntLength() + 1;
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 
-				_baseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
+				BaseStream.ReadExactly(memory.Memory.Slice(0, len).Span);
 				return new(
 					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+					StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span));
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token)
 		{
-			ThrowIfDisposed();
+			//ThrowIfDisposed();
 
-			int len = await _baseStream.ReadVarIntAsync(token);
+			int len = await BaseStream.ReadVarIntAsync(token);
 			if (_compressionThreshold <= 0)
 			{
 
-				int id = await _baseStream.ReadVarIntAsync(token);
+				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
+				try
+				{
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
-				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-
-				return new(
-					id,
-					MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
-					memory);
+					return new(
+						id,
+						StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
+						memory);
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
+				}
 
 			}
 
-			int sizeUncompressed = await _baseStream.ReadVarIntAsync(token);
+			int sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
 			if (sizeUncompressed > 0)
 			{
 				len -= sizeUncompressed.GetVarIntLength();
 
 				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
 
-				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-
-				Memory<byte> compressedData = memory.Memory.Slice(0, len);
-
-				fastStream.Position = 0;
-				fastStream.SetLength(len);
-				var destMemory = fastStream.GetMemory(len);
-
-				compressedData.CopyTo(destMemory);
-
-				using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+				try
 				{
-					int id = await ReadZlib.ReadVarIntAsync(token);
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 
-					sizeUncompressed -= id.GetVarIntLength();
+					Memory<byte> compressedData = memory.Memory.Slice(0, len);
 
-					await ReadZlib.ReadExactlyAsync(memory.Memory.Slice(0, sizeUncompressed), token);
+					using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
+					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+					{
+						int id = await ReadZlib.ReadVarIntAsync(token);
 
-					return new Packet(
-						id,
-						MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-						memory);
+						sizeUncompressed -= id.GetVarIntLength();
+
+						await ReadZlib.ReadExactlyAsync(memory.Memory.Slice(0, sizeUncompressed), token);
+
+						return new Packet(
+							id,
+							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
+							memory);
+					}
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
 				}
 
 
@@ -151,16 +157,23 @@ namespace McProtoNet.Core.Protocol
 			}
 			{
 
-				int id = await _baseStream.ReadVarIntAsync(token);
+				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
 
 				var memory = MemoryPool<byte>.Shared.Rent(len);
-
-				await _baseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-				return new(
-					id,
-					MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-					memory);
+				try
+				{
+					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
+					return new(
+						id,
+						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
+						memory);
+				}
+				catch
+				{
+					memory.Dispose();
+					throw;
+				}
 			}
 
 		}
@@ -171,54 +184,28 @@ namespace McProtoNet.Core.Protocol
 		}
 		private bool _disposed = false;
 
-		private void ThrowIfDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException(nameof(MinecraftPacketReader));
-		}
-		~MinecraftPacketReader()
-		{
-			Dispose();
-		}
-		public void Dispose()
-		{
-			if (_disposed)
-				return;
+		//private void ThrowIfDisposed()
+		//{
+		//	if (_disposed)
+		//		throw new ObjectDisposedException(nameof(MinecraftPacketReader));
+		//}
+		//~MinecraftPacketReader()
+		//{
+		//	Dispose();
+		//}
+		//public void Dispose()
+		//{
+		//	if (_disposed)
+		//		return;
 
-			fastStream?.Dispose();
-			fastStream = null;
-			if (disposeStream)
-			{
-				if (_baseStream is not null)
-				{
-					_baseStream.Dispose();
-					_baseStream = null;
-				}
-			}
-			_disposed = true;
-			GC.SuppressFinalize(this);
-		}
+		//	//fastStream?.Dispose();
+		//	//fastStream = null;
 
-		public async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			if (fastStream is not null)
-			{
-				await fastStream.DisposeAsync();
-				fastStream = null;
-			}
-			if (disposeStream)
-			{
-				if (_baseStream is not null)
-				{
-					await _baseStream.DisposeAsync();
-					_baseStream = null;
-				}
-			}
-			GC.SuppressFinalize(this);
-		}
+		//	_disposed = true;
+		//	GC.SuppressFinalize(this);
+		//}
+
+
 
 
 	}

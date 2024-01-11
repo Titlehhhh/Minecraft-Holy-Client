@@ -65,7 +65,7 @@ namespace HolyClient.ViewModels
 
 			this.WhenActivated(d =>
 			{
-				Console.WriteLine("Activet");
+				
 
 
 				LoadVersionsAndDownlaodCount();

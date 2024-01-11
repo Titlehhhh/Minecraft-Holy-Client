@@ -57,7 +57,7 @@ namespace McProtoNet.Core.Protocol
 			}
 		}
 
-		static RecyclableMemoryStreamManager streamManager = new();
+		
 		public async Task SendPacketAsync(MinecraftPacket packet, CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -65,7 +65,7 @@ namespace McProtoNet.Core.Protocol
 
 			if (ok)
 			{
-				using (MemoryStream ms = streamManager.GetStream())
+				using (MemoryStream ms = StaticResources.MSmanager.GetStream())
 				{
 					IMinecraftPrimitiveWriter writer = new MinecraftPrimitiveWriter(ms);
 					packet.Write(writer);

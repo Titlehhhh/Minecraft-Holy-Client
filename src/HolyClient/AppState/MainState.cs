@@ -4,6 +4,7 @@ using HolyClient.StressTest;
 using MessagePack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Collections;
 
 namespace HolyClient.AppState;
 
@@ -18,19 +19,13 @@ public class MainState : ReactiveObject
 	[Key(1)]
 	public Page SelectedPage { get; set; }
 
-
 	[Reactive]
-	[Key(2)]
-	public IBotManager BotManagerState { get; set; } = new BotManager();
+	[Key(5)]
+	public StressTestState StressTest { get; set; } = new();
 
-
-	[Reactive]
-	[Key(3)]
-	public IStressTest StressTestState { get; set; } = new HolyClient.StressTest.StressTest();
 
 
 	[Reactive]
 	[Key(4)]
 	public ExtensionManagerState ExtensionManagerState { get; set; } = new();
 }
-

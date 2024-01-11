@@ -28,18 +28,17 @@ namespace HolyClient.StressTest
 			this.cancellationToken = cancellationToken;
 		}
 
-		private Subject<Exception> _onError = new();
-
-		public IObservable<Exception> OnError => _onError;
 
 		public async Task Restart(bool changeNickAndProxy)
 		{
 			if (cancellationToken.IsCancellationRequested)
 				return;
 
+			Client.Disconnect();
+
+
 			try
 			{
-				Client.Disconnect();
 				if (changeNickAndProxy)
 				{
 					IProxyClient? proxy = null;
@@ -58,31 +57,18 @@ namespace HolyClient.StressTest
 					};
 				}
 
-				await Client.Login(Logger.None);
-
-
+				await Client.Start(Logger.None);
 
 			}
-			catch (Exception ex)
+			catch
 			{
-
-
-				_onError.OnNext(ex);
-
+				throw;
 			}
+
+
 		}
 
-		private async void WaitClient()
-		{
-			try
-			{
-				await Client;
-			}
-			catch (Exception ex)
-			{
-				this._onError.OnNext(ex);
-			}
-		}
+
 	}
 
 }

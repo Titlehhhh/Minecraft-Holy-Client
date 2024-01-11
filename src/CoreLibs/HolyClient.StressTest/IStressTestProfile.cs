@@ -2,15 +2,28 @@
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
 using McProtoNet;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace HolyClient.StressTest
 {
-
-	[MessagePack.Union(0, typeof(StressTest))]
-	public interface IStressTest : INotifyPropertyChanged, INotifyPropertyChanging
+	public class ExceptionThrowCount
 	{
+		public Type TypeException { get; set; }
 
+		public int Count { get; set; }
+
+		public Dictionary<string, int> Messages { get; set; }
+	}
+	
+
+	[MessagePack.Union(0, typeof(StressTestProfile))]
+	public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
+	{
+		Guid Id { get; set; }
+		string Name { get; set; }
+
+		
 
 		string Server { get; set; }
 
@@ -23,16 +36,20 @@ namespace HolyClient.StressTest
 		bool UseProxy { get; set; }
 		MinecraftVersion Version { get; set; }
 
-
+		
 		ISourceCache<IProxySource, Guid> Proxies { get; }
 
 
 		IObservable<StressTestMetrik> Metrics { get; }
 
+
+		ConcurrentDictionary<Tuple<string,string>, ExceptionCounter> ExceptionCounter { get; }
+
 		IStressTestBehavior Behavior { get; }
 		StressTestServiceState CurrentState { get; }
 
 		PluginTypeReference BehaviorRef { get; }
+		bool CheckDNS { get; set; }
 
 		void SetBehavior(IPluginSource pluginSource);
 		void DeleteBehavior();

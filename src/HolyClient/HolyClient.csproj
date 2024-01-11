@@ -14,9 +14,13 @@
   
   <ItemGroup>
     <AvaloniaXaml Remove="Models\StressTest\**" />
+    <AvaloniaXaml Remove="Views\Pages\StressTest\Behavior\**" />
     <Compile Remove="Models\StressTest\**" />
+    <Compile Remove="Views\Pages\StressTest\Behavior\**" />
     <EmbeddedResource Remove="Models\StressTest\**" />
+    <EmbeddedResource Remove="Views\Pages\StressTest\Behavior\**" />
     <None Remove="Models\StressTest\**" />
+    <None Remove="Views\Pages\StressTest\Behavior\**" />
   </ItemGroup>
 
   
@@ -58,7 +62,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
     <PackageReference Include="NuGet.Protocol" Version="6.8.0" />
     <PackageReference Include="NuGet.Resolver" Version="6.8.0" />
-    <PackageReference Include="ReactiveUI.Fody" Version="19.5.31" />
+    <PackageReference Include="ReactiveUI.Fody" Version="19.5.39" />
     <PackageReference Include="ReactiveUI.Validation" Version="3.1.7" />
     <PackageReference Include="SkiaSharp.Skottie" Version="2.88.6" />
     <PackageReference Include="SpacedGrid-Avalonia" Version="11.0.0" />
@@ -68,23 +72,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\Pages\BotManager\BotProfileView.axaml.cs">
-      <DependentUpon>BotProfileView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pages\BotManager\EmptyProfilesView.axaml.cs">
-      <DependentUpon>EmptyProfilesView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
       <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\StressTest\Dialogs\SelectImportSourceProxyDialogContent.axaml.cs">
       <DependentUpon>SelectImportSourceProxyDialogContent.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\RootView.axaml.cs">
+      <DependentUpon>RootView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
-    <Folder Include="Views\Pages\StressTest\Behavior\" />
+    <Folder Include="Commands\" />
   </ItemGroup>
 
   <ItemGroup>

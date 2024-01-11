@@ -18,7 +18,7 @@ namespace HolyClient.Views
 	{
 		private Window _owner;
 
-		private SpalshScreenViewModel spalshScreenViewModel = new();
+		private SplashScreenViewModel SplashScreenViewModel = new();
 		public ApplicationSplashScreen(Window owner)
 		{
 			_owner = owner;
@@ -27,7 +27,7 @@ namespace HolyClient.Views
 
 			SplashScreenContent = new SplashContent
 			{
-				DataContext = spalshScreenViewModel
+				DataContext = SplashScreenViewModel
 			};
 		}
 
@@ -52,11 +52,11 @@ namespace HolyClient.Views
 			subject.ObserveOn(RxApp.MainThreadScheduler)
 				.Subscribe(x =>
 				{
-					spalshScreenViewModel.State = x;
-					spalshScreenViewModel.Progress += 30;
+					SplashScreenViewModel.State = x;
+					SplashScreenViewModel.Progress += 30;
 				}, () =>
 				{
-					spalshScreenViewModel.Progress = 100;
+					SplashScreenViewModel.Progress = 100;
 				}).DisposeWith(disp);
 
 			

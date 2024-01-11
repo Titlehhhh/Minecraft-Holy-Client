@@ -78,7 +78,7 @@ namespace HolyClient.ViewModels
 
 				if (answer == ConfirmDeleteAssemblyAnswer.ForceDelete)
 				{
-					IStressTest stressTest = Locator.Current.GetService<IStressTest>();
+					IStressTestProfile stressTest = Locator.Current.GetService<IStressTestProfile>();
 
 					if (stressTest.CurrentState != StressTestServiceState.None)
 					{

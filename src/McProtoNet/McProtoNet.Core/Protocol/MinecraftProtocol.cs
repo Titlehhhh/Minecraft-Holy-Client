@@ -19,8 +19,8 @@ namespace McProtoNet.Core.Protocol
 		public MinecraftProtocol(Stream baseStream, bool disposeStream)
 		{
 			_baseStream = baseStream;
-			Reader = new MinecraftPacketReader(_baseStream, disposeStream);
-			Sender = new MinecraftPacketSender(_baseStream, disposeStream);
+			Reader = new MinecraftPacketReader(_baseStream );
+			Sender = new MinecraftPacketSender(_baseStream);
 		}
 
 		~MinecraftProtocol()
@@ -35,8 +35,8 @@ namespace McProtoNet.Core.Protocol
 				return;
 			_disposed = true;
 
-			Reader?.Dispose();
-			Sender?.Dispose();
+			//Reader?.Dispose();
+			//Sender?.Dispose();
 			Reader = null;
 			Sender = null;
 

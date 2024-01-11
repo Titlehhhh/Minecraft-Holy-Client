@@ -1,8 +1,11 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 
 namespace QuickProxyNet
 {
+
+
 	public abstract class ProxyClient : IProxyClient
 	{
 		public abstract ProxyType Type { get; }
@@ -20,8 +23,16 @@ namespace QuickProxyNet
 
 			ProxyHost = host;
 			ProxyPort = port == 0 ? 1080 : port;
-		}
 
+			socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+			{
+				NoDelay = true,
+				LingerState = new LingerOption(true, 0),
+				SendTimeout = 10000,
+				ReceiveTimeout = 10000
+			};
+		}
+		private Socket socket;
 		protected ProxyClient(string host, int port, NetworkCredential credentials) : this(host, port)
 		{
 			if (credentials == null)
@@ -70,27 +81,28 @@ namespace QuickProxyNet
 				throw new ArgumentOutOfRangeException(nameof(timeout));
 		}
 
-		public async ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
+		public async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			var socket = SocketHelper.CreateSocket();
-
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+			{
+				NoDelay = true,
+				LingerState = new LingerOption(true, 0),
+				SendTimeout = 10000,
+				ReceiveTimeout = 10000
+			};
 
 			try
 			{
 				await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-			}
-			catch
-			{
-				socket.Dispose();
-				throw;
-			}
 
 
-			var stream = new NetworkStream(socket, true);
-			using (cancellationToken.Register(() => stream.Dispose()))
-			{
+				var stream = new NetworkStream(socket, true);
 				try
 				{
+					
+
+					using var reg = cancellationToken.Register(() => stream.Dispose());
+
 					return await ConnectAsync(stream, host, port, cancellationToken);
 				}
 				catch
@@ -98,13 +110,23 @@ namespace QuickProxyNet
 					stream.Dispose();
 					throw;
 				}
+
+			}
+			catch
+			{
+
+				
+				throw;
 			}
 
 		}
 
-		public async virtual ValueTask<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default(CancellationToken))
+		public async virtual Task<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			ValidateArguments(host, port, timeout);
+
+			cancellationToken.ThrowIfCancellationRequested();
+
 
 
 			using (var ts = new CancellationTokenSource(timeout))
@@ -116,14 +138,17 @@ namespace QuickProxyNet
 				}
 			}
 
-			//throw new ProxyProtocolException("Deadline Exception");
+
 		}
 
 		public abstract ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default);
 
-		public async ValueTask<Stream> EstablishTCPConnectionAsync(CancellationToken token)
+		public async Task<Stream> EstablishTCPConnectionAsync(CancellationToken token)
 		{
-			var socket = SocketHelper.CreateSocket();
+
+			throw new NotImplementedException();
+			//TcpClient tcpClient = new();
+
 			try
 			{
 				await socket.ConnectAsync(ProxyHost, ProxyPort, token);
@@ -137,6 +162,19 @@ namespace QuickProxyNet
 
 
 			return new NetworkStream(socket, true);
+		}
+		private bool disposed = false;
+		public void Dispose()
+		{
+			if (disposed)
+				return;
+
+			disposed = true;
+			Interlocked.Exchange(ref socket, null)?.Dispose();
+			
+
+			GC.SuppressFinalize(this);
+
 		}
 	}
 }

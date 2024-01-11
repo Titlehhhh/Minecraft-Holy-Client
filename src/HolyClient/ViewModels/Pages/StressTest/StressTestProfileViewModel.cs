@@ -1,12 +1,10 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
-using HolyClient.Commands;
-using HolyClient.Common;
+using HolyClient.AppState;
 using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
 using McProtoNet;
-using NuGet.Configuration;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
@@ -19,103 +17,59 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
-public class StressTestConfigurationViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
-{
 
+public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
+{
 	private static string GetTr(string key)
 	{
-		return $"StressTest.Configuration.GeneralSettings.Validation.{key}";
+		return $"StressTest.Profile.GeneralSettings.Validation.{key}";
 	}
 
-	public string? UrlPathSegment => throw new NotImplementedException();
-	public IScreen HostScreen { get; }
+	public Guid Id { get; private set; }
+
 	public ViewModelActivator Activator { get; } = new();
 
+	public string? UrlPathSegment => throw new NotImplementedException();
+
+	public IScreen HostScreen { get; private set; }
 
 	[Reactive]
-	public ICommand StartCommand { get; private set; }
+	public string Name { get; set; }
 
 
-	#region General Settings
-	[Reactive]
-	public string Server { get; set; }
-	[Reactive]
-	public string BotsNickname { get; set; }
-	[Reactive]
-	public int NumberOfBots { get; set; }
-
-	[Reactive]
-	public bool UseProxy { get; set; }
-
-	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
-
-	[Reactive]
-	public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-
-	#endregion
-
-	#region Behavior
-
-
-	[Reactive]
-	public StressTestPluginViewModel? SelectedBehavior { get; set; }
-
-	[Reactive]
-	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
-
-
-	#endregion
-
-	[Reactive]
-	public IStressTestBehavior? CurrentBehavior { get; private set; }
-
-	[Reactive]
-	public IPluginSource? InstalledBehavior { get; private set; }
-	#region Proxy
-
-
-	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
-	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
-	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
-	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
-
-	[Reactive]
-	public ICommand AddSourceProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand ExportProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteAllProxyCommand { get; private set; }
-
-
-
-	[Reactive]
-	public ProxySourceViewModel? SelectedProxy { get; set; }
-
-	public ReadOnlyObservableCollection<ProxySourceViewModel> _proxies;
-
-	public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
-
-	#endregion
 
 	private SelectImportSourceProxyViewModel _selectProxyImportSourceViewModel = new();
-	public StressTestConfigurationViewModel(IScreen hostScreen, IStressTest state)
+
+	private IStressTestProfile _state;
+
+	public StressTestProfileViewModel(IStressTestProfile state)
 	{
 
+		_state = state;
 
 		#region Bind to state
+		this.Id = state.Id;
+		this.Name = state.Name;
 		this.Server = state.Server;
 		this.Version = state.Version;
 		this.BotsNickname = state.BotsNickname;
 		this.NumberOfBots = state.NumberOfBots;
 		this.UseProxy = state.UseProxy;
+		this.CheckDNS = state.CheckDNS;
+
+		this.WhenAnyValue(x => x.Name)
+			.BindTo(state, x => x.Name);
+
+		this.WhenAnyValue(x => x.CheckDNS)
+			.BindTo(state, x => x.CheckDNS);
 
 		this.WhenAnyValue(x => x.Server)
 			.BindTo(state, x => x.Server);
+
 
 		this.WhenAnyValue(x => x.Version)
 			.BindTo(state, x => x.Version);
@@ -130,7 +84,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 			.BindTo(state, x => x.UseProxy);
 		#endregion
 
-		HostScreen = hostScreen;
+		//HostScreen = hostScreen;
 		#region Configure validation
 
 
@@ -154,7 +108,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						{
 							return ValidationState.Valid;
 						}
-						if(name.Length >= 14)
+						if (name.Length >= 14)
 						{
 							return new ValidationState(false, GetTr("BotsNickname.Long"));
 						}
@@ -163,7 +117,9 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
-			StartCommand = new StartStressTestCommand(hostScreen, state, this.IsValid());
+
+
+			StartCommand = ReactiveCommand.CreateFromTask(this.StartStressTest, this.IsValid());
 		});
 		#endregion
 
@@ -230,7 +186,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 						proxySource = new UrlProxySource(vm.Type, vm.URL);
 						importVm = vm;
 					}
-					
+
 					if (importVm.IsValid())
 					{
 						if (proxySource is not null)
@@ -278,7 +234,7 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 
 		#region Configure plugins
 
-		Console.WriteLine("CurrBeh: " + state.Behavior);
+
 
 		this.CurrentBehavior = state.Behavior;
 
@@ -309,5 +265,119 @@ public class StressTestConfigurationViewModel : ReactiveValidationObject, IRouta
 	}
 
 
+	private async Task StartStressTest()
+	{
 
+
+		var rootScreen = Locator.Current.GetService<IScreen>("Root");
+
+		LoggerWrapper loggerWrapper = new LoggerWrapper();
+
+		Serilog.ILogger logger = loggerWrapper;
+
+		try
+		{
+			var cancelCommand = ReactiveCommand.CreateFromTask(async () =>
+			{
+				
+
+				var mainVM = Locator.Current.GetService<MainViewModel>();
+
+				await rootScreen.Router.Navigate.Execute(mainVM);
+				await _state.Stop();
+
+			});
+
+
+
+			StressTestProcessViewModel proccess = new StressTestProcessViewModel(cancelCommand, _state, loggerWrapper);
+			await rootScreen.Router.Navigate.Execute(proccess);
+
+
+
+			await _state.Start(logger);
+
+
+		}
+		catch (TaskCanceledException)
+		{
+			logger.Information("[STRESS TEST] Завершился из-за отмены");
+		}
+		catch (Exception ex)
+		{
+			logger.Error(ex, "[STRESS TEST] завершился с ошибкой");
+		}
+		finally
+		{
+
+		}
+	}
+
+
+
+
+	#region General Settings
+	[Reactive]
+	public string Server { get; set; }
+	[Reactive]
+	public string BotsNickname { get; set; }
+	[Reactive]
+	public int NumberOfBots { get; set; }
+
+	[Reactive]
+	public bool UseProxy { get; set; }
+	[Reactive]
+	public bool CheckDNS { get;  set; }
+	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
+
+	[Reactive]
+	public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
+
+	#endregion
+
+	#region Behavior
+
+
+	[Reactive]
+	public StressTestPluginViewModel? SelectedBehavior { get; set; }
+
+	[Reactive]
+	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
+
+
+	#endregion
+
+	[Reactive]
+	public IStressTestBehavior? CurrentBehavior { get; private set; }
+
+	[Reactive]
+	public IPluginSource? InstalledBehavior { get; private set; }
+	#region Proxy
+
+
+	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
+	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
+	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
+	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
+
+	[Reactive]
+	public ICommand AddSourceProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand ExportProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand DeleteProxyCommand { get; private set; }
+	[Reactive]
+	public ICommand DeleteAllProxyCommand { get; private set; }
+
+	[Reactive]
+	public ICommand StartCommand { get; private set; }
+
+	[Reactive]
+	public ProxySourceViewModel? SelectedProxy { get; set; }
+
+	public ReadOnlyObservableCollection<ProxySourceViewModel> _proxies;
+
+	public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
+
+	#endregion
 }

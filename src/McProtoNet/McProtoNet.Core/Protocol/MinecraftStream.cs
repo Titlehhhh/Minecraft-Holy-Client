@@ -22,8 +22,7 @@ namespace McProtoNet.Core.Protocol
 		public override long Length => BaseStream.Length;
 
 		public override long Position { get => BaseStream.Position; set => BaseStream.Position = value; }
-		public SemaphoreSlim Lock { get; } = new SemaphoreSlim(1, 1);
-
+		
 
 		public MinecraftStream(Stream stream)
 		{
@@ -247,7 +246,7 @@ namespace McProtoNet.Core.Protocol
 			if (_disposed)
 				return;
 			BaseStream.Dispose();
-			Lock.Dispose();
+			
 			_disposed = true;
 		}
 

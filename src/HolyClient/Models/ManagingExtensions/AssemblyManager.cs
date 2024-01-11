@@ -51,7 +51,7 @@ namespace HolyClient.Models.ManagingExtensions
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error loading plugin {file.Name} exception: {ex}");
+			
 			}
 			file.FileUpdated.Subscribe(x =>
 			{
