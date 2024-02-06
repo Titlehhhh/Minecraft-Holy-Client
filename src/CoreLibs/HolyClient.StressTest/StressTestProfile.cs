@@ -101,7 +101,7 @@ namespace HolyClient.StressTest
 		[IgnoreMember]
 		public StressTestServiceState CurrentState { get; private set; }
 
-		
+
 		[IgnoreMember]
 		public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; private set; } = new();
 
@@ -371,7 +371,7 @@ namespace HolyClient.StressTest
 				logger.Information("Запуск поведения");
 				if (Behavior is not null)
 				{
-					await Behavior.Activate(disposables, stressTestBots, cancellationTokenSource.Token);
+					await Behavior.Activate(disposables, stressTestBots, logger, cancellationTokenSource.Token);
 				}
 				logger.Information("Поведение запущено");
 
@@ -408,22 +408,22 @@ namespace HolyClient.StressTest
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
 				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
 			}
-			
+
 			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
 			foreach (var s in sources)
 			{
 				tasks.Add(s.GetProxiesAsync());
 			}
-		
+
 			var result = await Task.WhenAll(tasks);
 
 			var proxies = result.SelectMany(x => x).ToList();
-			
+
 			var provider = new ProxyProvider(proxies);
 
 			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
-			
+
 			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
 			return provider;

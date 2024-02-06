@@ -35,24 +35,6 @@ using System.Windows.Input;
 namespace HolyClient.ViewModels;
 
 
-public sealed class ExceptionInfo
-{
-	public string Type { get; private set; }
-	public string Message { get; private set; }
-	public int Count { get; private set; }
-
-	public Tuple<string, string> Key { get; private set; }
-
-	public ExceptionInfo(string type, string message, int count)
-	{
-		Type = type;
-		Message = message;
-		Count = count;
-		Key = Tuple.Create<string, string>(Type, Message);
-	}
-}
-
-
 public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
 {
 	[Reactive]
@@ -108,7 +90,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 	#region Exceptions
 	[Reactive]
-	public ReadOnlyObservableCollection<ExceptionInfo> Exceptions { get; private set; }
+	public ReadOnlyObservableCollection<ExceptionInfoViewModel> Exceptions { get; private set; }
 	#endregion
 
 	private readonly DateTimeAxis _botsOnlineAxis;
@@ -218,13 +200,13 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 		this.WhenActivated(async d =>
 		{
-			SourceCache<ExceptionInfo, Tuple<string, string>> exceptions = new(x => x.Key);
+			SourceCache<ExceptionInfoViewModel, Tuple<string, string>> exceptions = new(x => x.Key);
 
 
 
 			exceptions
 				.Connect()				
-				.Sort(SortExpressionComparer<ExceptionInfo>.Descending(p => p.Count))				
+				.Sort(SortExpressionComparer<ExceptionInfoViewModel>.Descending(p => p.Count))				
 				.Bind(out var _exceptions)
 				.Subscribe()
 				.DisposeWith(d);
@@ -262,7 +244,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 				.Select(x =>
 				{
 
-					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfo(x.Key.Item1, x.Key.Item2, x.Value.Count));
+					return stressTest.ExceptionCounter.ToArray().Select(x => new ExceptionInfoViewModel(x.Key.Item1, x.Key.Item2, x.Value.Count));
 
 				})
 				.ObserveOn(RxApp.MainThreadScheduler)

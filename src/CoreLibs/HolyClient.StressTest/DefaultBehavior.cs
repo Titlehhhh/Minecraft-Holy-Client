@@ -1,4 +1,5 @@
 ﻿using HolyClient.Abstractions.StressTest;
+using Serilog;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -6,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace HolyClient.StressTest
 {
-	public class DefaultBehavior : IStressTestBehavior
+	public class DefaultBehavior : BaseStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
 		public string SpamText { get; set; } = "!Hello from Minecraft Holy Client";
@@ -24,7 +25,7 @@ namespace HolyClient.StressTest
 
 		private static Regex SayVerifyRegex = new(@"\.say \/verify (\d+)");
 
-		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
+		public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots,ILogger logger, CancellationToken cancellationToken)
 		{
 			foreach (var bot in bots)
 			{
@@ -50,7 +51,7 @@ namespace HolyClient.StressTest
 					{
 						cts = null;
 					}
-					if (Reconnects <= 0)
+					if (Reconnects <= 1)
 					{
 						await bot.Restart(true);
 					}
@@ -89,8 +90,9 @@ namespace HolyClient.StressTest
 
 						await Task.Delay(500);
 
+						await bot.Client.SendChat("/register 21qwerty");
 						await bot.Client.SendChat("/register 21qwerty 21qwerty");
-
+						await bot.Client.SendChat("/login 21qwerty");
 						try
 						{
 							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -111,6 +113,7 @@ namespace HolyClient.StressTest
 						{
 
 						}
+
 
 						var spamming = SpamMessage(cts, bot);
 						var nuker = SpamNocomAsync(cts, bot);

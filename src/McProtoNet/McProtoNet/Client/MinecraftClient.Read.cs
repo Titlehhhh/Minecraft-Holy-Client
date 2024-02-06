@@ -8,17 +8,13 @@ namespace McProtoNet
 {
 	public partial class MinecraftClient
 	{
-		private CompositeDisposable disposables = new CompositeDisposable();
+		private CompositeDisposable _events = new CompositeDisposable();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		private Subject<T> CreateEvent<T>()
 		{
 			Subject<T> subject = new Subject<T>();
-			disposables.Add(Disposable.Create(() =>
-			{
-				subject.OnCompleted();
-				subject.Dispose();
-			}));
+			_events.Add(subject);
 
 			return subject;
 		}
@@ -51,6 +47,8 @@ namespace McProtoNet
 
 
 
+
+
 		public IObservable<RespawnEventArgs> OnRespawn => _respawnEvent;
 		public IObservable<ChatMessageEventArgs> OnChatMessage => _chatEvent;
 		public IObservable<DisconnectEventArgs> OnDisconnect => _disconnectEvent;
@@ -67,19 +65,24 @@ namespace McProtoNet
 		{
 
 
-			if (_disconnectEvent.HasObservers && id == PacketIn.Disconnect)
+			if (id == PacketIn.Disconnect)
 			{
-				string reason = reader.ReadString();
-				var dis = PacketPool.DisconnectEventPool.Get();
-				try
-				{
-					dis.Reason = reason;
 
-					_disconnectEvent.OnNext(dis);
-				}
-				finally
+				string reason = reader.ReadString();
+
+				if (_disconnectEvent.HasObservers)
 				{
-					PacketPool.DisconnectEventPool.Return(dis);
+					var dis = PacketPool.DisconnectEventPool.Get();
+					try
+					{
+						dis.Reason = reason;
+
+						_disconnectEvent.OnNext(dis);
+					}
+					finally
+					{
+						PacketPool.DisconnectEventPool.Return(dis);
+					}
 				}
 				throw new DisconnectException(reason);
 			}

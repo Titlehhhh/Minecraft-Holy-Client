@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace HolyClient.ViewModels;
 
-public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivatableViewModel
+public partial class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivatableViewModel
 {
 	public ViewModelActivator Activator { get; } = new();
 
@@ -29,6 +29,8 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 	private static int testId = 0;
 	public StressTestViewModel()
 	{
+		
+
 		HostScreen = null;
 
 		var state = Locator.Current.GetService<StressTestState>();
@@ -49,9 +51,14 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 		   .RefCount();
 
 		outputCollectionChanges
-			.Filter(provider => provider.Id == state.SelectedProfileId)
+			
 			.ObserveOn(RxApp.MainThreadScheduler)
-			.OnItemAdded(provider => SelectedProfile = provider)
+			.OnItemAdded(provider =>
+			{
+				if (provider is null)
+					throw new Exception("asd");
+				SelectedProfile = provider;
+			})
 			.Subscribe();
 
 		//outputCollectionChanges
@@ -61,7 +68,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 		this.WhenAnyValue(x => x.SelectedProfile)
 			.Subscribe(x =>
 			{
-				
+
 			});
 
 		this.WhenAnyValue(x => x.SelectedProfile)
@@ -75,11 +82,11 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 			int i = 1;
 			string basename = "New profile ";
 			string name = basename + i;
-			while (state.Profiles.Items.ToArray().Any(x=>x.Name == name))
+			while (state.Profiles.Items.ToArray().Any(x => x.Name == name))
 			{
 				name = basename + (i++);
 			}
-
+			
 			state.Profiles.AddOrUpdate(new StressTestProfile()
 			{
 				Name = name
@@ -97,7 +104,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
 					var id = SelectedProfile.Id;
 					SelectedProfile = Profiles.FirstOrDefault();
 					state.Profiles.Remove(id);
-					
+
 				}
 			}
 		});

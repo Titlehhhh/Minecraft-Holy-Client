@@ -333,6 +333,8 @@ namespace McProtoNet
 			{
 
 			}
+
+			_events.Dispose();
 			pipe = null;
 
 

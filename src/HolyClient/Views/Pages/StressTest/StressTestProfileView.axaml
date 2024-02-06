@@ -155,7 +155,6 @@
 				</ScrollViewer>
 			</TabItem>
 
-
 			<TabItem  Header="{Tr StressTest.Configuration.Proxy}" FontSize="15">
 				<ui:FABorder BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
@@ -330,6 +329,11 @@
 						</Grid>
 					</Border>
 				</sg:SpacedGrid>
+			</TabItem>
+
+
+			<TabItem FontSize="15" Header="Behavior">
+				
 			</TabItem>
 		</TabControl>
 

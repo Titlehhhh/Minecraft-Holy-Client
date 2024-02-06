@@ -6,6 +6,7 @@
 			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:reactive="http://reactiveui.net"
 			 xmlns:views="using:HolyClient.Views"
+			 xmlns:vm="using:HolyClient.ViewModels"
 			 x:Class="HolyClient.Views.StressTestView">
 	<Grid>
 		<StackPanel IsVisible="{Binding !Profiles.Count}" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -47,13 +48,13 @@
 					</ListBox>
 				</Border>
 			</Grid>
-			<TransitioningContentControl Margin="10,0,0,0" Grid.Column="1" Content="{Binding SelectedProfile}">
-				<TransitioningContentControl.ContentTemplate>
-					<DataTemplate >
+			<ContentControl Margin="10,0,0,0" Grid.Column="1" Content="{Binding SelectedProfile}" >
+				<ContentControl.ContentTemplate>
+					<DataTemplate x:DataType="vm:StressTestProfileViewModel">
 						<views:StressTestProfileView />
 					</DataTemplate>
-				</TransitioningContentControl.ContentTemplate>
-			</TransitioningContentControl>
+				</ContentControl.ContentTemplate>
+			</ContentControl>
 		</Grid>
 	</Grid>
 </UserControl>

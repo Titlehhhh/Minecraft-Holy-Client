@@ -33,7 +33,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 	public ViewModelActivator Activator { get; } = new();
 
-	public string? UrlPathSegment => throw new NotImplementedException();
+	public string? UrlPathSegment => "Profile";
 
 	public IScreen HostScreen { get; private set; }
 
