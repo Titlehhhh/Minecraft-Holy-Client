@@ -1,21 +1,23 @@
-﻿using HolyClient.Abstractions.StressTest;
+﻿
+using HolyClient.Abstractions.StressTest;
+using Serilog;
 using System.Reactive.Disposables;
 
 namespace TestStressTestBehavior
 {
 
-	public class SpammerHelloBehavior : IStressTestBehavior
+	public class SpammerHelloBehavior : BaseStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
 		public string SpamText { get; set; } = "Hello";
 
-		public Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, CancellationToken cancellationToken)
+		public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger, CancellationToken cancellationToken)
 		{
 			foreach (var bot in bots)
 			{
 				//var d = bot.OnError.Subscribe(async x =>
 				//{
-					
+
 
 				//	await Task.Delay(1500);
 				//	await bot.Restart(true);

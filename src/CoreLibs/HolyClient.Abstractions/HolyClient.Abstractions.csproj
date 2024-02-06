@@ -10,6 +10,8 @@
 
 
 	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.0.7" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.7" />
 		<PackageReference Include="MinVer" Version="5.0.0-beta.1" PrivateAssets="All" />
 		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
 	</ItemGroup>

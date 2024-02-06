@@ -6,6 +6,7 @@ using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
 using ReactiveUI;
+using System.Diagnostics;
 using System.Reactive.Disposables;
 
 namespace HolyClient.Views;
@@ -18,6 +19,9 @@ public partial class StressTestProfileView : ReactiveUserControl<StressTestProfi
 
 		this.WhenActivated(d =>
 		{
+			Trace.WriteLine("Activate");
+
+
 
 			var NotificationManager = new Avalonia.Controls.Notifications.WindowNotificationManager(TopLevel.GetTopLevel(this));
 

@@ -1,4 +1,7 @@
-﻿namespace HolyClient.Core.Helpers
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+
+namespace HolyClient.Core.Helpers
 {
 	public class MapDataHelper
 	{
