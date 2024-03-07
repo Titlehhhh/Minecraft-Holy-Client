@@ -3,6 +3,11 @@ using McProtoNet.Core.Protocol;
 
 namespace McProtoNet.Core
 {
+	public enum HandShakeIntent : int
+	{
+		STATUS = 1,
+		LOGIN = 2
+	}
 	public sealed class HandShakePacket : MinecraftPacket
 	{
 		public HandShakeIntent Intent { get; private set; }
