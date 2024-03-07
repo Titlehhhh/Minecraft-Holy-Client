@@ -17,7 +17,7 @@ namespace HolyClient.StressTest
 		[System.ComponentModel.DisplayName("Reconnect timeout")]
 		public int ReconnectTimeout { get; set; } = 5000;
 
-		[System.ComponentModel.DisplayName("Reconnect timeout")]
+		[System.ComponentModel.DisplayName("Reconnect count")]
 		public int Reconnects { get; set; } = 1;
 
 		[System.ComponentModel.DisplayName("Spam Nocom")]

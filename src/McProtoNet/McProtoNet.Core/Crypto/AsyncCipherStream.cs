@@ -3,8 +3,7 @@ using System.Diagnostics;
 
 namespace McProtoNet.Core
 {
-	public class AsyncCipherStream
-		: Stream
+	public class AsyncCipherStream : Stream
 	{
 		internal Stream stream;
 		internal IBufferedCipher inCipher, outCipher;
