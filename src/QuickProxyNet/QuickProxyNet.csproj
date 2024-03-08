@@ -14,7 +14,7 @@
 	<ItemGroup>
 		<PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All" />
 
-		<PackageReference Include="ConfigureAwait.Fody" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 	</ItemGroup>
 
 
