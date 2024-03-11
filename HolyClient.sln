@@ -56,6 +56,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.cspr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{94507341-EE19-4C7A-8C97-1906CB80A567}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "McProtoNet.Benchmark", "src\McProtoNet\McProtoNet.Benchmark\McProtoNet.Benchmark.csproj", "{B20035DA-21E0-4BFA-B31A-B0D8A520D117}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{061F3DDC-1CF0-40CD-9DD8-697B95F782F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D56912F-F95F-498D-806A-C0235801020A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D56912F-F95F-498D-806A-C0235801020A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20035DA-21E0-4BFA-B31A-B0D8A520D117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B20035DA-21E0-4BFA-B31A-B0D8A520D117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B20035DA-21E0-4BFA-B31A-B0D8A520D117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20035DA-21E0-4BFA-B31A-B0D8A520D117}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,6 +155,7 @@ Global
 		{03F81ECB-149C-4BCE-8C5A-76C35EDB03CF} = {6C340C87-C6DD-4E7D-B0FE-C9C6B63CB9F5}
 		{B4BE7CC0-F0A5-4EF7-A539-AFDBD1414281} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 		{061F3DDC-1CF0-40CD-9DD8-697B95F782F1} = {7A62B32A-20C2-4187-8C0E-71E7EBB2204C}
+		{B20035DA-21E0-4BFA-B31A-B0D8A520D117} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41AEE66A-568B-4B2B-A50B-5AC57D067A07}

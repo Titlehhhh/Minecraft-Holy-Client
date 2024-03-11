@@ -14,8 +14,7 @@
 		</Style>
 		
 		<StyleInclude Source="/Styles/LoadNugetAnimationControlStyles.axaml" />
-		<StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
-		<StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
+		
 		<sty:FluentAvaloniaTheme PreferUserAccentColor="False" PreferSystemTheme="False" UseSystemFontOnWindows="False"/>
 		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
 

@@ -15,7 +15,8 @@
 
 
 	<ItemGroup>
-		
+		<PackageReference Include="DnsClient"/>
+		<PackageReference Include="Newtonsoft.Json"/>
 	</ItemGroup>
 
 

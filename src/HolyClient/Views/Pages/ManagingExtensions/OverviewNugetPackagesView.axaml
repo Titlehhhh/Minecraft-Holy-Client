@@ -10,7 +10,7 @@
 			 
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-			 xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+			 
 			 xmlns:behaviors="using:HolyClient.Behaviors"
 			 xmlns:converters="using:HolyClient.Converters"
 			 xmlns:views="using:HolyClient.Views"
@@ -112,7 +112,7 @@
 
 
 							<StackPanel IsVisible="{Binding IsLoadingNewItems}" HorizontalAlignment="Center" Spacing="5" Orientation="Horizontal">
-								<progRing:ProgressRing IsActive="True" Height="20" Width="20" Foreground="White"/>
+								<!--<progRing:ProgressRing IsActive="True" Height="20" Width="20" Foreground="White"/>-->
 								<TextBlock Text="Загрузка"/>
 							</StackPanel>
 						</StackPanel>

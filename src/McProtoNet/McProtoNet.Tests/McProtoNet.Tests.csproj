@@ -1,14 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
 	  <LangVersion>11</LangVersion>
     <IsPackable>false</IsPackable>
+	  <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
-    
+
+	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0-preview-24080-01" />
+	  <PackageReference Include="MSTest.TestAdapter" Version="3.2.0" />
+	  <PackageReference Include="MSTest.TestFramework" Version="3.2.0" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,7 @@
 			 xmlns:labs="clr-namespace:Avalonia.Labs.Controls;assembly=Avalonia.Labs.Controls"
 			 xmlns:custom="using:HolyClient.CustomControls"
 			 xmlns:converters="using:HolyClient.Converters"
-			 xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+			 
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 x:Class="HolyClient.Views.ManagingExtensionsView">

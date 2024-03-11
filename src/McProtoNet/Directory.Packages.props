@@ -11,11 +11,6 @@
 		<PackageVersion Include="MinVer" Version="5.0.0" />
 
 
-		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0-preview-24080-01" />
-		<PackageVersion Include="MSTest.TestAdapter" Version="3.2.0" />
-		<PackageVersion Include="MSTest.TestFramework" Version="3.2.0" />
-
-
 		<PackageVersion Include="DnsClient" Version="1.7.0" />
 		<PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="8.0.2" />
@@ -23,23 +18,10 @@
 		<PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
 
 
-		<PackageReference Include="ConfigureAwait.Fody"/>
-		<PackageReference Include="Serilog"/>
-		<PackageReference Include="Stateless"/>
-		<PackageReference Include="System.IO.Pipelines"/>
-		<PackageReference Include="System.Reactive"/>
-		<PackageReference Include="MinVer"/>
-
-
-		<PackageReference Include="Microsoft.NET.Test.Sdk"/>
-		<PackageReference Include="MSTest.TestAdapter"/>
-		<PackageReference Include="MSTest.TestFramework"/>
-
-
-		<PackageReference Include="DnsClient"/>
-		<PackageReference Include="Newtonsoft.Json"/>
-		<PackageReference Include="Microsoft.Extensions.ObjectPool"/>
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream"/>
-		<PackageReference Include="Portable.BouncyCastle"/>
+		<PackageReference Include="MinVer">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ConfigureAwait.Fody" />
 	</ItemGroup>
 </Project>
