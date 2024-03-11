@@ -24,7 +24,7 @@
 				return;
 			_disposed = true;
 			Data?.Dispose();
-			memory.Dispose();
+			memory?.Dispose();
 			Data = null;
 			memory = null;
 			GC.SuppressFinalize(this);

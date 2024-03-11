@@ -152,6 +152,9 @@ namespace McProtoNet.Core.Protocol
 							
 							using (var compressedPacket = StaticResources.MSmanager.GetStream())
 							{
+								
+								
+
 								using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 								{
 
@@ -161,6 +164,8 @@ namespace McProtoNet.Core.Protocol
 
 									await data.CopyToAsync(zlibStream, token);
 									//await zlibStream.FlushAsync(token);
+
+									
 								}
 								int uncompressedSizeLength = uncompressedSize.GetVarIntLength();
 
