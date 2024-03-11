@@ -271,6 +271,7 @@ namespace McProtoNet
 				minecraftStream?.Dispose();
 				minecraftStream = null;
 
+				
 
 
 			}
@@ -322,6 +323,9 @@ namespace McProtoNet
 
 			minecraftStream?.Dispose();
 			minecraftStream = null;
+
+			//PacketSender?.Dispose();
+			//PacketSender = null;
 
 			try
 			{

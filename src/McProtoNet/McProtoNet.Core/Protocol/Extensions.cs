@@ -39,7 +39,7 @@ namespace McProtoNet.Core
 			return len;
 		}
 
-		
+
 
 		public static int GetVarIntLength(this int value, Span<byte> data)
 		{
@@ -95,31 +95,38 @@ namespace McProtoNet.Core
 
 		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
 		{
-			using var memory = MemoryPool<byte>.Shared.Rent(1);
-			var buff = memory.Memory.Slice(0, 1);
-			int numRead = 0;
-			int result = 0;
-			byte read;
-			do
+
+			byte[] buff = ArrayPool<byte>.Shared.Rent(1);
+			try
 			{
-				if (await stream.ReadAsync(buff, token) <= 0)
+				int numRead = 0;
+				int result = 0;
+				byte read;
+				do
 				{
-					throw new EndOfStreamException();
-				}
-				read = buff.Span[0];
+					if (await stream.ReadAsync(buff, 0, 1, token) <= 0)
+					{
+						throw new EndOfStreamException();
+					}
+					read = buff[0];
 
 
-				int value = read & 0b01111111;
-				result |= value << 7 * numRead;
+					int value = read & 0b01111111;
+					result |= value << 7 * numRead;
 
-				numRead++;
-				if (numRead > 5)
-				{
-					throw new InvalidOperationException("VarInt is too big");
-				}
-			} while ((read & 0b10000000) != 0);
+					numRead++;
+					if (numRead > 5)
+					{
+						throw new InvalidOperationException("VarInt is too big");
+					}
+				} while ((read & 0b10000000) != 0);
 
-			return result;
+				return result;
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buff);
+			}
 		}
 
 
@@ -170,23 +177,30 @@ namespace McProtoNet.Core
 			while (unsigned != 0);
 			stream.Write(data.Slice(0, len));
 		}
-		public static async ValueTask WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
+		public static Task WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
 		{
 			var unsigned = (uint)value;
-			byte[] data = new byte[5];
-			int len = 0;
-			do
+			byte[] data = ArrayPool<byte>.Shared.Rent(5);
+			try
 			{
-				token.ThrowIfCancellationRequested();
-				var temp = (byte)(unsigned & 127);
-				unsigned >>= 7;
+				int len = 0;
+				do
+				{
+					token.ThrowIfCancellationRequested();
+					var temp = (byte)(unsigned & 127);
+					unsigned >>= 7;
 
-				if (unsigned != 0)
-					temp |= 128;
-				data[len++] = temp;
+					if (unsigned != 0)
+						temp |= 128;
+					data[len++] = temp;
+				}
+				while (unsigned != 0);
+				return stream.WriteAsync(data, 0, len, token);
 			}
-			while (unsigned != 0);
-			await stream.WriteAsync(data, 0, len, token);
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(data);
+			}
 		}
 
 
@@ -250,9 +264,9 @@ namespace McProtoNet.Core
 			try
 			{
 				int bytesRead;
-				while ((bytesRead = await source.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false)) != 0)
+				while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
 				{
-					await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+					await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
 				}
 			}
 			finally

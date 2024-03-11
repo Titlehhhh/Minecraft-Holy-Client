@@ -119,6 +119,8 @@ namespace McProtoNet.Core.Protocol
 			}
 
 			int sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
+
+
 			if (sizeUncompressed > 0)
 			{
 				len -= sizeUncompressed.GetVarIntLength();
@@ -155,7 +157,10 @@ namespace McProtoNet.Core.Protocol
 
 
 			}
+			else
 			{
+				if (sizeUncompressed != 0)
+					throw new Exception("size incorrect");
 
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
@@ -163,6 +168,8 @@ namespace McProtoNet.Core.Protocol
 				var memory = MemoryPool<byte>.Shared.Rent(len);
 				try
 				{
+					
+
 					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
 					return new(
 						id,
