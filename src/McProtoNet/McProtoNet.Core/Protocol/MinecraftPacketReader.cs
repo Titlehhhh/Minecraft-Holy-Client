@@ -187,32 +187,7 @@ namespace McProtoNet.Core.Protocol
 		{
 			_compressionThreshold = threshold;
 		}
-		private bool _disposed = false;
-
-		//private void ThrowIfDisposed()
-		//{
-		//	if (_disposed)
-		//		throw new ObjectDisposedException(nameof(MinecraftPacketReader));
-		//}
-		//~MinecraftPacketReader()
-		//{
-		//	Dispose();
-		//}
-		//public void Dispose()
-		//{
-		//	if (_disposed)
-		//		return;
-
-		//	//fastStream?.Dispose();
-		//	//fastStream = null;
-
-		//	_disposed = true;
-		//	GC.SuppressFinalize(this);
-		//}
-
-
-
-
+		
 	}
 }
 

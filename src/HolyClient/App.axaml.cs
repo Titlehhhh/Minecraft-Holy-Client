@@ -12,6 +12,7 @@ using HolyClient.Views;
 using ReactiveUI;
 using Splat;
 using System;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 
@@ -43,7 +44,11 @@ namespace HolyClient
 
 			ThreadPool.SetMinThreads(1, cpt);
 
-			
+			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+			{
+				File.WriteAllText("error.txt", e.ExceptionObject.ToString());
+			};
+	
 
 
 			RootViewModel root = new();

@@ -25,7 +25,7 @@ namespace HolyClient.StressTest
 
 		private static Regex SayVerifyRegex = new(@"\.say \/verify (\d+)");
 
-		public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots,ILogger logger, CancellationToken cancellationToken)
+		public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger, CancellationToken cancellationToken)
 		{
 			foreach (var bot in bots)
 			{
@@ -58,7 +58,7 @@ namespace HolyClient.StressTest
 					else
 					{
 
-						for (int i = 0; i < Reconnects-1; i++)
+						for (int i = 0; i < Reconnects - 1; i++)
 						{
 							if (ReconnectTimeout <= 0)
 								await Task.Delay(1000);
@@ -86,33 +86,34 @@ namespace HolyClient.StressTest
 					cts = new();
 					try
 					{
+						await bot.Client.SendSettings("ru", 8, 1, true, 255, 1);
 
-
-						await Task.Delay(500);
+						//await Task.Delay(1000);
 
 						await bot.Client.SendChat("/register 21qwerty");
 						await bot.Client.SendChat("/register 21qwerty 21qwerty");
 						await bot.Client.SendChat("/login 21qwerty");
-						try
-						{
-							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+						if (false)
+							try
+							{
+								using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
 
-							var m = await bot.Client.OnChatMessage
-								.Where(x => x.Message.Contains("verify"))
-								.Skip(3)
-								.FirstAsync()
-								.ToTask(cts.Token);
+								var m = await bot.Client.OnChatMessage
+									.Where(x => x.Message.Contains("verify"))
+									.Skip(3)
+									.FirstAsync()
+									.ToTask(cts.Token);
 
-							var code = SayVerifyRegex.Match(m.Message).Value;
+								var code = SayVerifyRegex.Match(m.Message).Value;
 
-							await bot.Client.SendChat(code);
+								await bot.Client.SendChat(code);
 
-						}
-						catch (Exception ex)
-						{
+							}
+							catch (Exception ex)
+							{
 
-						}
+							}
 
 
 						var spamming = SpamMessage(cts, bot);

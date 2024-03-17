@@ -255,12 +255,12 @@ namespace McProtoNet
 			if (Interlocked.CompareExchange(ref _canceling, 1, 0) == 0)
 			{
 				_error = exception;
-				if (CTS is not null)
-				{
-					CTS.Cancel();
-					CTS.Dispose();
-					CTS = null;
-				}
+
+				CTS?.Cancel();
+				CTS?.Dispose();
+				CTS = null;
+
+
 
 				tcpClient?.Dispose();
 				tcpClient = null;
@@ -271,7 +271,7 @@ namespace McProtoNet
 				minecraftStream?.Dispose();
 				minecraftStream = null;
 
-				
+
 
 
 			}
