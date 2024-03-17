@@ -1,7 +1,4 @@
-﻿
-using System.Net;
-
-
+﻿using System.Net;
 internal partial class Program
 {
 

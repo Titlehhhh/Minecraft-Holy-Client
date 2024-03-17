@@ -14,6 +14,10 @@
 			Signed = signed;
 			Order = order;
 		}
+		public override string ToString()
+		{
+			return Name;
+		}
 	}
 
 

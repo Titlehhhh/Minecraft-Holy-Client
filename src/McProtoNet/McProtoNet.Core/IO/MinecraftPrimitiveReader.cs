@@ -242,5 +242,10 @@ namespace McProtoNet.Core.IO
 			BaseStream = null;
 			return true;
 		}
+
+		public uint ReadUnsignedInt()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
