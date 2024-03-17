@@ -1,0 +1,28 @@
+{
+  "types": {
+    "A": "native",
+    "B": [
+      "container",
+      [
+        {
+          "name": "field1",
+          "type": "varint"
+        },
+        {
+          "name": "field1",
+          "type": "i8"
+        }
+      ]
+    ],
+    "C": [
+      "switch",
+      {
+        "compareTo": "$compareTo",
+        "fields": {
+          "1": ""
+        }
+      }
+
+    ]
+  }
+}
