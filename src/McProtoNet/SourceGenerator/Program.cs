@@ -101,8 +101,6 @@ public sealed class NetClass
 	{
 		foreach (var (name, type) in Fields)
 		{
-
-
 			string prop = $"public {type} {name} {{ get; set; }}";
 			builder.AppendLine("\t" + prop);
 		}
