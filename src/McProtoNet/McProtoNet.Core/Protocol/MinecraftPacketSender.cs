@@ -24,6 +24,8 @@ namespace McProtoNet.Core.Protocol
 			//zLib = new ZLibStream(compressedPacket, CompressionMode.Compress);
 		}
 
+		private static ArrayPool<byte> TestPool = ArrayPool<byte>.Shared;
+
 
 		private const int ZERO_VARLENGTH = 1;//default(int).GetVarIntLength();
 		private readonly byte[] ZERO_VARINT = { 0 };
@@ -140,7 +142,7 @@ namespace McProtoNet.Core.Protocol
 				{
 
 
-					byte[] idData = ArrayPool<byte>.Shared.Rent(5);
+					byte[] idData = TestPool.Rent(5);
 					try
 					{
 						int idLen = id.GetVarIntLength(idData);
@@ -197,7 +199,7 @@ namespace McProtoNet.Core.Protocol
 					}
 					finally
 					{
-						ArrayPool<byte>.Shared.Return(idData);
+						TestPool.Return(idData);
 					}
 				}
 				else
@@ -218,7 +220,7 @@ namespace McProtoNet.Core.Protocol
 			// packet.Write(writer);
 			int Packetlength = (int)packet.Length;
 
-			var idDataMemory = ArrayPool<byte>.Shared.Rent(5);
+			var idDataMemory = TestPool.Rent(5);
 			try
 			{
 
@@ -237,7 +239,7 @@ namespace McProtoNet.Core.Protocol
 			}
 			finally
 			{
-				ArrayPool<byte>.Shared.Return(idDataMemory);
+				TestPool.Return(idDataMemory);
 			}
 
 

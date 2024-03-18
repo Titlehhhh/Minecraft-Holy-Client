@@ -97,19 +97,34 @@ namespace McProtoNet.Core.Protocol
 			int len = await BaseStream.ReadVarIntAsync(token);
 			if (_compressionThreshold <= 0)
 			{
-
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
+				if (true)
+				{
 
-				var stream = StaticResources.MSmanager.GetStream(null, len);
 
-				await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
+					var stream = StaticResources.MSmanager.GetStream(null, len);
 
-				stream.Advance(len);
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
 
-				stream.Position = 0;
+					stream.Advance(len);
 
-				return new Packet(id, stream);
+					stream.Position = 0;
+
+					return new Packet(id, stream);
+				}
+				else
+				{
+
+					byte[] buffer = new byte[len];
+
+					await BaseStream.ReadExactlyAsync(buffer, token);
+
+					var stream = new MemoryStream(buffer);
+					stream.Position = 0;
+
+					return new Packet(id, stream);
+				}
 
 
 
@@ -120,36 +135,60 @@ namespace McProtoNet.Core.Protocol
 
 			if (sizeUncompressed > 0)
 			{
+				
 				len -= sizeUncompressed.GetVarIntLength();
 
-				using var buffer = StaticResources.MSmanager.GetStream(null, len);
-
-
-
-				await BaseStream.ReadExactlyAsync(buffer.GetMemory(len).Slice(0, len), token);
-
-				buffer.Advance(len);
-
-				buffer.Position = 0;
-
-				//Memory<byte> compressedData = buffer.Memory.Slice(0, len);
-
-
-
-
-				using (var ReadZlib = new ZLibStream(buffer, CompressionMode.Decompress, true))
+				if (true)
 				{
-					int id = await ReadZlib.ReadVarIntAsync(token);
-					sizeUncompressed -= id.GetVarIntLength();
 
-					var stream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
+					using var buffer = StaticResources.MSmanager.GetStream(null, len);
 
-					await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
+					await BaseStream.ReadExactlyAsync(buffer.GetMemory(len).Slice(0, len), token);
 
-					stream.Advance(sizeUncompressed);
+					buffer.Advance(len);
 
-					stream.Position = 0;
-					return new Packet(id, stream);
+					buffer.Position = 0;
+
+					
+
+					using (var ReadZlib = new ZLibStream(buffer, CompressionMode.Decompress, true))
+					{
+						int id = await ReadZlib.ReadVarIntAsync(token);
+						sizeUncompressed -= id.GetVarIntLength();
+
+						var stream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
+
+						await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
+
+						stream.Advance(sizeUncompressed);
+
+						stream.Position = 0;
+						return new Packet(id, stream);
+					}
+				}
+				else
+				{
+					byte[] buffer = new byte[len];
+					await BaseStream.ReadExactlyAsync(buffer, token);
+					using var ms = new MemoryStream(buffer);
+					ms.Position = 0;
+
+					using (var ReadZlib = new ZLibStream(ms, CompressionMode.Decompress, true))
+					{
+						int id = await ReadZlib.ReadVarIntAsync(token);
+						sizeUncompressed -= id.GetVarIntLength();
+
+
+
+						byte[] decompressed = new byte[sizeUncompressed];
+
+						await ReadZlib.ReadExactlyAsync(decompressed, token);
+
+						var stream = new MemoryStream(decompressed);
+						stream.Position = 0;
+
+						return new Packet(id, stream);
+					}
 				}
 
 
@@ -166,17 +205,30 @@ namespace McProtoNet.Core.Protocol
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
 
+				if (true)
+				{
 
-				var stream = StaticResources.MSmanager.GetStream();
+					var stream = StaticResources.MSmanager.GetStream();
 
-				await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
 
-				stream.Advance(len);
+					stream.Advance(len);
 
-				stream.Position = 0;
+					stream.Position = 0;
 
 
-				return new Packet(id, stream);
+					return new Packet(id, stream);
+				}
+				else
+				{
+					byte[] buffer = new byte[len];
+
+					await BaseStream.ReadExactlyAsync(buffer, token);
+
+					var stream = new MemoryStream(buffer);
+					stream.Position = 0;
+					return new Packet(id, stream);
+				}
 
 
 			}
@@ -187,7 +239,7 @@ namespace McProtoNet.Core.Protocol
 		{
 			_compressionThreshold = threshold;
 		}
-		
+
 	}
 }
 
