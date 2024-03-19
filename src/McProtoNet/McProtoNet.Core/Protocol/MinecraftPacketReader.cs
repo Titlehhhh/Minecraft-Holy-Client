@@ -102,14 +102,21 @@ namespace McProtoNet.Core.Protocol
 				len -= id.GetVarIntLength();
 
 				var stream = StaticResources.MSmanager.GetStream(null, len);
+				try
+				{
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
 
-				await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
+					stream.Advance(len);
 
-				stream.Advance(len);
+					stream.Position = 0;
 
-				stream.Position = 0;
-
-				return new Packet(id, stream);
+					return new Packet(id, stream);
+				}
+				catch
+				{
+					stream.Dispose();
+					throw;
+				}
 
 
 
@@ -141,15 +148,23 @@ namespace McProtoNet.Core.Protocol
 				{
 					int id = await ReadZlib.ReadVarIntAsync(token);
 					sizeUncompressed -= id.GetVarIntLength();
-
 					var stream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
+					try
+					{
+						
 
-					await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
+						await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
 
-					stream.Advance(sizeUncompressed);
+						stream.Advance(sizeUncompressed);
 
-					stream.Position = 0;
-					return new Packet(id, stream);
+						stream.Position = 0;
+						return new Packet(id, stream);
+					}
+					catch
+					{
+						stream.Dispose();
+						throw;
+					}
 				}
 
 
@@ -168,15 +183,22 @@ namespace McProtoNet.Core.Protocol
 
 
 				var stream = StaticResources.MSmanager.GetStream();
+				try
+				{
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
 
-				await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
+					stream.Advance(len);
 
-				stream.Advance(len);
-
-				stream.Position = 0;
+					stream.Position = 0;
 
 
-				return new Packet(id, stream);
+					return new Packet(id, stream);
+				}
+				catch
+				{
+					stream.Dispose();
+					throw;
+				}
 
 
 			}

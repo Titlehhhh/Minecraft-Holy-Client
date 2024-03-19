@@ -86,34 +86,35 @@ namespace HolyClient.StressTest
 					cts = new();
 					try
 					{
-						await bot.Client.SendSettings("ru", 8, 1, true, 255, 1);
+						//await bot.Client.SendSettings("ru", 8, 1, true, 255, 1);
 
-						//await Task.Delay(1000);
+						await Task.Delay(1000);
 
 						await bot.Client.SendChat("/register 21qwerty");
 						await bot.Client.SendChat("/register 21qwerty 21qwerty");
+						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
 						await bot.Client.SendChat("/login 21qwerty");
-						if (false)
-							try
-							{
-								using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+						try
+						{
+							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
 
-								var m = await bot.Client.OnChatMessage
-									.Where(x => x.Message.Contains("verify"))
-									.Skip(3)
-									.FirstAsync()
-									.ToTask(cts.Token);
+							var m = await bot.Client.OnChatMessage
+								.Where(x => x.Message.Contains("verify"))
+								.Skip(3)
+								.FirstAsync()
+								.ToTask(cts.Token);
 
-								var code = SayVerifyRegex.Match(m.Message).Value;
+							var code = SayVerifyRegex.Match(m.Message).Value;
 
-								await bot.Client.SendChat(code);
+							await bot.Client.SendChat(code);
 
-							}
-							catch (Exception ex)
-							{
+						}
+						catch (Exception ex)
+						{
 
-							}
+						}
 
 
 						var spamming = SpamMessage(cts, bot);
