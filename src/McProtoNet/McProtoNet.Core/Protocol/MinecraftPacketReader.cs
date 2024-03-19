@@ -139,10 +139,6 @@ namespace McProtoNet.Core.Protocol
 
 				buffer.Position = 0;
 
-				//Memory<byte> compressedData = buffer.Memory.Slice(0, len);
-
-
-
 
 				using (var ReadZlib = new ZLibStream(buffer, CompressionMode.Decompress, true))
 				{
@@ -151,7 +147,7 @@ namespace McProtoNet.Core.Protocol
 					var stream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
 					try
 					{
-						
+
 
 						await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
 
@@ -203,13 +199,14 @@ namespace McProtoNet.Core.Protocol
 
 			}
 
+
 		}
 		private int _compressionThreshold;
 		public void SwitchCompression(int threshold)
 		{
 			_compressionThreshold = threshold;
 		}
-		
+
 	}
 }
 
