@@ -21,6 +21,12 @@ namespace SourceGenerator.ProtoDefTypes
 		public string? Name { get; }
 		[JsonPropertyName("type")]
 		public ProtodefType Type { get; }
+
+		public override void OnDeserialized()
+		{
+			Type.Parent = this;
+		}
+
 	}
 
 

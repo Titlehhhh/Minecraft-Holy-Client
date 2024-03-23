@@ -52,6 +52,7 @@ namespace SourceGenerator.ProtoDefTypes
 				Namespaces[key] = namespaceObj;
 
 			}
+
 		}
 
 		private Namespace ParseNamespace(JsonElement element)

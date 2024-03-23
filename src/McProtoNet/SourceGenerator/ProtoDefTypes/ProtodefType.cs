@@ -6,9 +6,12 @@ namespace SourceGenerator.ProtoDefTypes
 	[JsonConverter(typeof(DataTypeConverter))]
 	public abstract class ProtodefType: IJsonOnDeserialized
 	{
+#if DEBUG
+		public string Id { get; } = Random.Shared.NextInt64().ToString();
+#endif
 		public ProtodefType? Parent { get; set; }
 
-		public void OnDeserialized()
+		public virtual void OnDeserialized()
 		{
 			if(this is IPathTypeEnumerable enums)
 			{

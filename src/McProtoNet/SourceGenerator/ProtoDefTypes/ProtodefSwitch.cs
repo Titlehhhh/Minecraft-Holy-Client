@@ -33,6 +33,8 @@ namespace SourceGenerator.ProtoDefTypes
 			if (Default is IPathTypeEnumerable)
 				yield return new("default", Default);
 		}
+
+		
 	}
 
 

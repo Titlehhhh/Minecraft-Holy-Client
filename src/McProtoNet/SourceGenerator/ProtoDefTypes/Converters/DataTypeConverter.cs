@@ -55,7 +55,7 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 					};
 					reader.Read();
 					//while (reader.Read()) ;
-
+					result.OnDeserialized();
 					return result;
 				}
 				catch (Exception ex)
