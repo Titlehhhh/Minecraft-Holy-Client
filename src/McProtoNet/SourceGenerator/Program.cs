@@ -1,4 +1,6 @@
 ﻿using SourceGenerator.ProtoDefTypes;
+using System.Linq;
+using System.Xml.Linq;
 
 
 internal class Program
@@ -15,16 +17,14 @@ internal class Program
 
 		List<string> names = new();
 
-		foreach (var (key, val) in packets.Types)
+		foreach (var (key, val) in protocol.Types)
 		{
-			if(val is IFieldsEnumerable enumerable)
+			if (val is IFieldsEnumerable enumerable)
 			{
-				foreach(var item in enumerable)
-				{
-
-				}
+				EnumerateTree(enumerable, key, names);
 			}
 		}
+
 
 
 		foreach (var name in names)
@@ -32,6 +32,38 @@ internal class Program
 			Console.WriteLine(name);
 		}
 
+	}
+
+	private static void EnumerateTree(IFieldsEnumerable enumerable, string parent, List<string> names)
+	{
+		int id = 0;
+		foreach (var item in enumerable)
+		{
+			id++;
+			string name = string.IsNullOrEmpty(item.Key) ? $"anon_{id}" : item.Key;
+			name = parent + "." + name;
+
+
+
+			if (item.Value is IFieldsEnumerable en)
+			{
+
+				bool any = false;
+				foreach (var field in en)
+				{
+					any = true;
+					break;
+				}
+				if (any)
+				{
+					EnumerateTree(en, name, names);
+
+					if (!item.Value.IsSwitch())
+						names.Add(name);
+
+				}
+			}
+		}
 	}
 
 

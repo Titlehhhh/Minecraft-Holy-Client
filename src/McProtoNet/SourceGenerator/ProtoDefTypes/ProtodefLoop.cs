@@ -12,7 +12,8 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
 		{
-			yield return new("type", Type);
+			if (Type is IFieldsEnumerable)
+				yield return new("type", Type);
 		}
 	}
 }
