@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefLoop : ProtodefType, IFieldsEnumerable
+	public sealed class ProtodefLoop : ProtodefType, IPathTypeEnumerable
 	{
 		[JsonPropertyName("endVal")]
 		public uint EndValue { get; set; }
@@ -12,7 +12,7 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
 		{
-			if (Type is IFieldsEnumerable)
+			if (Type is IPathTypeEnumerable)
 				yield return new("type", Type);
 		}
 	}

@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefArray : ProtodefType, IFieldsEnumerable
+	public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
 	{
 		[JsonConstructor]
 		public ProtodefArray(ProtodefType type, ProtodefType countType, string? count)
@@ -21,7 +21,7 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
 		{
-			if (Type is IFieldsEnumerable)
+			if (Type is IPathTypeEnumerable)
 				yield return new("type", Type);
 		}
 	}

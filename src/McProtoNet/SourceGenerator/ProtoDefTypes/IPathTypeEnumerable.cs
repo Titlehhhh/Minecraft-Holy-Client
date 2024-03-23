@@ -1,6 +1,6 @@
 ﻿namespace SourceGenerator.ProtoDefTypes
 {
-	public interface IFieldsEnumerable
+	public interface IPathTypeEnumerable
 	{
 		IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator();
 	}

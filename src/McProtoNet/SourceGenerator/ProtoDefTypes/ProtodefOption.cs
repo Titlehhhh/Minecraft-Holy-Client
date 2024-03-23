@@ -1,7 +1,7 @@
 ﻿
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefOption : ProtodefType, IFieldsEnumerable
+	public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
 	{
 		public ProtodefType Type { get; }
 
@@ -12,7 +12,7 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
 		{
-			if (Type is IFieldsEnumerable)
+			if (Type is IPathTypeEnumerable)
 				yield return new("type", Type);
 		}
 	}

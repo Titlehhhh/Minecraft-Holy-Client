@@ -6,6 +6,7 @@ namespace SourceGenerator.ProtoDefTypes
 	[JsonConverter(typeof(DataTypeConverter))]
 	public abstract class ProtodefType
 	{
+		public ProtodefType? Parent { get; set; }
 	}
 
 

@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefSwitch : ProtodefType, IFieldsEnumerable
+	public sealed class ProtodefSwitch : ProtodefType, IPathTypeEnumerable
 	{
 
 
@@ -30,7 +30,7 @@ namespace SourceGenerator.ProtoDefTypes
 			{
 				yield return new KeyValuePair<string, ProtodefType>(item.Key, item.Value);
 			}
-			if (Default is IFieldsEnumerable)
+			if (Default is IPathTypeEnumerable)
 				yield return new("default", Default);
 		}
 	}

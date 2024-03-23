@@ -17,9 +17,9 @@ internal class Program
 
 		List<string> names = new();
 
-		foreach (var (key, val) in protocol.Types)
+		foreach (var (key, val) in packets.Types)
 		{
-			if (val is IFieldsEnumerable enumerable)
+			if (val is IPathTypeEnumerable enumerable)
 			{
 				EnumerateTree(enumerable, key, names);
 			}
@@ -34,7 +34,7 @@ internal class Program
 
 	}
 
-	private static void EnumerateTree(IFieldsEnumerable enumerable, string parent, List<string> names)
+	private static void EnumerateTree(IPathTypeEnumerable enumerable, string parent, List<string> names)
 	{
 		int id = 0;
 		foreach (var item in enumerable)
@@ -45,7 +45,7 @@ internal class Program
 
 
 
-			if (item.Value is IFieldsEnumerable en)
+			if (item.Value is IPathTypeEnumerable en)
 			{
 
 				bool any = false;
@@ -58,7 +58,7 @@ internal class Program
 				{
 					EnumerateTree(en, name, names);
 
-					if (!item.Value.IsSwitch())
+					if (!item.Value.IsSwitch() || !item.Value.IsArray())
 						names.Add(name);
 
 				}

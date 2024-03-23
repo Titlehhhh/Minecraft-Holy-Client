@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace SourceGenerator.ProtoDefTypes
 {
 
-	public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContainerField>, IFieldsEnumerable
+	public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContainerField>, IPathTypeEnumerable
 	{
 		private readonly List<ProtodefContainerField> fields = new();
 
@@ -28,7 +28,7 @@ namespace SourceGenerator.ProtoDefTypes
 			return fields.GetEnumerator();
 		}
 
-		IEnumerator<KeyValuePair<string, ProtodefType>> IFieldsEnumerable.GetEnumerator()
+		IEnumerator<KeyValuePair<string, ProtodefType>> IPathTypeEnumerable.GetEnumerator()
 		{
 
 			foreach (var item in fields)

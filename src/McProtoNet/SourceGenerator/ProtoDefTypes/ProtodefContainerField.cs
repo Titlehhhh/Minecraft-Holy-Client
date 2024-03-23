@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefContainerField
+	public sealed class ProtodefContainerField : ProtodefType
 	{
 
 		[JsonConstructor]
