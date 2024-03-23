@@ -15,12 +15,12 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public IEnumerator<ProtodefBitFieldNode> GetEnumerator()
 		{
-			throw new NotImplementedException();
+			return nodes.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			throw new NotImplementedException();
+			return nodes.GetEnumerator();
 		}
 	}
 

@@ -38,6 +38,14 @@ public static class Extensions
 	{
 		return type is ProtodefArray;
 	}
+	public static bool IsContainer(this ProtodefType type)
+	{
+		return type is ProtodefContainer;
+	}
+	public static bool IsSwitch(this ProtodefType type)
+	{
+		return type is ProtodefSwitch;
+	}
 
 	public static bool IsBuffer(this ProtodefType type)
 	{

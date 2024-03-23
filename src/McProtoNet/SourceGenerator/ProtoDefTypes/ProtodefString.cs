@@ -7,11 +7,14 @@ namespace SourceGenerator.ProtoDefTypes
 		[JsonPropertyName("countType")]
 		public ProtodefType CountType { get; }
 
+		
+
 		[JsonConstructor]
 		public ProtodefString(ProtodefType countType)
 		{
 			CountType = countType;
 		}
+
 	}
 
 

@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefSwitch : ProtodefType
+	public sealed class ProtodefSwitch : ProtodefType, IFieldsEnumerable
 	{
 
 
@@ -21,6 +21,18 @@ namespace SourceGenerator.ProtoDefTypes
 
 		[JsonPropertyName("default")]
 		public ProtodefType? Default { get; set; }
+
+		public bool Supported => true;
+
+		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
+		{
+			foreach (var item in Fields)
+			{
+				yield return new KeyValuePair<string, ProtodefType>(item.Key, item.Value);
+			}
+			if (Default is IFieldsEnumerable)
+				yield return new("default", Default);
+		}
 	}
 
 

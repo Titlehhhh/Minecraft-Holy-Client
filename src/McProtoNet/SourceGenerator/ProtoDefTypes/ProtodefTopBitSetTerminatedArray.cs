@@ -2,11 +2,8 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefLoop : ProtodefType, IFieldsEnumerable
+	public sealed class ProtodefTopBitSetTerminatedArray : ProtodefType, IFieldsEnumerable
 	{
-		[JsonPropertyName("endVal")]
-		public uint EndValue { get; set; }
-
 		[JsonPropertyName("type")]
 		public ProtodefType Type { get; set; }
 
