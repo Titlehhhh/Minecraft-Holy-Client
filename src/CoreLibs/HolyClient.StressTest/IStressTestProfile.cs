@@ -49,7 +49,7 @@ namespace HolyClient.StressTest
 		StressTestServiceState CurrentState { get; }
 
 		PluginTypeReference BehaviorRef { get; }
-		bool CheckDNS { get; set; }
+		bool OptimizeDNS { get; set; }
 
 		void SetBehavior(IPluginSource pluginSource);
 		void DeleteBehavior();

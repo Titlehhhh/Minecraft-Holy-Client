@@ -20,6 +20,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace HolyClient.StressTest
 {
@@ -70,7 +71,13 @@ namespace HolyClient.StressTest
 		public bool UseProxy { get; set; } = true;
 
 		[Reactive]
-		public bool CheckDNS { get; set; } = false;
+		public bool OptimizeDNS { get; set; } = false;
+
+
+		#region ProxyChecker
+
+		#endregion
+
 		#endregion
 
 		#region NonSerializable
@@ -160,7 +167,18 @@ namespace HolyClient.StressTest
 				}).DisposeWith(_disposables);
 
 
-				var proxyProvider = await LoadProxy(logger);
+				var proxies = await LoadProxy(logger);
+
+
+				var proxyCheckerOptions = new ProxyCheckerOptions()
+				{
+
+
+				};
+
+				var proxyChecker = new ProxyChecker();
+
+				var proxyProvider = new ProxyProvider();
 
 				if (proxyProvider is not null)
 				{
@@ -197,7 +215,11 @@ namespace HolyClient.StressTest
 					}
 				}
 				logger.Information($"[STRESS TEST] Поиск DNS для {this.Server}");
-				if (CheckDNS)
+
+				var srv_host = host;
+				var srv_port = port;
+
+				if (OptimizeDNS)
 				{
 					try
 					{
@@ -232,14 +254,37 @@ namespace HolyClient.StressTest
 						break;
 
 					MinecraftClient bot = new MinecraftClient();
-					bot.Config = new ClientConfig
-					{
-						Host = host,
-						Port = port,
-						Version = this.Version,
-						Username = nickProvider.GetNextNick()
 
-					};
+
+
+					if (OptimizeDNS)
+					{
+						bot.Config = new ClientConfig
+						{
+							Host = srv_host,
+							Port = srv_port,
+							Version = this.Version,
+							Username = nickProvider.GetNextNick(),
+							HandshakeHost = this.Server,
+							HandshakePort = 25565
+
+						};
+					}
+					else
+					{
+						bot.Config = new ClientConfig
+						{
+							Host = host,
+							Port = port,
+							Version = this.Version,
+							Username = nickProvider.GetNextNick()
+
+						};
+					}
+
+
+
+
 
 
 
@@ -248,7 +293,9 @@ namespace HolyClient.StressTest
 
 
 					var b = new StressTestBot(
-							bot, nickProvider, proxyProvider,
+							bot, 
+							nickProvider, 
+							proxyProvider,
 							logger,
 							i,
 							cancellationTokenSource.Token);
@@ -298,9 +345,7 @@ namespace HolyClient.StressTest
 							Interlocked.Decrement(ref _botsLoginCounter);
 						}
 
-						//Console.WriteLine(ex.GetType().Name);
-						//Console.WriteLine(ex.Message);
-						//Console.WriteLine(ex.StackTrace);
+						
 
 						var key = Tuple.Create(exc.GetType().FullName, exc.Message);
 
@@ -391,7 +436,7 @@ namespace HolyClient.StressTest
 
 
 
-		private async Task<IProxyProvider?> LoadProxy(Serilog.ILogger logger)
+		private async Task<IEnumerable<ProxyInfo>> LoadProxy(Serilog.ILogger logger)
 		{
 			if (!UseProxy)
 			{
@@ -420,13 +465,14 @@ namespace HolyClient.StressTest
 
 			var proxies = result.SelectMany(x => x).ToList();
 
-			var provider = new ProxyProvider(proxies);
+			
+			
 
 			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
 
 			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
-			return provider;
+			return proxies;
 
 		}
 

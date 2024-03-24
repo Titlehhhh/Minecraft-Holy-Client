@@ -10,12 +10,12 @@ namespace HolyClient.StressTest
 	public class DefaultBehavior : BaseStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
-		public string SpamText { get; set; } = "!Hello from Minecraft Holy Client";
+		public string SpamText { get; set; } = "!github com Titlehhhh Minecraft-Holy-Client";
 
 		[System.ComponentModel.DisplayName("Spam timeout")]
-		public int SpamTimeout { get; set; } = 5000;
+		public int SpamTimeout { get; set; } = 2500;
 		[System.ComponentModel.DisplayName("Reconnect timeout")]
-		public int ReconnectTimeout { get; set; } = 5000;
+		public int ReconnectTimeout { get; set; } = 1000;
 
 		[System.ComponentModel.DisplayName("Reconnect count")]
 		public int Reconnects { get; set; } = 1;
@@ -117,10 +117,11 @@ namespace HolyClient.StressTest
 
 							}
 						}
-						await Task.Delay(3000);
 
-						IDisposable? d = null;
-						await bot.Client.SendChat("/menu");
+
+
+
+						IDisposable d = null;
 						d = bot.Client.OnOpenWindow.Subscribe(async x =>
 						{
 							d?.Dispose();
@@ -157,11 +158,16 @@ namespace HolyClient.StressTest
 							{
 
 							}
-							
-						}).DisposeWith(disposables);
-						
 
-						
+						}).DisposeWith(disposables);
+
+
+						await bot.Client.SendChat("/menu");
+
+
+
+
+
 					}
 					catch (Exception ex)
 					{
@@ -189,19 +195,21 @@ namespace HolyClient.StressTest
 					await Task.Delay(1000);
 				else
 					await Task.Delay(SpamTimeout);
+
+				await bot.Client.SendChat("/tpa Floodedstepan");
 			}
 		}
 		private async Task SpamNocomAsync(CancellationTokenSource cts, IStressTestBot bot)
 		{
 			if (!SpamNocom)
 				return;
-			var pos = new McProtoNet.Vector3(1,64,2);
+			var pos = new McProtoNet.Vector3(1, 64, 2);
 			while (!cts.IsCancellationRequested)
 			{
 
 				await Task.Delay(100);
 
-				await bot.Client.SendAction(0,pos,
+				await bot.Client.SendAction(0, pos,
 					McProtoNet.Core.BlockFace.DOWN);
 				await bot.Client.SendAction(2, pos,
 					McProtoNet.Core.BlockFace.DOWN);

@@ -59,13 +59,13 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 		this.BotsNickname = state.BotsNickname;
 		this.NumberOfBots = state.NumberOfBots;
 		this.UseProxy = state.UseProxy;
-		this.CheckDNS = state.CheckDNS;
+		this.CheckDNS = state.OptimizeDNS;
 
 		this.WhenAnyValue(x => x.Name)
 			.BindTo(state, x => x.Name);
 
 		this.WhenAnyValue(x => x.CheckDNS)
-			.BindTo(state, x => x.CheckDNS);
+			.BindTo(state, x => x.OptimizeDNS);
 
 		this.WhenAnyValue(x => x.Server)
 			.BindTo(state, x => x.Server);

@@ -1,69 +1,84 @@
 ﻿using Fody;
 using HolyClient.Common;
 using QuickProxyNet;
+using System.Collections.Concurrent;
+using System.Threading.Channels;
 
 namespace HolyClient.StressTest
 {
 	[ConfigureAwait(false)]
 	class ProxyProvider : IProxyProvider
 	{
-		private IEnumerable<ProxyInfo> proxies;
+		private readonly ChannelReader<ProxyCheckResult> reader;
+		private Channel<IProxyClient> channel;
+		private ChannelReader<IProxyClient> _reader;
+		private ChannelWriter<IProxyClient> _writer;
 
-		private volatile int _index;
+		private CancellationTokenSource cts = new();
 
-		private IProxyClient[] _clients;
-		private static ProxyClientFactory factory = new();
 
-		public ProxyProvider(IEnumerable<ProxyInfo> proxies)
+		public ProxyProvider(ChannelReader<ProxyCheckResult> reader, int capacity = 100)
 		{
-			this.proxies = proxies;
-
-			var clients = proxies.Select(x => factory.Create(x.Type, x.Host, x.Port));
-
-			_clients = clients.ToArray();
-		}
-
-		private volatile object _lock = new();
-
-		public IProxyClient GetNextProxy()
-		{
-			lock (_lock)
+			this.reader = reader;
+			this.channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
 			{
-				if (_index >= _clients.Length)
-					_index = 0;
+				SingleWriter = true
+			});
 
-				return _clients[_index++];
-			}
-		}
-		private SemaphoreSlim _lockAsync = new(1, 1);
-
-		async ValueTask<IProxyClient> IProxyProvider.GetNextProxy()
-		{
-			try
-			{
-				await _lockAsync.WaitAsync();
-
-				if (_index >= _clients.Length)
-					_index = 0;
-
-				return _clients[_index++];
-			}
-			finally
-			{
-				_lockAsync.Release();
-			}
+			_writer = channel.Writer;
+			_reader = channel.Reader;
 
 		}
-		private bool disposed = false;
+		private List<IProxyClient> proxies = new();
+
+
+
+
+		public async void Run()
+		{
+			await foreach (var item in reader.ReadAllAsync())
+			{
+				await _writer.WriteAsync(item.ProxyClient);
+				proxies.Add(item.ProxyClient);
+			}
+
+			await Task.Run(async () =>
+			{
+				try
+				{
+					while (!cts.IsCancellationRequested)
+					{
+						foreach (var item in proxies)
+						{
+							await _writer.WriteAsync(item, cts.Token);
+						}
+					}
+				}
+				catch
+				{
+
+				}
+				finally
+				{
+					_writer.TryComplete();
+				}
+			});
+		}
+
+
+
+		public ValueTask<IProxyClient> GetNextProxy()
+		{
+			return _reader.ReadAsync();
+		}
+		private bool _disposed = false;
 		public void Dispose()
 		{
-			if (disposed)
+			if (_disposed)
 				return;
-			disposed = true;
-			foreach (var proxy in _clients)
-			{
-				proxy.Dispose();
-			}
+			_disposed = true;
+			cts.Dispose();
+
 			GC.SuppressFinalize(this);
 		}
 	}

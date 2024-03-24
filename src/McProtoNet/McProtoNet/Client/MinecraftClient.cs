@@ -433,8 +433,8 @@ namespace McProtoNet
 					 new HandShakePacket(
 						 HandShakeIntent.LOGIN,
 						 (int)_protocol,
-						 Config.Host,
-						 Config.Port),
+						 Config.HandshakeHost ?? Config.Host,
+						 Config.HandshakePort ?? Config.Port),
 					 0x00);
 
 
