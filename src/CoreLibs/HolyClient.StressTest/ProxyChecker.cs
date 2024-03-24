@@ -105,10 +105,7 @@ namespace HolyClient.StressTest
 			{
 				using TcpClient tcpClient = new();
 
-				using var g = cancellationToken.Register(() =>
-				{
-					tcpClient.Dispose();
-				});
+				
 
 				tcpClient.SendTimeout = _sendTimeout;
 				tcpClient.ReceiveTimeout = _readTimeout;
