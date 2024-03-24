@@ -78,7 +78,7 @@ namespace HolyClient.StressTest
 
 		#region ProxyChecker
 
-		public ProxyCheckerOptions ProxyChecker { get; set; }
+		public ProxyCheckerOptions ProxyChecker { get; set; } = new();
 
 		[Reactive]
 		public bool ParallelCountCheckingCalculateAuto { get; set; } = true;
@@ -191,8 +191,55 @@ namespace HolyClient.StressTest
 					this.ProxyChecker.ParallelCount = this.NumberOfBots * 10;
 				}
 
+				string host = this.Server;
 
+				string[] hostPort = host.Split(':');
+				ushort port = 25565;
+				if (hostPort.Length == 2)
+				{
+					host = hostPort[0];
+					port = ushort.Parse(hostPort[1]);
+				}
 
+				if (port == 25565)
+				{
+
+					logger.Information($"[STRESS TEST] Поиск srv для {this.Server}");
+					try
+					{
+						IServerResolver resolver = new ServerResolver();
+
+						var result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
+						host = result.Host;
+						port = result.Port;
+					}
+					catch
+					{
+						logger.Error($"[STRESS TEST] Ошибка поиска srv для {this.Server}");
+					}
+				}
+				logger.Information($"[STRESS TEST] Поиск DNS для {this.Server}");
+
+				var srv_host = host;
+				var srv_port = port;
+
+				if (OptimizeDNS)
+				{
+					try
+					{
+						var result = await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationTokenSource.Token).ConfigureAwait(false);
+
+						host = result[0].ToString();
+						logger.Information($"[STRESS TEST] DNS IP for {this.Server} - {host}");
+					}
+					catch
+					{
+						logger.Error($"[STRESS TEST] Ошибка поиска DNS для {this.Server}");
+					}
+				}
+
+				this.ProxyChecker.TargetHost = srv_host;
+				this.ProxyChecker.TargetPort = srv_port;
 
 				var proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
 
@@ -205,7 +252,15 @@ namespace HolyClient.StressTest
 
 
 
-				var bots = await RunBots(logger, cancellationTokenSource, proxyProvider, disposables);
+				var bots = await RunBots(
+					logger,
+					cancellationTokenSource,
+					proxyProvider,
+					disposables,
+					host,
+					port,
+					srv_host,
+					srv_port);
 
 				_cleanUp = disposables;
 
@@ -245,7 +300,8 @@ namespace HolyClient.StressTest
 					catch { }
 				});
 				logger.Information("Запущены потоки чтения метрик");
-				_ = proxyChecker.Run();
+
+				_ = proxyChecker.Run(logger);
 				_ = proxyProvider.Run();
 
 				logger.Information("Запущен прокси-чекер");
@@ -262,58 +318,20 @@ namespace HolyClient.StressTest
 			}
 		}
 
-		private async Task<List<IStressTestBot>> RunBots(Serilog.ILogger logger, CancellationTokenSource cancellationTokenSource, IProxyProvider proxyProvider, CompositeDisposable disposables)
+		private async Task<List<IStressTestBot>> RunBots(
+			Serilog.ILogger logger,
+			CancellationTokenSource cancellationTokenSource,
+			IProxyProvider proxyProvider,
+			CompositeDisposable disposables,
+			string host,
+			ushort port,
+			string? srv_host,
+			ushort? srv_port)
 		{
 			var bots = new List<MinecraftClient>();
 
-			string host = this.Server;
 
-			string[] hostPort = host.Split(':');
-			ushort port = 25565;
-			if (hostPort.Length == 2)
-			{
-				host = hostPort[0];
-				port = ushort.Parse(hostPort[1]);
-			}
 
-			if (port == 25565)
-			{
-
-				logger.Information($"[STRESS TEST] Поиск srv для {this.Server}");
-				try
-				{
-					IServerResolver resolver = new ServerResolver();
-
-					var result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
-					host = result.Host;
-					port = result.Port;
-				}
-				catch
-				{
-					logger.Error($"[STRESS TEST] Ошибка поиска srv для {this.Server}");
-				}
-			}
-			logger.Information($"[STRESS TEST] Поиск DNS для {this.Server}");
-
-			var srv_host = host;
-			var srv_port = port;
-
-			if (OptimizeDNS)
-			{
-				try
-				{
-					var result = await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationTokenSource.Token).ConfigureAwait(false);
-
-					host = result[0].ToString();
-					logger.Information($"[STRESS TEST] DNS IP for {this.Server} - {host}");
-				}
-				catch
-				{
-					logger.Error($"[STRESS TEST] Ошибка поиска DNS для {this.Server}");
-				}
-			}
-
-			logger.Information($"[STRESS TEST] Запущен стресс тест на {this.NumberOfBots} ботов на сервер {host}:{port}");
 
 
 
@@ -341,7 +359,7 @@ namespace HolyClient.StressTest
 					bot.Config = new ClientConfig
 					{
 						Host = srv_host,
-						Port = srv_port,
+						Port = (ushort)srv_port,
 						Version = this.Version,
 						Username = nickProvider.GetNextNick(),
 						HandshakeHost = this.Server,
@@ -454,6 +472,7 @@ namespace HolyClient.StressTest
 
 			}
 
+			logger.Information($"[STRESS TEST] Запущен стресс тест на {this.NumberOfBots} ботов на сервер {host}:{port}");
 
 
 

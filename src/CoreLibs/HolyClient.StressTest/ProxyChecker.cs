@@ -32,7 +32,7 @@ namespace HolyClient.StressTest
 		}
 
 
-		public async Task Run()
+		public async Task Run(Serilog.ILogger logger)
 		{
 			try
 			{
@@ -48,31 +48,36 @@ namespace HolyClient.StressTest
 					}
 
 					var tasks = new List<Task<ProxyCheckResult>>();
+					
+					logger.Information($"[Proxy Checker] Checking...");
 					using var cts = new CancellationTokenSource(this._connectTimeout);
-
 					foreach (var client in clients)
 					{
+						
 						tasks.Add(CheckProxy(client, cts.Token));
 					}
 
 					var result = await Task.WhenAll(tasks);
 
-
+					int c = 0;
 					for (int i = 0; i < result.Length; i++)
 					{
 						ProxyCheckResult checkResult = result[i];
 						if (checkResult.Success)
 						{
+							c++;
 							await _writer.WriteAsync(checkResult);
 						}
 					}
 
+					logger.Information($"[Proxy Checker] {c}/{result.Length}");
+
 
 				}
 			}
-			catch
+			catch(Exception ex)
 			{
-
+				logger.Error("[Proxy Checker] Failed run", ex);
 			}
 		}
 
