@@ -188,6 +188,16 @@ namespace McProtoNet
 			}, PacketOut.ClientSettings);
 		}
 
+		public ValueTask SendUseItem(int hand)
+		{
+			return this.SendPacket(w =>
+			{
+				w.WriteVarInt(hand);
+
+			}, PacketOut.UseItem);
+		}
+
+
 
 
 		private byte[] GetLocation(Vector3 location)

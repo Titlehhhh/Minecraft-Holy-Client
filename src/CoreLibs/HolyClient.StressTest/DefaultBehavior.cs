@@ -94,33 +94,74 @@ namespace HolyClient.StressTest
 						await bot.Client.SendChat("/register 21qwerty 21qwerty");
 						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
 						await bot.Client.SendChat("/login 21qwerty");
-
-						try
+						if (false)
 						{
-							using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+							try
+							{
+								using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
 
-							var m = await bot.Client.OnChatMessage
-								.Where(x => x.Message.Contains("verify"))
-								.Skip(3)
-								.FirstAsync()
-								.ToTask(cts.Token);
+								var m = await bot.Client.OnChatMessage
+									.Where(x => x.Message.Contains("verify"))
+									.Skip(3)
+									.FirstAsync()
+									.ToTask(cts.Token);
 
-							var code = SayVerifyRegex.Match(m.Message).Value;
+								var code = SayVerifyRegex.Match(m.Message).Value;
 
-							await bot.Client.SendChat(code);
+								await bot.Client.SendChat(code);
 
+							}
+							catch (Exception ex)
+							{
+
+							}
 						}
-						catch (Exception ex)
+						await Task.Delay(3000);
+
+						IDisposable? d = null;
+						await bot.Client.SendChat("/menu");
+						d = bot.Client.OnOpenWindow.Subscribe(async x =>
 						{
+							d?.Dispose();
+							logger.Debug("menu: " + x.Id);
 
-						}
 
 
-						var spamming = SpamMessage(cts, bot);
-						var nuker = SpamNocomAsync(cts, bot);
+							await bot.Client.SendPacket(w =>
+							{
+								w.WriteUnsignedByte((byte)x.Id);
 
-						await Task.WhenAll(spamming, nuker);
+								w.WriteShort(3);
+
+								w.WriteByte(0);
+								w.WriteShort(0);
+
+								w.WriteVarInt(0);
+								w.WriteBoolean(false);
+
+							}, McProtoNet.PacketOut.ClickWindow);
+
+							await Task.Delay(1000);
+
+							try
+							{
+
+
+								var spamming = SpamMessage(cts, bot);
+								var nuker = SpamNocomAsync(cts, bot);
+
+								await Task.WhenAll(spamming, nuker);
+							}
+							catch
+							{
+
+							}
+							
+						}).DisposeWith(disposables);
+						
+
+						
 					}
 					catch (Exception ex)
 					{
@@ -154,18 +195,19 @@ namespace HolyClient.StressTest
 		{
 			if (!SpamNocom)
 				return;
+			var pos = new McProtoNet.Vector3(1,64,2);
 			while (!cts.IsCancellationRequested)
 			{
 
 				await Task.Delay(100);
 
-				await bot.Client.SendAction(0,
-					new McProtoNet.Vector3(
-						Random.Shared.Next(0, 10000),
-						Random.Shared.Next(0, 255),
-						Random.Shared.Next(0, 10000)),
+				await bot.Client.SendAction(0,pos,
+					McProtoNet.Core.BlockFace.DOWN);
+				await bot.Client.SendAction(2, pos,
 					McProtoNet.Core.BlockFace.DOWN);
 
+				await bot.Client.SendAction(6, pos,
+					McProtoNet.Core.BlockFace.DOWN);
 
 			}
 		}

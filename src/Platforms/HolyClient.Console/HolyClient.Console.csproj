@@ -16,9 +16,9 @@
     <ProjectReference Include="..\..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
     <ProjectReference Include="..\..\McProtoNet\McProtoNet.Core\McProtoNet.Core.csproj" />
     <ProjectReference Include="..\..\McProtoNet\McProtoNet.NBT\McProtoNet.NBT.csproj" />
-    <ProjectReference Include="..\..\McProtoNet\McProtoNet.Tests\McProtoNet.Tests.csproj" />
     <ProjectReference Include="..\..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
     <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj" />
+    <ProjectReference Include="..\..\QuickProxyNet\QuickProxyNet.csproj" />
   </ItemGroup>
 	
 

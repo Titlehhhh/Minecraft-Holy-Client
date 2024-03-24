@@ -116,7 +116,7 @@ public partial class StressTestViewModel : ReactiveObject, IRoutableViewModel, I
 	public ReadOnlyObservableCollection<StressTestProfileViewModel> Profiles => _profiles;
 
 	[Reactive]
-	public StressTestProfileViewModel SelectedProfile { get; set; }
+	public StressTestProfileViewModel? SelectedProfile { get; set; }
 
 
 	public ICommand Add { get; set; }

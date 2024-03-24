@@ -31,7 +31,7 @@ namespace McProtoNet
 			_entityPositionRotationEvent = CreateEvent<EntityPositionRotationEventArgs>();
 			_entityTeleportEvent = CreateEvent<EntityTeleportEventArgs>();
 			_spawnPlayerEvent = CreateEvent<SpawnPlayerEventArgs>();
-
+			_openWindowEvent = CreateEvent<WindowOpenEventArgs>();
 		}
 
 		private Subject<RespawnEventArgs> _respawnEvent;
@@ -44,7 +44,7 @@ namespace McProtoNet
 		private Subject<EntityPositionRotationEventArgs> _entityPositionRotationEvent;
 		private Subject<EntityTeleportEventArgs> _entityTeleportEvent;
 		private Subject<SpawnPlayerEventArgs> _spawnPlayerEvent;
-
+		private Subject<WindowOpenEventArgs> _openWindowEvent;
 
 
 
@@ -59,7 +59,7 @@ namespace McProtoNet
 		public IObservable<EntityPositionRotationEventArgs> OnEntityPositionRotation => _entityPositionRotationEvent;
 		public IObservable<EntityTeleportEventArgs> OnEntityTeleport => _entityTeleportEvent;
 		public IObservable<SpawnPlayerEventArgs> OnSpawnPlayer => _spawnPlayerEvent;
-
+		public IObservable<WindowOpenEventArgs> OnOpenWindow => _openWindowEvent;
 
 		private void OnPacket(IMinecraftPrimitiveReader reader, PacketIn id)
 		{
@@ -98,6 +98,12 @@ namespace McProtoNet
 				{
 					PacketPool.JoinGamePacketPool.Return(join);
 				}
+			}
+			else if(id == PacketIn.OpenWindow)
+			{
+				var win_id = reader.ReadVarInt();
+
+				_openWindowEvent.OnNext(new WindowOpenEventArgs(win_id));
 			}
 			else if (id == PacketIn.MapData)
 			{

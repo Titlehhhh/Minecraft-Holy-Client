@@ -388,7 +388,7 @@ namespace McProtoNet
 
 				var tcpStream = tcpClient.GetStream();
 
-				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
 				{
 
 					using var combined = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, token);

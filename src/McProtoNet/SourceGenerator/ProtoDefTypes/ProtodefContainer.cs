@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace SourceGenerator.ProtoDefTypes
 {
 
-	public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContainerField>, IPathTypeEnumerable,IJsonOnDeserialized
+	public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContainerField>, IPathTypeEnumerable, IJsonOnDeserialized
 	{
 		private readonly List<ProtodefContainerField> fields = new();
 
@@ -30,18 +30,25 @@ namespace SourceGenerator.ProtoDefTypes
 
 		IEnumerator<KeyValuePair<string, ProtodefType>> IPathTypeEnumerable.GetEnumerator()
 		{
+			int id = 0;
+
 
 			foreach (var item in fields)
 			{
-				yield return new(item.Name, item.Type);
+				id++;
+
+				string name = string.IsNullOrEmpty(item.Name) ? $"anon_{id}" : item.Name;
+
+				yield return new(name, item.Type);
 			}
 
 		}
 
 		public override void OnDeserialized()
 		{
-			foreach(var field in fields)
+			foreach (var field in fields)
 			{
+
 				field.Parent = this;
 				field.Type.Parent = field;
 			}

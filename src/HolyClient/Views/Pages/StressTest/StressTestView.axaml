@@ -39,7 +39,7 @@
 					</StackPanel>
 				</Border>
 				<Border Grid.Row="1" CornerRadius="7" Padding="7"  Margin="0,5,0,0" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
-					<ListBox  ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}">
+					<ListBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}">
 						<ListBox.ItemTemplate>
 							<DataTemplate>
 								<TextBlock Text="{Binding Name}"/>
@@ -48,13 +48,11 @@
 					</ListBox>
 				</Border>
 			</Grid>
-			<ContentControl Margin="10,0,0,0" Grid.Column="1" Content="{Binding SelectedProfile}" >
-				<ContentControl.ContentTemplate>
-					<DataTemplate x:DataType="vm:StressTestProfileViewModel">
-						<views:StressTestProfileView />
-					</DataTemplate>
-				</ContentControl.ContentTemplate>
-			</ContentControl>
+			<views:StressTestProfileView 				
+				Margin="10,0,0,0" 
+				DataContext="{Binding SelectedProfile}"
+				Grid.Column="1" />
+			
 		</Grid>
 	</Grid>
 </UserControl>

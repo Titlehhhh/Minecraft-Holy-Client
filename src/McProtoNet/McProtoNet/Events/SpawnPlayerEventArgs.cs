@@ -1,5 +1,14 @@
 ﻿namespace McProtoNet.Events
 {
+	public class WindowOpenEventArgs : EventArgs
+	{
+		public int Id { get; private set; }
+
+		public WindowOpenEventArgs(int id)
+		{
+			Id = id;
+		}
+	}
 	public class SpawnPlayerEventArgs : EventArgs
 	{
 		public int EntityId { get; internal set; }
