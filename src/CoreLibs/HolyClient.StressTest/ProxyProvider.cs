@@ -34,7 +34,7 @@ namespace HolyClient.StressTest
 
 
 
-		public async void Run()
+		public async Task Run()
 		{
 			await foreach (var item in reader.ReadAllAsync())
 			{

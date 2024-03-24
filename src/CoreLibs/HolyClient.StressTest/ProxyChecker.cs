@@ -5,21 +5,12 @@ using QuickProxyNet;
 
 namespace HolyClient.StressTest
 {
-	public sealed class ProxyCheckerOptions
-	{
-		public int ParallelCount { get; set; }
-		public TimeSpan ConnectTimeout { get; set; }
-		public int SendTimeout { get; set; }
-		public int ReadTimeout { get; set; }
-		public string TargetHost { get; set; }
-		public ushort TargetPort { get; set; }
-	}
 	public sealed class ProxyChecker : IDisposable
 	{
 		private readonly ChannelWriter<ProxyCheckResult> _writer;
 		private readonly IEnumerable<ProxyInfo> _proxies;
 		private readonly int _parallelCount;
-		private readonly TimeSpan _connectTimeout;
+		private readonly int _connectTimeout;
 		private readonly int _sendTimeout;
 		private readonly int _readTimeout;
 		private readonly string _targetHost;
@@ -40,10 +31,6 @@ namespace HolyClient.StressTest
 			_readTimeout = options.ReadTimeout;
 		}
 
-		public ProxyChecker()
-		{
-
-		}
 
 		public async Task Run()
 		{
