@@ -23,7 +23,7 @@ namespace QuickProxyNet
 			cancellationToken.ThrowIfCancellationRequested();
 
 
-			await SocksHelper.EstablishSocks5TunnelAsync(stream, host, port, this.ProxyCredentials, true);
+			await SocksHelper.EstablishSocks5TunnelAsync(stream, host, port, this.ProxyCredentials, true,cancellationToken);
 
 			return stream;
 

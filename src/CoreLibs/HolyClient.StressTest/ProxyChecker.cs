@@ -29,6 +29,8 @@ namespace HolyClient.StressTest
 			_connectTimeout = options.ConnectTimeout;
 			_sendTimeout = options.SendTimeout;
 			_readTimeout = options.ReadTimeout;
+			_targetHost = options.TargetHost;
+			_targetPort = options.TargetPort;
 		}
 
 
@@ -51,9 +53,10 @@ namespace HolyClient.StressTest
 					
 					logger.Information($"[Proxy Checker] Checking...");
 					using var cts = new CancellationTokenSource(this._connectTimeout);
+
+					
 					foreach (var client in clients)
-					{
-						
+					{						
 						tasks.Add(CheckProxy(client, cts.Token));
 					}
 
@@ -65,12 +68,20 @@ namespace HolyClient.StressTest
 						ProxyCheckResult checkResult = result[i];
 						if (checkResult.Success)
 						{
-							c++;
-							await _writer.WriteAsync(checkResult);
+							c++;							
 						}
 					}
 
 					logger.Information($"[Proxy Checker] {c}/{result.Length}");
+
+					for (int i = 0; i < result.Length; i++)
+					{
+						ProxyCheckResult checkResult = result[i];
+						if (checkResult.Success)
+						{
+							await _writer.WriteAsync(checkResult);
+						}
+					}
 
 
 				}
@@ -94,6 +105,11 @@ namespace HolyClient.StressTest
 			{
 				using TcpClient tcpClient = new();
 
+				using var g = cancellationToken.Register(() =>
+				{
+					tcpClient.Dispose();
+				});
+
 				tcpClient.SendTimeout = _sendTimeout;
 				tcpClient.ReceiveTimeout = _readTimeout;
 
@@ -102,8 +118,8 @@ namespace HolyClient.StressTest
 				using var stream = await client.ConnectAsync(tcpClient.GetStream(), _targetHost, _targetPort, cancellationToken);
 				return new ProxyCheckResult(true, client);
 			}
-			catch
-			{
+			catch(Exception ex)
+			{				
 				return new ProxyCheckResult(false, null);
 			}
 
