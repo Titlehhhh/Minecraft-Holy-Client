@@ -36,33 +36,40 @@ namespace HolyClient.StressTest
 
 		public async Task Run()
 		{
-			await foreach (var item in reader.ReadAllAsync())
+			try
 			{
-				await _writer.WriteAsync(item.ProxyClient);
-				proxies.Add(item.ProxyClient);
-			}
-
-			await Task.Run(async () =>
-			{
-				try
+				await foreach (var item in reader.ReadAllAsync(cts.Token))
 				{
-					while (!cts.IsCancellationRequested)
+					await _writer.WriteAsync(item.ProxyClient, cts.Token);
+					proxies.Add(item.ProxyClient);
+				}
+
+				await Task.Run(async () =>
+				{
+					try
 					{
-						foreach (var item in proxies)
+						while (!cts.IsCancellationRequested)
 						{
-							await _writer.WriteAsync(item, cts.Token);
+							foreach (var item in proxies)
+							{
+								await _writer.WriteAsync(item, cts.Token);
+							}
 						}
 					}
-				}
-				catch
-				{
+					catch
+					{
 
-				}
-				finally
-				{
-					_writer.TryComplete();
-				}
-			});
+					}
+					finally
+					{
+						_writer.TryComplete();
+					}
+				});
+			}
+			catch
+			{
+
+			}
 		}
 
 

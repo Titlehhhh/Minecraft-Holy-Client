@@ -118,7 +118,9 @@ namespace HolyClient.StressTest
 							}
 						}
 
+						await Task.Delay(1000);
 
+						await bot.Client.SendChat("/menu");
 
 
 						IDisposable d = null;

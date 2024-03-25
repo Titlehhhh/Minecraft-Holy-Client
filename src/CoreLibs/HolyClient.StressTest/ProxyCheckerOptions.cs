@@ -1,8 +1,10 @@
 ﻿using ReactiveUI.Fody.Helpers;
 using ReactiveUI;
+using MessagePack;
 
 namespace HolyClient.StressTest
 {
+	[MessagePackObject(keyAsPropertyName: true)]
 	public sealed class ProxyCheckerOptions : ReactiveObject
 	{
 		[Reactive]

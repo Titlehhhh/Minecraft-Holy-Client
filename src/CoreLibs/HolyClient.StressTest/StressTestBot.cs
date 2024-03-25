@@ -53,7 +53,9 @@ namespace HolyClient.StressTest
 						Port = Client.Config.Port,
 						Username = this.nickProvider.GetNextNick(),
 						Version = Client.Config.Version,
-						Proxy = proxy
+						Proxy = proxy,
+						HandshakeHost = Client.Config.HandshakeHost,
+						HandshakePort = Client.Config.HandshakePort
 					};
 				}
 

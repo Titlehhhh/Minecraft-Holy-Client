@@ -15,7 +15,7 @@ namespace HolyClient.StressTest
 
 		public Dictionary<string, int> Messages { get; set; }
 	}
-	
+
 
 	[MessagePack.Union(0, typeof(StressTestProfile))]
 	public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
@@ -23,7 +23,7 @@ namespace HolyClient.StressTest
 		Guid Id { get; set; }
 		string Name { get; set; }
 
-		
+
 
 		string Server { get; set; }
 
@@ -36,14 +36,16 @@ namespace HolyClient.StressTest
 		bool UseProxy { get; set; }
 		MinecraftVersion Version { get; set; }
 
-		
+
 		ISourceCache<IProxySource, Guid> Proxies { get; }
 
 
 		IObservable<StressTestMetrik> Metrics { get; }
 
+		ProxyCheckerOptions ProxyChecker { get; set; }
 
-		ConcurrentDictionary<Tuple<string,string>, ExceptionCounter> ExceptionCounter { get; }
+		bool ParallelCountCheckingCalculateAuto { get; set; }
+		ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; }
 
 		IStressTestBehavior Behavior { get; }
 		StressTestServiceState CurrentState { get; }

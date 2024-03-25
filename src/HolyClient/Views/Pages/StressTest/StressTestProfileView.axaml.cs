@@ -20,7 +20,6 @@ public partial class StressTestProfileView : ReactiveUserControl<StressTestProfi
 
 		this.WhenActivated(d =>
 		{
-
 			this.WhenAnyValue(x => x.ViewModel)
 				.Subscribe(vm =>
 				{

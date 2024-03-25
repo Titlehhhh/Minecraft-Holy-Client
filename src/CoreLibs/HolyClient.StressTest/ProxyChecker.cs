@@ -16,6 +16,7 @@ namespace HolyClient.StressTest
 		private readonly string _targetHost;
 		private readonly ushort _targetPort;
 
+		private readonly CancellationTokenSource _cts = new();
 
 
 		public ProxyChecker(
@@ -41,34 +42,43 @@ namespace HolyClient.StressTest
 				ProxyClientFactory proxyClientFactory = new();
 				foreach (var chunk in _proxies.Chunk(_parallelCount))
 				{
+					_cts.Token.ThrowIfCancellationRequested();
+
 
 					var clients = new List<IProxyClient>();
 					foreach (var proxy in chunk)
 					{
+						_cts.Token.ThrowIfCancellationRequested();
 						var client = proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port);
 						clients.Add(client);
 					}
 
 					var tasks = new List<Task<ProxyCheckResult>>();
-					
+
 					logger.Information($"[Proxy Checker] Checking...");
-					using var cts = new CancellationTokenSource(this._connectTimeout);
-
 					
-					foreach (var client in clients)
-					{						
-						tasks.Add(CheckProxy(client, cts.Token));
-					}
 
+					using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+
+					foreach (var client in clients)
+					{
+						_cts.Token.ThrowIfCancellationRequested();
+						tasks.Add(CheckProxy(client, linked.Token));
+					}
+					linked.CancelAfter(_connectTimeout);
+					_cts.Token.ThrowIfCancellationRequested();
 					var result = await Task.WhenAll(tasks);
+
+					_cts.Token.ThrowIfCancellationRequested();
 
 					int c = 0;
 					for (int i = 0; i < result.Length; i++)
 					{
+						_cts.Token.ThrowIfCancellationRequested();
 						ProxyCheckResult checkResult = result[i];
 						if (checkResult.Success)
 						{
-							c++;							
+							c++;
 						}
 					}
 
@@ -76,27 +86,45 @@ namespace HolyClient.StressTest
 
 					for (int i = 0; i < result.Length; i++)
 					{
+						_cts.Token.ThrowIfCancellationRequested();
 						ProxyCheckResult checkResult = result[i];
 						if (checkResult.Success)
 						{
-							await _writer.WriteAsync(checkResult);
+							await _writer.WriteAsync(checkResult, _cts.Token);
 						}
 					}
 
 
 				}
 			}
-			catch(Exception ex)
+			catch (TaskCanceledException)
+			{
+				Console.WriteLine("TaskCancel");
+			}
+			catch (OperationCanceledException)
+			{
+				Console.WriteLine("OperationCancel");
+			}
+			catch (Exception ex)
 			{
 				logger.Error("[Proxy Checker] Failed run", ex);
+			}
+			finally
+			{
+				Console.WriteLine("Complete");
+				_writer.Complete();
 			}
 		}
 
 
-
+		bool disposed = false;
 		public void Dispose()
 		{
-			_writer.TryComplete();
+			if (disposed)
+				return;
+			disposed = true;
+			_cts.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		private async Task<ProxyCheckResult> CheckProxy(IProxyClient client, CancellationToken cancellationToken)
@@ -105,7 +133,7 @@ namespace HolyClient.StressTest
 			{
 				using TcpClient tcpClient = new();
 
-				
+
 
 				tcpClient.SendTimeout = _sendTimeout;
 				tcpClient.ReceiveTimeout = _readTimeout;
@@ -115,8 +143,10 @@ namespace HolyClient.StressTest
 				using var stream = await client.ConnectAsync(tcpClient.GetStream(), _targetHost, _targetPort, cancellationToken);
 				return new ProxyCheckResult(true, client);
 			}
-			catch(Exception ex)
-			{				
+			catch (Exception ex)
+			{
+				if (_cts.IsCancellationRequested)
+					throw;
 				return new ProxyCheckResult(false, null);
 			}
 
