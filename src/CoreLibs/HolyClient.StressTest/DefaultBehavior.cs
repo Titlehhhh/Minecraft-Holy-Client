@@ -1,4 +1,5 @@
 ﻿using HolyClient.Abstractions.StressTest;
+using McProtoNet;
 using Serilog;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -10,7 +11,7 @@ namespace HolyClient.StressTest
 	public class DefaultBehavior : BaseStressTestBehavior
 	{
 		[System.ComponentModel.DisplayName("Spam text")]
-		public string SpamText { get; set; } = "!github com Titlehhhh Minecraft-Holy-Client";
+		public string SpamText { get; set; } = "!Spam Spam Spam";
 
 		[System.ComponentModel.DisplayName("Spam timeout")]
 		public int SpamTimeout { get; set; } = 2500;
@@ -75,113 +76,76 @@ namespace HolyClient.StressTest
 
 				bot.Client.OnErrored += onErr;
 
+				bot.Client.OnChatMessage.Subscribe(x =>
+				{
+					var ch = ChatParser.ParseText(x.Message);
+					if (ch.Contains("/register"))
+					{
+						try
+						{
+							bot.Client.SendChat("/register 21qwerty123 21qwerty123");
+						}
+						catch { }
+					}
+					else if (ch.Contains("nice game"))
+					{
+						try
+						{
+							
+
+							IDisposable d = null;
+							d = bot.Client.OnOpenWindow.Subscribe(async x =>
+							{
+								d?.Dispose();
+								logger.Debug("menu: " + x.Id);
+
+
+
+								await bot.Client.SendPacket(w =>
+								{
+									w.WriteUnsignedByte((byte)x.Id);
+
+									w.WriteShort(3);
+
+									w.WriteByte(0);
+									w.WriteShort(0);
+
+									w.WriteVarInt(0);
+									w.WriteBoolean(false);
+
+								}, McProtoNet.PacketOut.ClickWindow);
+
+								await Task.Delay(1000);
+
+								try
+								{
+
+
+									var spamming = SpamMessage(cts, bot);
+									var nuker = SpamNocomAsync(cts, bot);
+
+									await Task.WhenAll(spamming, nuker);
+								}
+								catch
+								{
+
+								}
+
+							}).DisposeWith(disposables);
+							bot.Client.SendChat("/menu");
+						}
+						catch { }
+					}
+
+				}).DisposeWith(disposables);
 
 				disposables.Add(Disposable.Create(() =>
 				{
 					bot.Client.OnErrored -= onErr;
 				}));
 
-				var d2 = bot.Client.OnJoinGame.Subscribe(async x =>
-				{
-					cts = new();
-					try
-					{
-						//await bot.Client.SendSettings("ru", 8, 1, true, 255, 1);
+				
 
-						await Task.Delay(1000);
-
-						await bot.Client.SendChat("/register 21qwerty");
-						await bot.Client.SendChat("/register 21qwerty 21qwerty");
-						await bot.Client.SendChat("/reg 21qwerty 21qwerty");
-						await bot.Client.SendChat("/login 21qwerty");
-						if (false)
-						{
-							try
-							{
-								using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-
-
-								var m = await bot.Client.OnChatMessage
-									.Where(x => x.Message.Contains("verify"))
-									.Skip(3)
-									.FirstAsync()
-									.ToTask(cts.Token);
-
-								var code = SayVerifyRegex.Match(m.Message).Value;
-
-								await bot.Client.SendChat(code);
-
-							}
-							catch (Exception ex)
-							{
-
-							}
-						}
-
-						await Task.Delay(1000);
-
-						await bot.Client.SendChat("/menu");
-
-
-						IDisposable d = null;
-						d = bot.Client.OnOpenWindow.Subscribe(async x =>
-						{
-							d?.Dispose();
-							logger.Debug("menu: " + x.Id);
-
-
-
-							await bot.Client.SendPacket(w =>
-							{
-								w.WriteUnsignedByte((byte)x.Id);
-
-								w.WriteShort(3);
-
-								w.WriteByte(0);
-								w.WriteShort(0);
-
-								w.WriteVarInt(0);
-								w.WriteBoolean(false);
-
-							}, McProtoNet.PacketOut.ClickWindow);
-
-							await Task.Delay(1000);
-
-							try
-							{
-
-
-								var spamming = SpamMessage(cts, bot);
-								var nuker = SpamNocomAsync(cts, bot);
-
-								await Task.WhenAll(spamming, nuker);
-							}
-							catch
-							{
-
-							}
-
-						}).DisposeWith(disposables);
-
-
-						await bot.Client.SendChat("/menu");
-
-
-
-
-
-					}
-					catch (Exception ex)
-					{
-
-					}
-					finally
-					{
-
-					}
-				});
-
-				disposables.Add(d2);
 
 				_ = bot.Restart(true);
 
@@ -192,13 +156,14 @@ namespace HolyClient.StressTest
 		{
 			while (!cts.IsCancellationRequested)
 			{
+				var spamText = SpamText +" "+ Random.Shared.NextInt64();
+
 				await bot.Client.SendChat(SpamText);
 				if (SpamTimeout <= 0)
 					await Task.Delay(1000);
 				else
 					await Task.Delay(SpamTimeout);
 
-				await bot.Client.SendChat("/tpa Floodedstepan");
 			}
 		}
 		private async Task SpamNocomAsync(CancellationTokenSource cts, IStressTestBot bot)
