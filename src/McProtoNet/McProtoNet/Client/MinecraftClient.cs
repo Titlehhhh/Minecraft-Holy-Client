@@ -204,14 +204,11 @@ namespace McProtoNet
 					}
 					catch
 					{
-						//new Thread(() =>
-						//{
-						//	throw new Exception("Fatal");
-						//}).Start();
+						
 					}
 					finally
 					{
-						//Console.WriteLine("ok");
+						
 					}
 
 
