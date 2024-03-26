@@ -5,16 +5,6 @@ public static class Extensions
 
 
 
-	public static string GenerateReadMethod(this ProtodefType type, string propName)
-	{
-		if (type.IsPrimitive())
-		{
-
-
-
-		}
-		throw new NotImplementedException();
-	}
 
 	public static bool IsPrimitive(this ProtodefType type)
 	{

@@ -20,6 +20,9 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 					{
 						"varint" => new ProtodefVarInt(),
 						"varlong" => new ProtodefVarLong(),
+						"void"=> new ProtodefVoid(),
+						"string"=> new ProtodefString(),
+						"bool"=> new ProtodefBool(),
 						_ => new ProtodefCustomType(name)
 					};
 				}
@@ -48,7 +51,7 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 						"mapper" => JsonSerializer.Deserialize<ProtodefMapper>(ref reader, options),
 						"array" => JsonSerializer.Deserialize<ProtodefArray>(ref reader, options),
 						"option" => new ProtodefOption(JsonSerializer.Deserialize<ProtodefType>(ref reader, options)),
-						"pstring" => JsonSerializer.Deserialize<ProtodefString>(ref reader, options),
+						"pstring" => JsonSerializer.Deserialize<ProtodefPrefixedString>(ref reader, options),
 						"switch" => JsonSerializer.Deserialize<ProtodefSwitch>(ref reader, options),
 						"topBitSetTerminatedArray" => JsonSerializer.Deserialize<ProtodefTopBitSetTerminatedArray>(ref reader, options),
 						_ => ReadUnknownType(ref reader, options, name)
@@ -80,7 +83,7 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 			if (obj.Count() == 1)
 			{
 				var compareTo = obj.First(x => x.NameEquals("compareTo"));
-				return new ProtodefSwitch
+				return new ProtodefCustomSwitch
 				{
 					Owner = name,
 					CompareTo = compareTo.Value.GetString()

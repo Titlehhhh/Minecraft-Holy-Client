@@ -1,10 +1,10 @@
 ﻿namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefString : ProtodefType
+	public sealed class ProtodefBool : ProtodefType
 	{
 		public override string ToString()
 		{
-			return "string";
+			return "void";
 		}
 	}
 

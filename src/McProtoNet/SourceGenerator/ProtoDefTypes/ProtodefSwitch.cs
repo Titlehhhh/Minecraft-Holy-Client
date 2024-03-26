@@ -2,12 +2,13 @@
 
 namespace SourceGenerator.ProtoDefTypes
 {
-	public sealed class ProtodefSwitch : ProtodefType, IPathTypeEnumerable
+
+
+	public class ProtodefSwitch : ProtodefType, IPathTypeEnumerable
 	{
 
 
-		[JsonIgnore]
-		public string? Owner { get; set; }
+
 
 		//TODO path parser
 		[JsonPropertyName("compareTo")]
@@ -22,7 +23,6 @@ namespace SourceGenerator.ProtoDefTypes
 		[JsonPropertyName("default")]
 		public ProtodefType? Default { get; set; }
 
-		public bool Supported => true;
 
 		public IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator()
 		{
@@ -34,7 +34,7 @@ namespace SourceGenerator.ProtoDefTypes
 				yield return new("default", Default);
 		}
 
-		
+
 	}
 
 
