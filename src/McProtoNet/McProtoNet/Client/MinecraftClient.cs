@@ -289,6 +289,12 @@ namespace McProtoNet
 
 		}
 
+		public void Disconnect(Exception exception)
+		{
+			CancelAll(exception);
+			InvokeError();
+		}
+
 
 
 		~MinecraftClient()

@@ -1,8 +1,10 @@
 ﻿using HolyClient.Abstractions.StressTest;
 using McProtoNet;
 using Serilog;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text.RegularExpressions;
 
@@ -28,6 +30,28 @@ namespace HolyClient.StressTest
 
 		public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger, CancellationToken cancellationToken)
 		{
+			Subject<Unit> spamEvent = new();
+			CancellationTokenSource loopCts = new();
+
+			Task.Run(async () =>
+			{
+				try
+				{
+					while (!loopCts.IsCancellationRequested)
+					{
+						await Task.Delay(SpamTimeout, loopCts.Token);
+						spamEvent.OnNext(default);
+					}
+				}
+				catch
+				{
+
+				}
+			});
+
+			loopCts.DisposeWith(disposables);
+			spamEvent.DisposeWith(disposables);
+
 			foreach (var bot in bots)
 			{
 				CancellationTokenSource cts = null;
@@ -84,6 +108,8 @@ namespace HolyClient.StressTest
 						try
 						{
 							bot.Client.SendChat("/register 21qwerty123 21qwerty123");
+
+
 						}
 						catch { }
 					}
@@ -91,7 +117,7 @@ namespace HolyClient.StressTest
 					{
 						try
 						{
-							
+
 
 							IDisposable d = null;
 							d = bot.Client.OnOpenWindow.Subscribe(async x =>
@@ -105,7 +131,7 @@ namespace HolyClient.StressTest
 								{
 									w.WriteUnsignedByte((byte)x.Id);
 
-									w.WriteShort(3);
+									w.WriteShort(5);
 
 									w.WriteByte(0);
 									w.WriteShort(0);
@@ -119,22 +145,27 @@ namespace HolyClient.StressTest
 
 								try
 								{
+									if (cts is null)
+										cts = new();
 
-
-									var spamming = SpamMessage(cts, bot);
-									var nuker = SpamNocomAsync(cts, bot);
-
-									await Task.WhenAll(spamming, nuker);
+									SpamMessage(cts, bot, spamEvent);
+									
 								}
-								catch
+								catch (Exception ex)
 								{
-
+									logger.Error(ex, "Start spam error");
 								}
 
 							}).DisposeWith(disposables);
 							bot.Client.SendChat("/menu");
 						}
 						catch { }
+					} else if(ch.Contains("tempbanned") || ch.Contains("tempmuted"))
+					{
+						if (ch.Contains(bot.Client.Config.Username))
+						{
+							bot.Client.Disconnect(new Exception());
+						}
 					}
 
 				}).DisposeWith(disposables);
@@ -144,7 +175,7 @@ namespace HolyClient.StressTest
 					bot.Client.OnErrored -= onErr;
 				}));
 
-				
+
 
 
 				_ = bot.Restart(true);
@@ -152,19 +183,15 @@ namespace HolyClient.StressTest
 			}
 			return Task.CompletedTask;
 		}
-		private async Task SpamMessage(CancellationTokenSource cts, IStressTestBot bot)
+		private void SpamMessage(CancellationTokenSource cts, IStressTestBot bot, IObservable<Unit> observable)
 		{
-			while (!cts.IsCancellationRequested)
+			IDisposable d = observable.Subscribe(async x =>
 			{
-				var spamText = SpamText +" "+ Random.Shared.NextInt64();
+				var spamText = SpamText + " " + Random.Shared.NextInt64();
 
-				await bot.Client.SendChat(SpamText);
-				if (SpamTimeout <= 0)
-					await Task.Delay(1000);
-				else
-					await Task.Delay(SpamTimeout);
-
-			}
+				await bot.Client.SendChat(spamText);
+			});
+			cts.Token.Register(d.Dispose);
 		}
 		private async Task SpamNocomAsync(CancellationTokenSource cts, IStressTestBot bot)
 		{

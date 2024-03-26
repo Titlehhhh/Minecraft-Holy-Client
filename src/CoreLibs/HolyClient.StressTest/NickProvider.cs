@@ -25,7 +25,7 @@
 			}
 
 			var finalString = new String(stringChars);
-			return _baseNick + finalString;
+			return finalString + _baseNick;
 		}
 	}
 
