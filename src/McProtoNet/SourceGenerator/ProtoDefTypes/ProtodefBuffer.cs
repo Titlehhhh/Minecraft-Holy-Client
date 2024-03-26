@@ -4,21 +4,15 @@ namespace SourceGenerator.ProtoDefTypes
 {
 	public sealed class ProtodefBuffer : ProtodefType
 	{
-		[JsonConstructor]
-		public ProtodefBuffer(ProtodefType countType, string? count, bool? rest)
-		{
-			CountType = countType;
-			Count = count;
-			Rest = rest;
-		}
+		
 
 		[JsonPropertyName("countType")]
-		public ProtodefType CountType { get; }
+		public ProtodefType CountType { get; set; }
 
 		[JsonPropertyName("count")]
-		public string? Count { get; }
+		public object? Count { get; set; }
 		[JsonPropertyName("rest")]
-		public bool? Rest { get; }
+		public bool? Rest { get; set; }
 	}
 
 

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SourceGenerator.ProtoDefTypes
 {
@@ -13,12 +14,15 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public Protocol Parse()
 		{
-			//JsonSerializerOptions options = new();
+			JsonSerializerOptions options = new()
+			{
+				NumberHandling = JsonNumberHandling.AllowReadingFromString
+			};
 
 			//options.Converters.Add(new DataTypeConverter());
 
 
-			return JsonSerializer.Deserialize<Protocol>(json);
+			return JsonSerializer.Deserialize<Protocol>(json, options);
 		}
 	}
 }
