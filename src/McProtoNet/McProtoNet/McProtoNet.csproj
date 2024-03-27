@@ -12,9 +12,13 @@
 	
 
 
-	<ItemGroup>		
-		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />
+	<ItemGroup>
+		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj">
+			
+		</ProjectReference>
+		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj">
+			
+		</ProjectReference>
 	</ItemGroup>
 	
 	

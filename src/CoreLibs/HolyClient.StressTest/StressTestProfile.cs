@@ -241,15 +241,25 @@ namespace HolyClient.StressTest
 				this.ProxyChecker.TargetHost = srv_host;
 				this.ProxyChecker.TargetPort = srv_port;
 
-				var proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
+				ProxyChecker? proxyChecker = null;
+				ProxyProvider? proxyProvider = null;
 
-				var proxyProvider = new ProxyProvider(channel.Reader, this.ProxyChecker.ParallelCount);
+				if (UseProxy)
+				{
+
+					proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
+
+					proxyProvider = new ProxyProvider(channel.Reader, this.ProxyChecker.ParallelCount);
+
+					_ = proxyChecker.Run(logger);
+					_ = proxyProvider.Run();
+
+					logger.Information("Запущен прокси-чекер");
 
 
-
-				proxyChecker.DisposeWith(disposables);
-				proxyProvider.DisposeWith(disposables);
-
+					proxyChecker.DisposeWith(disposables);
+					proxyProvider.DisposeWith(disposables);
+				}
 
 
 				var bots = await RunBots(
@@ -301,10 +311,7 @@ namespace HolyClient.StressTest
 				});
 				logger.Information("Запущены потоки чтения метрик");
 
-				_ = proxyChecker.Run(logger);
-				_ = proxyProvider.Run();
 
-				logger.Information("Запущен прокси-чекер");
 
 				CurrentState = StressTestServiceState.Running;
 
@@ -321,7 +328,7 @@ namespace HolyClient.StressTest
 		private async Task<List<IStressTestBot>> RunBots(
 			Serilog.ILogger logger,
 			CancellationTokenSource cancellationTokenSource,
-			IProxyProvider proxyProvider,
+			IProxyProvider? proxyProvider,
 			CompositeDisposable disposables,
 			string host,
 			ushort port,

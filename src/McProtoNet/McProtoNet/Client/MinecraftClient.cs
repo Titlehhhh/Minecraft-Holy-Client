@@ -509,7 +509,7 @@ namespace McProtoNet
 			}
 			else
 			{
-				throw new Exception("Unkown packet: " + id);
+				throw new Exception("Unknown packet: " + id);
 			}
 
 			return false;

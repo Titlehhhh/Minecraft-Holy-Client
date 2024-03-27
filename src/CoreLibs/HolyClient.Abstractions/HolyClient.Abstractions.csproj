@@ -19,7 +19,7 @@
 
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj" />
+		<ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj"/>
 	</ItemGroup>
 
 	
