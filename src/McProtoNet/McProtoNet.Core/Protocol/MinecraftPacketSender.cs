@@ -179,9 +179,9 @@ namespace McProtoNet.Core.Protocol
 								int fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
 
 
-								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len));
+								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
 
-								await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength));
+								await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
 								//await BaseStream.WriteVarIntAsync(fullSize, token);
 
 								//await BaseStream.WriteVarIntAsync(uncompressedSize, token);
@@ -244,8 +244,8 @@ namespace McProtoNet.Core.Protocol
 				int fullsize_len = (id_len + Packetlength).GetVarIntLength(buffer, id_len);
 
 
-				await BaseStream.WriteAsync(buffer,id_len,fullsize_len, token);
-				await BaseStream.WriteAsync(buffer,0,id_len);
+				await BaseStream.WriteAsync(buffer, id_len, fullsize_len, token);
+				await BaseStream.WriteAsync(buffer, 0, id_len, token);
 
 				//await BaseStream.WriteVarIntAsync(Packetlength + len, token);
 
