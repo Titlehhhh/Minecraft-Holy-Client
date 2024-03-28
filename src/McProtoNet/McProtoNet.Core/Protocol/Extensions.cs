@@ -2,13 +2,14 @@
 using McProtoNet.Core.Protocol;
 using Microsoft.IO;
 using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace McProtoNet.Core
 {
 	public static class Extensions
 	{
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static int GetVarIntLength(this int val)
 		{
 			int amount = 0;
@@ -20,7 +21,14 @@ namespace McProtoNet.Core
 
 			return amount;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static int GetVarIntLength(this int value, byte[] data)
+		{
+			return GetVarIntLength(value, data, 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static int GetVarIntLength(this int value, byte[] data, int offset)
 		{
 			var unsigned = (uint)value;
 
@@ -33,14 +41,16 @@ namespace McProtoNet.Core
 				if (unsigned != 0)
 					temp |= 128;
 
-				data[len++] = temp;
+				data[offset + len++] = temp;
 			}
 			while (unsigned != 0);
+			if (len > 5)
+				throw new ArithmeticException("Var int is too big");
 			return len;
 		}
 
 
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static int GetVarIntLength(this int value, Span<byte> data)
 		{
 			var unsigned = (uint)value;
@@ -59,6 +69,14 @@ namespace McProtoNet.Core
 			while (unsigned != 0);
 			return len;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static int GetVarIntLength(this int value, Memory<byte> data)
+		{
+			return GetVarIntLength(value, data.Span);
+		}
+
+
+
 		private static int SEGMENT_BITS = 0x7F;
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
@@ -161,8 +179,7 @@ namespace McProtoNet.Core
 		public static void WriteVarInt(this Stream stream, int value)
 		{
 			var unsigned = (uint)value;
-			Span<byte> data = stackalloc byte[5];
-			int len = 0;
+
 			do
 			{
 				var temp = (byte)(unsigned & 127);
@@ -171,11 +188,10 @@ namespace McProtoNet.Core
 				if (unsigned != 0)
 					temp |= 128;
 
-				//stream.WriteByte(temp);
-				data[len++] = temp;
+				stream.WriteByte(temp);
+
 			}
 			while (unsigned != 0);
-			stream.Write(data.Slice(0, len));
 		}
 		public static Task WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
 		{
