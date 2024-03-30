@@ -1,30 +1,27 @@
 <Project>
-	<PropertyGroup>
-		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageVersion Include="ConfigureAwait.Fody" Version="3.3.2" />
-		<PackageVersion Include="Serilog" Version="3.1.1" />
-		<PackageVersion Include="Stateless" Version="5.15.0" />
-		<PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
-		<PackageVersion Include="System.Reactive" Version="6.0.1-preview.1" />
-		<PackageVersion Include="MinVer" Version="5.0.0" />
-
-
-		<PackageVersion Include="DnsClient" Version="1.7.0" />
-		<PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="8.0.2" />
-		<PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
-		<PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-
-
-		<PackageReference Include="MinVer">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="ConfigureAwait.Fody">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="ConfigureAwait.Fody" Version="3.3.2" />
+    <PackageVersion Include="Serilog" Version="3.1.1" />
+    <PackageVersion Include="SharpZipLib" Version="1.4.2" />
+    <PackageVersion Include="Stateless" Version="5.15.0" />
+    <PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
+    <PackageVersion Include="System.Reactive" Version="6.0.1-preview.1" />
+    <PackageVersion Include="MinVer" Version="5.0.0" />
+    <PackageVersion Include="DnsClient" Version="1.7.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
+    <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ConfigureAwait.Fody">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

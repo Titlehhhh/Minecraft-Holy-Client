@@ -204,11 +204,11 @@ namespace McProtoNet
 					}
 					catch
 					{
-						
+
 					}
 					finally
 					{
-						
+
 					}
 
 
@@ -276,7 +276,11 @@ namespace McProtoNet
 		private int _errorInvoked = 0;
 		private void InvokeError()
 		{
-			OnErrored?.Invoke(this._error);
+			if (this._error is not null)
+			{
+				OnErrored?.Invoke(this._error);
+				_error = null;
+			}
 		}
 
 		public void Disconnect()
@@ -391,7 +395,7 @@ namespace McProtoNet
 
 				var tcpStream = tcpClient.GetStream();
 
-				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
 				{
 
 					using var combined = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, token);

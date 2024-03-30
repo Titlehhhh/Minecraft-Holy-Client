@@ -1,4 +1,5 @@
 ﻿using Microsoft.IO;
+using Org.BouncyCastle.Utilities.Zlib;
 using System.Buffers;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
@@ -7,29 +8,28 @@ namespace McProtoNet.Core.Protocol
 {
 	public class MinecraftPacketSender : IMinecraftPacketSender, IDisposable
 	{
+
 		public Stream BaseStream { get; set; }
 
 		public MinecraftPacketSender(Stream baseStream) : base()
 		{
 			BaseStream = baseStream;
-			//compressedPacket = StaticResources.MSmanager.GetStream();
-			//zLib = new ZLibStream(compressedPacket, CompressionMode.Compress);
+			
 		}
 
-		private static ArrayPool<byte> VarIntPool = ArrayPool<byte>.Create(10, 200);
+		private static ArrayPool<byte> VarIntPool = ArrayPool<byte>.Create(10, 20);
+
+		
 
 
 
-		//private MemoryStream compressedPacket;
-		//private ZLibStream zLib;
 		public MinecraftPacketSender()
 		{
-			//compressedPacket = StaticResources.MSmanager.GetStream();
-			//zLib = new ZLibStream(compressedPacket, CompressionMode.Compress);
+			
 		}
 
 
-		private const int ZERO_VARLENGTH = 1;//default(int).GetVarIntLength();
+		private const int ZERO_VARLENGTH = 1;
 		private static readonly byte[] ZERO_VARINT = { 0 };
 		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
@@ -41,10 +41,7 @@ namespace McProtoNet.Core.Protocol
 			var data = packet.Data;
 			try
 			{
-				//ThrowIfDisposed();
-
-
-
+				
 
 				if (_compressionThreshold > 0)
 				{
@@ -57,9 +54,13 @@ namespace McProtoNet.Core.Protocol
 
 					if (uncompressedSize >= _compressionThreshold)
 					{
-
+						
 						using (var compressedPacket = StaticResources.MSmanager.GetStream())
 						{
+							//compressedPacket.GetBuffer()
+
+							
+
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{
 								zlibStream.WriteVarInt(id);
@@ -149,7 +150,7 @@ namespace McProtoNet.Core.Protocol
 					{
 						var memory = buffer.AsMemory();
 
-						int idLen = id.GetVarIntLength(memory);
+						byte idLen = id.GetVarIntLength(memory);
 
 
 
@@ -161,22 +162,22 @@ namespace McProtoNet.Core.Protocol
 							{
 								using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 								{
-									zlibStream.Write(memory.Span.Slice(0, idLen));
-									data.CopyTo(zlibStream);
+									await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
+									await data.CopyToAsync(zlibStream, token);
 								}
 
 								int compressedPacketLength = (int)compressedPacket.Length;
 
 
 
-								int uncompressedSizeLength = uncompressedSize.GetVarIntLength(memory);
+								byte uncompressedSizeLength = uncompressedSize.GetVarIntLength(memory);
 
 
 
 
 								int fullSize = uncompressedSizeLength + compressedPacketLength;
 
-								int fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
+								byte fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
 
 
 								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
@@ -195,15 +196,15 @@ namespace McProtoNet.Core.Protocol
 						{
 							uncompressedSize++;
 
-							int unc_len = uncompressedSize.GetVarIntLength(memory.Slice(idLen));
+							byte unc_len = uncompressedSize.GetVarIntLength(memory.Slice(idLen));
 
 							//await BaseStream.WriteVarIntAsync(uncompressedSize, token);
 
-							await BaseStream.WriteAsync(memory.Slice(idLen, unc_len));
+							await BaseStream.WriteAsync(memory.Slice(idLen, unc_len), token);
 
 							await BaseStream.WriteAsync(ZERO_VARINT, token);
 
-							await BaseStream.WriteAsync(memory.Slice(0, idLen));
+							await BaseStream.WriteAsync(memory.Slice(0, idLen), token);
 							//await BaseStream.WriteAsync(buffer, 0, idLen, token);
 
 							await data.CopyToAsync(BaseStream, token);
@@ -239,9 +240,9 @@ namespace McProtoNet.Core.Protocol
 			try
 			{
 
-				int id_len = id.GetVarIntLength(buffer);
+				byte id_len = id.GetVarIntLength(buffer);
 
-				int fullsize_len = (id_len + Packetlength).GetVarIntLength(buffer, id_len);
+				byte fullsize_len = (id_len + Packetlength).GetVarIntLength(buffer, id_len);
 
 
 				await BaseStream.WriteAsync(buffer, id_len, fullsize_len, token);

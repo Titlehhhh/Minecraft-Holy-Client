@@ -172,14 +172,14 @@ namespace McProtoNet.Benchmark
 			
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async ValueTask Send_Small()
 		{
 			ms.Position = 0;
 			await sender.SendPacketAsync(smallPacket);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async ValueTask Send1M_Small()
 		{
 			for (int i = 0; i < 1000000; i++)
@@ -190,14 +190,14 @@ namespace McProtoNet.Benchmark
 
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async ValueTask Send_Big()
 		{
 			ms.Position = 0;
 			await sender.SendPacketAsync(bigPacket);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async ValueTask Send1M_Big()
 		{
 			for (int i = 0; i < 1000000; i++)
@@ -208,13 +208,13 @@ namespace McProtoNet.Benchmark
 
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public ValueTask Send_Big_Compress()
 		{
 			return senderWithCompress.SendPacketAsync(bigPacket);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async ValueTask Send1K_Big_Compress()
 		{
 			for (int i = 0; i < 1000; i++)
@@ -240,6 +240,8 @@ namespace McProtoNet.Benchmark
 			packet.Dispose();
 
 		}
+
+		
 
 		[Benchmark]
 		public async ValueTask Read_Small_1M()

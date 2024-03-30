@@ -42,6 +42,7 @@ namespace McProtoNet
 			catch (Exception ex)
 			{
 				CancelAll(ex);
+				InvokeError();
 				throw;
 			}
 			finally

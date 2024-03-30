@@ -2,82 +2,36 @@
 using HolyClient.Common;
 using QuickProxyNet;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace HolyClient.StressTest
 {
+
+
 	[ConfigureAwait(false)]
 	class ProxyProvider : IProxyProvider
 	{
-		private readonly ChannelReader<ProxyCheckResult> reader;
-		private Channel<IProxyClient> channel;
-		private ChannelReader<IProxyClient> _reader;
-		private ChannelWriter<IProxyClient> _writer;
+
+
+		private readonly ChannelReader<IProxyClient> reader;
+
 
 		private CancellationTokenSource cts = new();
 
 
-		public ProxyProvider(ChannelReader<ProxyCheckResult> reader, int capacity = 100)
+		public ProxyProvider(ChannelReader<IProxyClient> reader)
 		{
 			this.reader = reader;
-			this.channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
-			{
-				SingleWriter = true
-			});
-
-			_writer = channel.Writer;
-			_reader = channel.Reader;
-
 		}
-		private List<IProxyClient> proxies = new();
-
-
-
-
-		public async Task Run()
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public async ValueTask<IProxyClient> GetNextProxy()
 		{
-			try
-			{
-				await foreach (var item in reader.ReadAllAsync(cts.Token))
-				{
-					await _writer.WriteAsync(item.ProxyClient, cts.Token);
-					proxies.Add(item.ProxyClient);
-				}
-
-				await Task.Run(async () =>
-				{
-					try
-					{
-						while (!cts.IsCancellationRequested)
-						{
-							foreach (var item in proxies)
-							{
-								await _writer.WriteAsync(item, cts.Token);
-							}
-						}
-					}
-					catch
-					{
-
-					}
-					finally
-					{
-						_writer.TryComplete();
-					}
-				});
-			}
-			catch
-			{
-
-			}
+			return await reader.ReadAsync(cts.Token);
 		}
 
 
-
-		public ValueTask<IProxyClient> GetNextProxy()
-		{
-			return _reader.ReadAsync();
-		}
 		private bool _disposed = false;
 		public void Dispose()
 		{

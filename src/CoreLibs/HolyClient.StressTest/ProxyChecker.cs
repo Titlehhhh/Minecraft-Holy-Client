@@ -2,12 +2,14 @@
 using System.Net.Sockets;
 using System.Threading.Channels;
 using QuickProxyNet;
+using Fody;
 
 namespace HolyClient.StressTest
 {
+	[ConfigureAwait(false)]
 	public sealed class ProxyChecker : IDisposable
 	{
-		private readonly ChannelWriter<ProxyCheckResult> _writer;
+		private readonly ChannelWriter<IProxyClient> _writer;
 		private readonly IEnumerable<ProxyInfo> _proxies;
 		private readonly int _parallelCount;
 		private readonly int _connectTimeout;
@@ -20,7 +22,7 @@ namespace HolyClient.StressTest
 
 
 		public ProxyChecker(
-			ChannelWriter<ProxyCheckResult> writer,
+			ChannelWriter<IProxyClient> writer,
 			IEnumerable<ProxyInfo> proxies,
 			ProxyCheckerOptions options)
 		{
@@ -40,78 +42,66 @@ namespace HolyClient.StressTest
 			try
 			{
 				ProxyClientFactory proxyClientFactory = new();
-				foreach (var chunk in _proxies.Chunk(_parallelCount))
+				var clients = _proxies.Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port));
+				var tasks = new List<Task>(_parallelCount);
+
+				while (!_cts.IsCancellationRequested)
 				{
-					_cts.Token.ThrowIfCancellationRequested();
 
-
-					var clients = new List<IProxyClient>();
-					foreach (var proxy in chunk)
+					foreach (var chunk in clients.Chunk(_parallelCount))
 					{
+						tasks.Clear();
+
 						_cts.Token.ThrowIfCancellationRequested();
-						var client = proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port);
-						clients.Add(client);
-					}
 
-					var tasks = new List<Task<ProxyCheckResult>>();
 
-					logger.Information($"[Proxy Checker] Checking...");
-					
+						using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
 
-					using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+						
 
-					foreach (var client in clients)
-					{
-						_cts.Token.ThrowIfCancellationRequested();
-						tasks.Add(CheckProxy(client, linked.Token));
-					}
-					linked.CancelAfter(_connectTimeout);
-					_cts.Token.ThrowIfCancellationRequested();
-					var result = await Task.WhenAll(tasks);
-
-					_cts.Token.ThrowIfCancellationRequested();
-
-					int c = 0;
-					for (int i = 0; i < result.Length; i++)
-					{
-						_cts.Token.ThrowIfCancellationRequested();
-						ProxyCheckResult checkResult = result[i];
-						if (checkResult.Success)
+						foreach (var client in chunk)
 						{
-							c++;
+							_cts.Token.ThrowIfCancellationRequested();
+							tasks.Add(CheckProxy(client, linked.Token));
 						}
-					}
-
-					logger.Information($"[Proxy Checker] {c}/{result.Length}");
-
-					for (int i = 0; i < result.Length; i++)
-					{
+						linked.CancelAfter(_connectTimeout);
 						_cts.Token.ThrowIfCancellationRequested();
-						ProxyCheckResult checkResult = result[i];
-						if (checkResult.Success)
+						await Task.WhenAll(tasks);
+
+
+
+						_cts.Token.ThrowIfCancellationRequested();
+
+
+						for (int i = 0; i < _parallelCount; i++)
 						{
-							await _writer.WriteAsync(checkResult, _cts.Token);
+							_cts.Token.ThrowIfCancellationRequested();
+							var task = tasks[i];
+
+
+							if (task.IsCompletedSuccessfully)
+							{
+								var client = chunk[i];
+								await _writer.WriteAsync(client, _cts.Token);
+							}
 						}
+
+
+
+
 					}
-
-
+					await Task.Delay(1000, _cts.Token);
 				}
+
+
 			}
-			catch (TaskCanceledException)
+			catch
 			{
-				Console.WriteLine("TaskCancel");
-			}
-			catch (OperationCanceledException)
-			{
-				Console.WriteLine("OperationCancel");
-			}
-			catch (Exception ex)
-			{
-				logger.Error("[Proxy Checker] Failed run", ex);
+
 			}
 			finally
 			{
-				Console.WriteLine("Complete");
+
 				_writer.Complete();
 			}
 		}
@@ -127,28 +117,21 @@ namespace HolyClient.StressTest
 			GC.SuppressFinalize(this);
 		}
 
-		private async Task<ProxyCheckResult> CheckProxy(IProxyClient client, CancellationToken cancellationToken)
+		private async Task CheckProxy(IProxyClient client, CancellationToken cancellationToken)
 		{
-			try
-			{
-				using TcpClient tcpClient = new();
+
+			using TcpClient tcpClient = new();
 
 
 
-				tcpClient.SendTimeout = _sendTimeout;
-				tcpClient.ReceiveTimeout = _readTimeout;
+			tcpClient.SendTimeout = _sendTimeout;
+			tcpClient.ReceiveTimeout = _readTimeout;
 
-				await tcpClient.ConnectAsync(client.ProxyHost, client.ProxyPort, cancellationToken);
+			await tcpClient.ConnectAsync(client.ProxyHost, client.ProxyPort, cancellationToken);
 
-				using var stream = await client.ConnectAsync(tcpClient.GetStream(), _targetHost, _targetPort, cancellationToken);
-				return new ProxyCheckResult(true, client);
-			}
-			catch (Exception ex)
-			{
-				if (_cts.IsCancellationRequested)
-					throw;
-				return new ProxyCheckResult(false, null);
-			}
+			using var stream = await client.ConnectAsync(tcpClient.GetStream(), _targetHost, _targetPort, cancellationToken);
+
+
 
 		}
 	}

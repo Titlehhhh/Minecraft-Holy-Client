@@ -10,9 +10,9 @@ namespace McProtoNet.Core
 	public static class Extensions
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public static int GetVarIntLength(this int val)
+		public static byte GetVarIntLength(this int val)
 		{
-			int amount = 0;
+			byte amount = 0;
 			do
 			{
 				val >>= 7;
@@ -22,17 +22,17 @@ namespace McProtoNet.Core
 			return amount;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public static int GetVarIntLength(this int value, byte[] data)
+		public static byte GetVarIntLength(this int value, byte[] data)
 		{
 			return GetVarIntLength(value, data, 0);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public static int GetVarIntLength(this int value, byte[] data, int offset)
+		public static byte GetVarIntLength(this int value, byte[] data, int offset)
 		{
 			var unsigned = (uint)value;
 
-			int len = 0;
+			byte len = 0;
 			do
 			{
 				var temp = (byte)(unsigned & 127);
@@ -51,11 +51,11 @@ namespace McProtoNet.Core
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public static int GetVarIntLength(this int value, Span<byte> data)
+		public static byte GetVarIntLength(this int value, Span<byte> data)
 		{
 			var unsigned = (uint)value;
 
-			int len = 0;
+			byte len = 0;
 			do
 			{
 				var temp = (byte)(unsigned & 127);
@@ -70,7 +70,7 @@ namespace McProtoNet.Core
 			return len;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public static int GetVarIntLength(this int value, Memory<byte> data)
+		public static byte GetVarIntLength(this int value, Memory<byte> data)
 		{
 			return GetVarIntLength(value, data.Span);
 		}

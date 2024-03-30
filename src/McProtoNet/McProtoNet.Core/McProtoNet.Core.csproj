@@ -14,12 +14,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>		
-		<PackageReference Include="Serilog"/>
-		<PackageReference Include="Stateless"/>
-		<PackageReference Include="System.IO.Pipelines"/>
-		<PackageReference Include="System.Reactive"/>		
-		<PackageReference Include="Portable.BouncyCastle"/>
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream"  />
+		<PackageReference Include="Serilog" />
+		<PackageReference Include="Stateless" />
+		<PackageReference Include="System.IO.Pipelines" />
+		<PackageReference Include="System.Reactive" />		
+		<PackageReference Include="Portable.BouncyCastle" />
+		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" />
 	</ItemGroup>
 	<ItemGroup>

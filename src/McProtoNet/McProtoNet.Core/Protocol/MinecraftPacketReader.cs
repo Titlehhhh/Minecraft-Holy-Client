@@ -11,7 +11,7 @@ namespace McProtoNet.Core.Protocol
 	{
 		public Stream BaseStream { get; set; }
 
-
+		
 
 		public MinecraftPacketReader(Stream baseStream)
 		{

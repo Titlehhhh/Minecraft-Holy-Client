@@ -23,6 +23,7 @@ using System.Threading;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Channels;
 using System;
+using QuickProxyNet;
 
 namespace HolyClient.StressTest
 {
@@ -177,11 +178,13 @@ namespace HolyClient.StressTest
 				var proxies = await LoadProxy(logger);
 
 
+				int capacity = Math.Min(proxies.Count(), this.NumberOfBots);
 
-				var channel = Channel.CreateBounded<ProxyCheckResult>(new BoundedChannelOptions(this.NumberOfBots)
+				var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
 				{
-					SingleWriter = true,
-					SingleReader = true
+					//SingleWriter = true,
+					//SingleReader = false
+					
 				});
 
 
@@ -249,10 +252,9 @@ namespace HolyClient.StressTest
 
 					proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
 
-					proxyProvider = new ProxyProvider(channel.Reader, this.ProxyChecker.ParallelCount);
+					proxyProvider = new ProxyProvider(channel.Reader);
 
-					_ = proxyChecker.Run(logger);
-					_ = proxyProvider.Run();
+					_ = proxyChecker.Run(logger);					
 
 					logger.Information("Запущен прокси-чекер");
 
@@ -261,7 +263,7 @@ namespace HolyClient.StressTest
 					proxyProvider.DisposeWith(disposables);
 				}
 
-
+				
 				var bots = await RunBots(
 					logger,
 					cancellationTokenSource,
