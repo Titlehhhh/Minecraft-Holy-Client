@@ -1,18 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-	  <LangVersion>11</LangVersion>
-    <IsPackable>false</IsPackable>
-	  <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<LangVersion>12</LangVersion>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0-preview-24080-01" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.2.0" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.2.0" />
+	</ItemGroup>
 
-	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0-preview-24080-01" />
-	  <PackageReference Include="MSTest.TestAdapter" Version="3.2.0" />
-	  <PackageReference Include="MSTest.TestFramework" Version="3.2.0" />
-  </ItemGroup>
 
 </Project>

@@ -1,3 +1,5 @@
+using BenchmarkDotNet.Running;
+
 namespace McProtoNet.Benchmark
 {
 	public class Program

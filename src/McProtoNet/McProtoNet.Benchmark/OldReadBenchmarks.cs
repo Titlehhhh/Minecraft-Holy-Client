@@ -1,4 +1,5 @@
-﻿using McProtoNet.Core.Protocol;
+﻿using BenchmarkDotNet.Attributes;
+using McProtoNet.Core.Protocol;
 using System;
 using System.IO;
 using System.Threading.Tasks;

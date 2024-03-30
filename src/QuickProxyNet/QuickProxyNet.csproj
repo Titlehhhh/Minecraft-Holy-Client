@@ -4,7 +4,7 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>11</LangVersion>
+		<LangVersion>latest</LangVersion>
 		<MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>

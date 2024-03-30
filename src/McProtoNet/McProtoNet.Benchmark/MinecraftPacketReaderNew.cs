@@ -1,4 +1,5 @@
-﻿using McProtoNet.Core;
+﻿using ICSharpCode.SharpZipLib.Zip.Compression;
+using McProtoNet.Core;
 using System;
 using System.Buffers;
 using System.IO;

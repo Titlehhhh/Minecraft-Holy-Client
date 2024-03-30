@@ -15,7 +15,9 @@ namespace McProtoNet.NBT
 			private set => Value = value ? (byte)1 : (byte)0;
 		}
 
+#pragma warning disable CS0108 // Член скрывает унаследованный член: отсутствует новое ключевое слово
 		public byte Value
+#pragma warning restore CS0108 // Член скрывает унаследованный член: отсутствует новое ключевое слово
 		{
 			get => base.Value;
 			set => base.Value = value;

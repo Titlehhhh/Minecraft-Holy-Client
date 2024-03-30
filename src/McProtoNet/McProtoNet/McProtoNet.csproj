@@ -4,7 +4,7 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>11</LangVersion>
+		<LangVersion>latest</LangVersion>
 		<Description>High-performance library for working with the minecraft protocol</Description>
 		<RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
 		<PackageTags>minecraft bot reactive performance</PackageTags>
@@ -14,11 +14,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj"/>
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj"/>
-
-		<PackageReference Include="MinVer" Version="5.0.0" />
-		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
+		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj"/>		
 	</ItemGroup>
-	
+
+	<ItemGroup>
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
+		<PackageReference Include="MinVer" Version="5.0.0" />
+	</ItemGroup>
 
 </Project>
