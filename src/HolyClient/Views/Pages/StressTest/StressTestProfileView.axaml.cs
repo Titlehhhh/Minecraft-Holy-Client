@@ -1,13 +1,9 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
 using ReactiveUI;
 using System;
-using System.Diagnostics;
 using System.Reactive.Disposables;
 
 namespace HolyClient.Views;

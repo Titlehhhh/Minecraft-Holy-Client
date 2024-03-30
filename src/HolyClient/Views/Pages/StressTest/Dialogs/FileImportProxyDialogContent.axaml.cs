@@ -1,7 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
@@ -10,10 +8,10 @@ namespace HolyClient.Views;
 
 public partial class FileImportProxyDialogContent : ReactiveUserControl<FileImportProxyDialogViewModel>
 {
-    public FileImportProxyDialogContent()
-    {
-        InitializeComponent();
-    }
+	public FileImportProxyDialogContent()
+	{
+		InitializeComponent();
+	}
 
 	private async void OpenFileButton_Click(object? sender, RoutedEventArgs e)
 	{

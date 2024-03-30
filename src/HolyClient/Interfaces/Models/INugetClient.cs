@@ -7,7 +7,7 @@ namespace HolyClient.Contracts.Models;
 
 public interface INugetClient : INotifyPropertyChanged
 {
-	
+
 
 	ISourceCache<IPackageSearchMetadata, string> Packages { get; }
 	string Filter { get; set; }

@@ -10,5 +10,5 @@ namespace HolyClient.Core.Infrastructure
 		T CreateInstance<T>() where T : IStressTestBehavior;
 	}
 
-	
+
 }

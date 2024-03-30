@@ -1,5 +1,4 @@
-﻿using HolyClient.AppState;
-using HolyClient.Core.Infrastructure;
+﻿using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

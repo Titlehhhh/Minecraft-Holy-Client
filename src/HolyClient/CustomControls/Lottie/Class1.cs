@@ -9,12 +9,8 @@ using Avalonia.Rendering.Composition;
 using Avalonia.Skia;
 using SkiaSharp;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HolyClient.CustomControls
 {
@@ -253,7 +249,7 @@ namespace HolyClient.CustomControls
 			//}
 			//else
 			//{
-				
+
 			//	//Logger
 			//	//	.TryGet(LogEventLevel.Warning, LogArea.Control)?
 			//	//	.Log(this, "Failed to load animation.");

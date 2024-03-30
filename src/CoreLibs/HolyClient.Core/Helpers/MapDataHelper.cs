@@ -30,7 +30,7 @@ namespace HolyClient.Core.Helpers
 
 					var color = new Rgba32(values[0], values[1], values[2]);
 
-					
+
 					image[y, x] = color;
 				}
 			}

@@ -20,9 +20,9 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 					{
 						"varint" => new ProtodefVarInt(),
 						"varlong" => new ProtodefVarLong(),
-						"void"=> new ProtodefVoid(),
-						"string"=> new ProtodefString(),
-						"bool"=> new ProtodefBool(),
+						"void" => new ProtodefVoid(),
+						"string" => new ProtodefString(),
+						"bool" => new ProtodefBool(),
 						_ => new ProtodefCustomType(name)
 					};
 				}

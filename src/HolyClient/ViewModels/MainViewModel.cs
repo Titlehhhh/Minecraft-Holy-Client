@@ -26,7 +26,7 @@ public class MainViewModel : ReactiveObject, IActivatableViewModel, IScreen, IRo
 	public MainViewModel(MainState mainState)
 	{
 		Router = new RoutingState();
-		
+
 		this.WhenActivated(d =>
 		{
 

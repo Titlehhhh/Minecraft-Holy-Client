@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 
 namespace QuickProxyNet
@@ -99,7 +98,7 @@ namespace QuickProxyNet
 				var stream = new NetworkStream(socket, true);
 				try
 				{
-					
+
 
 					using var reg = cancellationToken.Register(() => stream.Dispose());
 
@@ -115,7 +114,7 @@ namespace QuickProxyNet
 			catch
 			{
 
-				
+
 				throw;
 			}
 
@@ -171,7 +170,7 @@ namespace QuickProxyNet
 
 			disposed = true;
 			Interlocked.Exchange(ref socket, null)?.Dispose();
-			
+
 
 			GC.SuppressFinalize(this);
 

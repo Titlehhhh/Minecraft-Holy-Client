@@ -1,9 +1,7 @@
 ﻿using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
-using Microsoft.IO;
 using System.Buffers;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace McProtoNet.Core
 {

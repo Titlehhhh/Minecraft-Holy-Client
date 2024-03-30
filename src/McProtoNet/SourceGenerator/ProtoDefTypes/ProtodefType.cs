@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace SourceGenerator.ProtoDefTypes
 {
 	[JsonConverter(typeof(DataTypeConverter))]
-	public abstract class ProtodefType: IJsonOnDeserialized
+	public abstract class ProtodefType : IJsonOnDeserialized
 	{
 #if DEBUG
 		public string Id { get; } = Random.Shared.NextInt64().ToString();
@@ -13,9 +13,9 @@ namespace SourceGenerator.ProtoDefTypes
 
 		public virtual void OnDeserialized()
 		{
-			if(this is IPathTypeEnumerable enums)
+			if (this is IPathTypeEnumerable enums)
 			{
-				foreach(var item in enums)
+				foreach (var item in enums)
 				{
 					item.Value.Parent = this;
 				}

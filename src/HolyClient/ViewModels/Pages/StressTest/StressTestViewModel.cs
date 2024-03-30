@@ -29,7 +29,7 @@ public partial class StressTestViewModel : ReactiveObject, IRoutableViewModel, I
 	private static int testId = 0;
 	public StressTestViewModel()
 	{
-		
+
 
 		HostScreen = null;
 
@@ -51,7 +51,7 @@ public partial class StressTestViewModel : ReactiveObject, IRoutableViewModel, I
 		   .RefCount();
 
 		outputCollectionChanges
-			
+
 			.ObserveOn(RxApp.MainThreadScheduler)
 			.OnItemAdded(provider =>
 			{
@@ -86,7 +86,7 @@ public partial class StressTestViewModel : ReactiveObject, IRoutableViewModel, I
 			{
 				name = basename + (i++);
 			}
-			
+
 			state.Profiles.AddOrUpdate(new StressTestProfile()
 			{
 				Name = name

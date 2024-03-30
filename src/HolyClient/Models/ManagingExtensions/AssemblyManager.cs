@@ -51,7 +51,7 @@ namespace HolyClient.Models.ManagingExtensions
 			}
 			catch (Exception ex)
 			{
-			
+
 			}
 			file.FileUpdated.Subscribe(x =>
 			{

@@ -14,13 +14,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>		
-		<PackageReference Include="Serilog" />
-		<PackageReference Include="Stateless" />
-		<PackageReference Include="System.IO.Pipelines" />
-		<PackageReference Include="System.Reactive" />		
-		<PackageReference Include="Portable.BouncyCastle" />
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
-		<PackageReference Include="Microsoft.Extensions.ObjectPool" />
+		<PackageReference Include="Serilog" Version="3.1.1"/>		
+		<PackageReference Include="System.IO.Pipelines" Version="8.0.0"/>
+		<PackageReference Include="System.Reactive" Version="6.0.0"/>		
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
+		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0"/>
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.3"/>
+		<PackageReference Include="MinVer" Version="5.0.0" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 	</ItemGroup>
 	<ItemGroup>
 		

@@ -1,5 +1,4 @@
-﻿using FluentAvalonia.UI.Controls;
-using ReactiveUI;
+﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Linq;
 

@@ -2,11 +2,8 @@
 using McProtoNet;
 using ReactiveUI;
 using Serilog;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Text.RegularExpressions;
 
 namespace HolyClient.StressTest
@@ -48,7 +45,7 @@ namespace HolyClient.StressTest
 				Action<Exception> onErr = async (exc) =>
 				{
 
-					
+
 
 					try
 					{
@@ -76,7 +73,7 @@ namespace HolyClient.StressTest
 						{
 							await bot.Restart(true);
 						}
-						catch(Exception ex)
+						catch (Exception ex)
 						{
 							logger.Information($"Ошибка переподключения: {ex.Message}");
 						}

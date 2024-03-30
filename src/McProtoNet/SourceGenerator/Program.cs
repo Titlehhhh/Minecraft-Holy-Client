@@ -1,8 +1,5 @@
 ﻿using SourceGenerator.ProtoDefTypes;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Xml.Linq;
 
 
 public sealed class ProtocolGenNode

@@ -1,6 +1,4 @@
-﻿using FluentAvalonia.UI.Controls;
-
-namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
+﻿namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
 {
 	public class ImportSourceViewModel
 	{
@@ -11,7 +9,7 @@ namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
 
 		public ImportSourceViewModel(string icon, ImportSource sourceType)
 		{
-			
+
 			SourceType = sourceType;
 			Icon = icon;
 			string baseTr = $"StressTest.Configuration.Proxy.Dialog.SelectSource.{icon}";

@@ -1,12 +1,4 @@
-﻿using Avalonia.Controls;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Validation.Collections;
-using ReactiveUI.Validation.Extensions;
-using ReactiveUI.Validation.States;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Reactive.Linq;
+﻿using ReactiveUI.Fody.Helpers;
 
 namespace HolyClient.ViewModels;
 
@@ -20,7 +12,7 @@ public sealed class InMemoryImportProxyDialogViewModel : ImportProxyViewModel
 
 	public InMemoryImportProxyDialogViewModel(string title) : base(title)
 	{
-		
+
 
 		Init();
 	}

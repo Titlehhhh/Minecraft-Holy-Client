@@ -1,6 +1,6 @@
-﻿using ReactiveUI.Fody.Helpers;
+﻿using MessagePack;
 using ReactiveUI;
-using MessagePack;
+using ReactiveUI.Fody.Helpers;
 
 namespace HolyClient.StressTest
 {

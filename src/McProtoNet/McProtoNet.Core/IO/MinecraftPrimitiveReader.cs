@@ -1,7 +1,6 @@
 ﻿using McProtoNet.Core.Helpers;
 using McProtoNet.NBT;
 using Microsoft.Extensions.ObjectPool;
-using Microsoft.IO;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Text;
@@ -209,7 +208,7 @@ namespace McProtoNet.Core.IO
 
 			return result;
 		}
-		
+
 		public virtual byte[] ReadToEnd()
 		{
 			using (var ms = StaticResources.MSmanager.GetStream())

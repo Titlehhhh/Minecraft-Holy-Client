@@ -1,6 +1,5 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
-using HolyClient.AppState;
 using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
@@ -279,7 +278,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 		{
 			var cancelCommand = ReactiveCommand.CreateFromTask(async () =>
 			{
-				
+
 
 				var mainVM = Locator.Current.GetService<MainViewModel>();
 
@@ -327,7 +326,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 	[Reactive]
 	public bool UseProxy { get; set; }
 	[Reactive]
-	public bool CheckDNS { get;  set; }
+	public bool CheckDNS { get; set; }
 	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
 	[Reactive]

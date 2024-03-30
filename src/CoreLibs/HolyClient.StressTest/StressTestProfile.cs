@@ -7,23 +7,18 @@ using HolyClient.Core.Infrastructure;
 using McProtoNet;
 using McProtoNet.Utils;
 using MessagePack;
+using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Stateless.Graph;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Channels;
-using System;
-using QuickProxyNet;
 
 namespace HolyClient.StressTest
 {
@@ -184,7 +179,7 @@ namespace HolyClient.StressTest
 				{
 					//SingleWriter = true,
 					//SingleReader = false
-					
+
 				});
 
 
@@ -254,7 +249,7 @@ namespace HolyClient.StressTest
 
 					proxyProvider = new ProxyProvider(channel.Reader);
 
-					_ = proxyChecker.Run(logger);					
+					_ = proxyChecker.Run(logger);
 
 					logger.Information("Запущен прокси-чекер");
 
@@ -263,7 +258,7 @@ namespace HolyClient.StressTest
 					proxyProvider.DisposeWith(disposables);
 				}
 
-				
+
 				var bots = await RunBots(
 					logger,
 					cancellationTokenSource,

@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using ReactiveUI;
-using System.ComponentModel;
 using System.Reactive.Disposables;
 
 namespace HolyClient.Abstractions.StressTest

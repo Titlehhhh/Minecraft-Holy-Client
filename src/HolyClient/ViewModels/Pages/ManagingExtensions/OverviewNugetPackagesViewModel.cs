@@ -132,7 +132,7 @@ namespace HolyClient.ViewModels
 			}
 			catch (Exception ex)
 			{
-				
+
 			}
 
 		}

@@ -4,7 +4,7 @@ public static class Extensions
 {
 	public static bool IsVarLong(this ProtodefType type)
 	{
-		return type is ProtodefVarLong;		
+		return type is ProtodefVarLong;
 	}
 	public static bool IsVarInt(this ProtodefType type)
 	{
@@ -40,7 +40,7 @@ public static class Extensions
 
 	public static bool IsPrimitiveArray(this ProtodefType type)
 	{
-		if(type is ProtodefArray arr)
+		if (type is ProtodefArray arr)
 		{
 			return arr.Type.IsPrimitive();
 		}

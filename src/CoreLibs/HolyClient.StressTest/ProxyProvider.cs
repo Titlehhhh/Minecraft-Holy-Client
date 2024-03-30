@@ -1,8 +1,5 @@
 ﻿using Fody;
-using HolyClient.Common;
 using QuickProxyNet;
-using System.Collections.Concurrent;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 

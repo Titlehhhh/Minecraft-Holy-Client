@@ -8,7 +8,6 @@ using HolyClient.Localization;
 using HolyClient.Models;
 using HolyClient.Models.ManagingExtensions;
 using HolyClient.Services;
-using HolyClient.StressTest;
 using HolyClient.ViewModels;
 using HolyClient.Views;
 using ReactiveUI;
@@ -18,7 +17,6 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace HolyClient

@@ -1,7 +1,4 @@
-﻿using MessagePack;
-using QuickProxyNet;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+﻿using QuickProxyNet;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HolyClient.Common

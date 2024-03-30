@@ -126,7 +126,7 @@ namespace HolyClient.LoadPlugins
 
 			var resolvedPath = _dependencyResolver.ResolveAssemblyToPath(assemblyName);
 
-			
+
 
 			if (!string.IsNullOrEmpty(resolvedPath) && File.Exists(resolvedPath))
 			{

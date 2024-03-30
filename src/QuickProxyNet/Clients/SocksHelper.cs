@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 namespace QuickProxyNet
 {
@@ -35,7 +34,7 @@ namespace QuickProxyNet
 
 					if (string.Equals(proxyUri.Scheme, "socks5", StringComparison.OrdinalIgnoreCase))
 					{
-						await EstablishSocks5TunnelAsync(stream, host, port, credentials, async,cancellationToken).ConfigureAwait(false);
+						await EstablishSocks5TunnelAsync(stream, host, port, credentials, async, cancellationToken).ConfigureAwait(false);
 					}
 					else if (string.Equals(proxyUri.Scheme, "socks4a", StringComparison.OrdinalIgnoreCase))
 					{
@@ -58,7 +57,7 @@ namespace QuickProxyNet
 			}
 		}
 
-		public static async ValueTask EstablishSocks5TunnelAsync(Stream stream, string host, int port, NetworkCredential? credentials, bool async,CancellationToken cancellationToken)
+		public static async ValueTask EstablishSocks5TunnelAsync(Stream stream, string host, int port, NetworkCredential? credentials, bool async, CancellationToken cancellationToken)
 		{
 			byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
 			try
@@ -295,7 +294,7 @@ namespace QuickProxyNet
 				//    1    1      2              4
 
 
-				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async,cancellationToken).ConfigureAwait(false);
+				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async, cancellationToken).ConfigureAwait(false);
 
 				switch (buffer[1])
 				{
@@ -336,7 +335,7 @@ namespace QuickProxyNet
 			}
 		}
 
-		private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, bool async,CancellationToken cancellation)
+		private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, bool async, CancellationToken cancellation)
 		{
 			if (async)
 			{
@@ -349,7 +348,7 @@ namespace QuickProxyNet
 			}
 		}
 
-		private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer, bool async,CancellationToken cancellation)
+		private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer, bool async, CancellationToken cancellation)
 		{
 			int bytesRead = async
 				? await stream.ReadAtLeastAsync(buffer, buffer.Length, cancellationToken: cancellation, throwOnEndOfStream: false).ConfigureAwait(false)

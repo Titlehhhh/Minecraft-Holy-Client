@@ -35,7 +35,7 @@ namespace HolyClient.StressTest
 				{
 					foreach (var line in Proxies.Split('\n'))
 					{
-						if(ProxyInfo.TryParse(line,this.Type, out var proxy))
+						if (ProxyInfo.TryParse(line, this.Type, out var proxy))
 						{
 							proxies.Add(proxy);
 						}
@@ -52,12 +52,12 @@ namespace HolyClient.StressTest
 		{
 
 		}
-		
+
 		public InMemoryProxySource(ProxyType type, string lines)
 		{
 			Type = type;
 			Proxies = lines;
-			
+
 		}
 	}
 

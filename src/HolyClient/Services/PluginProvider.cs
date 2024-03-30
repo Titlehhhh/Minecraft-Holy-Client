@@ -32,8 +32,8 @@ namespace HolyClient.Services
 			_stressTestPlugins.AddOrUpdate(new CustomPluginSource(() =>
 			{
 				return new TidePVPBehaviorAttack();
-			}, new PluginMetadata("Titlehhhh","TidePVP Loader","TidePVP"),
-			new PluginTypeReference("HolyClient","TidePVP")));
+			}, new PluginMetadata("Titlehhhh", "TidePVP Loader", "TidePVP"),
+			new PluginTypeReference("HolyClient", "TidePVP")));
 
 		}
 
@@ -64,7 +64,7 @@ namespace HolyClient.Services
 
 	public class DefaultPluginSource : IPluginSource
 	{
-		
+
 		public PluginMetadata Metadata { get; private set; } = new PluginMetadata("Titlehhhh", "Spam hello bots", "HolyClient default behavior");
 
 		public PluginTypeReference Reference { get; } = new PluginTypeReference();
@@ -87,7 +87,7 @@ namespace HolyClient.Services
 			Reference = reference;
 		}
 
-		public PluginMetadata Metadata { get; private set; } 
+		public PluginMetadata Metadata { get; private set; }
 
 		public PluginTypeReference Reference { get; private set; }
 

@@ -3,9 +3,9 @@
 
 public enum Page
 {
-	Home,	
+	Home,
 	StressTest,
-	ManagingExtensions,	
+	ManagingExtensions,
 	Settings
 }
 

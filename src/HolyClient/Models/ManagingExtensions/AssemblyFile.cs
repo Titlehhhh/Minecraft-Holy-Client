@@ -48,7 +48,7 @@ namespace HolyClient.Models.ManagingExtensions
 					.GetExportedTypes()
 					.Where(x =>
 					{
-						
+
 
 						var g = !x.IsAbstract && typeof(IStressTestBehavior).IsAssignableFrom(x);
 						return g;

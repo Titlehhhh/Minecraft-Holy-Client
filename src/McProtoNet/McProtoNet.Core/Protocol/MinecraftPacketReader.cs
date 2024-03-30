@@ -1,8 +1,5 @@
-﻿using Microsoft.IO;
-using Org.BouncyCastle.Asn1.Cms;
-using System.Buffers;
+﻿using System.Buffers;
 using System.IO.Compression;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Core.Protocol
@@ -11,7 +8,7 @@ namespace McProtoNet.Core.Protocol
 	{
 		public Stream BaseStream { get; set; }
 
-		
+
 
 		public MinecraftPacketReader(Stream baseStream)
 		{
@@ -90,7 +87,7 @@ namespace McProtoNet.Core.Protocol
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token)
+		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token = default)
 		{
 			//ThrowIfDisposed();
 

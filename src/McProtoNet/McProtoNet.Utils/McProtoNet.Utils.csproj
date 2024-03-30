@@ -8,15 +8,14 @@
 		<Description>Библиотека с инструментами для McProtoNet</Description>
 		<RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
 		<LangVersion>11</LangVersion>
-
-		
-		
 	</PropertyGroup>
 
 
 	<ItemGroup>
-		<PackageReference Include="DnsClient"/>
-		<PackageReference Include="Newtonsoft.Json"/>
+		<PackageReference Include="DnsClient" Version="1.7.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="MinVer" Version="5.0.0" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 	</ItemGroup>
 
 

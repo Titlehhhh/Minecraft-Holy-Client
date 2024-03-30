@@ -2,7 +2,7 @@
 
 namespace McProtoNet.Core.IO
 {
-	
+
 	public interface IMinecraftPrimitiveReader
 	{
 
@@ -28,18 +28,18 @@ namespace McProtoNet.Core.IO
 		long ReadVarLong();
 
 		Guid ReadUUID();
-		
-		
-		
-			
-		
-		string ReadString(int maxLength = 32767);
-		
 
-		
-		
-		
-		
+
+
+
+
+		string ReadString(int maxLength = 32767);
+
+
+
+
+
+
 
 		byte[] ReadByteArray();
 		byte[] ReadByteArray(int size);

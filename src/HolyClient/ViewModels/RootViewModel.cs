@@ -1,5 +1,4 @@
 ﻿using ReactiveUI;
-using Splat;
 
 namespace HolyClient.ViewModels;
 
@@ -10,9 +9,9 @@ public sealed class RootViewModel : ReactiveObject, IActivatableViewModel, IScre
 	public RoutingState Router { get; } = new();
 	public RootViewModel()
 	{
-		
 
-	
+
+
 	}
 }
 

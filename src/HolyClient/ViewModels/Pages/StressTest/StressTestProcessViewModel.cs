@@ -1,10 +1,8 @@
-﻿using Avalonia.Threading;
-using DynamicData;
+﻿using DynamicData;
 using DynamicData.Binding;
 using HolyClient.Converters;
 using HolyClient.StressTest;
 using LiveChartsCore;
-using LiveChartsCore.ConditionalDraw;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel.Events;
@@ -15,9 +13,7 @@ using LiveChartsCore.SkiaSharpView.Drawing;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.VisualElements;
-using LiveChartsCore.Themes;
 using LiveChartsCore.VisualElements;
-using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SkiaSharp;
@@ -27,8 +23,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 
@@ -205,8 +199,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
 
 			exceptions
-				.Connect()				
-				.Sort(SortExpressionComparer<ExceptionInfoViewModel>.Descending(p => p.Count))				
+				.Connect()
+				.Sort(SortExpressionComparer<ExceptionInfoViewModel>.Descending(p => p.Count))
 				.Bind(out var _exceptions)
 				.Subscribe()
 				.DisposeWith(d);

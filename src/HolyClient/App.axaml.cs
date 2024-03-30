@@ -4,9 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Metadata;
 using Avalonia.Styling;
-using HolyClient.AppState;
 using HolyClient.Localization;
-using HolyClient.Models;
 using HolyClient.ViewModels;
 using HolyClient.Views;
 using ReactiveUI;
@@ -33,7 +31,7 @@ namespace HolyClient
 			GC.KeepAlive(typeof(HolyClient.Localization.Tr).Assembly);
 			Languages.Init();
 			AvaloniaXamlLoader.Load(this);
-			
+
 		}
 
 
@@ -48,7 +46,7 @@ namespace HolyClient
 			{
 				File.WriteAllText("error.txt", e.ExceptionObject.ToString());
 			};
-	
+
 
 
 			RootViewModel root = new();
@@ -56,10 +54,10 @@ namespace HolyClient
 
 			Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
 
-			
+
 			try
 			{
-				
+
 
 				RootView rootView = new()
 				{
@@ -71,7 +69,7 @@ namespace HolyClient
 					var wnd = new MainWindow()
 					{
 						Content = rootView
-					};					
+					};
 
 					desktop.MainWindow = wnd;
 				}
@@ -87,7 +85,7 @@ namespace HolyClient
 			}
 			catch (Exception e)
 			{
-				
+
 				if (ApplicationLifetime is ISingleViewApplicationLifetime single)
 				{
 					single.MainView = new TextBlock()

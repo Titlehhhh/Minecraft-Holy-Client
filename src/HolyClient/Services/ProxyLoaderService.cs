@@ -44,7 +44,7 @@ namespace HolyClient.Services
 				}
 				int count = 0;
 				List<ProxyInfo> uniqueProxies = new();
-				
+
 
 				sourceList.Edit(outProxies =>
 				{

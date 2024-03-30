@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "McProtoNet", "McProtoNet", 
 	ProjectSection(SolutionItems) = preProject
 		src\McProtoNet\Directory.Build.props = src\McProtoNet\Directory.Build.props
 		src\McProtoNet\Directory.Build.targets = src\McProtoNet\Directory.Build.targets
-		src\McProtoNet\Directory.Packages.props = src\McProtoNet\Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platfroms", "Platfroms", "{B2F7D8DD-5C70-465C-BE7A-DB2C49DE143F}"

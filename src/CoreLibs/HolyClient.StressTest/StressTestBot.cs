@@ -4,7 +4,6 @@ using McProtoNet;
 using QuickProxyNet;
 using Serilog;
 using Serilog.Core;
-using System.Reactive.Subjects;
 
 namespace HolyClient.StressTest
 {

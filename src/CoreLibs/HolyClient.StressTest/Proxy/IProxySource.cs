@@ -9,7 +9,7 @@ namespace HolyClient.StressTest
 	public interface IProxySource
 	{
 		Guid Id { get; }
-		string Name { get;}
+		string Name { get; }
 
 		ProxyType Type { get; set; }
 

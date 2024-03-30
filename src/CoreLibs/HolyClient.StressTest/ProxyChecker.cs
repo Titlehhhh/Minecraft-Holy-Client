@@ -1,8 +1,8 @@
-﻿using HolyClient.Common;
+﻿using Fody;
+using HolyClient.Common;
+using QuickProxyNet;
 using System.Net.Sockets;
 using System.Threading.Channels;
-using QuickProxyNet;
-using Fody;
 
 namespace HolyClient.StressTest
 {
@@ -57,7 +57,7 @@ namespace HolyClient.StressTest
 
 						using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
 
-						
+
 
 						foreach (var client in chunk)
 						{

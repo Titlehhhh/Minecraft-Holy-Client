@@ -1,7 +1,6 @@
 ﻿
 using HolyClient.Abstractions.StressTest;
 using Serilog;
-using System.Reactive.Disposables;
 
 namespace TestStressTestBehavior
 {

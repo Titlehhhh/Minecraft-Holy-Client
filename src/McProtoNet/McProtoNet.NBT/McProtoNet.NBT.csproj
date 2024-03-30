@@ -11,6 +11,7 @@
 		
 	</PropertyGroup>
 	<ItemGroup>
-		
+		<PackageReference Include="MinVer" Version="5.0.0" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 	</ItemGroup>
 </Project>

@@ -1,6 +1,4 @@
-﻿using Microsoft.IO;
-using Org.BouncyCastle.Utilities.Zlib;
-using System.Buffers;
+﻿using System.Buffers;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 
@@ -14,18 +12,18 @@ namespace McProtoNet.Core.Protocol
 		public MinecraftPacketSender(Stream baseStream) : base()
 		{
 			BaseStream = baseStream;
-			
+
 		}
 
 		private static ArrayPool<byte> VarIntPool = ArrayPool<byte>.Create(10, 20);
 
-		
+
 
 
 
 		public MinecraftPacketSender()
 		{
-			
+
 		}
 
 
@@ -41,7 +39,7 @@ namespace McProtoNet.Core.Protocol
 			var data = packet.Data;
 			try
 			{
-				
+
 
 				if (_compressionThreshold > 0)
 				{
@@ -54,12 +52,12 @@ namespace McProtoNet.Core.Protocol
 
 					if (uncompressedSize >= _compressionThreshold)
 					{
-						
+
 						using (var compressedPacket = StaticResources.MSmanager.GetStream())
 						{
 							//compressedPacket.GetBuffer()
 
-							
+
 
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{

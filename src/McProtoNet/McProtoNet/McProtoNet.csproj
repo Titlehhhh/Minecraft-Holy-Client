@@ -13,12 +13,11 @@
 
 
 	<ItemGroup>
-		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj">
-			
-		</ProjectReference>
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj">
-			
-		</ProjectReference>
+		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj"/>
+		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj"/>
+
+		<PackageReference Include="MinVer" Version="5.0.0" />
+		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 	</ItemGroup>
 	
 

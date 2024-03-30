@@ -1,9 +1,7 @@
-﻿using Avalonia.Controls;
-using HolyClient.Abstractions.StressTest;
+﻿using HolyClient.Abstractions.StressTest;
 using Serilog;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks.Dataflow;
 
 namespace HolyClient.StressTest
 {
@@ -15,7 +13,7 @@ namespace HolyClient.StressTest
 		{
 			foreach (var bot in bots)
 			{
-				
+
 
 
 

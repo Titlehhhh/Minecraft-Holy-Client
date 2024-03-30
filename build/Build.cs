@@ -1,26 +1,7 @@
-using NuGet.ContentModel;
-using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitHub;
-using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.MinVer;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.NerdbankGitVersioning;
-using Nuke.Common.Tools.OctoVersion;
-using Nuke.Common.Utilities;
-using Nuke.Common.Utilities.Collections;
-using Octokit;
-using Octokit.Internal;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using ParameterAttribute = Nuke.Common.ParameterAttribute;
 
 
@@ -205,7 +186,7 @@ class Build : NukeBuild
 				DotNetNuGetPush(s => s
 							.SetTargetPath($"{ArtifactsDirectory}/**/*.nupkg")
 							.SetSource("https://f.feedz.io/holyclient/holyclient/nuget/index.json")
-							.SetApiKey(FeedzApiKey));				
+							.SetApiKey(FeedzApiKey));
 			}
 		});
 
@@ -234,9 +215,9 @@ class Build : NukeBuild
 				.EnableSelfContained()
 				.SetAssemblyVersion(MinVer.AssemblyVersion)
 				.SetFileVersion(MinVer.FileVersion)
-				
+
 				.SetOutput(BuildDirectory)
-				.SetFramework("net8.0")			
+				.SetFramework("net8.0")
 				.SetRuntime(Runtime));
 
 

@@ -15,7 +15,7 @@ namespace HolyClient.StressTest
 
 		public Guid Id { get; set; } = Guid.NewGuid();
 
-		
+
 
 		public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
 		{

@@ -4,7 +4,7 @@ namespace SourceGenerator.ProtoDefTypes
 {
 	public sealed class ProtodefBuffer : ProtodefType
 	{
-		
+
 
 		[JsonPropertyName("countType")]
 		public ProtodefType CountType { get; set; }

@@ -1,5 +1,4 @@
 ﻿using HolyClient.AppState;
-using HolyClient.Models;
 using System;
 
 namespace HolyClient.LoadPlugins.Models

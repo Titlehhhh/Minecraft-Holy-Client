@@ -99,7 +99,7 @@ namespace McProtoNet
 					PacketPool.JoinGamePacketPool.Return(join);
 				}
 			}
-			else if(id == PacketIn.OpenWindow)
+			else if (id == PacketIn.OpenWindow)
 			{
 				var win_id = reader.ReadVarInt();
 
@@ -418,6 +418,6 @@ namespace McProtoNet
 
 		}
 
-		
+
 	}
 }

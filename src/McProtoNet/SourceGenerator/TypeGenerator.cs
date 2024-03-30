@@ -34,7 +34,7 @@ public sealed class BitFieldGenerator : ISourceGenerator
 
 	public void Reset(ProtodefType protodefType)
 	{
-		if(protodefType is ProtodefBitField bitField)
+		if (protodefType is ProtodefBitField bitField)
 		{
 			_bitField = bitField;
 		}
