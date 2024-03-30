@@ -1,13 +1,13 @@
-﻿using McProtoNet.Core.Protocol;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Buffers;
 
 namespace McProtoNet.Benchmark
 {
 	[MemoryDiagnoser(true)]
-	public class OldSendBenchmarks
+	public class NewSendBenchmarks
 	{
 		[Params(0, 256)]
 		public int CompressionThreshold { get; set; }
@@ -18,10 +18,10 @@ namespace McProtoNet.Benchmark
 		[Params(1, 1_000_000)]
 		public int Count { get; set; }
 
-		private MinecraftPacketSender sender;
+		private MinecraftPacketSenderNew sender;
 		private MemoryStream ms;
 
-		private Packet packet;
+		private PacketOut packet;
 
 		[GlobalSetup]
 		public void Setup()
@@ -33,11 +33,11 @@ namespace McProtoNet.Benchmark
 
 			Random.Shared.NextBytes(data);
 
-			packet = new Packet(3, new MemoryStream(data));
+			packet = new PacketOut(0, data.Length, data, ArrayPool<byte>.Shared);
 		}
 
 		[Benchmark]
-		public async ValueTask OldSend()
+		public async ValueTask NewSend()
 		{
 			sender.BaseStream = ms;
 			sender.SwitchCompression(CompressionThreshold);

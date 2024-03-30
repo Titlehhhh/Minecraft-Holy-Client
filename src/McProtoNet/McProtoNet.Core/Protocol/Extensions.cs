@@ -191,7 +191,7 @@ namespace McProtoNet.Core
 			}
 			while (unsigned != 0);
 		}
-		public static Task WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
+		public static ValueTask WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
 		{
 			var unsigned = (uint)value;
 			byte[] data = ArrayPool<byte>.Shared.Rent(5);
@@ -209,7 +209,7 @@ namespace McProtoNet.Core
 					data[len++] = temp;
 				}
 				while (unsigned != 0);
-				return stream.WriteAsync(data, 0, len, token);
+				return stream.WriteAsync(data.AsMemory(0,len), token);
 			}
 			finally
 			{

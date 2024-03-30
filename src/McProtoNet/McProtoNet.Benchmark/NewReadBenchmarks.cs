@@ -1,13 +1,16 @@
-﻿using McProtoNet.Core.Protocol;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
+using McProtoNet.Core.Protocol;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+
+
 
 namespace McProtoNet.Benchmark
 {
 	[MemoryDiagnoser(true)]
-	public class OldSendBenchmarks
+	public class NewReadBenchmarks
 	{
 		[Params(0, 256)]
 		public int CompressionThreshold { get; set; }
@@ -18,33 +21,40 @@ namespace McProtoNet.Benchmark
 		[Params(1, 1_000_000)]
 		public int Count { get; set; }
 
-		private MinecraftPacketSender sender;
+		private MinecraftPacketReaderNew reader;
 		private MemoryStream ms;
 
-		private Packet packet;
+		//private Packet packet;
 
 		[GlobalSetup]
 		public void Setup()
 		{
-			sender = new();
+			reader = new();
 			ms = new(1024);
 
 			byte[] data = new byte[PacketSize];
 
 			Random.Shared.NextBytes(data);
 
-			packet = new Packet(3, new MemoryStream(data));
+			var packet = new Packet(3, new MemoryStream(data));
+
+			var sender = new MinecraftPacketSender(ms);
+
+			ms.Position = 0;
+			sender.SendPacketAsync(packet).GetAwaiter().GetResult();
 		}
 
 		[Benchmark]
-		public async ValueTask OldSend()
+		public async ValueTask NewSend()
 		{
-			sender.BaseStream = ms;
-			sender.SwitchCompression(CompressionThreshold);
+			reader.BaseStream = ms;
+			reader.SwitchCompression(CompressionThreshold);
 			for (int i = 0; i < Count; i++)
 			{
 				ms.Position = 0;
-				await sender.SendPacketAsync(packet);
+				var packet = await reader.ReadNextPacketAsync();
+
+				packet.Dispose();
 			}
 		}
 	}
