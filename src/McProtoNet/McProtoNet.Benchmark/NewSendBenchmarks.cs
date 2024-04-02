@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Buffers;
+using McProtoNet.Experimental;
 
 namespace McProtoNet.Benchmark
 {
@@ -21,7 +22,7 @@ namespace McProtoNet.Benchmark
 		private MinecraftPacketSenderNew sender;
 		private MemoryStream ms;
 
-		private PacketOut packet;
+		private McProtoNet.Experimental.PacketOut packet;
 
 		[GlobalSetup]
 		public void Setup()
@@ -33,7 +34,7 @@ namespace McProtoNet.Benchmark
 
 			Random.Shared.NextBytes(data);
 
-			packet = new PacketOut(0, data.Length, data, ArrayPool<byte>.Shared);
+			packet = new McProtoNet.Experimental.PacketOut(0, data.Length, data, ArrayPool<byte>.Shared);
 		}
 
 		[Benchmark]

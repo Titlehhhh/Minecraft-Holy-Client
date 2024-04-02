@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using McProtoNet.Core.Protocol;
+using McProtoNet.Experimental;
 using System;
 using System.IO;
 using System.Reflection;

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Benchmark
 {
+
 	public class MathBenchmarks
 	{
 		private int[] data = new int[2048];

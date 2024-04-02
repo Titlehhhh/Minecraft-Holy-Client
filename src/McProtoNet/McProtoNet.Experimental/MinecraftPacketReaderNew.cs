@@ -1,15 +1,10 @@
 ﻿using ICSharpCode.SharpZipLib.Zip.Compression;
-using McProtoNet.Core;
-using System;
 using System.Buffers;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
+using McProtoNet.Core;
 
-namespace McProtoNet.Benchmark
+namespace McProtoNet.Experimental
 {
-
 	public class MinecraftPacketReaderNew
 	{
 		public Stream BaseStream { get; set; }

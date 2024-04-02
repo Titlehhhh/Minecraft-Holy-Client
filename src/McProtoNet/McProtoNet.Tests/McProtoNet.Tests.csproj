@@ -14,5 +14,9 @@
 		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\McProtoNet.Experimental\McProtoNet.Experimental.csproj" />
+	</ItemGroup>
+
 
 </Project>

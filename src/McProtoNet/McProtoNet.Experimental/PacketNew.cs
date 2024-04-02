@@ -1,7 +1,6 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 
-namespace McProtoNet.Benchmark
+namespace McProtoNet.Experimental
 {
 	public struct PacketNew : IDisposable
 	{

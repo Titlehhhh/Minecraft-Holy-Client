@@ -1,10 +1,13 @@
 ﻿using System.Buffers;
+using System.IO.Compression;
 using System.IO.Pipelines;
 
 internal class Program
 {
 	private static async Task Main(string[] args)
 	{
+		
+
 		CancellationTokenSource cts = new();
 		Pipe pipe = new Pipe();
 
