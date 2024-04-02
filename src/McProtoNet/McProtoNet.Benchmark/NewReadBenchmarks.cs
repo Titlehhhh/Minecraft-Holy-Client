@@ -39,7 +39,7 @@ namespace McProtoNet.Benchmark
 			var packet = new Packet(3, new MemoryStream(data));
 
 			var sender = new MinecraftPacketSender(ms);
-
+			sender.SwitchCompression(CompressionThreshold);
 			ms.Position = 0;
 			sender.SendPacketAsync(packet).GetAwaiter().GetResult();
 		}

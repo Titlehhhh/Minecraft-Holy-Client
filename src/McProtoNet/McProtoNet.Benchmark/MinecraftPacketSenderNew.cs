@@ -170,7 +170,7 @@ namespace McProtoNet.Benchmark
 						uncompressedSize++;
 
 						await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-						await BaseStream.WriteAsync(ZERO_VARINT,token);
+						await BaseStream.WriteAsync(ZERO_VARINT, token);
 						await BaseStream.WriteAsync(packet.GetMemory(), token);
 
 						//byte unc_len = uncompressedSize.GetVarIntLength(memory.Slice(idLen));

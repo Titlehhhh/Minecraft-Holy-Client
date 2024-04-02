@@ -15,7 +15,7 @@ namespace McProtoNet.Benchmark
 		[Params(64, 512)]
 		public int PacketSize { get; set; }
 
-		[Params(1, 1_000_000)]
+		[Params(1, 100_000)]
 		public int Count { get; set; }
 
 		private MinecraftPacketSenderNew sender;

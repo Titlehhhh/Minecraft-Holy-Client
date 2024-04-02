@@ -181,6 +181,7 @@ namespace McProtoNet
 				var readStream = pipe.Reader.AsStream();
 				PacketReader.BaseStream = readStream;
 
+				
 
 
 				var fill = FillPipeAsync();
@@ -581,6 +582,8 @@ namespace McProtoNet
 				while (!CTS.IsCancellationRequested)
 				{
 					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
+
+
 					int bytesRead = await minecraftStream.ReadAsync(memory, CTS.Token);
 
 

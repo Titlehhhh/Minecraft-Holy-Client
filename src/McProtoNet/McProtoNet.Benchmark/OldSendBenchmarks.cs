@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace McProtoNet.Benchmark
 {
+
 	[MemoryDiagnoser(true)]
 	public class OldSendBenchmarks
 	{

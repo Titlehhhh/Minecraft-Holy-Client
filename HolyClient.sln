@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34607.79
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreLibs", "CoreLibs", "{00CC44BE-C0E1-44BB-AC5D-EB0656140923}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "McProtoNet", "McProtoNet", "{E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}"
@@ -57,6 +60,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceGenerator", "src\McProtoNet\SourceGenerator\SourceGenerator.csproj", "{1826F0CF-C719-457B-9D88-F9C05C433B36}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestGenerator", "TestGenerator", "{6F1DD793-76A2-446E-B713-94087E3F9086}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experimental", "Experimental", "{4092C92C-F03E-42C5-8A86-FF8A172EF7F8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExperimentalApp", "src\Experimental\ExperimentalApp\ExperimentalApp.csproj", "{B5F00CDF-A417-4C47-A3CB-547CAD451816}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +145,10 @@ Global
 		{1826F0CF-C719-457B-9D88-F9C05C433B36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1826F0CF-C719-457B-9D88-F9C05C433B36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1826F0CF-C719-457B-9D88-F9C05C433B36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5F00CDF-A417-4C47-A3CB-547CAD451816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5F00CDF-A417-4C47-A3CB-547CAD451816}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5F00CDF-A417-4C47-A3CB-547CAD451816}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5F00CDF-A417-4C47-A3CB-547CAD451816}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -162,6 +173,7 @@ Global
 		{B20035DA-21E0-4BFA-B31A-B0D8A520D117} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 		{1826F0CF-C719-457B-9D88-F9C05C433B36} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 		{6F1DD793-76A2-446E-B713-94087E3F9086} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
+		{B5F00CDF-A417-4C47-A3CB-547CAD451816} = {4092C92C-F03E-42C5-8A86-FF8A172EF7F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41AEE66A-568B-4B2B-A50B-5AC57D067A07}
