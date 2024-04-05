@@ -13,13 +13,13 @@ namespace McProtoNet.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static byte GetVarIntLength(this int val)
 		{
-			
+
 			byte amount = 0;
 			do
 			{
 				val >>= 7;
 				amount++;
-				
+
 			} while (val != 0);
 
 			return amount;
@@ -60,7 +60,7 @@ namespace McProtoNet.Core
 
 			byte len = 0;
 
-			
+
 
 			do
 			{
@@ -203,6 +203,9 @@ namespace McProtoNet.Core
 		{
 			var unsigned = (uint)value;
 
+			
+
+
 			var data = ArrayPool<byte>.Shared.Rent(5);
 			try
 			{
@@ -215,9 +218,10 @@ namespace McProtoNet.Core
 
 					if (unsigned != 0)
 						temp |= 128;
-					data[len++] = temp;					
+					data[len++] = temp;
 				}
 				while (unsigned != 0);
+
 				return stream.WriteAsync(data.AsMemory(0, len), token);
 			}
 			finally

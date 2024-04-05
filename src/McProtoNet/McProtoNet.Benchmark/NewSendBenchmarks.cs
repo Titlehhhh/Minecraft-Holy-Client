@@ -16,7 +16,7 @@ namespace McProtoNet.Benchmark
 		[Params(64, 512)]
 		public int PacketSize { get; set; }
 
-		[Params(1, 100_000)]
+		[Params(1, 1_000_000)]
 		public int Count { get; set; }
 
 		private MinecraftPacketSenderNew sender;
@@ -34,7 +34,7 @@ namespace McProtoNet.Benchmark
 
 			Random.Shared.NextBytes(data);
 
-			packet = new McProtoNet.Experimental.PacketOut(0, data.Length, data, ArrayPool<byte>.Shared);
+			packet = new McProtoNet.Experimental.PacketOut(0, data.Length, data, null);
 		}
 
 		[Benchmark]

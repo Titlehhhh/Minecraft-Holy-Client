@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Buffers;
+using System.Runtime.CompilerServices;
+using DnsClient.Internal;
 using LibDeflate;
 using McProtoNet.Core;
 
@@ -42,20 +44,30 @@ namespace McProtoNet.Experimental
 
 					if (uncompressedSize >= _compressionThreshold)
 					{
+						int length = compressor.GetBound(uncompressedSize);
 
+						var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
 
-
-						using (var compressed = compressor.Compress(packet.GetMemory().Span, true))
+						try
 						{
+							int bytesCompress = compressor.Compress(packet.GetMemory().Span, compressedBuffer.AsSpan(0, length));
 
-							int compressedLength = compressed.Memory.Length;
+							int compressedLength = bytesCompress;
 
 							int fullsize = compressedLength + uncompressedSize.GetVarIntLength();
 
 							await BaseStream.WriteVarIntAsync(fullsize, token);
 							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-							await BaseStream.WriteAsync(compressed.Memory, token);
+							//await BaseStream.WriteAsync(compressed.Memory, token);
+
+							await BaseStream.WriteAsync(compressedBuffer.AsMemory(0, bytesCompress), token);
 						}
+						finally
+						{
+							ArrayPool<byte>.Shared.Return(compressedBuffer);
+						}
+
+
 
 					}
 					else

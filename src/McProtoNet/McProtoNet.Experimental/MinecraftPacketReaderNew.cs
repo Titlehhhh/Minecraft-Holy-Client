@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using McProtoNet.Core;
+using LibDeflate;
 
 namespace McProtoNet.Experimental
 {
@@ -9,8 +10,9 @@ namespace McProtoNet.Experimental
 	{
 		public Stream BaseStream { get; set; }
 
-		private readonly Inflater Inflater = new Inflater();
+		//private readonly Inflater Inflater = new Inflater();
 
+		private readonly ZlibDecompressor decompressor = new();
 
 
 
@@ -60,43 +62,27 @@ namespace McProtoNet.Experimental
 			{
 
 
-				//var buffer2 = new byte[length];
-				//Inflater.SetInput(buffer);
-				//Inflater.Inflate(buffer2);
-				//Inflater.Reset();
-
-				//return new PacketBuffer(buffer2, this._useAnonymousNbt);
-
 				len -= sizeUncompressed.GetVarIntLength();
 
 				var buffer_compress = ArrayPool<byte>.Shared.Rent(len);
 
 				try
 				{
-					//using var buffer = StaticResources.MSmanager.GetStream(null, len);
+					var uncompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
 
 					await BaseStream.ReadExactlyAsync(buffer_compress, 0, len, token);
 
-					//buffer.Advance(len);
 
-					//buffer.Position = 0;
-
-					var uncompressed_buffer = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-
-					try
+					var status = decompressor.Decompress(buffer_compress.AsSpan(0, len), uncompressed.AsSpan(0, sizeUncompressed), out int written);
+					if (status == OperationStatus.Done)
 					{
-
-						Inflater.SetInput(buffer_compress, 0, len);
-						Inflater.Inflate(uncompressed_buffer, 0, sizeUncompressed);
-						Inflater.Reset();
-
-						return new PacketNew(-1, uncompressed_buffer, ArrayPool<byte>.Shared);
+						return new PacketNew(1, uncompressed, ArrayPool<byte>.Shared);
 					}
-					catch
+					else
 					{
-						ArrayPool<byte>.Shared.Return(uncompressed_buffer);
-						throw;
+						throw new Exception("Decompress Error");
 					}
+
 				}
 				finally
 				{
