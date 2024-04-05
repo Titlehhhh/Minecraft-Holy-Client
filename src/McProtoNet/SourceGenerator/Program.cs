@@ -1,4 +1,5 @@
 ﻿using SourceGenerator.ProtoDefTypes;
+using System.Diagnostics;
 using System.Text.Json;
 
 
@@ -61,12 +62,68 @@ internal class Program
 
 
 
+		var ver1_16 = chain.First(x => x.Version.Version == 754);
 
-
+		CheckPrimitives(ver1_16.Protocol);
 
 	}
 
+	private static void CheckPrimitives(Protocol protocol)
+	{
+		var serverPackets = (protocol.Namespaces["play"] as Namespace).Types["toClient"] as Namespace;
+		var clientPackets = (protocol.Namespaces["play"] as Namespace).Types["toServer"] as Namespace;
 
+		WritePrimitives(clientPackets.Types,"ClientPackets");
+		WritePrimitives(serverPackets.Types, "ServerPackets");
+	}
+
+	private static void WritePrimitives(Dictionary<string, ProtodefType> types, string header)
+	{
+
+		List<string> primitive = new List<string>();
+		List<string> other = new List<string>();
+		foreach (var (name, type) in types)
+		{
+			if (type is ProtodefContainer container)
+			{
+				if (name != "packet")
+				{
+					//if (name == "packet_title")
+					//	Debugger.Break();
+
+					if (container.IsAllFieldsPrimitive())
+					{
+						primitive.Add(name);
+					}
+					else
+					{
+						other.Add(name);
+					}
+				}
+			}
+		}
+
+		using (var sw = new StreamWriter($"{header}.txt"))
+		{
+			sw.WriteLine($"Всего {primitive.Count + other.Count} пакетов. {primitive.Count} примитивных, {other.Count} сложных.");
+
+			sw.WriteLine();
+
+			sw.WriteLine("Примитивные");
+			foreach(var item in primitive)
+			{
+				sw.WriteLine(item);
+			}
+			sw.WriteLine();
+			sw.WriteLine("Сложные");
+			foreach(var item in other)
+			{
+				sw.WriteLine(item);
+			}
+		}
+
+
+	}
 
 
 
