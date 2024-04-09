@@ -7,8 +7,11 @@ namespace McProtoNet
 	{
 		public ClientState State { get; }
 		public event EventHandler<StateChangedEventArgs> StateChanged;
+		ClientConfig Config { get; set; }
 
 
-		Task Disconnect();
+		void Start();
+
+
 	}
 }

@@ -6,14 +6,14 @@ namespace QuickProxyNet
 {
 
 
-	public class Socks4Client : SocksClient
+	public class Socks4Client : ProxyClient
 	{
 
-		public Socks4Client(string host, int port) : base(4, host, port)
+		public Socks4Client(string host, int port) : base("socks4", host, port)
 		{
 		}
 
-		public Socks4Client(string host, int port, NetworkCredential credentials) : base(4, host, port, credentials)
+		public Socks4Client(string host, int port, NetworkCredential credentials) : base("socks4", host, port, credentials)
 		{
 		}
 
@@ -32,17 +32,8 @@ namespace QuickProxyNet
 		public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port, CancellationToken cancellationToken = default(CancellationToken))
 		{
 
-
-			ValidateArguments(host, port);
-
-
-
-
-			await SocksHelper.EstablishSocks4TunnelAsync(stream, IsSocks4a, host, port, this.ProxyCredentials, true, cancellationToken);
-
-
-
-			return stream;
+			var result = await ProxyConnector.ConnectToProxyAsync(stream, this.ProxyUri, host, port, this.ProxyCredentials, cancellationToken);
+			return result;
 		}
 	}
 }

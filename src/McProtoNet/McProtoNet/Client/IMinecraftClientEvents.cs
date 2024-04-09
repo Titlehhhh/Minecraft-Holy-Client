@@ -4,7 +4,7 @@ namespace McProtoNet
 {
 	public interface IMinecraftClientEvents
 	{
-		ClientConfig Config { get; set; }
+		
 		IObservable<ChatMessageEventArgs> OnChatMessage { get; }
 		IObservable<DisconnectEventArgs> OnDisconnect { get; }
 		IObservable<EntityPositionEventArgs> OnEntityPosition { get; }

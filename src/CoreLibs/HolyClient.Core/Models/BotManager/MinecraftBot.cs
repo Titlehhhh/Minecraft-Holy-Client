@@ -110,7 +110,7 @@ namespace HolyClient.Core.Models.BotManager
 
 			Interlocked.Exchange(ref _cleanUpPlugins, disposables);
 
-			await minecraftClient.Start(logger);
+			 minecraftClient.Start(logger);
 		}
 		public Task Stop()
 		{

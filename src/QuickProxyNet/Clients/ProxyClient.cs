@@ -8,9 +8,11 @@ namespace QuickProxyNet
 	public abstract class ProxyClient : IProxyClient
 	{
 		public abstract ProxyType Type { get; }
-
-		protected ProxyClient(string host, int port)
+		public Uri ProxyUri { get; private set; }
+		protected ProxyClient(string protocol,string host, int port)
 		{
+			ProxyUri = new Uri($"{protocol}://{host}:{port}");
+
 			if (host == null)
 				throw new ArgumentNullException(nameof(host));
 
@@ -23,16 +25,9 @@ namespace QuickProxyNet
 			ProxyHost = host;
 			ProxyPort = port == 0 ? 1080 : port;
 
-			socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-			{
-				NoDelay = true,
-				LingerState = new LingerOption(true, 0),
-				SendTimeout = 10000,
-				ReceiveTimeout = 10000
-			};
+			
 		}
-		private Socket socket;
-		protected ProxyClient(string host, int port, NetworkCredential credentials) : this(host, port)
+		protected ProxyClient(string protocol,string host, int port, NetworkCredential credentials) : this(protocol,host, port)
 		{
 			if (credentials == null)
 				throw new ArgumentNullException(nameof(credentials));
@@ -142,38 +137,6 @@ namespace QuickProxyNet
 
 		public abstract ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default);
 
-		public async Task<Stream> EstablishTCPConnectionAsync(CancellationToken token)
-		{
-
-			throw new NotImplementedException();
-			//TcpClient tcpClient = new();
-
-			try
-			{
-				await socket.ConnectAsync(ProxyHost, ProxyPort, token);
-
-			}
-			catch
-			{
-				socket.Dispose();
-				throw;
-			}
-
-
-			return new NetworkStream(socket, true);
-		}
-		private bool disposed = false;
-		public void Dispose()
-		{
-			if (disposed)
-				return;
-
-			disposed = true;
-			Interlocked.Exchange(ref socket, null)?.Dispose();
-
-
-			GC.SuppressFinalize(this);
-
-		}
+		
 	}
 }

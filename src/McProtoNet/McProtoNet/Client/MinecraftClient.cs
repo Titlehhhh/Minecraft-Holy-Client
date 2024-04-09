@@ -6,10 +6,10 @@ using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.IO.Pipelines;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace McProtoNet
 {
-
 
 	public partial class MinecraftClient : IDisposable
 	{
@@ -17,7 +17,7 @@ namespace McProtoNet
 		#region Fields
 		private ILogger _logger;
 
-		
+
 
 		private CancellationTokenSource CTS;
 
@@ -58,7 +58,7 @@ namespace McProtoNet
 
 		public MinecraftClient()
 		{
-			
+
 
 
 
@@ -144,7 +144,7 @@ namespace McProtoNet
 			PacketReader.BaseStream = null;
 		}
 
-		public async Task Start(Serilog.ILogger logger)
+		public async void Start(Serilog.ILogger logger)
 		{
 			ResetFields();
 
@@ -154,7 +154,7 @@ namespace McProtoNet
 			ValidateConfig();
 
 			_protocol = Config.Version;
-			bool runLoop = false;
+
 			try
 			{
 				ChangeState(ClientState.Connecting);
@@ -172,38 +172,25 @@ namespace McProtoNet
 
 
 				await LoginCore(CTS.Token);
-
-
-
-				
-				
-
-				
-
-
-				
-				_ = ReadPacketLoop();
-				
-
-				
-				runLoop = true;
-
-
 			}
 			catch (Exception e)
 			{
 
-				CancelAll(e);
-				if (!runLoop)
-				{
-					InvokeError();
-				}
-				_logger.Error(e, "Во время запуска клиента произошла ошибка");
-				//throw e;
 			}
+
+			 ReadPacketLoop();
+
+
+
+
+
+
+
 
 
 		}
+
+		
 
 
 
@@ -307,10 +294,10 @@ namespace McProtoNet
 			//PacketSender?.Dispose();
 			//PacketSender = null;
 
-			
+
 
 			_events.Dispose();
-			
+
 
 
 			GC.SuppressFinalize(this);
@@ -385,7 +372,7 @@ namespace McProtoNet
 
 		}
 
-		public async ValueTask Connect()
+		private async ValueTask Connect()
 		{
 			CTS = new();
 			mainStream = await CreateTcp(CTS.Token);
@@ -396,7 +383,7 @@ namespace McProtoNet
 			PacketReader.BaseStream = minecraftStream;
 
 		}
-		public ValueTask HandShake()
+		private ValueTask HandShake()
 		{
 
 			_logger.Information("Рукопожатие");
@@ -483,7 +470,7 @@ namespace McProtoNet
 			return false;
 		}
 
-		private async Task ReadPacketLoop()
+		private async void ReadPacketLoop()
 		{
 
 			try
@@ -514,18 +501,18 @@ namespace McProtoNet
 						}
 					}
 				}
-				CancelAll(null);				
+				CancelAll(null);
 			}
 			catch (Exception ex)
 			{
-				CancelAll(ex);				
+				CancelAll(ex);
 			}
 			finally
 			{
 				this.InvokeError();
 			}
 
-			
+
 
 
 		}

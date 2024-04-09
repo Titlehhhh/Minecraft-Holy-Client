@@ -2,8 +2,10 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace QuickProxyNet
 {
@@ -24,40 +26,9 @@ namespace QuickProxyNet
 		private const byte Socks4_Success = 90;
 		private const byte Socks4_AuthFailed = 93;
 
-		public static async ValueTask EstablishSocksTunnelAsync(Stream stream, string host, int port, Uri proxyUri, ICredentials? proxyCredentials, bool async, CancellationToken cancellationToken)
-		{
-			using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
-			{
-				try
-				{
-					NetworkCredential? credentials = proxyCredentials?.GetCredential(proxyUri, proxyUri.Scheme);
 
-					if (string.Equals(proxyUri.Scheme, "socks5", StringComparison.OrdinalIgnoreCase))
-					{
-						await EstablishSocks5TunnelAsync(stream, host, port, credentials, async, cancellationToken).ConfigureAwait(false);
-					}
-					else if (string.Equals(proxyUri.Scheme, "socks4a", StringComparison.OrdinalIgnoreCase))
-					{
-						await EstablishSocks4TunnelAsync(stream, isVersion4a: true, host, port, credentials, async, cancellationToken).ConfigureAwait(false);
-					}
-					else if (string.Equals(proxyUri.Scheme, "socks4", StringComparison.OrdinalIgnoreCase))
-					{
-						await EstablishSocks4TunnelAsync(stream, isVersion4a: false, host, port, credentials, async, cancellationToken).ConfigureAwait(false);
-					}
-					else
-					{
-						Debug.Fail("Bad socks version.");
-					}
-				}
-				catch
-				{
-					stream.Dispose();
-					throw;
-				}
-			}
-		}
 
-		public static async ValueTask EstablishSocks5TunnelAsync(Stream stream, string host, int port, NetworkCredential? credentials, bool async, CancellationToken cancellationToken)
+		internal static async ValueTask EstablishSocks5TunnelAsync(Stream stream, string host, int port, NetworkCredential? credentials, bool async)
 		{
 			byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
 			try
@@ -81,14 +52,14 @@ namespace QuickProxyNet
 					buffer[2] = METHOD_NO_AUTH;
 					buffer[3] = METHOD_USERNAME_PASSWORD;
 				}
-				await WriteAsync(stream, buffer.AsMemory(0, buffer[1] + 2), async, cancellationToken).ConfigureAwait(false);
+				await WriteAsync(stream, buffer.AsMemory(0, buffer[1] + 2), async).ConfigureAwait(false);
 
 				// +----+--------+
 				// |VER | METHOD |
 				// +----+--------+
 				// | 1  |   1    |
 				// +----+--------+
-				await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async, cancellationToken).ConfigureAwait(false);
+				await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async).ConfigureAwait(false);
 				VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
 
 				switch (buffer[1])
@@ -118,14 +89,14 @@ namespace QuickProxyNet
 							buffer[1] = usernameLength;
 							byte passwordLength = EncodeString(credentials.Password, buffer.AsSpan(3 + usernameLength), nameof(credentials.Password));
 							buffer[2 + usernameLength] = passwordLength;
-							await WriteAsync(stream, buffer.AsMemory(0, 3 + usernameLength + passwordLength), async, cancellationToken).ConfigureAwait(false);
+							await WriteAsync(stream, buffer.AsMemory(0, 3 + usernameLength + passwordLength), async).ConfigureAwait(false);
 
 							// +----+--------+
 							// |VER | STATUS |
 							// +----+--------+
 							// | 1  |   1    |
 							// +----+--------+
-							await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async, cancellationToken).ConfigureAwait(false);
+							await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async).ConfigureAwait(false);
 							if (buffer[0] != SubnegotiationVersion || buffer[1] != Socks5_Success)
 							{
 								throw new ProxyProtocolException("SR.net_socks_auth_failed");
@@ -176,14 +147,14 @@ namespace QuickProxyNet
 
 				BinaryPrimitives.WriteUInt16BigEndian(buffer.AsSpan(addressLength + 4), (ushort)port);
 
-				await WriteAsync(stream, buffer.AsMemory(0, addressLength + 6), async, cancellationToken).ConfigureAwait(false);
+				await WriteAsync(stream, buffer.AsMemory(0, addressLength + 6), async).ConfigureAwait(false);
 
 				// +----+-----+-------+------+----------+----------+
 				// |VER | REP |  RSV  | ATYP | DST.ADDR | DST.PORT |
 				// +----+-----+-------+------+----------+----------+
 				// | 1  |  1  | X'00' |  1   | Variable |    2     |
 				// +----+-----+-------+------+----------+----------+
-				await ReadToFillAsync(stream, buffer.AsMemory(0, 5), async, cancellationToken).ConfigureAwait(false);
+				await ReadToFillAsync(stream, buffer.AsMemory(0, 5), async).ConfigureAwait(false);
 				VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
 				if (buffer[1] != Socks5_Success)
 				{
@@ -196,7 +167,7 @@ namespace QuickProxyNet
 					ATYP_DOMAIN_NAME => buffer[4] + 2,
 					_ => throw new ProxyProtocolException("SR.net_socks_bad_address_type")
 				};
-				await ReadToFillAsync(stream, buffer.AsMemory(0, bytesToSkip), async, cancellationToken).ConfigureAwait(false);
+				await ReadToFillAsync(stream, buffer.AsMemory(0, bytesToSkip), async).ConfigureAwait(false);
 				// response address not used
 			}
 			finally
@@ -205,7 +176,7 @@ namespace QuickProxyNet
 			}
 		}
 
-		public static async ValueTask EstablishSocks4TunnelAsync(Stream stream, bool isVersion4a, string host, int port, NetworkCredential? credentials, bool async, CancellationToken cancellationToken)
+		internal static async ValueTask EstablishSocks4TunnelAsync(Stream stream, bool isVersion4a, string host, int port, NetworkCredential? credentials, bool async)
 		{
 			byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
 			try
@@ -244,7 +215,7 @@ namespace QuickProxyNet
 					try
 					{
 						addresses = async
-							? await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationToken).ConfigureAwait(false)
+							? await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork).ConfigureAwait(false)
 							: Dns.GetHostAddresses(host, AddressFamily.InterNetwork);
 					}
 					catch (Exception ex)
@@ -286,7 +257,7 @@ namespace QuickProxyNet
 					totalLength += hostLength + 1;
 				}
 
-				await WriteAsync(stream, buffer.AsMemory(0, totalLength), async, cancellationToken).ConfigureAwait(false);
+				await WriteAsync(stream, buffer.AsMemory(0, totalLength), async).ConfigureAwait(false);
 
 				// +----+----+----+----+----+----+----+----+
 				// | VN | CD | DSTPORT |      DSTIP        |
@@ -294,7 +265,7 @@ namespace QuickProxyNet
 				//    1    1      2              4
 
 
-				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async, cancellationToken).ConfigureAwait(false);
+				await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async).ConfigureAwait(false);
 
 				switch (buffer[1])
 				{
@@ -314,7 +285,7 @@ namespace QuickProxyNet
 			}
 		}
 
-		public static byte EncodeString(ReadOnlySpan<char> chars, Span<byte> buffer, string parameterName)
+		private static byte EncodeString(ReadOnlySpan<char> chars, Span<byte> buffer, string parameterName)
 		{
 			try
 			{
@@ -335,11 +306,11 @@ namespace QuickProxyNet
 			}
 		}
 
-		private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, bool async, CancellationToken cancellation)
+		private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, bool async)
 		{
 			if (async)
 			{
-				return stream.WriteAsync(buffer, cancellation);
+				return stream.WriteAsync(buffer);
 			}
 			else
 			{
@@ -348,10 +319,10 @@ namespace QuickProxyNet
 			}
 		}
 
-		private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer, bool async, CancellationToken cancellation)
+		private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer, bool async)
 		{
 			int bytesRead = async
-				? await stream.ReadAtLeastAsync(buffer, buffer.Length, cancellationToken: cancellation, throwOnEndOfStream: false).ConfigureAwait(false)
+				? await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false).ConfigureAwait(false)
 				: stream.ReadAtLeast(buffer.Span, buffer.Length, throwOnEndOfStream: false);
 
 			if (bytesRead < buffer.Length)

@@ -58,7 +58,7 @@ namespace HolyClient.StressTest
 					};
 				}
 
-				await Client.Start(Logger.None);
+				 Client.Start(Logger.None);
 
 			}
 			catch
