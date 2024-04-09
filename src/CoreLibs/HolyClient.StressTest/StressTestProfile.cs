@@ -177,8 +177,7 @@ namespace HolyClient.StressTest
 
 				var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
 				{
-					//SingleWriter = true,
-					//SingleReader = false
+					
 
 				});
 

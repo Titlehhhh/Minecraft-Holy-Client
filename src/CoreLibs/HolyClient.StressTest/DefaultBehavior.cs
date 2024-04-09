@@ -115,25 +115,15 @@ namespace HolyClient.StressTest
 					catch { }
 				}).DisposeWith(disposables);
 
-				bot.Client.OnChatMessage.Subscribe(x =>
+				bot.Client.OnChatMessage.Subscribe(async x =>
 				{
 					var ch = ChatParser.ParseText(x.Message);
-					if (ch.Contains("/register"))
+					if (ch.Contains("/register") || ch.Contains("/reg"))
 					{
 						try
 						{
-							bot.Client.SendChat("/register 21qwerty123 21qwerty123");
-
-
-						}
-						catch { }
-					}
-					else if (ch.Contains("nice game"))
-					{
-						try
-						{
-
-
+							await bot.Client.SendChat("/register 21qwerty123 21qwerty123");
+							return;
 							IDisposable d = null;
 							d = bot.Client.OnOpenWindow.Subscribe(async x =>
 							{
@@ -173,18 +163,22 @@ namespace HolyClient.StressTest
 
 							}).DisposeWith(disposables);
 							bot.Client.SendChat("/menu");
+
 						}
 						catch { }
 					}
-					else if (ch.Contains("tempbanned") || ch.Contains("tempmuted"))
-					{
-						Console.WriteLine("Test");
-						if (ch.Contains(bot.Client.Config.Username))
-						{
-							bot.Client.Disconnect(new Exception());
-						}
-					}
 
+
+				}).DisposeWith(disposables);
+
+				bot.Client.OnPlayerPositionRotation.Subscribe(x =>
+				{
+
+				}).DisposeWith(disposables);
+
+				bot.Client.OnMapData.Subscribe(x =>
+				{
+					logger.Information("map");
 				}).DisposeWith(disposables);
 
 				disposables.Add(Disposable.Create(() =>
@@ -239,5 +233,7 @@ namespace HolyClient.StressTest
 			}
 		}
 	}
+
+	
 
 }

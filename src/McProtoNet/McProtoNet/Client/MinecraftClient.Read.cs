@@ -107,6 +107,9 @@ namespace McProtoNet
 			}
 			else if (id == PacketIn.MapData)
 			{
+				var eventArgs = new MapDataEventArgs();
+
+				_mapDataEvent.OnNext(eventArgs);
 				return;
 				int mapid = reader.ReadVarInt();
 				byte scale = reader.ReadUnsignedByte();

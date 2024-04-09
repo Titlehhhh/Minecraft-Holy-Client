@@ -17,8 +17,11 @@ public partial class StressTestProfileView : ReactiveUserControl<StressTestProfi
 		this.WhenActivated(d =>
 		{
 			this.WhenAnyValue(x => x.ViewModel)
+				
 				.Subscribe(vm =>
 				{
+					if (vm is null)
+						return;
 					vm.SelectProxyImportSourceDialog.RegisterHandler(async x =>
 					{
 						ContentDialog dialog = new ContentDialog()

@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 namespace HolyClient.StressTest
 {
-	[ConfigureAwait(false)]
+
 	public sealed class ProxyChecker : IDisposable
 	{
 		private readonly ChannelWriter<IProxyClient> _writer;
@@ -37,75 +37,89 @@ namespace HolyClient.StressTest
 		}
 
 
-		public async Task Run(Serilog.ILogger logger)
+		public Task Run(Serilog.ILogger logger)
 		{
-			try
+			return Task.Run(async () =>
 			{
-				ProxyClientFactory proxyClientFactory = new();
-				var clients = _proxies.Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port));
-				var tasks = new List<Task>(_parallelCount);
 
-				while (!_cts.IsCancellationRequested)
+
+				try
+				{
+					ProxyClientFactory proxyClientFactory = new();
+					var clients = _proxies.Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port));
+
+
+					while (!_cts.IsCancellationRequested)
+					{
+
+						foreach (var chunk in clients.Chunk(_parallelCount))
+						{
+							var tasks = new List<Task>(_parallelCount);
+
+
+							_cts.Token.ThrowIfCancellationRequested();
+
+
+							using (var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token))
+							{
+
+
+
+								foreach (var client in chunk)
+								{
+									_cts.Token.ThrowIfCancellationRequested();
+									tasks.Add(CheckProxy(client, linked.Token));
+								}
+								linked.CancelAfter(_connectTimeout);
+								_cts.Token.ThrowIfCancellationRequested();
+
+								
+
+								await Task.WhenAll(tasks).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+							}
+
+							
+							_cts.Token.ThrowIfCancellationRequested();
+
+							int count = 0;
+							for (int i = 0; i < Math.Min(_parallelCount, tasks.Count); i++)
+							{
+								_cts.Token.ThrowIfCancellationRequested();
+								var task = tasks[i];
+
+
+								if (task.IsCompletedSuccessfully)
+								{
+									count++;
+									var client = chunk[i];
+									await _writer.WriteAsync(client, _cts.Token);
+								}
+							}
+							
+
+
+
+
+						}
+						await Task.Delay(1000, _cts.Token);
+					}
+
+
+				}
+				catch (Exception ex)
+				{
+					logger.Error(ex, "ProxyChecker завершился с ошибкой");
+				}
+				finally
 				{
 
-					foreach (var chunk in clients.Chunk(_parallelCount))
-					{
-						tasks.Clear();
 
-						_cts.Token.ThrowIfCancellationRequested();
-
-
-						using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
-
-
-
-						foreach (var client in chunk)
-						{
-							_cts.Token.ThrowIfCancellationRequested();
-							tasks.Add(CheckProxy(client, linked.Token));
-						}
-						linked.CancelAfter(_connectTimeout);
-						_cts.Token.ThrowIfCancellationRequested();
-						await Task.WhenAll(tasks);
-
-
-
-						_cts.Token.ThrowIfCancellationRequested();
-
-
-						for (int i = 0; i < _parallelCount; i++)
-						{
-							_cts.Token.ThrowIfCancellationRequested();
-							var task = tasks[i];
-
-
-							if (task.IsCompletedSuccessfully)
-							{
-								var client = chunk[i];
-								await _writer.WriteAsync(client, _cts.Token);
-							}
-						}
-
-
-
-
-					}
-					await Task.Delay(1000, _cts.Token);
+					_writer.Complete();
 				}
-
-
-			}
-			catch
-			{
-
-			}
-			finally
-			{
-
-				_writer.Complete();
-			}
+			});
 		}
 
+		private int test = 0;
 
 		bool disposed = false;
 		public void Dispose()
@@ -116,7 +130,7 @@ namespace HolyClient.StressTest
 			_cts.Dispose();
 			GC.SuppressFinalize(this);
 		}
-
+		[ConfigureAwait(true)]
 		private async Task CheckProxy(IProxyClient client, CancellationToken cancellationToken)
 		{
 
@@ -124,13 +138,19 @@ namespace HolyClient.StressTest
 
 
 
+			//using var c = cancellationToken.Register(d => ((IDisposable)d!).Dispose(), tcpClient);
+
 			tcpClient.SendTimeout = _sendTimeout;
 			tcpClient.ReceiveTimeout = _readTimeout;
 
+
 			await tcpClient.ConnectAsync(client.ProxyHost, client.ProxyPort, cancellationToken);
 
-			using var stream = await client.ConnectAsync(tcpClient.GetStream(), _targetHost, _targetPort, cancellationToken);
 
+
+			using var ns = tcpClient.GetStream();
+
+			using var stream = await client.ConnectAsync(ns, _targetHost, _targetPort, cancellationToken);
 
 
 		}

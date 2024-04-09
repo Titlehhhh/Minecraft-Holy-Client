@@ -17,7 +17,7 @@ namespace McProtoNet
 		#region Fields
 		private ILogger _logger;
 
-		private Pipe pipe;
+		
 
 		private CancellationTokenSource CTS;
 
@@ -58,10 +58,7 @@ namespace McProtoNet
 
 		public MinecraftClient()
 		{
-			pipe = new Pipe(new PipeOptions(pauseWriterThreshold: 10, resumeWriterThreshold: 5, useSynchronizationContext: false)
-			{
-
-			});
+			
 
 
 
@@ -178,42 +175,17 @@ namespace McProtoNet
 
 
 
-				var readStream = pipe.Reader.AsStream();
-				PacketReader.BaseStream = readStream;
+				
+				
 
 				
 
 
-				var fill = FillPipeAsync();
-				var read = ReadPacketLoop();
-				var combined = Task.WhenAll(fill, read);
+				
+				_ = ReadPacketLoop();
+				
 
-				_ = combined.ContinueWith(t =>
-				{
-					try
-					{
-						if (t.IsFaulted)
-						{
-							CancelAll(t.Exception);
-						}
-						else
-						{
-							CancelAll(new TaskCanceledException());
-						}
-						this.pipe.Reset();
-						this.InvokeError();
-					}
-					catch
-					{
-
-					}
-					finally
-					{
-
-					}
-
-
-				});
+				
 				runLoop = true;
 
 
@@ -335,19 +307,10 @@ namespace McProtoNet
 			//PacketSender?.Dispose();
 			//PacketSender = null;
 
-			try
-			{
-				pipe.Reader.Complete();
-				pipe.Writer.Complete();
-				pipe.Reset();
-			}
-			catch
-			{
-
-			}
+			
 
 			_events.Dispose();
-			pipe = null;
+			
 
 
 			GC.SuppressFinalize(this);
@@ -396,7 +359,7 @@ namespace McProtoNet
 
 				var tcpStream = tcpClient.GetStream();
 
-				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+				using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2500)))
 				{
 
 					using var combined = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, token);
@@ -551,80 +514,21 @@ namespace McProtoNet
 						}
 					}
 				}
-
+				CancelAll(null);				
 			}
 			catch (Exception ex)
 			{
-
-				await pipe.Reader.CompleteAsync(ex);
-
-
-				CancelAll(ex);
-
-				throw;
-				//OnError?.Invoke(ex);
-				//throw;
+				CancelAll(ex);				
 			}
 			finally
 			{
-
+				this.InvokeError();
 			}
 
-			await pipe.Reader.CompleteAsync();
+			
 
 
 		}
-		private async Task FillPipeAsync()
-		{
-			try
-			{
-				const int minimumBufferSize = 128;
-				while (!CTS.IsCancellationRequested)
-				{
-					Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
-
-
-					int bytesRead = await minecraftStream.ReadAsync(memory, CTS.Token);
-
-
-
-
-					pipe.Writer.Advance(bytesRead);
-
-
-					FlushResult result = await pipe.Writer.FlushAsync(CTS.Token);
-					if (result.IsCompleted)
-					{
-						break;
-					}
-
-					if (bytesRead <= 0)
-					{
-						throw new EndOfStreamException();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-
-				await pipe.Writer.CompleteAsync(ex);
-
-				CancelAll(ex);
-				throw;
-			}
-			finally
-			{
-
-			}
-
-			await pipe.Writer.CompleteAsync();
-
-		}
-
-
-
-
-
 
 
 
