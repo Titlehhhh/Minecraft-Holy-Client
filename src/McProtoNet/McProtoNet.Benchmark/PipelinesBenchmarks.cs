@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using McProtoNet.Core.Protocol;
 using McProtoNet.Core.Protocol.Pipelines;
+using McProtoNet.Experimental;
 using System;
 using System.Buffers;
 using System.IO;
@@ -9,13 +10,15 @@ using System.Threading.Tasks;
 
 namespace McProtoNet.Benchmark
 {
-	[MemoryDiagnoser(false)]
+	[MemoryDiagnoser(true)]
 	public class PipelinesBenchmarks
 	{
 
 		private Stream mainStream;
 		private MinecraftPacketReader native_reader;
 		private MinecraftPacketReader pipelines_reader;
+		private MinecraftPacketReaderNew pipelines_reader_new;
+	
 
 		private Pipe pipe;
 		private PipeReader pipeReader2;
@@ -30,7 +33,7 @@ namespace McProtoNet.Benchmark
 			sender.BaseStream = mainStream;
 			for (int i = 0; i < 1_000_000; i++)
 			{
-				var data = new byte[512];
+				var data = new byte[128];
 
 				MemoryStream ms = new MemoryStream(data);
 
@@ -41,9 +44,11 @@ namespace McProtoNet.Benchmark
 
 				await sender.SendPacketAsync(packet);
 			}
+			mainStream.Position = 0;
+
 
 			//var fs = File.OpenWrite("data.bin");
-			mainStream.Position = 0;
+
 			//await mainStream.CopyToAsync(fs);
 			//await fs.FlushAsync();
 			//fs.Position = 0;
@@ -64,7 +69,10 @@ namespace McProtoNet.Benchmark
 
 			pipelines_reader.BaseStream = pipe.Reader.AsStream();
 
-			pipeReader2 = PipeReader.Create(mainStream);
+			pipelines_reader_new = new();
+			pipelines_reader_new.BaseStream = pipe.Reader.AsStream();
+
+			//pipeReader2 = PipeReader.Create(mainStream, readerOptions: new StreamPipeReaderOptions(leaveOpen: true));
 		}
 		[GlobalCleanup]
 		public void Clean()
@@ -79,9 +87,12 @@ namespace McProtoNet.Benchmark
 			}
 		}
 
+
 		[Benchmark]
 		public async Task Read()
 		{
+			mainStream.Position = 0;
+
 			try
 			{
 				while (true)
@@ -95,29 +106,102 @@ namespace McProtoNet.Benchmark
 			}
 		}
 		[Benchmark]
-		public Task ReadWithPipelines()
+		public async Task ReadWithPipelines()
 		{
+
 			var fill = FillPipe();
 			var read = ReadPipe();
 
-			return Task.WhenAll(fill, read);
+			await Task.WhenAll(fill, read);
+			pipe.Reset();
 		}
+
 		[Benchmark]
-		public async Task ReadWithPipelines2()
+		public async Task ReadWithPipelinesNew()
 		{
-			EmptyProcessor processor = new();
-			using PacketPipeReader pipeReader = new PacketPipeReader(pipeReader2, processor);
 
-			await pipeReader.RunAsync();
+			var fill = FillPipe();
+			var read = ReadPipeNew();
+
+			await Task.WhenAll(fill, read);
+			pipe.Reset();
 		}
-
-		private async Task FillPipe()
+		private async Task ReadPipeNew()
 		{
+			mainStream.Position = 0;
+			int count = 0;
 			try
 			{
 				while (true)
 				{
-					Memory<byte> memory = pipe.Writer.GetMemory(128);
+					using var packet = await pipelines_reader_new.ReadNextPacketAsync();
+					count++;
+				}
+			}
+			catch
+			{
+				if (count != 1_000_000)
+					throw new Exception(count.ToString());
+			}
+			finally
+			{
+				await pipe.Reader.CompleteAsync();
+			}
+
+		}
+		private async Task ReadPipe()
+		{
+			mainStream.Position = 0;
+
+			try
+			{
+				while (true)
+				{
+					using var packet = await pipelines_reader.ReadNextPacketAsync();
+				}
+			}
+			catch
+			{
+
+			}
+			finally
+			{
+				await pipe.Reader.CompleteAsync();
+			}
+
+		}
+
+		[Benchmark]
+		public async Task ReadWithPipelines2()
+		{
+			//mainStream.Position = 0;
+			//pipeReader2 = PipeReader.Create(mainStream, new StreamPipeReaderOptions(leaveOpen: true));
+
+			EmptyProcessor processor = new();
+			using PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader, processor);
+
+
+			var fill = FillPipe();
+			var read =pipeReader.RunAsync();
+
+			await Task.WhenAll(fill, read);
+			pipe.Reset();
+
+			if (processor.Count != 1_000_000)
+			{
+				throw new Exception(processor.Count.ToString());
+			}
+		}
+
+		private async Task FillPipe()
+		{
+			mainStream.Position = 0;
+
+			try
+			{
+				while (true)
+				{
+					Memory<byte> memory = pipe.Writer.GetMemory(4096);
 
 
 					int bytesRead = await mainStream.ReadAsync(memory);
@@ -153,30 +237,15 @@ namespace McProtoNet.Benchmark
 				await pipe.Writer.CompleteAsync();
 			}
 		}
-		private async Task ReadPipe()
-		{
-			try
-			{
-				while (true)
-				{
-					using var packet = await pipelines_reader.ReadNextPacketAsync();
-				}
-			}
-			catch
-			{
 
-			}
-			finally
-			{
-				await pipe.Reader.CompleteAsync();
-			}
-		}
 	}
 
 	public sealed class EmptyProcessor : IPacketProcessor
 	{
+		public int Count { get; private set; }
 		public void ProcessPacket(int id, ref ReadOnlySpan<byte> data)
 		{
+			Count++;
 			//throw new NotImplementedException();
 		}
 	}

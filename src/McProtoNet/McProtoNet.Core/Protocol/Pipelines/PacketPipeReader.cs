@@ -40,32 +40,39 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 		public async Task RunAsync()
 		{
-			while (true)
+			try
 			{
-				ReadResult readResult = await pipeReader.ReadAsync();
-
-				ReadOnlySequence<byte> buffer = readResult.Buffer;
-
-				if(TryReadPackets(ref buffer))
+				while (true)
 				{
+					ReadResult readResult = await pipeReader.ReadAsync();
 
-				}
+					ReadOnlySequence<byte> buffer = readResult.Buffer;
 
-				if (readResult.IsCompleted)
-				{
-					if (!buffer.IsEmpty)
+					if (TryReadPackets(ref buffer))
 					{
-						throw new InvalidDataException("Incomplete message.");
+
 					}
-					break;
-				}
-				if (readResult.IsCanceled)
-				{
-					break;
-				}
+
+					if (readResult.IsCompleted)
+					{
+						if (!buffer.IsEmpty)
+						{
+							throw new InvalidDataException("Incomplete message.");
+						}
+						break;
+					}
+					if (readResult.IsCanceled)
+					{
+						break;
+					}
 
 
-				pipeReader.AdvanceTo(buffer.Start, buffer.End);
+					pipeReader.AdvanceTo(buffer.Start, buffer.End);
+				}
+			}
+			finally
+			{
+				await pipeReader.CompleteAsync();
 			}
 		}
 
