@@ -20,9 +20,9 @@ namespace McProtoNet.Core.Protocol.Pipelines
 	{
 		void ProcessPacket(int id, ref ReadOnlySpan<byte> data);
 	}
-	public sealed class PacketPipeReader
+	public sealed class PacketPipeReader : IDisposable
 	{
-		private readonly ZlibDecompressor decompressor = new();
+		private ZlibDecompressor decompressor = new();
 
 		private readonly PipeReader pipeReader;
 		private readonly IPacketProcessor packetProcessor;
@@ -46,20 +46,48 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 				ReadOnlySequence<byte> buffer = readResult.Buffer;
 
-				ReadPacket(ref buffer);
+				if(TryReadPackets(ref buffer))
+				{
+
+				}
+
+				if (readResult.IsCompleted)
+				{
+					if (!buffer.IsEmpty)
+					{
+						throw new InvalidDataException("Incomplete message.");
+					}
+					break;
+				}
+				if (readResult.IsCanceled)
+				{
+					break;
+				}
 
 
 				pipeReader.AdvanceTo(buffer.Start, buffer.End);
 			}
 		}
-		private void ReadPacket(ref ReadOnlySequence<byte> buffer)
+
+		private bool TryReadPackets(ref ReadOnlySequence<byte> buffer)
 		{
 			SequenceReader<byte> reader = new SequenceReader<byte>(buffer);
 
+			int count = 0;
+			while (TryReadPacket(ref reader))
+			{
+				count++;
+				buffer = buffer.Slice(reader.Position);
+			}
+
+			return count > 0;
+
+		}
+
+		private bool TryReadPacket(ref SequenceReader<byte> reader)
+		{
 			if (TryReadVarInt(ref reader, out int length, out _))
 			{
-
-
 				if (_compressionThreshold <= 0)
 				{
 					if (TryReadVarInt(ref reader, out int id, out int id_len))
@@ -69,7 +97,9 @@ namespace McProtoNet.Core.Protocol.Pipelines
 						if (reader.Remaining >= length)
 						{
 							ReadPacketWithoutCompression(id, ref reader, length);
+							return true;
 						}
+
 					}
 				}
 				else
@@ -80,40 +110,41 @@ namespace McProtoNet.Core.Protocol.Pipelines
 						{
 							//sizeUncompressed -= len;
 							length -= len;
-							ReadPacketWithCompression(ref reader, length, sizeUncompressed);
+							if (reader.Remaining >= length)
+							{
+								ReadPacketWithCompression(ref reader, length, sizeUncompressed);
+								return true;
+							}
 						}
 						else
 						{
 							if (TryReadVarInt(ref reader, out int id, out int id_len))
 							{
 								length -= id_len + 1;
-
-								ReadPacketWithoutCompression(id, ref reader, length);
+								if (reader.Remaining >= length)
+								{
+									ReadPacketWithoutCompression(id, ref reader, length);
+									return true;
+								}
 							}
 						}
 					}
 				}
 
-
 			}
-
-			buffer = buffer.Slice(reader.Position);
-
+			return false;
 		}
 
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ReadPacketWithCompression(ref SequenceReader<byte> reader, int length, int sizeUncompressed)
 		{
-
-
-
-
-
 			if (reader.UnreadSpan.Length >= length)
 			{
 				using (scoped SpanOwner<byte> uncompressed = new SpanOwner<byte>(sizeUncompressed))
 				{
 					DoDecompress(reader.UnreadSpan.Slice(0, length), uncompressed.Span, out int written);
-
+					reader.Advance(length);
 
 
 					ReadOnlySpan<byte> data = uncompressed.Span;
@@ -146,14 +177,14 @@ namespace McProtoNet.Core.Protocol.Pipelines
 				}
 			}
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void DoDecompress(ReadOnlySpan<byte> data, Span<byte> uncompressed, out int bytesWitten)
 		{
 			var result = decompressor.Decompress(data, uncompressed, out bytesWitten);
 			if (result != OperationStatus.Done)
 				throw new InvalidOperationException("Decompress Error status: " + result);
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ReadPacketWithoutCompression(int id, ref SequenceReader<byte> reader, int length)
 		{
 			ReadOnlySpan<byte> unread = reader.UnreadSpan;
@@ -263,8 +294,18 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			length = numRead;
 			return true;
 		}
+		bool disposed;
+		public void Dispose()
+		{
+			if (disposed)
+				return;
+			disposed = true;
 
+			decompressor.Dispose();
+			decompressor = null;
 
+			GC.SuppressFinalize(this);
+		}
 	}
 
 }

@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using McProtoNet.Core.Protocol;
+using McProtoNet.Core.Protocol.Pipelines;
 using System;
 using System.Buffers;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace McProtoNet.Benchmark
 {
+	[MemoryDiagnoser(false)]
 	public class PipelinesBenchmarks
 	{
 
@@ -16,6 +18,7 @@ namespace McProtoNet.Benchmark
 		private MinecraftPacketReader pipelines_reader;
 
 		private Pipe pipe;
+		private PipeReader pipeReader2;
 
 		[GlobalSetup]
 		public async Task Setup()
@@ -39,12 +42,12 @@ namespace McProtoNet.Benchmark
 				await sender.SendPacketAsync(packet);
 			}
 
-			var fs = File.OpenWrite("data.bin");
+			//var fs = File.OpenWrite("data.bin");
 			mainStream.Position = 0;
-			await mainStream.CopyToAsync(fs);
-			await fs.FlushAsync();
-			fs.Position = 0;
-			mainStream = fs;
+			//await mainStream.CopyToAsync(fs);
+			//await fs.FlushAsync();
+			//fs.Position = 0;
+			//mainStream = fs;
 
 
 			native_reader = new MinecraftPacketReader();
@@ -60,6 +63,8 @@ namespace McProtoNet.Benchmark
 			};
 
 			pipelines_reader.BaseStream = pipe.Reader.AsStream();
+
+			pipeReader2 = PipeReader.Create(mainStream);
 		}
 		[GlobalCleanup]
 		public void Clean()
@@ -96,6 +101,14 @@ namespace McProtoNet.Benchmark
 			var read = ReadPipe();
 
 			return Task.WhenAll(fill, read);
+		}
+		[Benchmark]
+		public async Task ReadWithPipelines2()
+		{
+			EmptyProcessor processor = new();
+			using PacketPipeReader pipeReader = new PacketPipeReader(pipeReader2, processor);
+
+			await pipeReader.RunAsync();
 		}
 
 		private async Task FillPipe()
@@ -157,6 +170,14 @@ namespace McProtoNet.Benchmark
 			{
 				await pipe.Reader.CompleteAsync();
 			}
+		}
+	}
+
+	public sealed class EmptyProcessor : IPacketProcessor
+	{
+		public void ProcessPacket(int id, ref ReadOnlySpan<byte> data)
+		{
+			//throw new NotImplementedException();
 		}
 	}
 
