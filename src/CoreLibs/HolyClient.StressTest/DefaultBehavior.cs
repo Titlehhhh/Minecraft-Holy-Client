@@ -44,8 +44,8 @@ namespace HolyClient.StressTest
 
 				Action<Exception> onErr = async (exc) =>
 				{
-
-
+					
+					
 
 					try
 					{
@@ -102,21 +102,22 @@ namespace HolyClient.StressTest
 				{
 					try
 					{
-						//if (disp is null)
-						//	disp = new();
-						//else if (disp.IsDisposed)
-						//	disp = new();
+						if (disp is null)
+							disp = new();
+						else if (disp.IsDisposed)
+							disp = new();
 
-						//await Task.Delay(1000);
-						//await bot.Client.SendChat("/register 21qwerty123 21qwerty123");
+						await Task.Delay(1000);
+						await bot.Client.SendChat("/register 21qwerty123 21qwerty123");
 
-						//SpamMessage(disp, bot);
+						SpamMessage(disp, bot);
 					}
 					catch { }
 				}).DisposeWith(disposables);
 
 				bot.Client.OnChatMessage.Subscribe(async x =>
 				{
+					return;
 					var ch = ChatParser.ParseText(x.Message);
 					if (ch.Contains("/register") || ch.Contains("/reg"))
 					{
@@ -234,6 +235,6 @@ namespace HolyClient.StressTest
 		}
 	}
 
-	
+
 
 }

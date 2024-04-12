@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
-using System.IO.Compression;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.IO.Compression;
 
 namespace McProtoNet.Core.Protocol
 {
@@ -29,12 +30,13 @@ namespace McProtoNet.Core.Protocol
 
 		private const int ZERO_VARLENGTH = 1;
 		private static readonly byte[] ZERO_VARINT = { 0 };
-		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+		//private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
 
 		public void SendPacket(Packet packet)
 		{
-			semaphore.Wait();
+			
+			
 			int id = packet.Id;
 			var data = packet.Data;
 			try
@@ -101,7 +103,7 @@ namespace McProtoNet.Core.Protocol
 			}
 			finally
 			{
-				semaphore.Release();
+		
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -156,9 +158,9 @@ namespace McProtoNet.Core.Protocol
 						if (uncompressedSize >= _compressionThreshold)
 						{
 
-							using (var compressedPacket = StaticResources.MSmanager.GetStream())
+							using (var compressedPacket = StaticResources.MSmanager.GetStream())							
 							{
-								using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
+								using (var zlibStream = new ZLibStream(compressedPacket, CompressionLevel.Fastest, true))
 								{
 									await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
 									await data.CopyToAsync(zlibStream, token);

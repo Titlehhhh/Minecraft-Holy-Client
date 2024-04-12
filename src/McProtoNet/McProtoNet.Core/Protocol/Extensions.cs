@@ -1,6 +1,7 @@
 ﻿using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
 using System.Buffers;
+using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,6 +11,10 @@ namespace McProtoNet.Core
 {
 	public static class Extensions
 	{
+		
+		
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public static byte GetVarIntLength(this int val)
 		{
@@ -203,7 +208,7 @@ namespace McProtoNet.Core
 		{
 			var unsigned = (uint)value;
 
-			
+
 
 
 			var data = ArrayPool<byte>.Shared.Rent(5);

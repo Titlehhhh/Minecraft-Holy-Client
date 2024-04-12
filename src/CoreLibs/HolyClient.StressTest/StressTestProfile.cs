@@ -170,16 +170,6 @@ namespace HolyClient.StressTest
 				}).DisposeWith(disposables);
 
 
-				var proxies = await LoadProxy(logger);
-
-
-				int capacity = Math.Min(proxies.Count(), this.NumberOfBots);
-
-				var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
-				{
-					
-
-				});
 
 
 
@@ -238,13 +228,23 @@ namespace HolyClient.StressTest
 				this.ProxyChecker.TargetHost = srv_host;
 				this.ProxyChecker.TargetPort = srv_port;
 
-				ProxyChecker? proxyChecker = null;
+
 				ProxyProvider? proxyProvider = null;
 
 				if (UseProxy)
 				{
+					var proxies = await LoadProxy(logger);
 
-					proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
+
+					int capacity = Math.Min(proxies.Count(), this.NumberOfBots);
+
+					var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity)
+					{
+
+
+					});
+
+					var proxyChecker = new ProxyChecker(channel.Writer, proxies, this.ProxyChecker);
 
 					proxyProvider = new ProxyProvider(channel.Reader);
 
@@ -445,7 +445,10 @@ namespace HolyClient.StressTest
 						Interlocked.Decrement(ref _botsLoginCounter);
 					}
 
-
+					if (exc is NullReferenceException)
+					{
+						logger.Information(exc.StackTrace);
+					}
 
 					var key = Tuple.Create(exc.GetType().FullName, exc.Message);
 
@@ -497,9 +500,9 @@ namespace HolyClient.StressTest
 			logger.Information("Загрузка прокси");
 			if (sources.Count() == 0)
 			{
-				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
-				//sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
-				//sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+				//sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
+				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
 			}
 
 			List<Task<IEnumerable<ProxyInfo>>> tasks = new();

@@ -172,13 +172,16 @@ namespace McProtoNet
 
 
 				await LoginCore(CTS.Token);
+
+				ReadPacketLoop();
 			}
 			catch (Exception e)
 			{
-
+				CancelAll(e);
+				InvokeError();
 			}
 
-			 ReadPacketLoop();
+			 
 
 
 
@@ -408,7 +411,9 @@ namespace McProtoNet
 			{
 				using (Packet readData = await PacketReader.ReadNextPacketAsync(cancellation))
 				{
-					var reader = Performance.Readers.Get();
+					readData.Data.Position = 0;
+					//var reader = Performance.Readers.Get();
+					var reader = s_reader.Value;
 					try
 					{
 						reader.BaseStream = readData.Data;
@@ -418,7 +423,7 @@ namespace McProtoNet
 					}
 					finally
 					{
-						Performance.Readers.Return(reader);
+						//Performance.Readers.Return(reader);
 					}
 				}
 
@@ -469,7 +474,7 @@ namespace McProtoNet
 
 			return false;
 		}
-
+		private static ThreadLocal<MinecraftPrimitiveReader> s_reader = new(()=> new MinecraftPrimitiveReader());
 		private async void ReadPacketLoop()
 		{
 
@@ -483,8 +488,9 @@ namespace McProtoNet
 						{
 							packet.Data.Position = 0;
 
-							var reader = Performance.Readers.Get();
-
+							//var reader = Performance.Readers.Get();
+							var reader = s_reader.Value;
+							
 							try
 							{
 
@@ -496,8 +502,9 @@ namespace McProtoNet
 							}
 							finally
 							{
-								Performance.Readers.Return(reader);
+								//Performance.Readers.Return(reader);
 							}
+							
 						}
 					}
 				}
