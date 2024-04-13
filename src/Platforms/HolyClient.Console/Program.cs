@@ -6,8 +6,7 @@ using System.Buffers;
 using System.IO.Compression;
 using System.IO.Pipelines;
 using System.Net.Sockets;
-using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
 
 
 internal partial class Program
@@ -18,12 +17,17 @@ internal partial class Program
 	private static async Task Main(string[] args)
 	{
 
+
+
+		TestAes();
+
 		TestCompressDecompress();
 
 
 
 		MemoryStream ms = new MemoryStream();
 		var sender = new MinecraftPacketSender(ms);
+		sender.SwitchCompression(256);
 		for (int i = 0; i < 10_000; i++)
 		{
 			byte[] data = new byte[Random.Shared.Next(10, 300)];
@@ -48,9 +52,23 @@ internal partial class Program
 		var processor = new TestProcessor();
 
 		var p_reader = new PacketPipeReader(reader, processor);
+		p_reader.CompressionThreshold = 256;
 		var t = p_reader.RunAsync();
 
 		await Task.Delay(-1);
+	}
+
+	private static void TestAes()
+	{
+		byte[] test = new byte[256];
+
+
+
+		using Aes aes = Aes.Create();
+
+		//var encryptor = aes.CreateEncryptor();
+
+		//encryptor.TransformBlock()
 	}
 
 	private static void TestCompressDecompress()

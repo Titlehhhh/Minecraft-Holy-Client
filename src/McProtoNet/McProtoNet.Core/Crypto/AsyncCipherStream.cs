@@ -1,5 +1,6 @@
 ﻿using Org.BouncyCastle.Crypto;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace McProtoNet.Core
 {
@@ -116,6 +117,9 @@ namespace McProtoNet.Core
 		}
 		private bool FillInBuf()
 		{
+			
+			
+
 			if (inStreamEnded)
 				return false;
 

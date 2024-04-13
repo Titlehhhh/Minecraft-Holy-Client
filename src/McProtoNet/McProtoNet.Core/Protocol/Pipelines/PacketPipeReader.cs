@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using LibDeflate;
 using System.Reflection.PortableExecutable;
 using System.Threading;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
 
 
 namespace McProtoNet.Core.Protocol.Pipelines
@@ -34,6 +36,9 @@ namespace McProtoNet.Core.Protocol.Pipelines
 		}
 		public PacketPipeReader(PipeReader pipeReader, IPacketProcessor packetProcessor)
 		{
+			var aes= System.Security.Cryptography.Aes.Create();
+
+			
 			this.pipeReader = pipeReader;
 			this.packetProcessor = packetProcessor;
 		}
@@ -154,7 +159,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 					reader.Advance(length);
 
 
-					ReadOnlySpan<byte> data = uncompressed.Span;
+					ReadOnlySpan<byte> data = uncompressed.Span.Slice(0, written);
 
 					int id = ReadVarInt(ref data);
 
@@ -171,15 +176,17 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 					using (scoped SpanOwner<byte> uncompressed = new SpanOwner<byte>(sizeUncompressed))
 					{
-						DoDecompress(compressed.Span, uncompressed.Span, out int written);
 
+						DoDecompress(span, uncompressed.Span, out int written);
 
+						
 
 						ReadOnlySpan<byte> data = uncompressed.Span;
 
 						int id = ReadVarInt(ref data);
 
 						this.packetProcessor.ProcessPacket(id, ref data);
+						
 					}
 				}
 			}
@@ -258,7 +265,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 			} while ((read & 0b10000000) != 0);
 
-			data = data.Slice(0, numRead);
+			data = data.Slice(numRead);
 
 
 			//len = numRead;

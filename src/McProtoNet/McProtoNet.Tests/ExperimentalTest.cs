@@ -12,6 +12,8 @@ using McProtoNet.Experimental;
 using McProtoNet.Core;
 using LibDeflate;
 using System.IO.Compression;
+using McProtoNet.Core.Protocol.Pipelines;
+using Org.BouncyCastle.Crypto.IO;
 
 namespace McProtoNet.Tests
 {
@@ -106,6 +108,146 @@ namespace McProtoNet.Tests
 
 			CollectionAssert.AreEqual(compressedArray, compressedArray2);
 
+		}
+
+		
+		[TestMethod]
+		public async Task TestPipelinesReader()
+		{
+
+			var mainStream = new MemoryStream();
+
+			var sender = new MinecraftPacketSender();
+			sender.BaseStream = mainStream;
+			byte id = 0;
+
+			List<(int, byte[])> original = new(1000000);
+
+			for (int i = 0; i < 1_000_000; i++)
+			{
+				var data = new byte[Random.Shared.Next(50,1024)];
+
+				Random.Shared.NextBytes(data);
+
+				MemoryStream ms = new MemoryStream(data.ToArray());
+
+				ms.Position = 0;
+
+				int int_id = id++;
+
+				original.Add((int_id, data));
+
+
+
+				var packet = new Packet(int_id, ms);
+
+				await sender.SendPacketAsync(packet);
+			}
+			mainStream.Position = 0;
+
+			EmptyProcessor processor = new();
+
+			var pipeReader = PipeReader.Create(mainStream);
+
+			using PacketPipeReader packetReader = new PacketPipeReader(pipeReader, processor);
+
+
+
+			await packetReader.RunAsync();
+
+
+			Assert.AreEqual(processor.Count, 1_000_000, 1_000_000 - processor.Count);
+
+			for (int i = 0; i < 1_000_000; i++)
+			{
+				var actual = processor.Packets[i];
+				var expected = original[i];
+
+				Assert.AreEqual<int>(actual.Item1, expected.Item1, message: $"Айди не совпадают у пакета номер {i}");
+				CollectionAssert.AreEqual(actual.Item2, expected.Item2, message: $"Данные не совпадают у пакета номер {i}");
+			}
+
+		}
+
+		[TestMethod]
+		public async Task TestPipelinesReaderWithCompress()
+		{
+
+			var mainStream = new MemoryStream();
+
+			var sender = new MinecraftPacketSender();
+			sender.SwitchCompression(256);
+			sender.BaseStream = mainStream;
+			byte id = 0;
+
+			const int countPackets = 1_000_000;
+
+			List<(int, byte[])> original = new(countPackets);
+
+			for (int i = 0; i < countPackets; i++)
+			{
+				var data = new byte[Random.Shared.Next(50, 1024)];
+
+				Random.Shared.NextBytes(data);
+
+				MemoryStream ms = new MemoryStream(data.ToArray());
+
+				ms.Position = 0;
+
+				int int_id = id++;
+
+				original.Add((int_id, data));
+
+
+
+				var packet = new Packet(int_id, ms);
+
+				await sender.SendPacketAsync(packet);
+			}
+			mainStream.Position = 0;
+
+			EmptyProcessor processor = new();
+
+			var pipeReader = PipeReader.Create(mainStream);
+
+			using PacketPipeReader packetReader = new PacketPipeReader(pipeReader, processor);
+			packetReader.CompressionThreshold = 256;
+
+
+			await packetReader.RunAsync();
+
+
+			Assert.AreEqual(processor.Count, countPackets, countPackets - processor.Count);
+
+			for (int i = 0; i < countPackets; i++)
+			{
+				var actual = processor.Packets[i];
+				var expected = original[i];
+
+				Assert.AreEqual<int>(actual.Item1, expected.Item1, message: $"Айди не совпадают у пакета номер {i}");
+				
+				
+				CollectionAssert.AreEqual(actual.Item2, expected.Item2, message: $"Данные не совпадают у пакета номер {i} Прочитано: {actual.Item2.Length} Должно быть: {expected.Item2.Length}");
+			}
+
+		}
+
+
+		public sealed class EmptyProcessor : IPacketProcessor
+		{
+			public int Count { get; private set; }
+			public List<(int, byte[])> Packets { get; } = new();
+			public void ProcessPacket(int id, ref ReadOnlySpan<byte> data)
+			{
+				Count++;
+
+
+				byte[] copy = data.ToArray();
+
+				Packets.Add((id, copy));
+
+				
+			}
 		}
 
 

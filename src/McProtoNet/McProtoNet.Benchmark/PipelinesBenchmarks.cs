@@ -18,10 +18,15 @@ namespace McProtoNet.Benchmark
 		private MinecraftPacketReader native_reader;
 		private MinecraftPacketReader pipelines_reader;
 		private MinecraftPacketReaderNew pipelines_reader_new;
-	
+
 
 		private Pipe pipe;
 		private PipeReader pipeReader2;
+
+		[Params(0,256)]
+		public int CompressionThreshold { get; set; }
+
+		public int PacketsCount { get; set; } = 100_000;
 
 		[GlobalSetup]
 		public async Task Setup()
@@ -30,10 +35,11 @@ namespace McProtoNet.Benchmark
 			mainStream = new MemoryStream();
 
 			var sender = new MinecraftPacketSender();
+			sender.SwitchCompression(CompressionThreshold);
 			sender.BaseStream = mainStream;
-			for (int i = 0; i < 1_000_000; i++)
+			for (int i = 0; i < PacketsCount; i++)
 			{
-				var data = new byte[128];
+				var data = new byte[Random.Shared.Next(100,512)];
 
 				MemoryStream ms = new MemoryStream(data);
 
@@ -68,9 +74,10 @@ namespace McProtoNet.Benchmark
 			};
 
 			pipelines_reader.BaseStream = pipe.Reader.AsStream();
-
+			pipelines_reader.SwitchCompression(CompressionThreshold);
 			pipelines_reader_new = new();
 			pipelines_reader_new.BaseStream = pipe.Reader.AsStream();
+			pipelines_reader_new.SwitchCompression(CompressionThreshold);
 
 			//pipeReader2 = PipeReader.Create(mainStream, readerOptions: new StreamPipeReaderOptions(leaveOpen: true));
 		}
@@ -128,46 +135,32 @@ namespace McProtoNet.Benchmark
 		}
 		private async Task ReadPipeNew()
 		{
-			mainStream.Position = 0;
-			int count = 0;
-			try
+
+
+
+			for (int i = 0; i < PacketsCount; i++)
 			{
-				while (true)
-				{
-					using var packet = await pipelines_reader_new.ReadNextPacketAsync();
-					count++;
-				}
+
+
+				using var packet = await pipelines_reader_new.ReadNextPacketAsync();
 			}
-			catch
-			{
-				if (count != 1_000_000)
-					throw new Exception(count.ToString());
-			}
-			finally
-			{
-				await pipe.Reader.CompleteAsync();
-			}
+
+			await pipe.Reader.CompleteAsync();
 
 		}
 		private async Task ReadPipe()
 		{
-			mainStream.Position = 0;
 
-			try
-			{
-				while (true)
-				{
-					using var packet = await pipelines_reader.ReadNextPacketAsync();
-				}
-			}
-			catch
+
+			for (int i = 0; i < PacketsCount; i++)
 			{
 
+
+				using var packet = await pipelines_reader.ReadNextPacketAsync();
 			}
-			finally
-			{
-				await pipe.Reader.CompleteAsync();
-			}
+
+			await pipe.Reader.CompleteAsync();
+
 
 		}
 
@@ -180,14 +173,15 @@ namespace McProtoNet.Benchmark
 			EmptyProcessor processor = new();
 			using PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader, processor);
 
+			pipeReader.CompressionThreshold = CompressionThreshold;
 
 			var fill = FillPipe();
-			var read =pipeReader.RunAsync();
+			var read = pipeReader.RunAsync();
 
 			await Task.WhenAll(fill, read);
 			pipe.Reset();
 
-			if (processor.Count != 1_000_000)
+			if (processor.Count != PacketsCount)
 			{
 				throw new Exception(processor.Count.ToString());
 			}
