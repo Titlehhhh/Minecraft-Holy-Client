@@ -15,280 +15,86 @@ using System.Threading;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 using System.Threading.Channels;
+using System.Diagnostics;
 
 
 namespace McProtoNet.Core.Protocol.Pipelines
 {
-	public interface IReadResult : IDisposable
+
+
+
+	public sealed class PacketPipeReader
 	{
-		ReadOnlyMemory<byte> Memory { get; }
-		int Id { get; }
-	}
 
-	public readonly struct McReadResult : IDisposable
-	{
-		private readonly object _memory;
-		public ReadOnlyMemory<byte> Memory
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => (ReadOnlyMemory<byte>)_memory;
-		}
-
-		public readonly int Id { get; }
-
-
-		private readonly object? _owner;
-
-
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal McReadResult(int id, ReadOnlyMemory<byte> memory)
-		{
-			Id = id;
-			_memory = memory;
-			_owner = null;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal McReadResult(int id, MemoryOwner<byte> owner)
-		{
-			Id = id;
-			_memory = owner.Memory;
-			_owner = owner;
-
-
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal McReadResult(int id, MemoryOwner<byte> owner, int offset)
-		{
-			Id = id;
-			_memory = owner.Memory.Slice(offset);
-			_owner = owner;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal McReadResult(int id, MemoryOwner<byte> owner, int offset, int length)
-		{
-			Id = id;
-			_memory = owner.Memory.Slice(offset, length);
-			_owner = owner;
-		}
-
-
-		public void Dispose()
-		{
-			Unsafe.As<IDisposable>(_owner)?.Dispose();
-
-			//this = default;
-		}
-	}
-
-
-	public sealed class PacketPipeReader : IDisposable
-	{
-		private ZlibDecompressor decompressor = new();
 
 		private readonly PipeReader pipeReader;
 
-		private int _compressionThreshold;
-		public int CompressionThreshold
-		{
-			get => _compressionThreshold;
-			set => _compressionThreshold = value;
-		}
+
 		public PacketPipeReader(PipeReader pipeReader)
 		{
 			this.pipeReader = pipeReader;
 		}
 
-		public async IAsyncEnumerable<McReadResult> RunAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+		public async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPacketsAsync()
 		{
-
 			try
 			{
-				while (!cancellation.IsCancellationRequested)
+				while (true)
 				{
+					ReadResult result = await pipeReader.ReadAsync();
+					ReadOnlySequence<byte> buffer = result.Buffer;
 
-					ReadResult readResult = await pipeReader.ReadAsync(cancellation);
-
-					ReadOnlySequence<byte> buffer = readResult.Buffer;
-
-					while (TryReadPacket(ref buffer, out McReadResult result))
+					while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
 					{
-						
-						yield return result;						
+						yield return packet;
 					}
-
-					if (readResult.IsCompleted)
-					{
-						if (!buffer.IsEmpty)
-						{
-							throw new InvalidDataException("Incomplete message.");
-						}
-						break;
-					}
-					if (readResult.IsCanceled)
-					{
-						break;
-					}
-
 
 					pipeReader.AdvanceTo(buffer.Start, buffer.End);
-				}
 
+					if (result.IsCompleted)
+					{
+						break;
+					}
+				}
 			}
 			finally
 			{
 				await pipeReader.CompleteAsync();
-
 			}
-			yield break;
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out McReadResult result)
-		{
-			scoped SequenceReader<byte> reader = new SequenceReader<byte>(buffer);
-			if (TryReadVarInt(ref reader, out int length, out _))
-			{
-				if (reader.Remaining >= length)
-				{
-					if (_compressionThreshold <= 0)
-					{
-						TryReadVarInt(ref reader, out int id, out int id_len);
-						length -= id_len;
-						result = ReadPacketWithoutCompression(id, ref reader, length);
-					}
-					else
-					{
-						TryReadVarInt(ref reader, out int sizeUncompressed, out int len);
-
-						if (sizeUncompressed > 0)
-						{
-							length -= len;
-							result = ReadPacketWithCompression(ref reader, length, sizeUncompressed);
-						}
-						else
-						{
-							TryReadVarInt(ref reader, out int id, out int id_len);
-							length -= id_len + 1;
-							result = ReadPacketWithoutCompression(id, ref reader, length);
-						}
-					}
-
-					buffer = buffer.Slice(reader.Position);
-
-					return true;
-				}
-				else
-				{
-					result = default;
-					return false;
-				}
-
-			}
-			else
-			{
-				result = default;
-				return false;
-			}
-
-		}
-
-
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private McReadResult ReadPacketWithCompression(ref SequenceReader<byte> reader, int length, int sizeUncompressed)
-		{
-
-
-
-			MemoryOwner<byte> uncompressed = s_allocator.AllocateExactly(sizeUncompressed);
-
-			try
-			{
-				scoped Span<byte> uncompressedSpan = uncompressed.Span;
-
-				int id = 0;
-				int offset = 0;
-
-				ReadOnlySpan<byte> unread = reader.UnreadSpan;
-				if (unread.Length >= length)
-				{
-
-
-					DoDecompress(unread.Slice(0, length), uncompressedSpan, out int written);
-					reader.Advance(length);
-
-
-
-
-
-					id = ReadVarInt(uncompressedSpan, out offset);
-
-
-
-				}
-				else
-				{
-					using (SpanOwner<byte> compressed = length <= 256 ?
-						new SpanOwner<byte>(stackalloc byte[length]) :
-						new SpanOwner<byte>(length))
-					{
-						Span<byte> span = compressed.Span;
-
-						ReadOnlySequence<byte> compressedPayload = reader.UnreadSequence.Slice(0, length);
-
-						compressedPayload.CopyTo(span);		
-						
-						reader.Advance(length);
-
-						DoDecompress(span, uncompressedSpan, out int written);
-
-						id = ReadVarInt(uncompressedSpan, out offset);
-					}
-				}
-
-				return new McReadResult(id, uncompressed, offset);
-			}
-			catch
-			{
-				uncompressed.Dispose();
-				throw;
-			}
-		}
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void DoDecompress(ReadOnlySpan<byte> data, Span<byte> uncompressed, out int bytesWitten)
-		{
-			var result = decompressor.Decompress(data, uncompressed, out bytesWitten);
-			if (result != OperationStatus.Done)
-				throw new InvalidOperationException("Decompress Error status: " + result);
-		}
-		private static readonly MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator();
-
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private McReadResult ReadPacketWithoutCompression(int id, ref SequenceReader<byte> reader, int length)
-		{
-
-
-			MemoryOwner<byte> owner = s_allocator.AllocateExactly(length);
-			try
-			{
-				ReadOnlySequence<byte> payload = reader.UnreadSequence.Slice(0, length);
-				payload.CopyTo(owner.Span);
-
-				reader.Advance(length);
-
-				return new McReadResult(id, owner);
-
-			}
-			catch
-			{
-				owner.Dispose();
-				throw;
-			}
-
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int ReadVarInt(Span<byte> data, out int len)
+		private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
+		{
+			packet = default;
+
+			if (buffer.Length < 1)
+			{
+				return false; // Недостаточно данных для чтения заголовка пакета
+			}
+
+			int length;
+			int bytesRead;
+			if (!TryReadVarInt(buffer, out length, out bytesRead))
+			{
+				return false; // Невозможно прочитать длину заголовка
+			}
+
+
+			if ((length + bytesRead) < buffer.Length)
+			{
+				return false; // Недостаточно данных для чтения полного пакета
+			}
+
+
+			// Чтение данных пакета
+			packet = buffer.Slice(bytesRead, length);
+
+			buffer = buffer.Slice(bytesRead + length);
+
+			return true;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int ReadVarInt(Span<byte> data, out int len)
 		{
 
 
@@ -319,9 +125,38 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			len = numRead;
 			return result;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool TryReadVarInt(ReadOnlySequence<byte> buffer, out int value, out int bytesRead)
+		{
+			value = 0;
+			bytesRead = 0;
+			int shift = 0;
 
+			foreach (var segment in buffer)
+			{
+				foreach (var b in segment.Span)
+				{
+					value |= (b & 127) << shift;
+					shift += 7;
+					bytesRead++;
 
-		private bool TryReadVarInt(ref SequenceReader<byte> reader, out int res, out int length)
+					if ((b & 0x80) == 0)
+					{
+
+						return true;
+					}
+
+					if (bytesRead >= 5)
+					{
+						throw new ArithmeticException("Varint is big");
+					}
+				}
+			}
+
+			return false; // Недостаточно данных для чтения varint
+		}
+
+		public static bool TryReadVarInt(ref SequenceReader<byte> reader, out int res, out int length)
 		{
 
 
@@ -334,7 +169,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 				if (reader.TryPeek(numRead, out read))
 				{
-					int value = read & 0b01111111;
+					int value = read & 127;
 					result |= value << 7 * numRead;
 
 					numRead++;
@@ -358,18 +193,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			length = numRead;
 			return true;
 		}
-		bool disposed;
-		public void Dispose()
-		{
-			if (disposed)
-				return;
-			disposed = true;
 
-			decompressor.Dispose();
-			decompressor = null;
-
-			GC.SuppressFinalize(this);
-		}
 	}
 
 }

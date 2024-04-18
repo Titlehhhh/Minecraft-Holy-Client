@@ -11,8 +11,8 @@ namespace McProtoNet.Core
 {
 	public static class Extensions
 	{
-		
-		
+
+
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -92,9 +92,7 @@ namespace McProtoNet.Core
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
 		{
-			using var memory = MemoryPool<byte>.Shared.Rent(1);
-
-			var buff = memory.Memory.Slice(0, 1).Span;
+			Span<byte> buff = stackalloc byte[1];
 
 			int numRead = 0;
 			int result = 0;

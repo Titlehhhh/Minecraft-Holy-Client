@@ -35,8 +35,8 @@ namespace McProtoNet.Core.Protocol
 
 		public void SendPacket(Packet packet)
 		{
-			
-			
+
+
 			int id = packet.Id;
 			var data = packet.Data;
 			try
@@ -103,7 +103,7 @@ namespace McProtoNet.Core.Protocol
 			}
 			finally
 			{
-		
+
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -158,9 +158,9 @@ namespace McProtoNet.Core.Protocol
 						if (uncompressedSize >= _compressionThreshold)
 						{
 
-							using (var compressedPacket = StaticResources.MSmanager.GetStream())							
+							using (var compressedPacket = StaticResources.MSmanager.GetStream())
 							{
-								using (var zlibStream = new ZLibStream(compressedPacket, CompressionLevel.Fastest, true))
+								using (var zlibStream = new ZLibStream(compressedPacket, CompressionLevel.Optimal, true))
 								{
 									await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
 									await data.CopyToAsync(zlibStream, token);
@@ -169,7 +169,7 @@ namespace McProtoNet.Core.Protocol
 								int compressedPacketLength = (int)compressedPacket.Length;
 
 
-
+								byte test = uncompressedSize.GetVarIntLength();
 								byte uncompressedSizeLength = uncompressedSize.GetVarIntLength(memory);
 
 
@@ -179,13 +179,15 @@ namespace McProtoNet.Core.Protocol
 
 								byte fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
 
+#if RELEASE
+								//await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
 
-								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
+								//await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
+#elif DEBUG
+								await BaseStream.WriteVarIntAsync(fullSize, token);
 
-								await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
-								//await BaseStream.WriteVarIntAsync(fullSize, token);
-
-								//await BaseStream.WriteVarIntAsync(uncompressedSize, token);
+								await BaseStream.WriteVarIntAsync(uncompressedSize, token);
+#endif
 
 								compressedPacket.Position = 0;
 								await compressedPacket.CopyToAsync(BaseStream, token);

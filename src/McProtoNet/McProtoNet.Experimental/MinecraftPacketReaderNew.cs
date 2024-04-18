@@ -63,7 +63,9 @@ namespace McProtoNet.Experimental
 			{
 
 
-				len -= sizeUncompressed.GetVarIntLength();
+				int test = sizeUncompressed.GetVarIntLength();
+
+				len -= test;
 
 				var buffer_compress = ArrayPool<byte>.Shared.Rent(len);
 
