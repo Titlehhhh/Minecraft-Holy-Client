@@ -13,9 +13,7 @@ namespace McProtoNet.Benchmark
 	[MemoryDiagnoser(true)]
 	public class PipelinesBenchmarks
 	{
-
-		private Stream mainStream;
-		private MinecraftPacketReader native_reader;
+		private MinecraftPacketReaderNew native_reader;
 		private MinecraftPacketReader pipelines_reader;
 		private MinecraftPacketReaderNew pipelines_reader_new;
 
@@ -23,23 +21,23 @@ namespace McProtoNet.Benchmark
 		private Pipe pipe;
 		private PipeReader pipeReader2;
 
-		[Params(0,256)]
+		[Params(256)]
 		public int CompressionThreshold { get; set; }
-
-		public int PacketsCount { get; set; } = 100_000;
+		[Params(1_000_000)]
+		public int PacketsCount { get; set; }
 
 		[GlobalSetup]
 		public async Task Setup()
 		{
 
-			mainStream = new MemoryStream();
+			var mainStream = new MemoryStream();
 
 			var sender = new MinecraftPacketSender();
 			sender.SwitchCompression(CompressionThreshold);
 			sender.BaseStream = mainStream;
 			for (int i = 0; i < PacketsCount; i++)
 			{
-				var data = new byte[Random.Shared.Next(100,512)];
+				var data = new byte[512];
 
 				MemoryStream ms = new MemoryStream(data);
 
@@ -53,22 +51,21 @@ namespace McProtoNet.Benchmark
 			mainStream.Position = 0;
 
 
-			//var fs = File.OpenWrite("data.bin");
+			//using var fs = File.OpenWrite("data.bin");
 
-			//await mainStream.CopyToAsync(fs);
-			//await fs.FlushAsync();
+			await File.WriteAllBytesAsync("data.bin", mainStream.ToArray());
 			//fs.Position = 0;
 			//mainStream = fs;
 
 
-			native_reader = new MinecraftPacketReader();
+			native_reader = new MinecraftPacketReaderNew();
 
 
-			native_reader.BaseStream = mainStream;
+			//native_reader.BaseStream = mainStream;
 
 			pipelines_reader = new MinecraftPacketReader();
 
-			pipe = new Pipe(new PipeOptions())
+			pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline))
 			{
 
 			};
@@ -95,10 +92,11 @@ namespace McProtoNet.Benchmark
 		}
 
 
-		[Benchmark]
-		public async Task Read()
+		//[Benchmark]
+		public async Task ReadNew()
 		{
-			mainStream.Position = 0;
+			using var fs = File.OpenRead("data.bin");
+			native_reader.BaseStream = fs;
 
 			try
 			{
@@ -112,7 +110,7 @@ namespace McProtoNet.Benchmark
 
 			}
 		}
-		[Benchmark]
+		//[Benchmark]
 		public async Task ReadWithPipelines()
 		{
 
@@ -123,7 +121,7 @@ namespace McProtoNet.Benchmark
 			pipe.Reset();
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public async Task ReadWithPipelinesNew()
 		{
 
@@ -170,26 +168,37 @@ namespace McProtoNet.Benchmark
 			//mainStream.Position = 0;
 			//pipeReader2 = PipeReader.Create(mainStream, new StreamPipeReaderOptions(leaveOpen: true));
 
-			EmptyProcessor processor = new();
-			using PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader, processor);
+			using PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader);
 
 			pipeReader.CompressionThreshold = CompressionThreshold;
 
 			var fill = FillPipe();
 			var read = pipeReader.RunAsync();
 
-			await Task.WhenAll(fill, read);
-			pipe.Reset();
 
-			if (processor.Count != PacketsCount)
+
+			int count = 0;
+
+			await foreach (var result in read)
 			{
-				throw new Exception(processor.Count.ToString());
+				//result.Dispose();
+
+				count++;
+
 			}
+			await fill;
+			if (count != PacketsCount)
+			{
+				throw new Exception();
+			}
+
+			pipe.Reset();
 		}
 
 		private async Task FillPipe()
 		{
-			mainStream.Position = 0;
+			using var fs = File.OpenRead("data.bin");
+
 
 			try
 			{
@@ -198,7 +207,7 @@ namespace McProtoNet.Benchmark
 					Memory<byte> memory = pipe.Writer.GetMemory(4096);
 
 
-					int bytesRead = await mainStream.ReadAsync(memory);
+					int bytesRead = await fs.ReadAsync(memory);
 
 
 					if (bytesRead <= 0)
@@ -234,14 +243,5 @@ namespace McProtoNet.Benchmark
 
 	}
 
-	public sealed class EmptyProcessor : IPacketProcessor
-	{
-		public int Count { get; private set; }
-		public void ProcessPacket(int id, ref ReadOnlySpan<byte> data)
-		{
-			Count++;
-			//throw new NotImplementedException();
-		}
-	}
 
 }

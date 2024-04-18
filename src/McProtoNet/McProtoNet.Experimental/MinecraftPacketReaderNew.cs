@@ -43,7 +43,8 @@ namespace McProtoNet.Experimental
 
 
 
-					return new PacketNew(id, buffer, ArrayPool<byte>.Shared);
+
+					return new PacketNew(id, buffer, ArrayPool<byte>.Shared, 0, len);
 				}
 				catch
 				{
@@ -76,7 +77,12 @@ namespace McProtoNet.Experimental
 					var status = decompressor.Decompress(buffer_compress.AsSpan(0, len), uncompressed.AsSpan(0, sizeUncompressed), out int written);
 					if (status == OperationStatus.Done)
 					{
-						return new PacketNew(1, uncompressed, ArrayPool<byte>.Shared);
+
+						int id = ReadVarInt(uncompressed, out int offset);
+
+						int length = sizeUncompressed - offset;
+
+						return new PacketNew(id, uncompressed, ArrayPool<byte>.Shared, offset, length);
 					}
 					else
 					{
@@ -112,7 +118,7 @@ namespace McProtoNet.Experimental
 				{
 					await BaseStream.ReadExactlyAsync(buffer, 0, len, token);
 
-					return new PacketNew(id, buffer, ArrayPool<byte>.Shared);
+					return new PacketNew(id, buffer, ArrayPool<byte>.Shared, 0, len);
 				}
 				catch
 				{
@@ -126,6 +132,40 @@ namespace McProtoNet.Experimental
 
 
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int ReadVarInt(Span<byte> data, out int len)
+		{
+
+
+
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do
+			{
+
+				read = data[numRead];
+
+				int value = read & 0b01111111;
+				result |= value << 7 * numRead;
+
+				numRead++;
+				if (numRead > 5)
+				{
+					throw new ArithmeticException("VarInt too long");
+				}
+
+
+			} while ((read & 0b10000000) != 0);
+
+			//data = data.Slice(numRead);
+
+
+			len = numRead;
+			return result;
+		}
+
 		private int _compressionThreshold;
 		public void SwitchCompression(int threshold)
 		{

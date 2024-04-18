@@ -40,7 +40,7 @@ namespace QuickProxyNet
 						throw new NotSupportedException("Bad protocol");
 					}
 				}
-				catch
+				catch(Exception ex)
 				{
 					stream.Dispose();
 					throw;

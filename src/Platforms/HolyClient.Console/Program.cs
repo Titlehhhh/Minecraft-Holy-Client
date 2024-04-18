@@ -1,11 +1,16 @@
-﻿using LibDeflate;
+﻿using DotNext;
+using LibDeflate;
 using McProtoNet.Core.Protocol;
 using McProtoNet.Core.Protocol.Pipelines;
 using Org.BouncyCastle.Utilities;
+using QuickProxyNet;
 using System.Buffers;
 using System.IO.Compression;
 using System.IO.Pipelines;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 
@@ -16,46 +21,50 @@ internal partial class Program
 
 	private static async Task Main(string[] args)
 	{
-
-
-
-		TestAes();
-
-		TestCompressDecompress();
-
-
-
-		MemoryStream ms = new MemoryStream();
-		var sender = new MinecraftPacketSender(ms);
-		sender.SwitchCompression(256);
-		for (int i = 0; i < 10_000; i++)
+		Console.WriteLine("Start");
 		{
-			byte[] data = new byte[Random.Shared.Next(10, 300)];
+			MemoryStream ms = new MemoryStream();
+			var sender = new MinecraftPacketSender(ms);
+			sender.SwitchCompression(128);
+			for (int i = 0; i < 100_000; i++)
+			{
+				byte[] data = new byte[512];
 
-			Random.Shared.NextBytes(data);
-			var ms2 = new MemoryStream(data);
-			ms2.Position = 0;
-			await sender.SendPacketAsync(new Packet(i, ms2));
+				//Random.Shared.NextBytes(data);
+				var ms2 = new MemoryStream(data);
+				ms2.Position = 0;
+				await sender.SendPacketAsync(new Packet(i, ms2));
+			}
+
+
+			
+
+
+
+			ms.Position = 0;
+
+			await File.WriteAllBytesAsync("data.bin", ms.ToArray());
+		}
+		GC.Collect();
+		using var fs = File.OpenRead("data.bin");
+
+		var reader = PipeReader.Create(fs);
+
+		Console.WriteLine("Start Reading");
+		var p_reader = new PacketPipeReader(reader);
+		p_reader.CompressionThreshold = 128;
+		int g = 0;
+		await foreach (var item in p_reader.RunAsync())
+		{
+			g++;
+			//if (g % 100 == 0)
+				//Console.WriteLine(g);
+
+			item.Dispose();
+			//item.Dispose();
 		}
 
 
-
-
-
-
-		ms.Position = 0;
-
-
-
-		var reader = PipeReader.Create(ms);
-
-		var processor = new TestProcessor();
-
-		var p_reader = new PacketPipeReader(reader, processor);
-		p_reader.CompressionThreshold = 256;
-		var t = p_reader.RunAsync();
-
-		await Task.Delay(-1);
 	}
 
 	private static void TestAes()
@@ -104,12 +113,17 @@ internal partial class Program
 
 	}
 
-	class TestProcessor : IPacketProcessor
-	{
-		public void ProcessPacket(int id, ref ReadOnlySpan<byte> data)
-		{
 
-			//throw new NotImplementedException();
+	public static async IAsyncEnumerable<int> Test()
+	{
+		Console.WriteLine("Start");
+		for (int i = 0; i < 10; i++)
+		{
+			Console.WriteLine($"BeforeAwait: {i}");
+			await Task.Delay(1000);
+			Console.WriteLine($"AfterAwait: {i}");
+			yield return i;
+			Console.WriteLine($"Before Yield: {i}");
 		}
 	}
 
