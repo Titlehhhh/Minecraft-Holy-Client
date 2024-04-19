@@ -30,10 +30,11 @@ namespace McProtoNet.Benchmark
 
 		private Pipe pipe;
 
+		private long TotalBytes;
+
 		[GlobalSetup]
 		public async Task Setup()
 		{
-
 
 			using var mainStream = File.OpenWrite("data.bin");
 
@@ -43,7 +44,7 @@ namespace McProtoNet.Benchmark
 			for (int i = 0; i < PacketsCount; i++)
 			{
 				var data = new byte[Random.Shared.Next(10, 512)];
-
+				TotalBytes += data.Length;
 				Random.Shared.NextBytes(data);
 
 				MemoryStream ms = new MemoryStream(data);
@@ -92,26 +93,92 @@ namespace McProtoNet.Benchmark
 		[Benchmark]
 		public async Task ReadWithPipelines2()
 		{
+
+			PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader);
+
+			var fill = FillPipe();
+			var read = ProcessPackets(pipeReader);
+
+
+
+			await Task.WhenAll(fill, read);
+
+
+
+
+			pipe.Reset();
+
+		}
+		private async Task ProcessPackets(PacketPipeReader reader)
+		{
 			using (ZlibDecompressor decompressor = new())
 			{
+				long count = 0;
+				await foreach (ReadOnlySequence<byte> data in reader.ReadPacketsAsync())
+				{
+					ReadOnlySequence<byte> mainData = default;
+					byte[]? rented = null;
+					if (CompressionThreshold > 0)
+					{
+						data.TryReadVarInt(out int sizeUncompressed, out int len);
+						ReadOnlySequence<byte> compressed = data.Slice(len);
+						if (sizeUncompressed == 0)
+						{
 
-				var fill = FillPipe();
+							data.TryReadVarInt(out int id, out len);
+							mainData = compressed.Slice(len);
+						}
+						else
+						{
+							byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
+							rented = decompressed;
+							if (compressed.IsSingleSegment)
+							{
+								var result = decompressor.Decompress(
+												compressed.FirstSpan,
+												decompressed.AsSpan(0, sizeUncompressed),
+												out int written);
+
+								if (result != OperationStatus.Done)
+									throw new Exception("Zlib: " + result);
+
+								int id = decompressed.AsSpan().ReadVarInt(out len);
 
 
 
+								mainData = new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
+							}
+							else
+							{
+								mainData = DecompressCore(compressed, decompressed, decompressor, sizeUncompressed);
 
-				PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader,
+							}
+						}
 
-					[MethodImpl(MethodImplOptions.AggressiveInlining)]
-				(p) => ProcessPackets(p, decompressor));
+					}
+					else
+					{
+						data.TryReadVarInt(out int id, out int len);
+
+						mainData = data.Slice(len);
+					}
 
 
+					count += mainData.Length;
 
+					if (rented is not null)
+					{
+						ArrayPool<byte>.Shared.Return(rented);
+					}
+				}
 
-				await Task.WhenAll(pipeReader.ReadPacketsAsync(), fill);
+				if (count != TotalBytes)
+				{
+					throw new Exception($"данные не прочитаны полностью: Должно быть: {TotalBytes} Прочитано: {count}");
+				}
 			}
-			pipe.Reset();
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private async Task FillPipe()
 		{
@@ -120,21 +187,26 @@ namespace McProtoNet.Benchmark
 			{
 				while (true)
 				{
-					Memory<byte> memory = pipe.Writer.GetMemory(4096);
+					Memory<byte> memory = pipe.Writer.GetMemory(512);
+					try
+					{
+						int count = await fs.ReadAsync(memory);
+						if (count == 0)
+							return;
 
-					int count = await fs.ReadAsync(memory);
-					
+						pipe.Writer.Advance(count);
+					}
+					catch
+					{
 
-					pipe.Writer.Advance(count);
+					}
 
-					
 
 					FlushResult flushResult = await pipe.Writer.FlushAsync();
 
 					if (flushResult.IsCanceled || flushResult.IsCompleted)
 						return;
-					if (count == 0)
-						return;
+
 				}
 			}
 			finally
@@ -143,69 +215,6 @@ namespace McProtoNet.Benchmark
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private ValueTask ProcessPackets(ReadOnlySequence<byte> data, ZlibDecompressor decompressor)
-		{
-
-			return ValueTask.CompletedTask;
-
-			//SequenceReader<byte> reader1 = new SequenceReader<byte>(data);
-
-			ReadOnlySequence<byte> mainData = default;
-			byte[]? rented = null;
-			if (CompressionThreshold > 0)
-			{
-				PacketPipeReader.TryReadVarInt(data, out int sizeUncompressed, out int len);
-				ReadOnlySequence<byte> compressed = data.Slice(len);
-				if (sizeUncompressed == 0)
-				{
-
-					PacketPipeReader.TryReadVarInt(data, out int id, out len);
-					mainData = compressed.Slice(len);
-				}
-				else
-				{
-					byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-					rented = decompressed;
-					if (compressed.IsSingleSegment)
-					{
-						var result = decompressor.Decompress(
-										compressed.FirstSpan,
-										decompressed.AsSpan(0, sizeUncompressed),
-										out int written);
-
-						if (result != OperationStatus.Done)
-							throw new Exception("Zlib");
-
-						int id = PacketPipeReader.ReadVarInt(decompressed.AsSpan(), out len);
-
-
-
-						mainData = new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
-					}
-					else
-					{
-						mainData = DecompressCore(compressed, decompressed, decompressor, sizeUncompressed);
-
-					}
-				}
-
-			}
-			else
-			{
-				PacketPipeReader.TryReadVarInt(data, out int id, out int len);
-
-				mainData = data.Slice(len);
-			}
-
-
-			if (rented is not null)
-			{
-				ArrayPool<byte>.Shared.Return(rented);
-			}
-			return ValueTask.CompletedTask;
-
-		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static ReadOnlySequence<byte> DecompressCore(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed)
@@ -236,7 +245,7 @@ namespace McProtoNet.Benchmark
 			if (result != OperationStatus.Done)
 				throw new Exception("Zlib");
 
-			int id = PacketPipeReader.ReadVarInt(decompressedSpan, out int len);
+			int id = decompressedSpan.ReadVarInt(out int len);
 
 
 

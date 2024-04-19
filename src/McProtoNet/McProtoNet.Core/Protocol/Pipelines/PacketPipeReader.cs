@@ -22,21 +22,20 @@ namespace McProtoNet.Core.Protocol.Pipelines
 {
 
 
-	public delegate ValueTask PacketProcessor(ReadOnlySequence<byte> packet);
+	
 	public sealed class PacketPipeReader
 	{
 
 
 		private readonly PipeReader pipeReader;
-		private readonly PacketProcessor processor;
+		
 
-		public PacketPipeReader(PipeReader pipeReader, PacketProcessor processor)
+		public PacketPipeReader(PipeReader pipeReader)
 		{
 			this.pipeReader = pipeReader;
-			this.processor = processor;
 		}
 
-		public async Task ReadPacketsAsync()
+		public async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPacketsAsync()
 		{
 			try
 			{
@@ -45,10 +44,11 @@ namespace McProtoNet.Core.Protocol.Pipelines
 				{
 					ReadResult result = await pipeReader.ReadAsync();
 					ReadOnlySequence<byte> buffer = result.Buffer;
-
+					//SequencePosition position = buffer.Start;
 					while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
 					{
-						await processor(packet);
+						yield return packet;
+						//await processor(packet);
 					}
 
 					pipeReader.AdvanceTo(buffer.Start, buffer.End);
@@ -71,6 +71,8 @@ namespace McProtoNet.Core.Protocol.Pipelines
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
 		{
+			scoped SequenceReader<byte> reader = new(buffer);
+
 			packet = ReadOnlySequence<byte>.Empty;
 
 			if (buffer.Length < 1)
@@ -80,125 +82,27 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 			int length;
 			int bytesRead;
-			if (!TryReadVarInt(buffer, out length, out bytesRead))
+			if (!reader.TryReadVarInt(out length, out bytesRead))
 			{
 				return false; // Невозможно прочитать длину заголовка
 			}
 
 
-			if ((length + bytesRead) < buffer.Length)
+			if (length > reader.Remaining)
 			{
 				return false; // Недостаточно данных для чтения полного пакета
 			}
 
+			reader.Advance(length);
 
 			// Чтение данных пакета
-			//packet = buffer.Slice(bytesRead, length);
-			packet = ReadOnlySequence<byte>.Empty;
-			buffer = buffer.Slice(bytesRead + length);
+			packet = buffer.Slice(bytesRead, length);
+			buffer = reader.UnreadSequence;
 
 			return true;
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int ReadVarInt(Span<byte> data, out int len)
-		{
 
 
-
-			int numRead = 0;
-			int result = 0;
-			byte read;
-			do
-			{
-
-				read = data[numRead];
-
-				int value = read & 0b01111111;
-				result |= value << 7 * numRead;
-
-				numRead++;
-				if (numRead > 5)
-				{
-					throw new ArithmeticException("VarInt too long");
-				}
-
-
-			} while ((read & 0b10000000) != 0);
-
-			//data = data.Slice(numRead);
-
-
-			len = numRead;
-			return result;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool TryReadVarInt(ReadOnlySequence<byte> buffer, out int value, out int bytesRead)
-		{
-			value = 0;
-			bytesRead = 0;
-			int shift = 0;
-
-			foreach (var segment in buffer)
-			{
-				foreach (var b in segment.Span)
-				{
-					value |= (b & 127) << shift;
-					shift += 7;
-					bytesRead++;
-
-					if ((b & 0x80) == 0)
-					{
-
-						return true;
-					}
-
-					if (bytesRead >= 5)
-					{
-						throw new ArithmeticException("Varint is big");
-					}
-				}
-			}
-
-			return false; // Недостаточно данных для чтения varint
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool TryReadVarInt(ref SequenceReader<byte> reader, out int res, out int length)
-		{
-
-
-
-			int numRead = 0;
-			int result = 0;
-			byte read;
-			do
-			{
-
-				if (reader.TryPeek(numRead, out read))
-				{
-					int value = read & 127;
-					result |= value << 7 * numRead;
-
-					numRead++;
-					if (numRead > 5)
-					{
-						throw new ArithmeticException("VarInt too long");
-					}
-				}
-				else
-				{
-					res = 0;
-					length = -1;
-					return false;
-				}
-
-			} while ((read & 0b10000000) != 0);
-
-			reader.Advance(numRead);
-
-			res = result;
-			length = numRead;
-			return true;
-		}
 
 	}
 
