@@ -58,12 +58,19 @@ internal partial class Program
 		{
 			using var fs = File.OpenRead("data.bin");
 
-			var reader = new MinecraftPacketReaderNew();
+			using var reader = new MinecraftPacketReaderNew();
 			reader.SwitchCompression(CompressionThreshold);
 			reader.BaseStream = fs;
 			for (int i = 0; i < PacketsCount; i++)
 			{
-				using var packet = await reader.ReadNextPacketAsync();
+				try
+				{
+					using var packet = await reader.ReadNextPacketAsync();
+				}
+				catch(Exception inner)
+				{
+					throw new Exception($"Packet: {i} error", inner);
+				}
 			}
 
 		}

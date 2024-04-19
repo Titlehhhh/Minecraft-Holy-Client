@@ -22,23 +22,25 @@ namespace McProtoNet.Core.Protocol.Pipelines
 {
 
 
-
+	public delegate ValueTask PacketProcessor(ReadOnlySequence<byte> packet);
 	public sealed class PacketPipeReader
 	{
 
 
 		private readonly PipeReader pipeReader;
+		private readonly PacketProcessor processor;
 
-
-		public PacketPipeReader(PipeReader pipeReader)
+		public PacketPipeReader(PipeReader pipeReader, PacketProcessor processor)
 		{
 			this.pipeReader = pipeReader;
+			this.processor = processor;
 		}
 
-		public async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPacketsAsync()
+		public async Task ReadPacketsAsync()
 		{
 			try
 			{
+
 				while (true)
 				{
 					ReadResult result = await pipeReader.ReadAsync();
@@ -46,12 +48,16 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 					while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
 					{
-						yield return packet;
+						await processor(packet);
 					}
 
 					pipeReader.AdvanceTo(buffer.Start, buffer.End);
 
 					if (result.IsCompleted)
+					{
+						break;
+					}
+					if (result.IsCanceled)
 					{
 						break;
 					}
@@ -65,7 +71,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
 		{
-			packet = default;
+			packet = ReadOnlySequence<byte>.Empty;
 
 			if (buffer.Length < 1)
 			{
@@ -87,8 +93,8 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 
 			// Чтение данных пакета
-			packet = buffer.Slice(bytesRead, length);
-
+			//packet = buffer.Slice(bytesRead, length);
+			packet = ReadOnlySequence<byte>.Empty;
 			buffer = buffer.Slice(bytesRead + length);
 
 			return true;
@@ -155,7 +161,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 			return false; // Недостаточно данных для чтения varint
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool TryReadVarInt(ref SequenceReader<byte> reader, out int res, out int length)
 		{
 

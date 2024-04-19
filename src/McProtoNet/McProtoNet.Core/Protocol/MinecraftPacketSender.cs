@@ -180,9 +180,9 @@ namespace McProtoNet.Core.Protocol
 								byte fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
 
 #if RELEASE
-								//await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
+								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
 
-								//await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
+								await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
 #elif DEBUG
 								await BaseStream.WriteVarIntAsync(fullSize, token);
 

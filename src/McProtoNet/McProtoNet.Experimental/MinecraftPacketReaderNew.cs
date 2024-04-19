@@ -6,7 +6,7 @@ using LibDeflate;
 
 namespace McProtoNet.Experimental
 {
-	public class MinecraftPacketReaderNew
+	public class MinecraftPacketReaderNew : IDisposable
 	{
 		public Stream BaseStream { get; set; }
 
@@ -16,11 +16,9 @@ namespace McProtoNet.Experimental
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public async ValueTask<PacketNew> ReadNextPacketAsync(CancellationToken token = default)
 		{
-			//ThrowIfDisposed();
-
 			int len = await BaseStream.ReadVarIntAsync(token);
 			if (_compressionThreshold <= 0)
 			{
@@ -28,21 +26,11 @@ namespace McProtoNet.Experimental
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
 
-				//var stream = StaticResources.MSmanager.GetStream(null, len);
-
 				var buffer = ArrayPool<byte>.Shared.Rent(len);
 
 				try
 				{
 					await BaseStream.ReadExactlyAsync(buffer, 0, len, token);
-
-					//stream.Advance(len);
-
-					//stream.Position = 0;
-
-
-
-
 
 					return new PacketNew(id, buffer, ArrayPool<byte>.Shared, 0, len);
 				}
@@ -62,21 +50,21 @@ namespace McProtoNet.Experimental
 			if (sizeUncompressed > 0)
 			{
 
-
-				int test = sizeUncompressed.GetVarIntLength();
-
-				len -= test;
+				len -= sizeUncompressed.GetVarIntLength();
 
 				var buffer_compress = ArrayPool<byte>.Shared.Rent(len);
 
 				try
 				{
-					var uncompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
+
 
 					await BaseStream.ReadExactlyAsync(buffer_compress, 0, len, token);
 
+					var uncompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
 
-					var status = decompressor.Decompress(buffer_compress.AsSpan(0, len), uncompressed.AsSpan(0, sizeUncompressed), out int written);
+					var status = decompressor.Decompress(
+						buffer_compress.AsSpan(0, len),
+						uncompressed.AsSpan(0, sizeUncompressed), out int written);
 					if (status == OperationStatus.Done)
 					{
 
@@ -174,5 +162,9 @@ namespace McProtoNet.Experimental
 			_compressionThreshold = threshold;
 		}
 
+		public void Dispose()
+		{
+			decompressor.Dispose();
+		}
 	}
 }
