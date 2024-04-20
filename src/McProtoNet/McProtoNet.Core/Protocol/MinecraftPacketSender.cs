@@ -145,12 +145,12 @@ namespace McProtoNet.Core.Protocol
 				{
 
 
-					byte[] buffer = VarIntPool.Rent(10);
+
 					try
 					{
-						var memory = buffer.AsMemory();
 
-						byte idLen = id.GetVarIntLength(memory);
+
+						byte idLen = id.GetVarIntLength();
 
 
 
@@ -160,34 +160,26 @@ namespace McProtoNet.Core.Protocol
 
 							using (var compressedPacket = StaticResources.MSmanager.GetStream())
 							{
-								using (var zlibStream = new ZLibStream(compressedPacket, CompressionLevel.Optimal, true))
+								using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 								{
-									await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
-									await data.CopyToAsync(zlibStream, token);
+									zlibStream.WriteVarInt(id);
+									data.CopyTo(zlibStream);
+									//await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
+									//await data.CopyToAsync(zlibStream, token);
 								}
 
 								int compressedPacketLength = (int)compressedPacket.Length;
 
 
-								byte test = uncompressedSize.GetVarIntLength();
-								byte uncompressedSizeLength = uncompressedSize.GetVarIntLength(memory);
 
-
-
+								byte uncompressedSizeLength = uncompressedSize.GetVarIntLength();
 
 								int fullSize = uncompressedSizeLength + compressedPacketLength;
 
-								byte fullsize_len = fullSize.GetVarIntLength(memory.Slice(uncompressedSizeLength));
-
-#if RELEASE
-								await BaseStream.WriteAsync(memory.Slice(uncompressedSizeLength, fullsize_len), token);
-
-								await BaseStream.WriteAsync(memory.Slice(0, uncompressedSizeLength), token);
-#elif DEBUG
 								await BaseStream.WriteVarIntAsync(fullSize, token);
 
 								await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-#endif
+
 
 								compressedPacket.Position = 0;
 								await compressedPacket.CopyToAsync(BaseStream, token);
@@ -197,26 +189,15 @@ namespace McProtoNet.Core.Protocol
 						else
 						{
 							uncompressedSize++;
-
-							byte unc_len = uncompressedSize.GetVarIntLength(memory.Slice(idLen));
-
-							//await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-
-							await BaseStream.WriteAsync(memory.Slice(idLen, unc_len), token);
-
+							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
 							await BaseStream.WriteAsync(ZERO_VARINT, token);
-
-							await BaseStream.WriteAsync(memory.Slice(0, idLen), token);
-							//await BaseStream.WriteAsync(buffer, 0, idLen, token);
-
+							await BaseStream.WriteVarIntAsync(id, token);
 							await data.CopyToAsync(BaseStream, token);
-
-
 						}
 					}
 					finally
 					{
-						VarIntPool.Return(buffer);
+
 					}
 				}
 				else

@@ -23,6 +23,8 @@ namespace McProtoNet.Core
 
 				if (reader.TryRead(out read))
 				{
+					
+
 					int value = read & 127;
 					result |= value << 7 * numRead;
 
@@ -41,7 +43,7 @@ namespace McProtoNet.Core
 
 			} while ((read & 0b10000000) != 0);
 
-			
+
 
 			res = result;
 			length = numRead;
@@ -73,6 +75,7 @@ namespace McProtoNet.Core
 
 				read = data[numRead];
 
+				
 				int value = read & 0b01111111;
 				result |= value << 7 * numRead;
 

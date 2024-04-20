@@ -24,9 +24,9 @@ namespace McProtoNet.Benchmark
 
 
 		[Params(128)]
-		public int CompressionThreshold { get; set; }
+		public int CompressionThreshold { get; set; } = 128;
 		[Params(100_000)]
-		public int PacketsCount { get; set; }
+		public int PacketsCount { get; set; } = 100_000;
 
 		private Pipe pipe;
 
@@ -65,9 +65,22 @@ namespace McProtoNet.Benchmark
 
 		}
 
-
 		[Benchmark]
-		public async Task ReadNew()
+		public async Task ReadStream1()
+		{
+			var native_reader = new MinecraftPacketReader();
+			using var fs = File.OpenRead("data.bin");
+			native_reader.BaseStream = fs;
+			native_reader.SwitchCompression(CompressionThreshold);
+
+			for (int i = 0; i < PacketsCount; i++)
+			{
+				using var packet = await native_reader.ReadNextPacketAsync();
+
+			}
+		}
+		[Benchmark]
+		public async Task ReadStream2()
 		{
 			using var native_reader = new MinecraftPacketReaderNew();
 			using var fs = File.OpenRead("data.bin");
@@ -76,14 +89,9 @@ namespace McProtoNet.Benchmark
 
 			for (int i = 0; i < PacketsCount; i++)
 			{
-				try
-				{
-					using var packet = await native_reader.ReadNextPacketAsync();
-				}
-				catch
-				{
-					throw new Exception($"Packet: {i} error");
-				}
+
+				using var packet = await native_reader.ReadNextPacketAsync();
+
 			}
 		}
 
@@ -91,7 +99,7 @@ namespace McProtoNet.Benchmark
 
 
 		[Benchmark]
-		public async Task ReadWithPipelines2()
+		public async Task ReadWithPipelines()
 		{
 
 			PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader);
@@ -113,68 +121,102 @@ namespace McProtoNet.Benchmark
 		{
 			using (ZlibDecompressor decompressor = new())
 			{
-				long count = 0;
+				long bytesCount = 0;
+				int count = 0;
 				await foreach (ReadOnlySequence<byte> data in reader.ReadPacketsAsync())
 				{
-					ReadOnlySequence<byte> mainData = default;
-					byte[]? rented = null;
-					if (CompressionThreshold > 0)
+					count++;
+					try
 					{
-						data.TryReadVarInt(out int sizeUncompressed, out int len);
-						ReadOnlySequence<byte> compressed = data.Slice(len);
-						if (sizeUncompressed == 0)
+						ReadOnlySequence<byte> mainData = default;
+						byte[]? rented = null;
+						if (CompressionThreshold > 0)
 						{
-
-							data.TryReadVarInt(out int id, out len);
-							mainData = compressed.Slice(len);
-						}
-						else
-						{
-							byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-							rented = decompressed;
-							if (compressed.IsSingleSegment)
+							long before = data.Length;
+							if (!data.TryReadVarInt(out int sizeUncompressed, out int len))
 							{
-								var result = decompressor.Decompress(
-												compressed.FirstSpan,
-												decompressed.AsSpan(0, sizeUncompressed),
-												out int written);
+								throw new Exception("1");
+							}
+							long after = data.Length;
 
-								if (result != OperationStatus.Done)
-									throw new Exception("Zlib: " + result);
+							if (after != before)
+								throw new Exception("2");
 
-								int id = decompressed.AsSpan().ReadVarInt(out len);
+							ReadOnlySequence<byte> compressed = data.Slice(len);
+							if (sizeUncompressed > 0)
+							{
+
+								byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
+								rented = decompressed;
+								if (compressed.IsSingleSegment)
+								{
+
+									try
+									{
+
+										var result = decompressor.Decompress(
+														compressed.FirstSpan,
+														decompressed.AsSpan(0, sizeUncompressed),
+														out int written);
+
+										if (result != OperationStatus.Done)
+											throw new Exception("Zlib: " + result);
+									}
+									catch
+									{
+										throw new Exception($"data: {data.Length} uncompressed: {sizeUncompressed} compressed: {compressed.Length} compressed f:{compressed.FirstSpan.Length}");
+									}
+
+									int id = decompressed.AsSpan().ReadVarInt(out len);
 
 
 
-								mainData = new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
+									mainData = new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
+								}
+								else
+								{
+									mainData = DecompressMultiSegment(compressed, decompressed, decompressor, sizeUncompressed);
+
+								}
+
+
+							}
+							else if (sizeUncompressed == 0)
+							{
+								data.TryReadVarInt(out int id, out len);
+								mainData = compressed.Slice(len);
 							}
 							else
 							{
-								mainData = DecompressCore(compressed, decompressed, decompressor, sizeUncompressed);
-
+								throw new InvalidOperationException($"sizeUncompressed negative: {sizeUncompressed}");
 							}
+
+						}
+						else
+						{
+
+							data.TryReadVarInt(out int id, out int len);
+
+							mainData = data.Slice(len);
 						}
 
+
+						bytesCount += mainData.Length;
+
+						if (rented is not null)
+						{
+							ArrayPool<byte>.Shared.Return(rented);
+						}
 					}
-					else
+					catch (Exception ex)
 					{
-						data.TryReadVarInt(out int id, out int len);
-
-						mainData = data.Slice(len);
-					}
-
-
-					count += mainData.Length;
-
-					if (rented is not null)
-					{
-						ArrayPool<byte>.Shared.Return(rented);
+						throw new Exception($"В пакете {count} ошибка:", ex);
 					}
 				}
 
-				if (count != TotalBytes)
+				if (bytesCount != TotalBytes)
 				{
-					throw new Exception($"данные не прочитаны полностью: Должно быть: {TotalBytes} Прочитано: {count}");
+					throw new Exception($"данные не прочитаны полностью: Должно быть: {TotalBytes} Прочитано: {bytesCount}");
 				}
 			}
 		}
@@ -217,9 +259,8 @@ namespace McProtoNet.Benchmark
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static ReadOnlySequence<byte> DecompressCore(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed)
+		private static ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed)
 		{
-			//byte[] compressedTemp = ArrayPool<byte>.Shared.Rent((int)compressed.Length);
 
 			int compressedLength = (int)compressed.Length;
 
@@ -243,7 +284,7 @@ namespace McProtoNet.Benchmark
 						out int written);
 
 			if (result != OperationStatus.Done)
-				throw new Exception("Zlib");
+				throw new Exception("Zlib: " + sizeUncompressed);
 
 			int id = decompressedSpan.ReadVarInt(out int len);
 

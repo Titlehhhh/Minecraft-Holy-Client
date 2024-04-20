@@ -46,9 +46,14 @@ namespace McProtoNet.Experimental
 
 			int sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
 
+			
 
 			if (sizeUncompressed > 0)
 			{
+
+				if (sizeUncompressed < _compressionThreshold)
+					throw new Exception($"Длина sizeUncompressed меньше порога сжатия. sizeUncompressed: {sizeUncompressed} Порог: {_compressionThreshold}");
+
 
 				len -= sizeUncompressed.GetVarIntLength();
 
@@ -95,6 +100,7 @@ namespace McProtoNet.Experimental
 			}
 			else
 			{
+
 				if (sizeUncompressed != 0)
 					throw new Exception("size incorrect");
 

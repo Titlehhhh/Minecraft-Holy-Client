@@ -100,6 +100,7 @@ namespace HolyClient.StressTest
 
 				bot.Client.OnJoinGame.Subscribe(async x =>
 				{
+					return;
 					try
 					{
 						if (disp is null)
@@ -179,7 +180,7 @@ namespace HolyClient.StressTest
 
 				bot.Client.OnMapData.Subscribe(x =>
 				{
-					logger.Information("map");
+					//logger.Information("map");
 				}).DisposeWith(disposables);
 
 				disposables.Add(Disposable.Create(() =>

@@ -124,6 +124,10 @@ namespace McProtoNet.Core.Protocol
 
 			if (sizeUncompressed > 0)
 			{
+				if (sizeUncompressed < _compressionThreshold)
+					throw new Exception($"Длина sizeUncompressed меньше порога сжатия. sizeUncompressed: {sizeUncompressed} Порог: {_compressionThreshold}");
+
+
 				len -= sizeUncompressed.GetVarIntLength();
 
 				using var buffer = StaticResources.MSmanager.GetStream(null, len);
@@ -168,6 +172,7 @@ namespace McProtoNet.Core.Protocol
 			}
 			else
 			{
+
 				if (sizeUncompressed != 0)
 					throw new Exception("size incorrect");
 
