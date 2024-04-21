@@ -24,13 +24,13 @@ namespace McProtoNet.Benchmark
 
 		public int CompressionThreshold { get; set; } = 128;
 
-		public int PacketsCount { get; set; } = 1_000_000;
+		public int PacketsCount { get; set; } = 100_000;
 
 		private Pipe pipe;
 
 		private long TotalBytes;
 
-
+		[GlobalSetup]
 		public async Task Setup()
 		{
 
@@ -67,11 +67,12 @@ namespace McProtoNet.Benchmark
 
 			pipe = new Pipe();
 		}
+		[GlobalCleanup]
 		public void Clean()
 		{
 
 		}
-
+		[Benchmark]
 		public async Task ReadStream1()
 		{
 			using var mainStream = File.OpenRead("data.bin");
@@ -89,6 +90,7 @@ namespace McProtoNet.Benchmark
 
 
 		}
+		[Benchmark]
 		public async Task ReadStream2()
 		{
 			using var mainStream = File.OpenRead("data.bin");
@@ -110,7 +112,7 @@ namespace McProtoNet.Benchmark
 
 
 
-
+		[Benchmark]
 		public async Task ReadWithPipelines()
 		{
 
@@ -130,115 +132,10 @@ namespace McProtoNet.Benchmark
 		}
 		private async Task ProcessPackets(PacketPipeReader reader)
 		{
-			using (ZlibDecompressor decompressor = new())
+			int count = 0;
+			await foreach (var packet in reader.ReadPacketsAsync().Decompress(CompressionThreshold))
 			{
-				long bytesCount = 0;
-				int count = 0;
-				await foreach (ReadOnlySequence<byte> data in reader.ReadPacketsAsync())
-				{
-
-					try
-					{
-						int id = -1;
-						ReadOnlySequence<byte> mainData = default;
-						byte[]? rented = null;
-						if (CompressionThreshold > 0)
-						{
-
-							data.TryReadVarInt(out int sizeUncompressed, out int len);
-
-
-
-
-							ReadOnlySequence<byte> compressed = data.Slice(len);
-							if (sizeUncompressed > 0)
-							{
-								if (sizeUncompressed < CompressionThreshold)
-								{
-									throw new Exception("Размер несжатого пакета меньше порога сжатия.");
-								}
-								byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-								rented = decompressed;
-								if (compressed.IsSingleSegment)
-								{
-
-									try
-									{
-
-										var result = decompressor.Decompress(
-														compressed.FirstSpan,
-														decompressed.AsSpan(0, sizeUncompressed),
-														out int written);
-
-										if (result != OperationStatus.Done)
-											throw new Exception("Zlib: " + result);
-									}
-									catch
-									{
-										throw new Exception($"data: {data.Length} uncompressed: {sizeUncompressed} compressed: {compressed.Length} compressed f:{compressed.FirstSpan.Length}");
-									}
-
-									id = decompressed.AsSpan().ReadVarInt(out len);
-
-
-
-									mainData = new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
-								}
-								else
-								{
-									mainData = DecompressMultiSegment(compressed, decompressed, decompressor, sizeUncompressed, out id);
-								}
-
-
-							}
-							else if (sizeUncompressed == 0)
-							{
-								compressed.TryReadVarInt(out id, out len);
-								mainData = compressed.Slice(len);
-							}
-							else
-							{
-								throw new InvalidOperationException($"sizeUncompressed negative: {sizeUncompressed}");
-							}
-
-						}
-						else
-						{
-
-							data.TryReadVarInt(out id, out int len);
-
-							mainData = data.Slice(len);
-						}
-
-
-
-
-
-						bytesCount += mainData.Length;
-
-
-
-						count++;
-
-						if (rented is not null)
-						{
-							ArrayPool<byte>.Shared.Return(rented);
-						}
-
-
-
-
-					}
-					catch (Exception ex)
-					{
-						throw new Exception($"В пакете {count} ошибка:", ex);
-					}
-				}
-
-				if (bytesCount != TotalBytes)
-				{
-					throw new Exception($"данные не прочитаны полностью: Должно быть: {TotalBytes} Прочитано: {bytesCount}");
-				}
+				count++;
 			}
 		}
 
@@ -283,39 +180,7 @@ namespace McProtoNet.Benchmark
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed, out int id)
-		{
 
-			int compressedLength = (int)compressed.Length;
-
-			using scoped SpanOwner<byte> compressedTemp = compressedLength <= 256 ?
-				new SpanOwner<byte>(stackalloc byte[compressedLength]) :
-				new SpanOwner<byte>(compressedLength);
-
-			scoped Span<byte> decompressedSpan = decompressed.AsSpan(0, sizeUncompressed);
-
-			scoped Span<byte> compressedTempSpan = compressedTemp.Span;
-
-
-			compressed.CopyTo(compressedTempSpan);
-
-
-
-
-			var result = decompressor.Decompress(
-						compressedTempSpan,
-						decompressedSpan,
-						out int written);
-
-			if (result != OperationStatus.Done)
-				throw new Exception("Zlib: " + sizeUncompressed);
-
-			id = decompressedSpan.ReadVarInt(out int len);
-
-			return new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
-
-		}
 
 
 	}

@@ -21,30 +21,11 @@ using System.Security.Cryptography;
 internal partial class Program
 {
 
-	private static async Task Main(string[] args)
+	public static async Task Main(string[] args)
 	{
-		//try
-		//{
-		//	PipelinesBenchmarks benchmarks = new();
-		//	Console.WriteLine("setup");
-		//	await benchmarks.Setup();
-		//	Console.WriteLine("Start read");
-		//	Console.WriteLine("stream1\n");
-		//	await benchmarks.ReadStream1();
-		//	Console.WriteLine("stream2\n");
-		//	await benchmarks.ReadStream2();
-		//	Console.WriteLine("Pipelines\n");
-		//	await benchmarks.ReadWithPipelines();
-			
-		//	benchmarks.Clean();
-		//}
-		//catch (Exception ex)
-		//{
-		//	Console.WriteLine(ex);
-		//}
-
-
+		
 	}
+	
 
 
 

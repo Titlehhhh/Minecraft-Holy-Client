@@ -6,10 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Buffers;
 using System.Runtime.CompilerServices;
-using DotNext.Buffers;
 using McProtoNet.Core;
 using System.Runtime.InteropServices;
-using LibDeflate;
 using System.Reflection.PortableExecutable;
 using System.Threading;
 using System.Runtime.Intrinsics.X86;
@@ -20,15 +18,12 @@ using System.Diagnostics;
 
 namespace McProtoNet.Core.Protocol.Pipelines
 {
-
-
-	
 	public sealed class PacketPipeReader
 	{
 
 
 		private readonly PipeReader pipeReader;
-		
+
 
 		public PacketPipeReader(PipeReader pipeReader)
 		{

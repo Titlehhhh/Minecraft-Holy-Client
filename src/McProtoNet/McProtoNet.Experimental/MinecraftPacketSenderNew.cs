@@ -6,7 +6,7 @@ using McProtoNet.Core;
 
 namespace McProtoNet.Experimental
 {
-	public class MinecraftPacketSenderNew
+	public class MinecraftPacketSenderNew : IDisposable
 	{
 
 		public Stream BaseStream { get; set; }
@@ -104,24 +104,7 @@ namespace McProtoNet.Experimental
 
 			await BaseStream.WriteAsync(packet.GetMemory(), token);
 
-			//int Packetlength = (int)packet.Length;
-
-			//var buffer = VarIntPool.Rent(10);
-
-
-
-			//byte id_len = id.GetVarIntLength(buffer);
-
-			//byte fullsize_len = (id_len + Packetlength).GetVarIntLength(buffer, id_len);
-
-
-			//await BaseStream.WriteAsync(buffer, id_len, fullsize_len, token);
-			//await BaseStream.WriteAsync(buffer, 0, id_len, token);
-
-
-
-
-			//await packet.CopyToAsync(BaseStream, token);
+			
 
 
 
@@ -134,6 +117,9 @@ namespace McProtoNet.Experimental
 			_compressionThreshold = threshold;
 		}
 
-
+		public void Dispose()
+		{
+			compressor.Dispose();
+		}
 	}
 }

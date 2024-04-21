@@ -16,10 +16,10 @@ namespace McProtoNet.Benchmark
 		[Params(64, 512)]
 		public int PacketSize { get; set; }
 
-		[Params(1, 1_000_000)]
+		[Params(1, 100_000)]
 		public int Count { get; set; }
 
-		private MinecraftPacketSenderNew sender;
+
 		private MemoryStream ms;
 
 		private McProtoNet.Experimental.PacketOut packet;
@@ -27,8 +27,7 @@ namespace McProtoNet.Benchmark
 		[GlobalSetup]
 		public void Setup()
 		{
-			sender = new();
-			ms = new(1024);
+			ms = new(PacketSize * Count + Count * 25);
 
 			byte[] data = new byte[PacketSize];
 
@@ -40,6 +39,8 @@ namespace McProtoNet.Benchmark
 		[Benchmark]
 		public async ValueTask NewSend()
 		{
+			ms.Position = 0;
+			using MinecraftPacketSenderNew sender = new();
 			sender.BaseStream = ms;
 			sender.SwitchCompression(CompressionThreshold);
 			for (int i = 0; i < Count; i++)
