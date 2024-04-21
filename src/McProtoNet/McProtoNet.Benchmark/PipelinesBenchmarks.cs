@@ -8,9 +8,11 @@ using McProtoNet.Core.Protocol.Pipelines;
 using McProtoNet.Experimental;
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -20,23 +22,22 @@ namespace McProtoNet.Benchmark
 	public class PipelinesBenchmarks
 	{
 
-
-
-
-		[Params(128)]
 		public int CompressionThreshold { get; set; } = 128;
-		[Params(100_000)]
-		public int PacketsCount { get; set; } = 100_000;
+
+		public int PacketsCount { get; set; } = 1_000_000;
 
 		private Pipe pipe;
 
 		private long TotalBytes;
 
-		[GlobalSetup]
+
 		public async Task Setup()
 		{
 
-			using var mainStream = File.OpenWrite("data.bin");
+
+			using var mainStream = File.Open("data.bin", FileMode.Create, FileAccess.Write, FileShare.Write);
+
+
 
 			var sender = new MinecraftPacketSender();
 			sender.SwitchCompression(CompressionThreshold);
@@ -44,33 +45,40 @@ namespace McProtoNet.Benchmark
 			for (int i = 0; i < PacketsCount; i++)
 			{
 				var data = new byte[Random.Shared.Next(10, 512)];
+
+				int id = Random.Shared.Next(0, 60);
+
 				TotalBytes += data.Length;
 				Random.Shared.NextBytes(data);
+
+
 
 				MemoryStream ms = new MemoryStream(data);
 
 				ms.Position = 0;
 
 
-				var packet = new Packet(Random.Shared.Next(0, 60), ms);
+				var packet = new Packet(id, ms);
 
 				await sender.SendPacketAsync(packet);
 			}
 			await mainStream.FlushAsync();
+
+
 			pipe = new Pipe();
 		}
-		[GlobalCleanup]
 		public void Clean()
 		{
 
 		}
 
-		[Benchmark]
 		public async Task ReadStream1()
 		{
+			using var mainStream = File.OpenRead("data.bin");
+
 			var native_reader = new MinecraftPacketReader();
-			using var fs = File.OpenRead("data.bin");
-			native_reader.BaseStream = fs;
+
+			native_reader.BaseStream = mainStream;
 			native_reader.SwitchCompression(CompressionThreshold);
 
 			for (int i = 0; i < PacketsCount; i++)
@@ -78,13 +86,17 @@ namespace McProtoNet.Benchmark
 				using var packet = await native_reader.ReadNextPacketAsync();
 
 			}
+
+
 		}
-		[Benchmark]
 		public async Task ReadStream2()
 		{
+			using var mainStream = File.OpenRead("data.bin");
+
+
 			using var native_reader = new MinecraftPacketReaderNew();
-			using var fs = File.OpenRead("data.bin");
-			native_reader.BaseStream = fs;
+
+			native_reader.BaseStream = mainStream;
 			native_reader.SwitchCompression(CompressionThreshold);
 
 			for (int i = 0; i < PacketsCount; i++)
@@ -98,7 +110,7 @@ namespace McProtoNet.Benchmark
 
 
 
-		[Benchmark]
+
 		public async Task ReadWithPipelines()
 		{
 
@@ -113,7 +125,6 @@ namespace McProtoNet.Benchmark
 
 
 
-
 			pipe.Reset();
 
 		}
@@ -125,27 +136,27 @@ namespace McProtoNet.Benchmark
 				int count = 0;
 				await foreach (ReadOnlySequence<byte> data in reader.ReadPacketsAsync())
 				{
-					count++;
+
 					try
 					{
+						int id = -1;
 						ReadOnlySequence<byte> mainData = default;
 						byte[]? rented = null;
 						if (CompressionThreshold > 0)
 						{
-							long before = data.Length;
-							if (!data.TryReadVarInt(out int sizeUncompressed, out int len))
-							{
-								throw new Exception("1");
-							}
-							long after = data.Length;
 
-							if (after != before)
-								throw new Exception("2");
+							data.TryReadVarInt(out int sizeUncompressed, out int len);
+
+
+
 
 							ReadOnlySequence<byte> compressed = data.Slice(len);
 							if (sizeUncompressed > 0)
 							{
-
+								if (sizeUncompressed < CompressionThreshold)
+								{
+									throw new Exception("Размер несжатого пакета меньше порога сжатия.");
+								}
 								byte[] decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
 								rented = decompressed;
 								if (compressed.IsSingleSegment)
@@ -167,7 +178,7 @@ namespace McProtoNet.Benchmark
 										throw new Exception($"data: {data.Length} uncompressed: {sizeUncompressed} compressed: {compressed.Length} compressed f:{compressed.FirstSpan.Length}");
 									}
 
-									int id = decompressed.AsSpan().ReadVarInt(out len);
+									id = decompressed.AsSpan().ReadVarInt(out len);
 
 
 
@@ -175,15 +186,14 @@ namespace McProtoNet.Benchmark
 								}
 								else
 								{
-									mainData = DecompressMultiSegment(compressed, decompressed, decompressor, sizeUncompressed);
-
+									mainData = DecompressMultiSegment(compressed, decompressed, decompressor, sizeUncompressed, out id);
 								}
 
 
 							}
 							else if (sizeUncompressed == 0)
 							{
-								data.TryReadVarInt(out int id, out len);
+								compressed.TryReadVarInt(out id, out len);
 								mainData = compressed.Slice(len);
 							}
 							else
@@ -195,18 +205,29 @@ namespace McProtoNet.Benchmark
 						else
 						{
 
-							data.TryReadVarInt(out int id, out int len);
+							data.TryReadVarInt(out id, out int len);
 
 							mainData = data.Slice(len);
 						}
 
 
+
+
+
 						bytesCount += mainData.Length;
+
+
+
+						count++;
 
 						if (rented is not null)
 						{
 							ArrayPool<byte>.Shared.Return(rented);
 						}
+
+
+
+
 					}
 					catch (Exception ex)
 					{
@@ -224,7 +245,8 @@ namespace McProtoNet.Benchmark
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private async Task FillPipe()
 		{
-			using var fs = File.OpenRead("data.bin");
+			using var mainStream = File.OpenRead("data.bin");
+
 			try
 			{
 				while (true)
@@ -232,22 +254,25 @@ namespace McProtoNet.Benchmark
 					Memory<byte> memory = pipe.Writer.GetMemory(512);
 					try
 					{
-						int count = await fs.ReadAsync(memory);
+						int count = await mainStream.ReadAsync(memory);
+
 						if (count == 0)
 							return;
 
 						pipe.Writer.Advance(count);
+
+						FlushResult flushResult = await pipe.Writer.FlushAsync();
+
+						if (flushResult.IsCanceled || flushResult.IsCompleted)
+							return;
 					}
-					catch
+					catch (Exception ex)
 					{
-
+						Console.WriteLine("Fill exception " + ex);
 					}
 
 
-					FlushResult flushResult = await pipe.Writer.FlushAsync();
 
-					if (flushResult.IsCanceled || flushResult.IsCompleted)
-						return;
 
 				}
 			}
@@ -259,7 +284,7 @@ namespace McProtoNet.Benchmark
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed)
+		private static ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed, ZlibDecompressor decompressor, int sizeUncompressed, out int id)
 		{
 
 			int compressedLength = (int)compressed.Length;
@@ -286,9 +311,7 @@ namespace McProtoNet.Benchmark
 			if (result != OperationStatus.Done)
 				throw new Exception("Zlib: " + sizeUncompressed);
 
-			int id = decompressedSpan.ReadVarInt(out int len);
-
-
+			id = decompressedSpan.ReadVarInt(out int len);
 
 			return new ReadOnlySequence<byte>(decompressed, len, sizeUncompressed - len);
 
@@ -296,6 +319,4 @@ namespace McProtoNet.Benchmark
 
 
 	}
-
-
 }

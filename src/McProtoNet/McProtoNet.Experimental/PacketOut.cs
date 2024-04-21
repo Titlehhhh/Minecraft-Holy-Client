@@ -2,6 +2,7 @@
 
 namespace McProtoNet.Experimental
 {
+
 	public readonly struct PacketOut : IDisposable
 	{
 		private readonly int offset;

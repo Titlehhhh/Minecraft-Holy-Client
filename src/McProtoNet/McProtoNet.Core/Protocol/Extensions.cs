@@ -23,7 +23,6 @@ namespace McProtoNet.Core
 
 				if (reader.TryRead(out read))
 				{
-					
 
 					int value = read & 127;
 					result |= value << 7 * numRead;
