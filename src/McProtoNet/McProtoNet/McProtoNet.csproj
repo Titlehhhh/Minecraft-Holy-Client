@@ -13,8 +13,9 @@
 
 
 	<ItemGroup>
-		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj"/>
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj"/>		
+		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
+		<ProjectReference Include="..\McProtoNet.Experimental\McProtoNet.Experimental.csproj" />
+		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />		
 	</ItemGroup>
 
 	<ItemGroup>

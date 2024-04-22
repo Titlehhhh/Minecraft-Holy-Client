@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Experimental
 {
@@ -27,7 +28,7 @@ namespace McProtoNet.Experimental
 			if (pool is not null)
 				pool.Return(buffer);
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ReadOnlyMemory<byte> GetMemory()
 		{
 			return new ReadOnlyMemory<byte>(buffer, offset, length);

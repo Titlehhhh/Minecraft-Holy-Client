@@ -6,7 +6,7 @@ using LibDeflate;
 
 namespace McProtoNet.Experimental
 {
-	public class MinecraftPacketReaderNew : IDisposable
+	public sealed class MinecraftPacketReaderNew : IDisposable
 	{
 		public Stream BaseStream { get; set; }
 
@@ -46,7 +46,7 @@ namespace McProtoNet.Experimental
 
 			int sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
 
-			
+
 
 			if (sizeUncompressed > 0)
 			{

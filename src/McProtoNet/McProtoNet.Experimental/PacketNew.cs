@@ -3,13 +3,8 @@ using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Experimental
 {
-	public interface IReadResult : IDisposable
-	{
-		public int Id { get; }
-		public ReadOnlySpan<byte> Span { get; }
-		public ReadOnlyMemory<byte> Memory { get; }
-	}
-	public readonly struct PacketNew : IDisposable
+	
+	public readonly struct PacketNew 
 	{
 		private readonly byte[] _buffer;
 		private readonly ArrayPool<byte>? pool;

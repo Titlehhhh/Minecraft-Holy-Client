@@ -27,7 +27,7 @@ namespace McProtoNet
 
 
 		private Stream mainStream;
-		private MinecraftStream minecraftStream;
+		private AesStream minecraftStream;
 		private MinecraftPacketReader PacketReader;
 		private MinecraftPacketSender PacketSender;
 
@@ -380,7 +380,7 @@ namespace McProtoNet
 			CTS = new();
 			mainStream = await CreateTcp(CTS.Token);
 
-			minecraftStream = new MinecraftStream(mainStream);
+			minecraftStream = new AesStream(mainStream);
 
 			PacketSender.BaseStream = minecraftStream;
 			PacketReader.BaseStream = minecraftStream;

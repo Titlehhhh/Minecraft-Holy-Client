@@ -13,6 +13,7 @@ namespace McProtoNet
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		private Subject<T> CreateEvent<T>()
 		{
+			
 			Subject<T> subject = new Subject<T>();
 			_events.Add(subject);
 

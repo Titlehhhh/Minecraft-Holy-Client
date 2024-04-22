@@ -1,21 +1,17 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
-using DnsClient.Internal;
 using LibDeflate;
 using McProtoNet.Core;
 
 namespace McProtoNet.Experimental
 {
-	public class MinecraftPacketSenderNew : IDisposable
+	public sealed class MinecraftPacketSenderNew : IDisposable
 	{
 
 		public Stream BaseStream { get; set; }
 
 
 
-		//private static ArrayPool<byte> VarIntPool = ArrayPool<byte>.Create(10, 20);
-
-		//private readonly Deflater Deflater = new Deflater();
 
 		private readonly ZlibCompressor compressor = new ZlibCompressor(6);
 
@@ -56,11 +52,11 @@ namespace McProtoNet.Experimental
 
 							int fullsize = compressedLength + uncompressedSize.GetVarIntLength();
 
-							await BaseStream.WriteVarIntAsync(fullsize, token);
-							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
+							await BaseStream.WriteVarIntAsync(fullsize, token).ConfigureAwait(false);
+							await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
 							//await BaseStream.WriteAsync(compressed.Memory, token);
 
-							await BaseStream.WriteAsync(compressedBuffer.AsMemory(0, bytesCompress), token);
+							await BaseStream.WriteAsync(compressedBuffer.AsMemory(0, bytesCompress), token).ConfigureAwait(false);
 						}
 						finally
 						{
@@ -74,9 +70,9 @@ namespace McProtoNet.Experimental
 					{
 						uncompressedSize++;
 
-						await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-						await BaseStream.WriteAsync(ZERO_VARINT, token);
-						await BaseStream.WriteAsync(packet.GetMemory(), token);
+						await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
+						await BaseStream.WriteAsync(ZERO_VARINT, token).ConfigureAwait(false);
+						await BaseStream.WriteAsync(packet.GetMemory(), token).ConfigureAwait(false);
 
 
 
@@ -85,7 +81,7 @@ namespace McProtoNet.Experimental
 				}
 				else
 				{
-					await SendPacketWithoutCompressionAsync(packet, token);
+					await SendPacketWithoutCompressionAsync(packet, token).ConfigureAwait(false);
 				}
 				await BaseStream.FlushAsync(token);
 			}
@@ -100,13 +96,11 @@ namespace McProtoNet.Experimental
 
 			int len = packet.GetMemory().Length;
 
-			await BaseStream.WriteVarIntAsync(len, token);
+			await BaseStream.WriteVarIntAsync(len, token).ConfigureAwait(false);
 
-			await BaseStream.WriteAsync(packet.GetMemory(), token);
+			await BaseStream.WriteAsync(packet.GetMemory(), token).ConfigureAwait(false);
 
 			
-
-
 
 		}
 		#endregion

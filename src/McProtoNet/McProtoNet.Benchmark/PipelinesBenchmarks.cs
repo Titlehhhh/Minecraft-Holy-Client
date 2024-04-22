@@ -64,7 +64,7 @@ namespace McProtoNet.Benchmark
 			}
 			await mainStream.FlushAsync();
 
-			
+
 
 
 			pipe = new Pipe();
@@ -105,9 +105,8 @@ namespace McProtoNet.Benchmark
 
 			for (int i = 0; i < PacketsCount; i++)
 			{
-
-				using var packet = await native_reader.ReadNextPacketAsync();
-
+				var packet = await native_reader.ReadNextPacketAsync();
+				packet.Dispose();
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using DotNext.Buffers;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Linq;
@@ -8,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace McProtoNet.Core.Protocol.Pipelines
 {
+	
+
 	public sealed class MinecraftPacketPipeWriter
 	{
 		private readonly PipeWriter pipeWriter;
