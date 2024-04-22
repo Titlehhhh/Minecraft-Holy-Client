@@ -64,6 +64,8 @@ namespace McProtoNet.Benchmark
 			}
 			await mainStream.FlushAsync();
 
+			
+
 
 			pipe = new Pipe();
 		}
@@ -116,7 +118,7 @@ namespace McProtoNet.Benchmark
 		public async Task ReadWithPipelines()
 		{
 
-			PacketPipeReader pipeReader = new PacketPipeReader(pipe.Reader);
+			MinecraftPacketPipeReader pipeReader = new MinecraftPacketPipeReader(pipe.Reader);
 
 			var fill = FillPipe();
 			var read = ProcessPackets(pipeReader);
@@ -130,7 +132,7 @@ namespace McProtoNet.Benchmark
 			pipe.Reset();
 
 		}
-		private async Task ProcessPackets(PacketPipeReader reader)
+		private async Task ProcessPackets(MinecraftPacketPipeReader reader)
 		{
 			int count = 0;
 			await foreach (var packet in reader.ReadPacketsAsync().Decompress(CompressionThreshold))

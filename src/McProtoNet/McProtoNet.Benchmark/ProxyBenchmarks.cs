@@ -21,7 +21,7 @@ namespace McProtoNet.Benchmark
 					g += i;
 				}
 				finally
-				{
+				{					
 					pipeReader.Complete();
 				}
 			}

@@ -1,4 +1,5 @@
-﻿using McProtoNet.Core.IO;
+﻿using DotNext.Buffers;
+using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
 using System.Buffers;
 using System.IO;
@@ -11,6 +12,51 @@ namespace McProtoNet.Core
 {
 	public static class Extensions
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteVarInt(this IBufferWriter<byte> writer, int value)
+		{
+			if (value == 0)
+			{
+				writer.GetSpan(1)[0] = 0;
+				writer.Advance(1);
+				return;
+			}
+
+
+
+			uint unsigned = (uint)value;
+
+			int required=0;
+			int bytesWritten = 0;
+			for (var destination = writer.GetSpan(); unsigned != 0; destination = writer.GetSpan(required))
+			{
+				int offset = 0;
+				do
+				{
+
+					var temp = (byte)(unsigned & 127);
+					unsigned >>= 7;
+
+					if (unsigned != 0)
+						temp |= 128;
+
+					bytesWritten++;
+
+
+					if (bytesWritten > destination.Length)
+					{
+						writer.Advance(offset + 1);
+						required = 5 - bytesWritten;
+						break;
+					}
+
+					destination[offset++] = temp;
+				} while (unsigned != 0);
+			}
+
+		}
+		
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool TryReadVarInt(this ref SequenceReader<byte> reader, out int res, out int length)
 		{
@@ -74,7 +120,7 @@ namespace McProtoNet.Core
 
 				read = data[numRead];
 
-				
+
 				int value = read & 0b01111111;
 				result |= value << 7 * numRead;
 

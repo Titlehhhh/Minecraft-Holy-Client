@@ -18,14 +18,14 @@ using System.Diagnostics;
 
 namespace McProtoNet.Core.Protocol.Pipelines
 {
-	public sealed class PacketPipeReader
+	public sealed class MinecraftPacketPipeReader
 	{
 
 
 		private readonly PipeReader pipeReader;
 
 
-		public PacketPipeReader(PipeReader pipeReader)
+		public MinecraftPacketPipeReader(PipeReader pipeReader)
 		{
 			this.pipeReader = pipeReader;
 		}
