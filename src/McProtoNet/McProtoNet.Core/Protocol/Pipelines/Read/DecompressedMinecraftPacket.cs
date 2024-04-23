@@ -6,8 +6,10 @@ namespace McProtoNet.Core.Protocol.Pipelines
 {
 	public readonly struct DecompressedMinecraftPacket
 	{
-		public int Id { get; }
-		public ReadOnlySequence<byte> Data { get; }
+		public readonly int Id;
+		public readonly ReadOnlySequence<byte> Data;
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DecompressedMinecraftPacket(int id, ReadOnlySequence<byte> data)
 		{

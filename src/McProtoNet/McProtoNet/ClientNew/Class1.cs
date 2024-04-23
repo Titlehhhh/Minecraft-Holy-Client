@@ -2,19 +2,21 @@
 
 using DotNext.Buffers;
 using McProtoNet.Core;
+using McProtoNet.Core.Protocol.Pipelines;
 using McProtoNet.Core.Protocol;
 using McProtoNet.Experimental;
 using System.Buffers;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Channels;
 
 namespace McProtoNet.ClientNew
 {
 	public interface IPacket
 	{
-		internal void Write();
-		internal void Read();
+		internal void Write(IMinecraftPrimitiveWriter writer);
+		internal void Read(IMinecraftPrimitiveReader reader);
 	}
 
 	public interface IMinecraftClient : IDisposable
@@ -133,25 +135,55 @@ namespace McProtoNet.ClientNew
 		private protected Subject<IPacket> onPacket = new Subject<IPacket>();
 		public IObservable<IPacket> OnPacket => onPacket;
 
+		private readonly IDuplexPipe pipe;
+		private readonly int compressionThreshold;
+		private readonly MinecraftPacketPipeReader reader;
+		private readonly Channel<IPacket> packetQueue;
 
-		public MinecraftClient(Stream stream)
+		public MinecraftClient(IDuplexPipe pipe, int compressionThreshold)
 		{
-
+			this.pipe = pipe;
+			this.compressionThreshold = compressionThreshold;
+			this.reader = new MinecraftPacketPipeReader(pipe.Input);
+			
 		}
 
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			
 		}
 
 		public ValueTask SendPacketAsync(IPacket packet, CancellationToken token)
 		{
-			throw new NotImplementedException();
+
 		}
 
 		public Task StartAsync(CancellationToken cancellationToken = default)
 		{
-			throw new NotImplementedException();
+			var receive = StartReceive(cancellationToken);
+
 		}
+		
+
+		private Task StartReceive(CancellationToken cancellationToken)
+		{
+			try
+			{
+				await foreach(var packet in reader.ReadPacketsAsync(cancellationToken)
+													.Decompress(this.compressionThreshold))
+				{
+					await HandlePacket(packet);
+				}
+
+			} 
+			finally
+			{
+				
+			}		
+		}
+		private virtual ValueTask HandlePacket(DecompressedMinecraftPacket packet)
+		{
+
+		}	
 	}
 }

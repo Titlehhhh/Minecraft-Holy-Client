@@ -30,7 +30,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			this.pipeReader = pipeReader;
 		}
 
-		public async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPacketsAsync()
+		public async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPacketsAsync(cancellationToken cancellationToken)
 		{
 			try
 			{

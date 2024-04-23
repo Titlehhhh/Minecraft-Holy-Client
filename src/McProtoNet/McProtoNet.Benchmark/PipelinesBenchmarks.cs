@@ -29,6 +29,7 @@ namespace McProtoNet.Benchmark
 		private Pipe pipe;
 
 		private long TotalBytes;
+		private MemoryStream mainStream;
 
 		[GlobalSetup]
 		public async Task Setup()
@@ -36,7 +37,7 @@ namespace McProtoNet.Benchmark
 
 
 			using var mainStream = File.Open("data.bin", FileMode.Create, FileAccess.Write, FileShare.Write);
-
+			//mainStream = new();
 
 
 			var sender = new MinecraftPacketSender();
@@ -78,7 +79,7 @@ namespace McProtoNet.Benchmark
 		public async Task ReadStream1()
 		{
 			using var mainStream = File.OpenRead("data.bin");
-
+			//mainStream.Position = 0;
 			var native_reader = new MinecraftPacketReader();
 
 			native_reader.BaseStream = mainStream;
@@ -96,7 +97,7 @@ namespace McProtoNet.Benchmark
 		public async Task ReadStream2()
 		{
 			using var mainStream = File.OpenRead("data.bin");
-
+			//mainStream.Position = 0;
 
 			using var native_reader = new MinecraftPacketReaderNew();
 
@@ -144,7 +145,7 @@ namespace McProtoNet.Benchmark
 		private async Task FillPipe()
 		{
 			using var mainStream = File.OpenRead("data.bin");
-
+			//mainStream.Position = 0;
 			try
 			{
 				while (true)
@@ -166,7 +167,7 @@ namespace McProtoNet.Benchmark
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine("Fill exception " + ex);
+						throw;
 					}
 
 
