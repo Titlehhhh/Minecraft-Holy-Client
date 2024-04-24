@@ -25,35 +25,17 @@ internal partial class Program
 	public static async Task Main(string[] args)
 	{
 
-		string url = "https://github.com/TheSpeedX/PROXY-List/raw/master/http.txt";
+		byte[] output = new byte[1024];
 
-		HttpClient httpClient = new();
+		byte[] input = Encoding.UTF8.GetBytes("Asd sdfbsb bfhbfbsd fgsdb fshydfb sdbfyw gufbwegfuwgbh2487rhy 3ib48y 63vt h3 t73 t 37t c28r y-3yt813yv-t8y13]ty v9387yt8 3vy79y v124y 53y4 5vv135 y4 7v52531y58v13t5v918y75t385v1t5v713ty4587 t47v95t1 35t v714 vt43 87v51vt 57813y57 45v15yv7 35 8v135");
 
-		string result = await httpClient.GetStringAsync(url);
-
-		if (!Directory.Exists("proxies"))
-			Directory.CreateDirectory("proxies");
-		List<Task> tasks = new List<Task>();
-
-		foreach (var item in result.Split("\n"))
-		{
-			try
-			{
-				string[] line = item.Trim().Split(":");
-				string host = line[0];
-				int port = int.Parse(line[1]);
+		ZlibCompressor compressor = new ZlibCompressor(6);
 
 
-				HttpProxyClient httpProxy = new(host, port);
+		int length = compressor.GetBound(input.Length);
 
-				Task t = httpProxy.ConnectAsync("185.215.4.16", 5000, 443);
+		int written = compressor.Compress(input, output);
 
-				tasks.Add(t);
-			}
-			catch { }
-		}
-
-		await Task.WhenAll(tasks);
 
 	}
 
