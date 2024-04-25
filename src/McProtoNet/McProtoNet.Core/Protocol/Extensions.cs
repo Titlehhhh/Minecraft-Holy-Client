@@ -26,7 +26,7 @@ namespace McProtoNet.Core
 
 			uint unsigned = (uint)value;
 
-			int required=0;
+			int required = 0;
 			int bytesWritten = 0;
 			for (var destination = writer.GetSpan(); unsigned != 0; destination = writer.GetSpan(required))
 			{
@@ -34,7 +34,7 @@ namespace McProtoNet.Core
 				do
 				{
 
-					var temp = (byte)(unsigned & 127);
+					byte temp = (byte)(unsigned & 127);
 					unsigned >>= 7;
 
 					if (unsigned != 0)
@@ -55,7 +55,7 @@ namespace McProtoNet.Core
 			}
 
 		}
-		
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool TryReadVarInt(this ref SequenceReader<byte> reader, out int res, out int length)

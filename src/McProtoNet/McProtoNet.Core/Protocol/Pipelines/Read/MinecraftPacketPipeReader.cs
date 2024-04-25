@@ -17,6 +17,8 @@ using System.Diagnostics;
 using System.Threading;
 using LibDeflate;
 using DotNext.Buffers;
+using System.Reactive;
+using DotNext;
 
 
 namespace McProtoNet.Core.Protocol.Pipelines
@@ -37,34 +39,45 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 		public async IAsyncEnumerable<DecompressedMinecraftPacket> ReadPacketsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
-			try
+			cancellationToken.ThrowIfCancellationRequested();
+			while (!cancellationToken.IsCancellationRequested)
 			{
-				while (!cancellationToken.IsCancellationRequested)
+
+				ReadResult result = default;
+				try
 				{
-					ReadResult result = await pipeReader.ReadAsync(cancellationToken).ConfigureAwait(false);
-					ReadOnlySequence<byte> buffer = result.Buffer;
-					//SequencePosition position = buffer.Start;
-					while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
-					{
-						yield return Decompress(packet);
-					}
+					result = await pipeReader.ReadAsync(cancellationToken).ConfigureAwait(false);
+				}
+				catch (OperationCanceledException)
+				{
 
-					pipeReader.AdvanceTo(buffer.Start, buffer.End);
+				}
+				catch (Exception ex)
+				{
+					await pipeReader.CompleteAsync(ex);
+					throw;
+				}
+				if (result.IsCompleted)
+				{
+					break;
+				}
+				if (result.IsCanceled)
+				{
+					break;
+				}
 
-					if (result.IsCompleted)
-					{
-						break;
-					}
-					if (result.IsCanceled)
-					{
-						break;
-					}
+				ReadOnlySequence<byte> buffer = result.Buffer;
+
+				while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
+				{
+					yield return Decompress(packet);
 				}
 			}
-			finally
-			{
-				await pipeReader.CompleteAsync().ConfigureAwait(false);
-			}
+
+
+			await pipeReader.CompleteAsync().ConfigureAwait(false);
+			yield break;
+
 		}
 
 
@@ -104,7 +117,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			return true;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private DecompressedMinecraftPacket Decompress(ReadOnlySequence<byte> data)
+		private DecompressedMinecraftPacket Decompress(in ReadOnlySequence<byte> data)
 		{
 			byte[]? rented = null;
 			try

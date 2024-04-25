@@ -18,6 +18,7 @@ using System.Diagnostics;
 
 namespace McProtoNet.Tests
 {
+
 	[TestClass]
 	public class ExperimentalTest
 	{

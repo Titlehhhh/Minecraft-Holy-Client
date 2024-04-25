@@ -7,6 +7,7 @@ using System.Threading.Channels;
 using System.IO.Pipelines;
 using DotNext;
 using LibDeflate;
+using DotNext.Threading;
 
 namespace McProtoNet.ClientNew
 {
@@ -34,7 +35,7 @@ namespace McProtoNet.ClientNew
 		private readonly MinecraftPacketPipeReader packetReader;
 		private readonly MinecraftPacketPipeWriter packetWriter;
 
-
+		private readonly IDuplexPipe duplexPipe;
 
 		public MinecraftClient(MinecraftClientContext context)
 		{
@@ -42,6 +43,8 @@ namespace McProtoNet.ClientNew
 			ArgumentNullException.ThrowIfNull(context.Pipe, nameof(context.Pipe));
 			ArgumentOutOfRangeException.ThrowIfNegative(context.ProtocolVersion, nameof(context.ProtocolVersion));
 
+
+			this.duplexPipe = context.Pipe;
 			this.compressionThreshold = context.CompressionThreshold;
 			this.protocolVersion = context.ProtocolVersion;
 
@@ -52,25 +55,57 @@ namespace McProtoNet.ClientNew
 			packetWriter.CompressionThreshold = compressionThreshold;
 		}
 
-
-		internal ValueTask SendPacket(ReadOnlyMemory<byte> data)
+		private AsyncLock sendLock = new AsyncLock();
+		private CancellationTokenSource internalCts;
+		internal async ValueTask SendPacket(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
 		{
 
+			var holder = await sendLock.AcquireAsync(cancellationToken);
+			try
+			{
+				await packetWriter.SendPacketAsync(data, cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				await duplexPipe.Input.CompleteAsync(ex).ConfigureAwait(false);
+				//duplexPipe.Input.CancelPendingRead();
+				throw;
+			}
+			finally
+			{
+				holder.Dispose();
+			}
 		}
 
 		public Task Start(CancellationToken cancellationToken)
 		{
-			Task receive = StartReceive(cancellationToken);
-
-			return Task.WhenAll(receive);
+			return StartReceive(cancellationToken);
 		}
 
 		private async Task StartReceive(CancellationToken cancellationToken)
 		{
-			await foreach (var packet in packetReader.ReadPacketsAsync(cancellationToken))
+			try
 			{
-				OnPacket?.Invoke(packet);
+				await foreach (var packet in packetReader.ReadPacketsAsync(cancellationToken))
+				{
+					OnPacket?.Invoke(packet);
+				}
 			}
+			catch (Exception ex)
+			{
+				await duplexPipe.Output.CompleteAsync(ex).ConfigureAwait(false);
+				throw;
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+
+			sendLock.Dispose();
+
+
+			OnDisposed?.Invoke();
+			base.Dispose(disposing);
 		}
 	}
 }
