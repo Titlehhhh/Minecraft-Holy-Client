@@ -21,32 +21,11 @@ using System.Text;
 
 internal partial class Program
 {
-
+	
 	public static async Task Main(string[] args)
 	{
-		CancellationTokenSource cts = new CancellationTokenSource();
-		cts.Cancel();
-
-		Task cancel = Task.FromCanceled(cts.Token);
 		
-		try
-		{
-			await cancel;
-		}
-		catch(Exception ex)
-		{
-			Console.WriteLine(ex);
-		}
-
-
 		
-
 	}
-
-
-
-
-
-
-
+	
 }

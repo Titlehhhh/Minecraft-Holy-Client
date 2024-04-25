@@ -1,6 +1,7 @@
 ﻿using DotNext.Buffers;
 using DotNext.IO.Pipelines;
 using LibDeflate;
+using Nerdbank.Streams;
 using Org.BouncyCastle.Bcpg;
 using System;
 using System.Buffers;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,10 +34,12 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 		public async ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			try
 			{
 				if (CompressionThreshold < 0)
 				{
+
 					pipeWriter.WriteVarInt(data.Length);
 					pipeWriter.Write(data.Span);
 					FlushResult result = await pipeWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -86,17 +90,22 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 						FlushResult result = await pipeWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-						if (result.IsCompleted || result.IsCanceled)
+						if (result.IsCompleted)
 						{
-							await pipeWriter.CompleteAsync().ConfigureAwait(false);
-							return;
+
 						}
+
+						if (result.IsCanceled)
+						{
+
+						}
+						
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				await pipeWriter.CompleteAsync(ex).ConfigureAwait(false);
+				await pipeWriter.CompleteAsync().ConfigureAwait(false);
 				throw;
 			}
 			finally

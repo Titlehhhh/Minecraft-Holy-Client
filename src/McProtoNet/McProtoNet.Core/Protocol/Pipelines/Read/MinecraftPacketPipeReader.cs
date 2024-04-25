@@ -19,6 +19,7 @@ using LibDeflate;
 using DotNext.Buffers;
 using System.Reactive;
 using DotNext;
+using System.Net.Sockets;
 
 
 namespace McProtoNet.Core.Protocol.Pipelines
@@ -50,27 +51,28 @@ namespace McProtoNet.Core.Protocol.Pipelines
 				}
 				catch (OperationCanceledException)
 				{
-
+					break;
 				}
 				catch (Exception ex)
 				{
-					await pipeReader.CompleteAsync(ex);
-					throw;
+					break;
 				}
 				if (result.IsCompleted)
 				{
 					break;
 				}
-				if (result.IsCanceled)
-				{
-					break;
-				}
+				
 
 				ReadOnlySequence<byte> buffer = result.Buffer;
 
 				while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
 				{
 					yield return Decompress(packet);
+				}
+
+				if (result.IsCanceled)
+				{
+					break;
 				}
 			}
 

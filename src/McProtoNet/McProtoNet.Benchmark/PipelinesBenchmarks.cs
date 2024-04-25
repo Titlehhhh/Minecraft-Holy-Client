@@ -112,14 +112,16 @@ namespace McProtoNet.Benchmark
 		}
 
 
-
+		private readonly ZlibDecompressor decompressor = new();
 
 		[Benchmark]
 		public async Task ReadWithPipelines()
 		{
 
-			MinecraftPacketPipeReader pipeReader = new MinecraftPacketPipeReader(pipe.Reader);
+			MinecraftPacketPipeReader pipeReader = new MinecraftPacketPipeReader(pipe.Reader, decompressor);
 
+
+			pipeReader.CompressionThreshold = this.CompressionThreshold;
 			var fill = FillPipe();
 			var read = ProcessPackets(pipeReader);
 
@@ -135,7 +137,7 @@ namespace McProtoNet.Benchmark
 		private async Task ProcessPackets(MinecraftPacketPipeReader reader)
 		{
 			int count = 0;
-			await foreach (var packet in reader.ReadPacketsAsync().Decompress(CompressionThreshold))
+			await foreach (var packet in reader.ReadPacketsAsync())
 			{
 				count++;
 			}

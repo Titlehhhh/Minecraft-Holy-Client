@@ -4,7 +4,8 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<LangVersion>12</LangVersion>
-		<IsPackable>false</IsPackable>
+		<IsPackable>false</IsPackable>		
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
