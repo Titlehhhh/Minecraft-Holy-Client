@@ -24,7 +24,7 @@ using System.Net.Sockets;
 
 namespace McProtoNet.Core.Protocol.Pipelines
 {
-	public sealed class MinecraftPacketPipeReader
+	internal sealed class MinecraftPacketPipeReader
 	{
 
 
@@ -55,29 +55,35 @@ namespace McProtoNet.Core.Protocol.Pipelines
 				}
 				catch (Exception ex)
 				{
-					break;
+					throw;
 				}
 				if (result.IsCompleted)
 				{
 					break;
 				}
-				
-
-				ReadOnlySequence<byte> buffer = result.Buffer;
-
-				while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
-				{
-					yield return Decompress(packet);
-				}
-
 				if (result.IsCanceled)
 				{
 					break;
 				}
+
+
+				ReadOnlySequence<byte> buffer = result.Buffer;
+				try
+				{
+					while (TryReadPacket(ref buffer, out ReadOnlySequence<byte> packet))
+					{
+						yield return Decompress(packet);
+					}
+				}
+				finally
+				{
+					pipeReader.AdvanceTo(buffer.Start, buffer.End);
+				}
+
+				
 			}
 
-
-			await pipeReader.CompleteAsync().ConfigureAwait(false);
+			
 			yield break;
 
 		}

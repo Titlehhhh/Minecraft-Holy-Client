@@ -10,7 +10,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 	public sealed class MinecraftProtocolPipeHandler : Disposable
 	{
 
-		public IObserver<DecompressedMinecraftPacket> OnPacket => onPacket;
+		public IObservable<DecompressedMinecraftPacket> OnPacket => onPacket;
 
 		private readonly IDuplexPipe duplexPipe;
 		private readonly MinecraftPacketPipeReader reader;
@@ -24,7 +24,19 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 
 		private readonly Subject<DecompressedMinecraftPacket> onPacket = new();
-		private readonly CancellationTokenSource cts = new();
+		private CancellationTokenSource cts = new();
+
+		private int compressionThreshold;
+		public int CompressionThreshold
+		{
+			get => compressionThreshold;
+			set
+			{
+				compressionThreshold = value;
+				reader.CompressionThreshold = value;
+				writer.CompressionThreshold = value;
+			}
+		}
 
 
 		public MinecraftProtocolPipeHandler(IDuplexPipe duplexPipe)
@@ -37,20 +49,52 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 		public async ValueTask SendPacketAsync(ReadOnlyMemory<byte> data)
 		{
+
+			if (state.Value != PipeHandlerState.Listening)
+			{
+				throw new InvalidOperationException("Invalid state");
+			}
+
+
 			var l = await asyncLock.AcquireAsync(cts.Token);
 
 			try
 			{
 				await writer.SendPacketAsync(data, cts.Token);
 			}
+			catch (OperationCanceledException)
+			{
+
+			}
+			catch (Exception ex)
+			{
+				await duplexPipe.Input.CompleteAsync(ex);
+			}
 			finally
 			{
 				l.Dispose();
 			}
 		}
-		public async Task StartListenAsync()
+
+		private Atomic<PipeHandlerState> state = new Atomic<PipeHandlerState>();
+
+		public PipeHandlerState State => state.Value;
+
+		private Task listen;
+
+		public Task StartListenAsync()
 		{
-			bool completed = false;
+			if (state.CompareAndSet(PipeHandlerState.None, PipeHandlerState.Listening))
+			{
+				cts = new CancellationTokenSource();
+				listen = DoStartListen();
+				return listen;
+			}
+			throw new InvalidOperationException("Invalid State");
+		}
+
+		private async Task DoStartListen()
+		{
 			try
 			{
 				await foreach (var packet in reader.ReadPacketsAsync(cts.Token))
@@ -60,21 +104,36 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			}
 			catch (Exception ex)
 			{
+				//isActive.Write(0);
+				duplexPipe.Output.CancelPendingFlush();
 				onPacket.OnError(ex);
 			}
 			finally
 			{
+				await duplexPipe.Output.CompleteAsync();
+
+				state.Write(PipeHandlerState.None);
+
 				onPacket.OnCompleted();
 			}
-
-
-			
-
 		}
 
-		public void Stop()
+
+
+		public Task Stop()
+		{
+			if (state.CompareAndSet(PipeHandlerState.Listening, PipeHandlerState.Stopping))
+			{
+				return DoStop();
+			}
+			return Task.CompletedTask;
+		}
+
+		private async Task DoStop()
 		{
 			cts.Cancel();
+			await listen;
+			cts.Dispose();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -87,5 +146,4 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			base.Dispose(disposing);
 		}
 	}
-
 }

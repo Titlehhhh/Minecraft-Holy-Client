@@ -2,6 +2,7 @@
 using McProtoNet.Core.Protocol.Pipelines;
 using McProtoNet.Experimental;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Nerdbank.Streams;
 using System;
 using System.Buffers;
 using System.IO.Pipelines;
@@ -37,62 +38,80 @@ namespace McProtoNet.Tests
 			});
 		}
 
-		[TestMethod]
+		[TestMethod("Не читать пакеты после отмены")]
 		public async Task WriterCompleteTest()
 		{
-			var _pool = new TestMemoryPool();
-			var	Pipe = new Pipe(
+			var pool = new TestMemoryPool();
+			var pipe1 = new Pipe(
 				new PipeOptions(
-					_pool,
-					pauseWriterThreshold: 65,
-					resumeWriterThreshold: 5,
+					pool,
 					readerScheduler: PipeScheduler.Inline,
 					writerScheduler: PipeScheduler.Inline,
 					useSynchronizationContext: false
 				));
 
+			var pipe2 = new Pipe(
+				new PipeOptions(
+					pool,
+					readerScheduler: PipeScheduler.Inline,
+					writerScheduler: PipeScheduler.Inline,
+					useSynchronizationContext: false
+				));
 
-			byte[] bytes = "Hello World"u8.ToArray();
-			PipeWriter output = Pipe.Writer;
-			output.Write(bytes);
-			await output.FlushAsync();
+			IDuplexPipe duplex = new DuplexPipe(pipe2.Reader, pipe1.Writer);
 
-			Func<Task> taskFunc = async () => {
-				await Task.Delay(1000);
 
-				ReadResult result = await Pipe.Reader.ReadAsync();
-				ReadOnlySequence<byte> buffer = result.Buffer;
-				Pipe.Reader.AdvanceTo(buffer.End);
+			MinecraftProtocolPipeHandler pipeHandler = new MinecraftProtocolPipeHandler(duplex, 0);
 
-				Assert.IsFalse(result.IsCompleted);
-				Assert.IsTrue(result.IsCanceled);
-				Assert.IsFalse(buffer.IsEmpty);
+			bool read = false;
 
-				output.Write(bytes);
-				await output.FlushAsync();
+			byte[] data = new byte[10];
+			Random.Shared.NextBytes(data.AsSpan(1));
 
-				result = await Pipe.Reader.ReadAsync();
-				buffer = result.Buffer;
 
-				Assert.AreEqual(11, buffer.Length);
-				Assert.IsTrue(buffer.IsSingleSegment);
-				Assert.IsFalse(result.IsCanceled);
-				var array = new byte[11];
-				buffer.First.Span.CopyTo(array);
-				Assert.AreEqual("Hello World", Encoding.ASCII.GetString(array));
-				Pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
-				Pipe.Reader.Complete();
-			};
+			using MinecraftPacketSenderNew sender = new MinecraftPacketSenderNew();
+			sender.SwitchCompression(0);
+			sender.BaseStream = pipe2.Writer.AsStream(true);
+			for (int i = 0; i < 2; i++)
+			{
+				await sender.SendPacketAsync(new PacketOut(0, 10, data, null));
+			}
 			
-			Task task = taskFunc();
+			
 
-			Pipe.Reader.CancelPendingRead();
+			Task task = Task.Run(async () =>
+			{
+				pipeHandler.OnPacket.Subscribe(p =>
+				{
+					pipe2.Writer.Complete();
+
+					Assert.IsFalse(read);
+
+					read = true;
+
+					CollectionAssert.AreEqual(data.AsSpan(1).ToArray(), p.Data.ToArray());
+				}, onError: (ex) =>
+				{
+					Assert.IsTrue(false, "OnPacket.OnError: " + ex.Message);
+				}, onCompleted: () =>
+				{
+
+				});
+
+				await pipeHandler.StartListenAsync();
+			});
+
+
 
 			await task;
 
-			Pipe.Writer.Complete();
+			Assert.IsTrue(read);
+
 
 		}
+
+
 	}
+
 }
