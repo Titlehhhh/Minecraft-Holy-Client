@@ -38,7 +38,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			this.decompressor = decompressor;
 		}
 
-		public async IAsyncEnumerable<DecompressedMinecraftPacket> ReadPacketsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+		public async IAsyncEnumerable<InputPacket> ReadPacketsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			while (!cancellationToken.IsCancellationRequested)
@@ -125,7 +125,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			return true;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private DecompressedMinecraftPacket Decompress(in ReadOnlySequence<byte> data)
+		private InputPacket Decompress(in ReadOnlySequence<byte> data)
 		{
 			byte[]? rented = null;
 			try
@@ -195,7 +195,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 					mainData = data.Slice(len);
 				}
 
-				return new DecompressedMinecraftPacket(id, mainData);
+				return new InputPacket(id, mainData);
 			}
 			finally
 			{

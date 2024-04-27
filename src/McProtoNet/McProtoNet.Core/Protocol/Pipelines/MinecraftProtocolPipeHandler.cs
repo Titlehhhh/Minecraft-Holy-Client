@@ -10,7 +10,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 	public sealed class MinecraftProtocolPipeHandler : Disposable
 	{
 
-		public IObservable<DecompressedMinecraftPacket> OnPacket => onPacket;
+		public IObservable<InputPacket> OnPacket => onPacket;
 
 		private readonly IDuplexPipe duplexPipe;
 		private readonly MinecraftPacketPipeReader reader;
@@ -23,7 +23,7 @@ namespace McProtoNet.Core.Protocol.Pipelines
 
 
 
-		private readonly Subject<DecompressedMinecraftPacket> onPacket = new();
+		private readonly Subject<InputPacket> onPacket = new();
 		private CancellationTokenSource cts = new();
 
 		private int compressionThreshold;

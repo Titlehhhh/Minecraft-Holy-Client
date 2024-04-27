@@ -12,7 +12,7 @@ using DotNext.Threading;
 namespace McProtoNet.ClientNew
 {
 
-	internal delegate void MinecraftPacketHandler(DecompressedMinecraftPacket packet);
+	internal delegate void MinecraftPacketHandler(InputPacket packet);
 	public sealed class ClientContext
 	{
 		public ZlibCompressor Compressor { get; }

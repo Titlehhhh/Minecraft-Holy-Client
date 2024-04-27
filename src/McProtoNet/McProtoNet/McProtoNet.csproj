@@ -23,4 +23,8 @@
 		<PackageReference Include="MinVer" Version="5.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Protocol\" />
+	</ItemGroup>
+
 </Project>
