@@ -17,5 +17,4 @@ namespace McProtoNet.Core.Protocol.Pipelines
 			Data = data;
 		}
 	}
-
 }

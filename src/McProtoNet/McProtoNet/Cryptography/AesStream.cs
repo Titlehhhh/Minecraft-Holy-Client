@@ -3,7 +3,7 @@ using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
 
-namespace McProtoNet.Core.Protocol
+namespace McProtoNet.Cryptography
 {
 	public sealed class AesStream : Stream, IDisposable
 	{
@@ -44,10 +44,10 @@ namespace McProtoNet.Core.Protocol
 
 
 
-		
+
 		private IBufferedCipher EncryptCipher { get; set; }
 		private IBufferedCipher DecryptCipher { get; set; }
-		
+
 		/// <summary>
 		/// Включает AES шифрование
 		/// </summary>
@@ -176,7 +176,7 @@ namespace McProtoNet.Core.Protocol
 			_disposed = true;
 		}
 
-		
+
 
 	}
 

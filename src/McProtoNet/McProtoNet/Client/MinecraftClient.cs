@@ -1,15 +1,10 @@
-﻿
-
-using DotNext.Buffers;
-using McProtoNet.Core.Protocol.Pipelines;
-using System.Reactive.Subjects;
-using System.Threading.Channels;
-using System.IO.Pipelines;
-using DotNext;
-using LibDeflate;
+﻿using DotNext;
 using DotNext.Threading;
+using LibDeflate;
+using McProtoNet.Protocol;
+using System.IO.Pipelines;
 
-namespace McProtoNet.ClientNew
+namespace McProtoNet.Client
 {
 
 	internal delegate void MinecraftPacketHandler(InputPacket packet);
@@ -24,7 +19,7 @@ namespace McProtoNet.ClientNew
 		public int ProtocolVersion { get; set; }
 	}
 
-	
+
 
 	public sealed partial class Client : Disposable
 	{
@@ -35,7 +30,7 @@ namespace McProtoNet.ClientNew
 
 		private readonly int compressionThreshold;
 		private readonly int protocolVersion;
-		
+
 		private readonly IDuplexPipe duplexPipe;
 
 		public Client(ClientContext context)
@@ -49,7 +44,7 @@ namespace McProtoNet.ClientNew
 			this.compressionThreshold = context.CompressionThreshold;
 			this.protocolVersion = context.ProtocolVersion;
 
-			
+
 		}
 
 		private AsyncLock sendLock = new AsyncLock();
@@ -68,9 +63,9 @@ namespace McProtoNet.ClientNew
 		{
 			try
 			{
-				await foreach (var packet in packetReader.ReadPacketsAsync(cancellationToken))
+				//await foreach (var packet in packetReader.ReadPacketsAsync(cancellationToken))
 				{
-					OnPacket?.Invoke(packet);
+					//OnPacket?.Invoke(packet);
 				}
 			}
 			catch (Exception ex)

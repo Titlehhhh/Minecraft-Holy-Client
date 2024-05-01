@@ -9,11 +9,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\McProtoNet\McProtoNet.Core\McProtoNet.Core.csproj" />
-    <ProjectReference Include="..\..\McProtoNet\McProtoNet.Experimental\McProtoNet.Experimental.csproj" />
-  </ItemGroup>
 	
 
 </Project>

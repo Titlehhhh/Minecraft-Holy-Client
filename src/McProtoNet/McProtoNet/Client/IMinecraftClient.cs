@@ -1,7 +1,7 @@
-﻿namespace McProtoNet.ClientNew
+﻿namespace McProtoNet.Client
 {
 	public interface IMinecraftClient
 	{
-		
+
 	}
 }

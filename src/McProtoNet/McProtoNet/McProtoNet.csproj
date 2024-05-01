@@ -9,22 +9,21 @@
 		<RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
 		<PackageTags>minecraft bot reactive performance</PackageTags>
 	</PropertyGroup>
-	
-
-
-	<ItemGroup>
-		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
-		<ProjectReference Include="..\McProtoNet.Experimental\McProtoNet.Experimental.csproj" />
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />		
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
+		<PackageReference Include="DotNext.IO" Version="5.4.0" />
+		<PackageReference Include="DotNext.Threading" Version="5.3.0" />
 		<PackageReference Include="MinVer" Version="5.0.0" />
+		<PackageReference Include="DotNext" Version="5.3.1" />
+		<PackageReference Include="LibDeflate.NET" Version="1.19.0" />
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
+		<PackageReference Include="System.Reactive" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Protocol\" />
+	  <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
 	</ItemGroup>
 
 </Project>

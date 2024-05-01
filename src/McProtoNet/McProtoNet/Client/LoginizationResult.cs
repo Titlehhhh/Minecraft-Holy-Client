@@ -1,4 +1,4 @@
-﻿namespace McProtoNet.ClientNew
+﻿namespace McProtoNet.Client
 {
 	public readonly struct LoginizationResult
 	{

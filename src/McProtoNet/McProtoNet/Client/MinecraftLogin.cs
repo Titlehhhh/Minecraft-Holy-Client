@@ -1,14 +1,13 @@
 ﻿
 
 using DotNext.Buffers;
-using McProtoNet.Core;
-using McProtoNet.Core.Protocol;
-using McProtoNet.Experimental;
+using McProtoNet.Cryptography;
+using McProtoNet.Protocol;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace McProtoNet.ClientNew
+namespace McProtoNet.Client
 {
 	public sealed class MinecraftLogin : IMinecraftLogin
 	{
@@ -25,8 +24,8 @@ namespace McProtoNet.ClientNew
 		{
 			AesStream result = new AesStream(source);
 
-			using MinecraftPacketSenderNew sender = new MinecraftPacketSenderNew();
-			using MinecraftPacketReaderNew reader = new MinecraftPacketReaderNew();
+			using MinecraftPacketSender sender = new MinecraftPacketSender();
+			using MinecraftPacketReader reader = new MinecraftPacketReader();
 
 			using var handshake = CreateHandshake(options.Host, options.Port);
 			await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
@@ -41,18 +40,18 @@ namespace McProtoNet.ClientNew
 			return new LoginizationResult(result, 0);
 		}
 
-		private static Experimental.PacketOut CreateLoginStart(string name)
+		private static OutputPacket CreateLoginStart(string name)
 		{
 			if (name.Length > 16)
 			{
 				throw new ArgumentOutOfRangeException();
 			}
-
-			return new Experimental.PacketOut(0, 0, null, ArrayPool<byte>.Shared);
+			throw null;
+			//return new OutputPacket(0, 0, null, ArrayPool<byte>.Shared);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static Experimental.PacketOut CreateHandshake(string host, ushort port)
+		private static OutputPacket CreateHandshake(string host, ushort port)
 		{
 			if (host.Length > 255)
 			{
@@ -66,8 +65,8 @@ namespace McProtoNet.ClientNew
 			scoped BufferWriterSlim<byte> writer = new BufferWriterSlim<byte>(buffer);
 			// WriteProtocolVersion Todo
 			writer.WriteBigEndian(port);
-
-			return new Experimental.PacketOut(0, writer.WrittenCount, buffer, ArrayPool<byte>.Shared);
+			throw null;
+			//return new OutputPacket(0, writer.WrittenCount, buffer, ArrayPool<byte>.Shared);
 		}
 	}
 }

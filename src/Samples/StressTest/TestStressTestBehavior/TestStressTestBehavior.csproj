@@ -28,10 +28,6 @@
 			<Private>false</Private>
 			<ExcludeAssets>runtime</ExcludeAssets>
 		</ProjectReference>
-		<ProjectReference Include="..\..\..\McProtoNet\McProtoNet.Core\McProtoNet.Core.csproj">
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
-		</ProjectReference>
 		<ProjectReference Include="..\..\..\McProtoNet\McProtoNet.NBT\McProtoNet.NBT.csproj">
 			<Private>false</Private>
 			<ExcludeAssets>runtime</ExcludeAssets>
