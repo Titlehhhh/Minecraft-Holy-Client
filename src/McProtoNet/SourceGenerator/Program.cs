@@ -9,14 +9,23 @@ public sealed class ProtocolGenNode
 	public Protocol Protocol { get; set; }
 }
 
-internal class Program
+public class Program
 {
+	public static Dictionary<string, string> MapWriteMethods = new Dictionary<string, string>()
+	{
+		{"","" }
+	};
+
+
+	public static string Root = "C:\\Users\\Title\\source\\repos\\Minecraft-Holy-Client\\src\\McProtoNet\\McProtoNet.Protocol";
+
+	public static string dataPath = @"C:\Users\Title\source\repos\Minecraft-Holy-Client\src\McProtoNet\SourceGenerator\minecraft-data-master\minecraft-data-master\data\";
+
 	private static async Task Main(string[] args)
 	{
 
 
 
-		string dataPath = @"C:\Users\Title\source\repos\Minecraft-Holy-Client\src\McProtoNet\SourceGenerator\minecraft-data-master\minecraft-data-master\data\";
 
 		var dataPathsJson = Path.Combine(dataPath, "dataPaths.json");
 
@@ -64,17 +73,21 @@ internal class Program
 
 		var ver1_16 = chain.First(x => x.Version.Version == 754);
 
-		CheckPrimitives(ver1_16.Protocol);
+		GeneratePackets(ver1_16.Protocol);
 
 	}
 
-	private static void CheckPrimitives(Protocol protocol)
+	private static void GeneratePackets(Protocol protocol)
 	{
-		var serverPackets = (protocol.Namespaces["play"] as Namespace).Types["toClient"] as Namespace;
-		var clientPackets = (protocol.Namespaces["play"] as Namespace).Types["toServer"] as Namespace;
+		foreach ((string nsName, Namespace side) in protocol.Namespaces)
+		{
+			var serverPackets = side.Types["toClient"] as Namespace;
+			var clientPackets = side.Types["toServer"] as Namespace;
 
-		WritePrimitives(clientPackets.Types,"ClientPackets");
-		WritePrimitives(serverPackets.Types, "ServerPackets");
+
+		}
+
+		
 	}
 
 	private static void WritePrimitives(Dictionary<string, ProtodefType> types, string header)
@@ -110,13 +123,13 @@ internal class Program
 			sw.WriteLine();
 
 			sw.WriteLine("Примитивные");
-			foreach(var item in primitive)
+			foreach (var item in primitive)
 			{
 				sw.WriteLine(item);
 			}
 			sw.WriteLine();
 			sw.WriteLine("Сложные");
-			foreach(var item in other)
+			foreach (var item in other)
 			{
 				sw.WriteLine(item);
 			}

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace McProtoNet.Client
 {
-	public sealed class MinecraftLogin : IMinecraftLogin
+	public sealed class MinecraftLogin 
 	{
 		private readonly static byte[] VarIntLoginIntent;
 		static MinecraftLogin()

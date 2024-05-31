@@ -7,7 +7,7 @@ using System.Reactive.Subjects;
 
 namespace McProtoNet.Protocol
 {
-	public sealed class MinecraftProtocolPipeHandler : Disposable
+	public sealed class MinecraftDuplexConnection : Disposable
 	{
 
 		public IObservable<InputPacket> OnPacket => onPacket;
@@ -39,7 +39,7 @@ namespace McProtoNet.Protocol
 		}
 
 
-		public MinecraftProtocolPipeHandler(IDuplexPipe duplexPipe)
+		public MinecraftDuplexConnection(IDuplexPipe duplexPipe)
 		{
 			this.duplexPipe = duplexPipe;
 
