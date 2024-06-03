@@ -1,7 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using SourceGenerator.ProtoDefTypes.Attributes;
+using System.Text.Json.Serialization;
 
 namespace SourceGenerator.ProtoDefTypes
 {
+	
 	public sealed class ProtodefPrefixedString : ProtodefType
 	{
 		[JsonPropertyName("countType")]
@@ -14,7 +16,10 @@ namespace SourceGenerator.ProtoDefTypes
 		{
 			CountType = countType;
 		}
-
+		public override string? GetNetType()
+		{
+			return "string";
+		}
 	}
 
 

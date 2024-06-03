@@ -21,6 +21,8 @@ namespace SourceGenerator.ProtoDefTypes
 				}
 			}
 		}
+
+		public virtual string? GetNetType() => null;
 	}
 
 

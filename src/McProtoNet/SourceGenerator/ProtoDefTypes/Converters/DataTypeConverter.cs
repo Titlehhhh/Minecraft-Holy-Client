@@ -5,6 +5,8 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 {
 	public sealed class DataTypeConverter : JsonConverter<ProtodefType>
 	{
+
+
 		public override ProtodefType? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			if (reader.TokenType == JsonTokenType.String)
@@ -105,26 +107,46 @@ namespace SourceGenerator.ProtoDefTypes.Converters
 
 		private ProtodefNumericType? GetNumber(string name)
 		{
+			const string i8 = "i8";
+			const string u8 = "u8";
+			const string i16 = "i16";
+			const string u16 = "u16";
+			const string li16 = "li16";
+			const string lu16 = "lu16";
+			const string i32 = "i32";
+			const string u32 = "u32";
+			const string li32 = "li32";
+			const string lu32 = "lu32";
+			const string i64 = "i64";
+			const string u64 = "u64";
+			const string li64 = "li64";
+			const string lu64 = "lu64";
+			const string f32 = "f32";
+			const string lf32 = "lf32";
+			const string f64 = "f64";
+			const string lf64 = "lf64";
+
+
 			return name switch
 			{
-				"i8" => new ProtodefNumericType("sbyte", true, ByteOrder.BigEndian),
-				"u8" => new ProtodefNumericType("byte", false, ByteOrder.BigEndian),
-				"i16" => new ProtodefNumericType("short", true, ByteOrder.BigEndian),
-				"u16" => new ProtodefNumericType("ushort", false, ByteOrder.BigEndian),
-				"li16" => new ProtodefNumericType("short", true, ByteOrder.LittleEndian),
-				"lu16" => new ProtodefNumericType("ushort", false, ByteOrder.LittleEndian),
-				"i32" => new ProtodefNumericType("int", true, ByteOrder.BigEndian),
-				"u32" => new ProtodefNumericType("unit", false, ByteOrder.BigEndian),
-				"li32" => new ProtodefNumericType("int", true, ByteOrder.LittleEndian),
-				"lu32" => new ProtodefNumericType("uint", false, ByteOrder.LittleEndian),
-				"i64" => new ProtodefNumericType("long", true, ByteOrder.BigEndian),
-				"u64" => new ProtodefNumericType("ulong", false, ByteOrder.BigEndian),
-				"li64" => new ProtodefNumericType("long", true, ByteOrder.LittleEndian),
-				"lu64" => new ProtodefNumericType("ulong", false, ByteOrder.LittleEndian),
-				"f32" => new ProtodefNumericType("float", true, ByteOrder.BigEndian),
-				"lf32" => new ProtodefNumericType("float", true, ByteOrder.LittleEndian),
-				"f64" => new ProtodefNumericType("double", true, ByteOrder.BigEndian),
-				"lf64" => new ProtodefNumericType("double", true, ByteOrder.LittleEndian),
+				i8 => new ProtodefNumericType("sbyte", true, ByteOrder.BigEndian),
+				u8 => new ProtodefNumericType("byte", false, ByteOrder.BigEndian),
+				i16 => new ProtodefNumericType("short", true, ByteOrder.BigEndian),
+				u16 => new ProtodefNumericType("ushort", false, ByteOrder.BigEndian),
+				li16 => new ProtodefNumericType("short", true, ByteOrder.LittleEndian),
+				lu16 => new ProtodefNumericType("ushort", false, ByteOrder.LittleEndian),
+				i32 => new ProtodefNumericType("int", true, ByteOrder.BigEndian),
+				u32 => new ProtodefNumericType("unit", false, ByteOrder.BigEndian),
+				li32 => new ProtodefNumericType("int", true, ByteOrder.LittleEndian),
+				lu32 => new ProtodefNumericType("uint", false, ByteOrder.LittleEndian),
+				i64=> new ProtodefNumericType("long", true, ByteOrder.BigEndian),
+				u64 => new ProtodefNumericType("ulong", false, ByteOrder.BigEndian),
+				li64 => new ProtodefNumericType("long", true, ByteOrder.LittleEndian),
+				lu64 => new ProtodefNumericType("ulong", false, ByteOrder.LittleEndian),
+				f32 => new ProtodefNumericType("float", true, ByteOrder.BigEndian),
+				lf32 => new ProtodefNumericType("float", true, ByteOrder.LittleEndian),
+				f64 => new ProtodefNumericType("double", true, ByteOrder.BigEndian),
+				lf64 => new ProtodefNumericType("double", true, ByteOrder.LittleEndian),
 				_ => null
 			};
 		}

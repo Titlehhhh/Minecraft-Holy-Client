@@ -1,4 +1,5 @@
-﻿using SourceGenerator.ProtoDefTypes;
+﻿using SourceGenerator.MCDataModels;
+using SourceGenerator.ProtoDefTypes;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -73,21 +74,24 @@ public class Program
 
 		var ver1_16 = chain.First(x => x.Version.Version == 754);
 
-		GeneratePackets(ver1_16.Protocol);
+		await GeneratePackets(ver1_16.Protocol);
 
 	}
 
-	private static void GeneratePackets(Protocol protocol)
+	private static async Task GeneratePackets(Protocol protocol)
 	{
-		foreach ((string nsName, Namespace side) in protocol.Namespaces)
+
+		ProtocolSourceGenerator generator = new()
 		{
-			var serverPackets = side.Types["toClient"] as Namespace;
-			var clientPackets = side.Types["toServer"] as Namespace;
+			Protocol = protocol,
+			Version = "754"
+		};
 
-
+		using (var fs = File.OpenWrite(@"C:\Users\Title\OneDrive\Рабочий стол\Test.cs"))
+		{
+			await generator.GenerateTo(fs);
 		}
 
-		
 	}
 
 	private static void WritePrimitives(Dictionary<string, ProtodefType> types, string header)
@@ -137,11 +141,6 @@ public class Program
 
 
 	}
-
-
-
-
-
 	private static async Task GenerateFileNames(Protocol protocol)
 	{
 		var serverPackets = (protocol.Namespaces["play"] as Namespace).Types["toClient"] as Namespace;
@@ -173,7 +172,6 @@ public class Program
 
 
 	}
-
 	private static Dictionary<string, string> GenerateNames(Dictionary<string, ProtodefType> types)
 	{
 		Dictionary<string, string> names = new();
@@ -189,7 +187,6 @@ public class Program
 
 
 	}
-
 	private static void FillNames(IPathTypeEnumerable enumerable, string parent, Dictionary<string, string> names)
 	{
 

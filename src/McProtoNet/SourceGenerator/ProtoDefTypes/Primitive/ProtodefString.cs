@@ -6,6 +6,11 @@
 		{
 			return "string";
 		}
+
+		public override string? GetNetType()
+		{
+			return "string";
+		}
 	}
 
 

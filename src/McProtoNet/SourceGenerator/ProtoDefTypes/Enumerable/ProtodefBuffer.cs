@@ -13,6 +13,11 @@ namespace SourceGenerator.ProtoDefTypes
 		public object? Count { get; set; }
 		[JsonPropertyName("rest")]
 		public bool? Rest { get; set; }
+
+		public override string? GetNetType()
+		{
+			return "byte[]";
+		}
 	}
 
 

@@ -18,6 +18,11 @@
 		{
 			return Name;
 		}
+
+		public override string? GetNetType()
+		{
+			return Name;
+		}
 	}
 
 

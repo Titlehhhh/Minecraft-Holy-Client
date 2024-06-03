@@ -6,6 +6,11 @@
 		{
 			return "varint";
 		}
+
+		public override string? GetNetType()
+		{
+			return "int";
+		}
 	}
 
 
