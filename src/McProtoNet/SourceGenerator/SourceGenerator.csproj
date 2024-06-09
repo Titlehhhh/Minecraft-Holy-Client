@@ -12,6 +12,10 @@
     <Compile Remove="PacketTemplate.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Humanizer" Version="3.0.0-beta.54" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <None Update="protocol.json">

@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\CoreLibs\HolyClient.Abstractions\HolyClient.Abstractions.csproj" />
-    <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
-  </ItemGroup>
-
 </Project>

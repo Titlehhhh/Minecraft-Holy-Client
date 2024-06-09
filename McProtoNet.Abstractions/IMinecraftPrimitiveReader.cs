@@ -1,6 +1,6 @@
 ﻿using McProtoNet.NBT;
 
-namespace McProtoNet
+namespace McProtoNet.Serialization
 {
 
 	public interface IMinecraftPrimitiveReader

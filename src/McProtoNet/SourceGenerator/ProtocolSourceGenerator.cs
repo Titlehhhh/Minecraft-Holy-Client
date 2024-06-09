@@ -1,25 +1,23 @@
 ﻿using SourceGenerator.ProtoDefTypes;
+using System.Diagnostics;
 using System.Text;
+using Humanizer;
 
 public sealed class ProtocolSourceGenerator
 {
 	public Protocol Protocol { get; set; }
 	public string Version { get; set; }
 
-	public async Task GenerateTo(Stream stream)
+
+
+
+
+
+	public Dictionary<string, string> Generate()
 	{
-		using (StreamWriter streamWriter = new StreamWriter(stream))
-		{
-			string content = GenerateCore();
-			await streamWriter.WriteAsync(content);
-		}
-	}
+		Dictionary<string, string> result = new();
 
 
-
-
-	private string GenerateCore()
-	{
 		foreach ((string nsName, Namespace side) in Protocol.Namespaces)
 		{
 			var serverPackets = side.Types["toClient"] as Namespace;
@@ -27,7 +25,9 @@ public sealed class ProtocolSourceGenerator
 
 			if (nsName == "play")
 			{
-				var methods = GenerateSendMethods(clientPackets);
+				var methods = GenerateSendMethods(clientPackets.Types);
+
+				var events = GenerateEvents(serverPackets);
 
 				StringBuilder builder = new StringBuilder();
 
@@ -38,9 +38,16 @@ public sealed class ProtocolSourceGenerator
 				builder.AppendLine($"public partial sealed class Protocol_{Version}");
 				builder.AppendLine("{");
 
-				foreach (var method in methods)
+				foreach (var receiveProp in events.Properties)
 				{
-					string formatted = string.Join("", method.Select(x => "\t" + x + Environment.NewLine));
+					string formatted = "\t" + receiveProp;
+					builder.AppendLine(formatted);
+					builder.AppendLine();
+				}
+
+				foreach (var sendMethod in methods)
+				{
+					string formatted = string.Join("", sendMethod.Select(x => "\t" + x + Environment.NewLine));
 
 					builder.AppendLine(formatted);
 					builder.AppendLine();
@@ -48,17 +55,25 @@ public sealed class ProtocolSourceGenerator
 
 				builder.AppendLine("}");
 
-				return builder.ToString();
+				builder.AppendLine();
+
+				foreach (var eventClass in events.Classes)
+				{
+					builder.AppendLine(eventClass);
+					builder.AppendLine();
+				}
 			}
 		}
 
-		return "WTF";
 	}
 	private static int AnonId = 0;
-	private List<string[]> GenerateSendMethods(IEnumerable<KeyValuePair<string, ProtodefType>> types)
+	private List<string[]> GenerateSendMethods(Dictionary<string, ProtodefType> types)
 	{
 
 		List<string[]> result = new();
+
+		ProtodefType IdMap = types["packet"];
+
 
 		foreach ((string name, ProtodefType type) in types)
 		{
@@ -68,47 +83,6 @@ public sealed class ProtocolSourceGenerator
 				bool isSkip = false;
 				ProtodefContainer fields = type as ProtodefContainer;
 
-
-				if (fields.IsAllFieldsPrimitive())
-				{
-					string method = name.Substring("packet".Length);
-					method = $"Send{method.ToPascalCase()}";
-
-					List<string> arguments = new List<string>();
-
-					foreach (var field in fields)
-					{
-						string argName = field.Anon == true ? $"anon_{AnonId++}" : field.Name.ToCamelCase();
-
-						string? netType = field.Type.GetNetType();
-						if (netType is null)
-						{
-							isSkip = true;
-							break;
-							throw new InvalidOperationException(".Net type in null for " + field);
-						}
-
-						arguments.Add(netType + " " + argName);
-					}
-
-					method += $"({string.Join(", ", arguments)})";
-
-					if (isSkip)
-					{
-						continue;
-					}
-
-					string[] item =
-					{
-						$"public Task {method}",
-						"{",
-						"\tthrow new NotImplementedException();",
-						"}"
-					};
-
-
-					result.Add(item);
-				}
 			}
 		}
 
@@ -130,46 +104,10 @@ public sealed class ProtocolSourceGenerator
 				bool isSkip = false;
 				ProtodefContainer fields = type as ProtodefContainer;
 
-				if (fields.IsAllFieldsPrimitive())
-				{
-					string className = name.Substring("packet".Length).ToPascalCase();
 
-					
-
-					StringBuilder classBuilder = new StringBuilder();
-
-					classBuilder
-						.AppendLine($"public sealed class {className}")
-						.AppendLine("{");
-
-					foreach (var field in fields)
-					{
-						string nameProp = field.Anon == true ? $"Anon_{AnonId++}" : field.Name.ToPascalCase();
-
-						string? netType = field.Type.GetNetType();
-						if (netType is null)
-						{
-							isSkip = true;
-							break;
-						}
-
-
-						classBuilder.AppendLine($"\t{netType} {nameProp} {{ get; set; }}");
-
-
-
-					}
-
-
-					classBuilder.AppendLine("}");
-
-					classes.Add(classBuilder.ToString());
-
-					string propName = className + "PacketObservable";
-
-					props.Add($"public IObservable<{className}> {propName} {{ get; private set; }}");
-
-				}
+			}
+			else
+			{
 
 			}
 		}
@@ -198,4 +136,9 @@ internal class ServerPacketGenerationResult
 	}
 }
 
+
+public static class Mappings
+{
+
+}
 
