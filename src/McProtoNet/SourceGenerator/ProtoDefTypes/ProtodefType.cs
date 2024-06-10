@@ -6,9 +6,6 @@ namespace SourceGenerator.ProtoDefTypes
 	[JsonConverter(typeof(DataTypeConverter))]
 	public abstract class ProtodefType : IJsonOnDeserialized
 	{
-#if DEBUG
-		public string Id { get; } = Random.Shared.NextInt64().ToString();
-#endif
 		public ProtodefType? Parent { get; set; }
 
 		public virtual void OnDeserialized()
@@ -23,6 +20,8 @@ namespace SourceGenerator.ProtoDefTypes
 		}
 
 		public virtual string? GetNetType() => null;
+
+
 	}
 
 

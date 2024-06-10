@@ -1,9 +1,0 @@
-{
-  "entityUUID": "354ba503-82f0-4228-bfdc-2fc9dd49e879",
-  "action": 0,
-  "title": "{\"insertion\":\"9864f96b-6dd0-4a12-b036-e9b005dac082\",\"hoverEvent\":{\"action\":\"show_entity\",\"value\":{\"text\":\"{name:\\\"Wither\\\",id:\\\"9864f96b-6dd0-4a12-b036-e9b005dac082\\\",type:\\\"WitherBoss\\\"}\"}},\"text\":\"Wither\"}",
-  "health": 1,
-  "color": 5,
-  "dividers": 0,
-  "flags": 1
-}

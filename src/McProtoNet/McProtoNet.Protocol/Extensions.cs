@@ -1,4 +1,4 @@
-﻿using DynamicData;
+﻿using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol
 {
@@ -30,7 +30,7 @@ namespace McProtoNet.Protocol
 			if (z >= 0x02000000) // 33,554,432
 				z -= 0x04000000; // 67,108,864
 
-			
+
 
 			return new Position(x, z, y);
 		}

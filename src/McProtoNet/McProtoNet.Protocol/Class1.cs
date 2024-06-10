@@ -1,6 +1,4 @@
-﻿using McProtoNet.Serialization;
-
-namespace McProtoNet.Protocol
+﻿namespace McProtoNet.Protocol
 {
 
 	public struct CommandNodeFlags

@@ -3,7 +3,23 @@ using SourceGenerator.MCDataModels;
 using SourceGenerator.ProtoDefTypes;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
+public sealed class ProtocolVersion
+{
+	[JsonPropertyName("minecraftVersion")]
+	public string MinecraftVersion { get; set; }
+	[JsonPropertyName("version")]
+	public int Version { get; set; }
+	[JsonPropertyName("dataVersion")]
+	public int DataVersion { get; set; }
+	[JsonPropertyName("usesNetty")]
+	public bool UsesNetty { get; set; }
+	[JsonPropertyName("majorVersion")]
+	public string MajorVersion { get; set; }
+	[JsonPropertyName("releaseType")]
+	public string ReleaseType { get; set; }
+}
 
 public sealed class Protocol
 {
@@ -21,7 +37,7 @@ public class Program
 
 	public static string Root = "C:\\Users\\Title\\source\\repos\\Minecraft-Holy-Client\\src\\McProtoNet\\McProtoNet.Protocol";
 
-	public static string dataPath = @"C:\Users\Title\source\repos\Minecraft-Holy-Client\src\McProtoNet\SourceGenerator\minecraft-data-master\minecraft-data-master\data\";
+	public static string dataPath = @"minecraft-data\data";
 
 	private static async Task Main(string[] args)
 	{
@@ -31,6 +47,16 @@ public class Program
 
 		var paths = JsonSerializer.Deserialize<DataPaths>(dataPathsJson);
 
+
+		var allVersions = JsonSerializer.Deserialize<ProtocolVersion[]>(
+			await File.ReadAllTextAsync(
+				Path.Combine(dataPath, "pc", "common", "protocolVersions.json")));
+
+
+
+		var filter = allVersions
+			.Where(x => x.Version >= 754)
+			.Where(x => x.ReleaseType != "snapshot");
 
 		ProtocolCollection collection = new();
 
@@ -57,7 +83,7 @@ public class Program
 						var protocol = parser.Parse();
 
 
-						collection.Add(new Protocol()
+						collection.Add(version.Version, new Protocol()
 						{
 							JsonPackets = protocol,
 							Version = version
@@ -84,9 +110,6 @@ public class Program
 
 		generator.Generate();
 
-
-
-
 	}
 
 
@@ -94,11 +117,19 @@ public class Program
 
 public sealed class ProtocolCollection
 {
-	private List<Protocol> protocols = new();
-
-	public void Add(Protocol protocol)
+	public ProtocolCollection()
 	{
+		Protocols = new();
+	}
 
+	public Dictionary<int, Protocol> Protocols { get; }
+
+	public void Add(int version, Protocol protocol)
+	{
+		if (!Protocols.ContainsKey(version))
+		{
+			Protocols.Add(version, protocol);
+		}
 	}
 }
 

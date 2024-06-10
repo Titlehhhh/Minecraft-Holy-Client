@@ -1,5 +1,0 @@
-{
-  "playerId": 106,
-  "entityId": -1,
-  "message": "{\"translate\":\"death.attack.outOfWorld\",\"with\":[{\"insertion\":\"nmptestbot\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell nmptestbot \"},\"hoverEvent\":{\"action\":\"show_entity\",\"contents\":{\"type\":\"minecraft:player\",\"id\":\"3591fdca-95ad-32a5-beb1-2a99402471c2\",\"name\":{\"text\":\"nmptestbot\"}}},\"text\":\"nmptestbot\"}]}"
-}

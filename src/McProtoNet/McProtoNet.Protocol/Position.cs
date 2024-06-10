@@ -2,8 +2,6 @@
 {
 	public struct Position
 	{
-
-
 		public int X { get; }
 
 		public int Y { get; }
@@ -15,7 +13,6 @@
 			X = x;
 			Z = z;
 			Y = y;
-			
 		}
 	}
 }

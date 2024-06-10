@@ -1,4 +1,5 @@
-﻿namespace McProtoNet.Utils
+﻿
+namespace McProtoNet.Utils
 {
 
 	public interface IServerResolver

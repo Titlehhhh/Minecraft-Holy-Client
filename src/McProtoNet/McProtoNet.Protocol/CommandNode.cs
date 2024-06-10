@@ -1,4 +1,6 @@
-﻿namespace McProtoNet.Protocol
+﻿using McProtoNet.Abstractions;
+
+namespace McProtoNet.Protocol
 {
 	public class CommandNode
 	{
@@ -27,8 +29,8 @@
 
 
 
-
-			return new CommandNode(flags, children, redirectNode);
+			throw new NotImplementedException();
+			//return new CommandNode(flags, children, redirectNode);
 		}
 
 

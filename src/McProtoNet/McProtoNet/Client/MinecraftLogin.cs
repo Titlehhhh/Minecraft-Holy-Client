@@ -9,7 +9,7 @@ using System.Text;
 
 namespace McProtoNet.Client
 {
-	public sealed class MinecraftLogin 
+	public sealed class MinecraftLogin
 	{
 		private readonly static byte[] VarIntLoginIntent;
 		static MinecraftLogin()
@@ -67,6 +67,18 @@ namespace McProtoNet.Client
 			writer.WriteBigEndian(port);
 			throw null;
 			//return new OutputPacket(0, writer.WrittenCount, buffer, ArrayPool<byte>.Shared);
+		}
+
+		public class LoginizationResult
+		{
+			private AesStream result;
+			private int v;
+
+			public LoginizationResult(AesStream result, int v)
+			{
+				this.result = result;
+				this.v = v;
+			}
 		}
 	}
 }

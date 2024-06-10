@@ -145,12 +145,12 @@ class Build : NukeBuild
 				.SetProject(Solution.McProtoNet.McProtoNet_Utils)
 				.SetOutputDirectory(ArtifactsDirectory));
 
-			DotNetPack(x => x
-				.EnableNoRestore()
-				.EnableNoBuild()
-				.SetConfiguration(Configuration)
-				.SetProject(Solution.McProtoNet.McProtoNet_Core)
-				.SetOutputDirectory(ArtifactsDirectory));
+			//DotNetPack(x => x
+			//	.EnableNoRestore()
+			//	.EnableNoBuild()
+			//	.SetConfiguration(Configuration)
+			//	//.SetProject(Solution.McProtoNet.McProtoNet_Core)
+			//	.SetOutputDirectory(ArtifactsDirectory));
 
 			DotNetPack(x => x
 				.EnableNoRestore()

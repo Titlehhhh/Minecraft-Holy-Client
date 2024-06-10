@@ -4,11 +4,11 @@ using System.Text;
 
 namespace McProtoNet.Utils
 {
-	public delegate void ServerFindedHandler(LanServer server);
+	//public delegate void ServerFindedHandler(LanServer server);
 
 	public sealed class LanServerDetector
 	{
-		public event ServerFindedHandler ServerFinded;
+		//public event ServerFindedHandler ServerFinded;
 
 		private const ushort Port = 4445;
 		private const string Host = "224.0.2.60";
@@ -85,7 +85,7 @@ namespace McProtoNet.Utils
 				IPEndPoint ip = (IPEndPoint)endPoint;
 				string motd = ParseMotd(data);
 				ushort port = ushort.Parse(ParseAddress(data));
-				ServerFinded?.Invoke(new LanServer(ip.Address.ToString(), port, motd));
+				//ServerFinded?.Invoke(new LanServer(ip.Address.ToString(), port, motd));
 			}
 			catch (Exception e)
 			{

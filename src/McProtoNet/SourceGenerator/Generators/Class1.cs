@@ -14,12 +14,12 @@ namespace SourceGenerator.Generators
 	{
 		public string GenerateWrite()
 		{
-
+			return null;
 		}
 
 		public string GenerateRead()
 		{
-
+			return null;
 		}
 
 		

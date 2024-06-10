@@ -1,6 +1,0 @@
-{
-  "event": 2,
-  "playerId": 837,
-  "entityId": -1,
-  "message": "{\"translate\":\"death.attack.outOfWorld\",\"with\":[{\"insertion\":\"nmptestbot\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/msg nmptestbot \"},\"hoverEvent\":{\"action\":\"show_entity\",\"value\":{\"text\":\"{name:\\\"nmptestbot\\\",id:\\\"3591fdca-95ad-32a5-beb1-2a99402471c2\\\"}\"}},\"text\":\"nmptestbot\"}]}"
-}
