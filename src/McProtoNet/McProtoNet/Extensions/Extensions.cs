@@ -16,88 +16,21 @@ public static class Extensions
 		}
 
 
+		Span<byte> data = stackalloc byte[5];
 
-		uint unsigned = (uint)value;
+		byte len = value.GetVarIntLength(data);
 
-		int required = 0;
-		int bytesWritten = 0;
-		for (var destination = writer.GetSpan(); unsigned != 0; destination = writer.GetSpan(required))
-		{
-			int offset = 0;
-			do
-			{
-
-				byte temp = (byte)(unsigned & 127);
-				unsigned >>= 7;
-
-				if (unsigned != 0)
-					temp |= 128;
-
-				bytesWritten++;
-
-
-				if (bytesWritten > destination.Length)
-				{
-					writer.Advance(offset + 1);
-					required = 5 - bytesWritten;
-					break;
-				}
-
-				destination[offset++] = temp;
-			} while (unsigned != 0);
-		}
-
+		writer.Write(data.Slice(0, len));
 	}
 
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool TryReadVarInt(this ref SequenceReader<byte> reader, out int res, out int length)
-	{
-
-		int numRead = 0;
-		int result = 0;
-		byte read;
-		do
-		{
-
-			if (reader.TryRead(out read))
-			{
-
-				int value = read & 127;
-				result |= value << 7 * numRead;
-
-				numRead++;
-				if (numRead > 5)
-				{
-					throw new ArithmeticException("VarInt too long");
-				}
-			}
-			else
-			{
-				res = 0;
-				length = -1;
-				return false;
-			}
-
-		} while ((read & 0b10000000) != 0);
+	
 
 
 
-		res = result;
-		length = numRead;
-		return true;
-	}
+	
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool TryReadVarInt(this ReadOnlySequence<byte> data, out int value, out int bytesRead)
-	{
-
-		scoped SequenceReader<byte> reader = new SequenceReader<byte>(data);
-
-		return reader.TryReadVarInt(out value, out bytesRead);
-
-
-	}
+	
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ReadVarInt(this Span<byte> data, out int len)
@@ -156,6 +89,28 @@ public static class Extensions
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static byte GetVarIntLength(this int value, byte[] data, int offset)
+	{
+		var unsigned = (uint)value;
+
+		byte len = 0;
+		do
+		{
+			var temp = (byte)(unsigned & 127);
+			unsigned >>= 7;
+
+			if (unsigned != 0)
+				temp |= 128;
+
+			data[offset + len++] = temp;
+		}
+		while (unsigned != 0);
+		if (len > 5)
+			throw new ArithmeticException("Var int is too big");
+		return len;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static byte GetVarIntLength(this int value, Span<byte> data, int offset)
 	{
 		var unsigned = (uint)value;
 

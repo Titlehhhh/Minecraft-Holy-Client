@@ -1,4 +1,5 @@
 ﻿using LibDeflate;
+using Org.BouncyCastle.Bcpg;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
@@ -20,18 +21,6 @@ namespace McProtoNet.Protocol
 		public async ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
 		{
 
-		}
-
-		#region Send        
-		public async ValueTask SendPacketAsync(OutputPacket packet, CancellationToken token = default)
-		{
-
-
-
-			//ThrowIfDisposed();
-			//int id = packet.Id;
-			//var data = packet.Data;
-			//data.Position = 0;
 
 			try
 			{
@@ -41,7 +30,7 @@ namespace McProtoNet.Protocol
 				{
 
 
-					int uncompressedSize = packet.Memory.Length;
+					int uncompressedSize = data.Length;
 
 					if (uncompressedSize >= _compressionThreshold)
 					{
@@ -51,7 +40,7 @@ namespace McProtoNet.Protocol
 
 						try
 						{
-							int bytesCompress = compressor.Compress(packet.Memory.Span, compressedBuffer.AsSpan(0, length));
+							int bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
 
 							int compressedLength = bytesCompress;
 
@@ -77,33 +66,38 @@ namespace McProtoNet.Protocol
 
 						await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
 						await BaseStream.WriteAsync(ZERO_VARINT, token).ConfigureAwait(false);
-						await BaseStream.WriteAsync(packet.Memory, token).ConfigureAwait(false);
-
-
-
+						await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
 					}
 
 				}
 				else
 				{
-					await SendPacketWithoutCompressionAsync(packet, token).ConfigureAwait(false);
+					await SendPacketWithoutCompressionAsync(data, token).ConfigureAwait(false);
 				}
 				await BaseStream.FlushAsync(token);
 			}
 			finally
 			{
-				//semaphore.Release();
+
 			}
 		}
+
+		#region Send        
+		public ValueTask SendPacketAsync(OutputPacket packet, CancellationToken token = default)
+		{
+			return SendPacketAsync(packet.Memory, token);
+
+
+		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		private async ValueTask SendPacketWithoutCompressionAsync(OutputPacket packet, CancellationToken token)
+		private async ValueTask SendPacketWithoutCompressionAsync(ReadOnlyMemory<byte> data, CancellationToken token)
 		{
 
-			int len = packet.Memory.Length;
+			int len = data.Length;
 
 			await BaseStream.WriteVarIntAsync(len, token).ConfigureAwait(false);
 
-			await BaseStream.WriteAsync(packet.Memory, token).ConfigureAwait(false);
+			await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
 
 
 

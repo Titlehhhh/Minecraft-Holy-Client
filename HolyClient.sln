@@ -67,6 +67,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "McProtoNet.Protocol", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "McProtoNet.Abstractions", "src\McProtoNet\McProtoNet.Abstractions\McProtoNet.Abstractions.csproj", "{E4C07AB3-DDEF-4CB2-8E5B-D169CAF3943F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{0F7BA8C4-5BDB-4810-9312-EDC17D450259}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "src\Sandbox\Sandbox.csproj", "{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +159,10 @@ Global
 		{E4C07AB3-DDEF-4CB2-8E5B-D169CAF3943F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4C07AB3-DDEF-4CB2-8E5B-D169CAF3943F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4C07AB3-DDEF-4CB2-8E5B-D169CAF3943F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +189,7 @@ Global
 		{B5F00CDF-A417-4C47-A3CB-547CAD451816} = {4092C92C-F03E-42C5-8A86-FF8A172EF7F8}
 		{59B24766-4950-4A48-BD1D-05F140D9B911} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 		{E4C07AB3-DDEF-4CB2-8E5B-D169CAF3943F} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
+		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59} = {0F7BA8C4-5BDB-4810-9312-EDC17D450259}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41AEE66A-568B-4B2B-A50B-5AC57D067A07}

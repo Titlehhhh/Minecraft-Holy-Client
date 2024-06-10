@@ -24,8 +24,6 @@ namespace QuickProxyNet
 			test1.Interpolate($"asd{host}");
 
 
-
-
 		}
 
 
@@ -89,7 +87,7 @@ namespace QuickProxyNet
 
 				builder.Advance(nread);
 
-
+				
 
 
 				return null;
