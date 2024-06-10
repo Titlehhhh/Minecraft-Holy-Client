@@ -5,7 +5,7 @@ using Humanizer;
 
 public sealed class ProtocolSourceGenerator
 {
-	public Protocol Protocol;
+	public ProtodefProtocol Protocol;
 	public string Version;
 	public int ProtocolVersion;
 

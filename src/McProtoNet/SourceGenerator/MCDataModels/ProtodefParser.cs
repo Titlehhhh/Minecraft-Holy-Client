@@ -13,7 +13,7 @@ namespace SourceGenerator.MCDataModels
             this.json = json;
         }
 
-        public Protocol Parse()
+        public ProtodefProtocol Parse()
         {
             JsonSerializerOptions options = new()
             {
@@ -23,7 +23,7 @@ namespace SourceGenerator.MCDataModels
             //options.Converters.Add(new DataTypeConverter());
 
 
-            return JsonSerializer.Deserialize<Protocol>(json, options);
+            return JsonSerializer.Deserialize<ProtodefProtocol>(json, options);
         }
     }
 }

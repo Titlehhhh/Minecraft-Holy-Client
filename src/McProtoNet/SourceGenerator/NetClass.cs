@@ -15,7 +15,7 @@ public sealed class NetClass
 			.AppendLine($"public sealed class {Name}")
 			.AppendLine("{");
 		GenerateFileds(builder);
-
+		
 		builder.AppendLine("}");
 
 		return builder.ToString();

@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.Text.Json;
 
 
-public sealed class ProtocolGenNode
+public sealed class Protocol
 {
 	public VersionInfo Version { get; set; }
-	public Protocol Protocol { get; set; }
+	public ProtodefProtocol JsonPackets { get; set; }
 }
 
 public class Program
@@ -31,8 +31,8 @@ public class Program
 
 		var paths = JsonSerializer.Deserialize<DataPaths>(dataPathsJson);
 
-		var chain = new List<ProtocolGenNode>();
 
+		ProtocolCollection collection = new();
 
 		foreach (var item in paths.Pc)
 		{
@@ -48,7 +48,7 @@ public class Program
 
 					var version = JsonSerializer.Deserialize<VersionInfo>(version_json);
 
-					if (version.Version is >= 340 and <= 765)
+					if (version.Version >= 754)
 					{
 						string protocol_json = await File.ReadAllTextAsync(protocol_path);
 
@@ -56,12 +56,12 @@ public class Program
 
 						var protocol = parser.Parse();
 
-						var node = new ProtocolGenNode()
+
+						collection.Add(new Protocol()
 						{
-							Protocol = protocol,
+							JsonPackets = protocol,
 							Version = version
-						};
-						chain.Add(node);
+						});
 					}
 				}
 			}
@@ -69,13 +69,11 @@ public class Program
 
 
 
-		var ver1_16 = chain.First(x => x.Version.Version == 754);
 
-		await GeneratePackets(ver1_16.Protocol);
 
 	}
 
-	private static async Task GeneratePackets(Protocol protocol)
+	private static async Task GeneratePackets(ProtodefProtocol protocol)
 	{
 
 		ProtocolSourceGenerator generator = new()
@@ -92,6 +90,16 @@ public class Program
 	}
 
 
+}
+
+public sealed class ProtocolCollection
+{
+	private List<Protocol> protocols = new();
+
+	public void Add(Protocol protocol)
+	{
+
+	}
 }
 
 
