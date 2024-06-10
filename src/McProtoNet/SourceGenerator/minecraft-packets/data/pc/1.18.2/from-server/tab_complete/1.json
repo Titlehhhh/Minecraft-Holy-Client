@@ -1,0 +1,16 @@
+{
+  "transactionId": 0,
+  "start": 9,
+  "length": 0,
+  "matches": [
+    {
+      "match": "clear"
+    },
+    {
+      "match": "rain"
+    },
+    {
+      "match": "thunder"
+    }
+  ]
+}

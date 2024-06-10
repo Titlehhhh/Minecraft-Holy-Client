@@ -1,0 +1,85 @@
+{
+  "reset": false,
+  "advancementMapping": [
+    {
+      "key": "minecraft:recipes/decorations/campfire",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_coal"
+          },
+          {
+            "key": "has_stick"
+          },
+          {
+            "key": "has_the_recipe"
+          }
+        ],
+        "requirements": [
+          [
+            "has_stick",
+            "has_coal",
+            "has_the_recipe"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "minecraft:recipes/building_blocks/coal_block",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_coal"
+          },
+          {
+            "key": "has_the_recipe"
+          }
+        ],
+        "requirements": [
+          [
+            "has_coal",
+            "has_the_recipe"
+          ]
+        ]
+      }
+    }
+  ],
+  "identifiers": [],
+  "progressMapping": [
+    {
+      "key": "minecraft:recipes/decorations/campfire",
+      "value": [
+        {
+          "criterionIdentifier": "has_coal",
+          "criterionProgress": [
+            396,
+            -1215766886
+          ]
+        },
+        {
+          "criterionIdentifier": "has_stick"
+        },
+        {
+          "criterionIdentifier": "has_the_recipe"
+        }
+      ]
+    },
+    {
+      "key": "minecraft:recipes/building_blocks/coal_block",
+      "value": [
+        {
+          "criterionIdentifier": "has_coal",
+          "criterionProgress": [
+            396,
+            -1215766886
+          ]
+        },
+        {
+          "criterionIdentifier": "has_the_recipe"
+        }
+      ]
+    }
+  ]
+}

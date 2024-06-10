@@ -1,4 +1,5 @@
 ﻿using SourceGenerator.ProtoDefTypes;
+using System.Diagnostics;
 
 public static class Extensions
 {
@@ -56,7 +57,13 @@ public static class Extensions
 	}
 	public static bool IsPrimitive(this ProtodefType type)
 	{
-		return type.IsNumberOrVar() || type.IsCustom() || IsBool(type) || IsString(type) || IsVoid(type);
+		return type.IsNumberOrVar()
+			|| type.IsCustom()
+			|| IsBool(type)
+			|| IsString(type)
+			|| IsVoid(type)
+			|| IsBuffer(type)
+			|| IsPrimitiveOption(type);
 	}
 
 	public static bool IsPrimitiveArray(this ProtodefType type)
@@ -71,9 +78,38 @@ public static class Extensions
 
 	public static bool IsAllFieldsPrimitive(this ProtodefContainer container)
 	{
-		return container.All(x => x.Type.IsPrimitive()
-		|| x.Type.IsPrimitiveArray()
-		|| x.Type.IsPrimitiveSwitch());
+		return container.All(x =>
+		{
+
+		
+
+            var result = x.Type.IsPrimitive()
+				|| x.Type.IsPrimitiveArray()
+				|| x.Type.IsPrimitiveSwitch()
+				|| x.Type.IsTopBitSetArray()
+				|| x.Type.IsMapper()
+				|| x.Type.IsPrimitiveLoop()
+				|| x.Type.IsBuffer()
+				|| x.Type.IsBitField()
+				|| x.Type.IsPrimitiveOption();
+
+			return result;
+		});
+	}
+	public static bool IsPrimitiveOption(this ProtodefType type)
+	{
+		if (type is ProtodefOption option)
+		{
+			if (option.Type.IsPrimitive())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	public static bool IsBitField(this ProtodefType type)
+	{
+		return type is ProtodefBitField;
 	}
 
 	public static bool IsArray(this ProtodefType type)
@@ -92,6 +128,33 @@ public static class Extensions
 	public static bool IsBuffer(this ProtodefType type)
 	{
 		return type is ProtodefBuffer;
+	}
+
+	public static bool IsMapper(this ProtodefType type)
+	{
+		return type is ProtodefMapper;
+	}
+
+	public static bool IsTopBitSetArray(this ProtodefType type)
+	{
+		if (type is ProtodefTopBitSetTerminatedArray arr)
+		{
+			if (arr.Type.IsCustom())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool IsPrimitiveLoop(this ProtodefType type)
+	{
+		if (type is ProtodefLoop loop)
+		{
+			if (loop.Type.IsPrimitive())
+				return true;
+		}
+		return false;
 	}
 
 }

@@ -1,0 +1,4 @@
+{
+  "message": "{\"color\":\"yellow\",\"translate\":\"multiplayer.player.joined\",\"with\":[{\"insertion\":\"tempBot\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/msg tempBot \"},\"hoverEvent\":{\"action\":\"show_entity\",\"value\":{\"text\":\"{name:\\\"tempBot\\\",id:\\\"56825bf2-67f6-3755-b1bf-e6c96cad3411\\\"}\"}},\"text\":\"tempBot\"}]}",
+  "position": 1
+}

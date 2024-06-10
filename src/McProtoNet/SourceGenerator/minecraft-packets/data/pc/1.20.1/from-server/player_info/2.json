@@ -1,0 +1,15 @@
+{
+  "action": 63,
+  "data": [
+    {
+      "uuid": "3591fdca-95ad-32a5-beb1-2a99402471c2",
+      "player": {
+        "name": "nmptestbot",
+        "properties": []
+      },
+      "gamemode": 0,
+      "listed": true,
+      "latency": 0
+    }
+  ]
+}

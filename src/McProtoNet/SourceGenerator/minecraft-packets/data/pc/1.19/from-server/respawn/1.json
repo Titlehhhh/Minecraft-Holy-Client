@@ -1,0 +1,21 @@
+{
+  "dimension": "minecraft:overworld",
+  "worldName": "minecraft:overworld",
+  "hashedSeed": [
+    769415618,
+    133799150
+  ],
+  "gamemode": 0,
+  "previousGamemode": 255,
+  "isDebug": false,
+  "isFlat": false,
+  "copyMetadata": false,
+  "death": {
+    "dimensionName": "minecraft:overworld",
+    "location": {
+      "x": -1,
+      "z": 42,
+      "y": 69
+    }
+  }
+}

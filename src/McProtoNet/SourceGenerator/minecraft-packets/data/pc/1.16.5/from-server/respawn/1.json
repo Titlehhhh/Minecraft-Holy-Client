@@ -1,0 +1,70 @@
+{
+  "dimension": {
+    "type": "compound",
+    "name": "",
+    "value": {
+      "piglin_safe": {
+        "type": "byte",
+        "value": 0
+      },
+      "natural": {
+        "type": "byte",
+        "value": 1
+      },
+      "ambient_light": {
+        "type": "float",
+        "value": 0
+      },
+      "infiniburn": {
+        "type": "string",
+        "value": "minecraft:infiniburn_overworld"
+      },
+      "respawn_anchor_works": {
+        "type": "byte",
+        "value": 0
+      },
+      "has_skylight": {
+        "type": "byte",
+        "value": 1
+      },
+      "bed_works": {
+        "type": "byte",
+        "value": 1
+      },
+      "effects": {
+        "type": "string",
+        "value": "minecraft:overworld"
+      },
+      "has_raids": {
+        "type": "byte",
+        "value": 1
+      },
+      "logical_height": {
+        "type": "int",
+        "value": 256
+      },
+      "coordinate_scale": {
+        "type": "double",
+        "value": 1
+      },
+      "ultrawarm": {
+        "type": "byte",
+        "value": 0
+      },
+      "has_ceiling": {
+        "type": "byte",
+        "value": 0
+      }
+    }
+  },
+  "worldName": "minecraft:overworld",
+  "hashedSeed": [
+    356931587,
+    697926197
+  ],
+  "gamemode": 0,
+  "previousGamemode": 255,
+  "isDebug": false,
+  "isFlat": false,
+  "copyMetadata": false
+}

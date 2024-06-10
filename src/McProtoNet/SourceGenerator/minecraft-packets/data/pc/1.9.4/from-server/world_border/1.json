@@ -1,0 +1,11 @@
+{
+  "action": 3,
+  "x": 0,
+  "z": 0,
+  "old_radius": 60000000,
+  "new_radius": 60000000,
+  "speed": 0,
+  "portalBoundary": 29999984,
+  "warning_time": 5,
+  "warning_blocks": 15
+}

@@ -1,0 +1,64 @@
+{
+  "entries": [
+    {
+      "categoryId": 8,
+      "statisticId": 4,
+      "value": 424
+    },
+    {
+      "categoryId": 4,
+      "statisticId": 765,
+      "value": 1
+    },
+    {
+      "categoryId": 2,
+      "statisticId": 951,
+      "value": 1
+    },
+    {
+      "categoryId": 2,
+      "statisticId": 858,
+      "value": 1
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 55,
+      "value": 1
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 1,
+      "value": 750
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 3,
+      "value": 423
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 26,
+      "value": 50
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 30,
+      "value": 2
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 2,
+      "value": 750
+    },
+    {
+      "categoryId": 8,
+      "statisticId": 10,
+      "value": 327
+    },
+    {
+      "categoryId": 4,
+      "statisticId": 959,
+      "value": 1
+    }
+  ]
+}

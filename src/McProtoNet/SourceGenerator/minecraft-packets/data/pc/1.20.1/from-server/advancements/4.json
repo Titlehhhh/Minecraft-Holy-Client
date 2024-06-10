@@ -1,0 +1,44 @@
+{
+  "reset": false,
+  "advancementMapping": [
+    {
+      "key": "minecraft:recipes/misc/beacon",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_nether_star"
+          },
+          {
+            "key": "has_the_recipe"
+          }
+        ],
+        "requirements": [
+          [
+            "has_nether_star",
+            "has_the_recipe"
+          ]
+        ],
+        "sendsTelemtryData": false
+      }
+    }
+  ],
+  "identifiers": [],
+  "progressMapping": [
+    {
+      "key": "minecraft:recipes/misc/beacon",
+      "value": [
+        {
+          "criterionIdentifier": "has_nether_star",
+          "criterionProgress": [
+            396,
+            -1215763477
+          ]
+        },
+        {
+          "criterionIdentifier": "has_the_recipe"
+        }
+      ]
+    }
+  ]
+}

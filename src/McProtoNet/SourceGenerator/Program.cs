@@ -25,10 +25,6 @@ public class Program
 
 	private static async Task Main(string[] args)
 	{
-
-
-
-
 		var dataPathsJson = Path.Combine(dataPath, "dataPaths.json");
 
 		dataPathsJson = await File.ReadAllTextAsync(dataPathsJson);
@@ -88,7 +84,7 @@ public class Program
 			Version = "754"
 		};
 
-
+		generator.Generate();
 
 
 

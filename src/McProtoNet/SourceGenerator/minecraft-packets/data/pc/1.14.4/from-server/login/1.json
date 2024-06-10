@@ -1,0 +1,9 @@
+{
+  "entityId": 240,
+  "gameMode": 0,
+  "dimension": 0,
+  "maxPlayers": 20,
+  "levelType": "default",
+  "viewDistance": 10,
+  "reducedDebugInfo": false
+}

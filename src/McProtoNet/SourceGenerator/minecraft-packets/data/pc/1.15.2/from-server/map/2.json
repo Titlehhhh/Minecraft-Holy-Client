@@ -1,0 +1,15 @@
+{
+  "itemDamage": 0,
+  "scale": 0,
+  "trackingPosition": true,
+  "locked": false,
+  "icons": [
+    {
+      "type": 0,
+      "x": 83,
+      "z": 75,
+      "direction": 0
+    }
+  ],
+  "columns": 0
+}

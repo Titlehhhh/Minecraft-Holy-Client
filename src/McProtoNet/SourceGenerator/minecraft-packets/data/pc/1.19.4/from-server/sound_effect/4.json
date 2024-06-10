@@ -1,0 +1,16 @@
+{
+  "soundId": 0,
+  "soundEvent": {
+    "resource": "minecraft:ambient.cave"
+  },
+  "soundCategory": "hostile",
+  "x": -1212,
+  "y": 616,
+  "z": 236,
+  "volume": 1,
+  "pitch": 1,
+  "seed": [
+    1496401955,
+    -1786967818
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "reset": false,
+  "advancementMapping": [
+    {
+      "key": "minecraft:recipes/misc/coal",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_the_recipe"
+          },
+          {
+            "key": "has_at_least_9_coal"
+          },
+          {
+            "key": "has_coal_block"
+          }
+        ],
+        "requirements": [
+          [
+            "has_at_least_9_coal",
+            "has_coal_block",
+            "has_the_recipe"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "minecraft:recipes/building_blocks/coal_block",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_the_recipe"
+          },
+          {
+            "key": "has_at_least_9_coal"
+          }
+        ],
+        "requirements": [
+          [
+            "has_at_least_9_coal",
+            "has_the_recipe"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "minecraft:recipes/root",
+      "value": {
+        "criteria": [
+          {
+            "key": "impossible"
+          }
+        ],
+        "requirements": [
+          [
+            "impossible"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "minecraft:recipes/misc/cactus_green",
+      "value": {
+        "parentId": "minecraft:recipes/root",
+        "criteria": [
+          {
+            "key": "has_cactus"
+          },
+          {
+            "key": "has_the_recipe"
+          }
+        ],
+        "requirements": [
+          [
+            "has_cactus",
+            "has_the_recipe"
+          ]
+        ]
+      }
+    }
+  ],
+  "identifiers": [],
+  "progressMapping": [
+    {
+      "key": "minecraft:recipes/building_blocks/coal_block",
+      "value": [
+        {
+          "criterionIdentifier": "has_the_recipe"
+        },
+        {
+          "criterionIdentifier": "has_at_least_9_coal",
+          "criterionProgress": [
+            396,
+            -1215807472
+          ]
+        }
+      ]
+    },
+    {
+      "key": "minecraft:recipes/misc/coal",
+      "value": [
+        {
+          "criterionIdentifier": "has_the_recipe"
+        },
+        {
+          "criterionIdentifier": "has_at_least_9_coal",
+          "criterionProgress": [
+            396,
+            -1215807470
+          ]
+        },
+        {
+          "criterionIdentifier": "has_coal_block"
+        }
+      ]
+    },
+    {
+      "key": "minecraft:recipes/root",
+      "value": [
+        {
+          "criterionIdentifier": "impossible"
+        }
+      ]
+    },
+    {
+      "key": "minecraft:recipes/misc/cactus_green",
+      "value": [
+        {
+          "criterionIdentifier": "has_cactus",
+          "criterionProgress": [
+            396,
+            -1215807467
+          ]
+        },
+        {
+          "criterionIdentifier": "has_the_recipe"
+        }
+      ]
+    }
+  ]
+}

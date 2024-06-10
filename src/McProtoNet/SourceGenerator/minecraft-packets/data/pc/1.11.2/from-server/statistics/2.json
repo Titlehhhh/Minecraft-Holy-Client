@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "name": "stat.furnaceInteraction",
+      "value": 1
+    },
+    {
+      "name": "stat.deaths",
+      "value": 2
+    },
+    {
+      "name": "stat.useItem.minecraft.ender_pearl",
+      "value": 1
+    },
+    {
+      "name": "stat.pickup.minecraft.nether_star",
+      "value": 1
+    },
+    {
+      "name": "stat.walkOneCm",
+      "value": 16
+    },
+    {
+      "name": "stat.timeSinceDeath",
+      "value": 431
+    },
+    {
+      "name": "stat.playOneMinute",
+      "value": 525
+    }
+  ]
+}

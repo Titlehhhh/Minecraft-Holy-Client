@@ -1,0 +1,6 @@
+{
+  "windowId": 1,
+  "inventoryType": "minecraft:furnace",
+  "windowTitle": "{\"translate\":\"container.furnace\"}",
+  "slotCount": 3
+}

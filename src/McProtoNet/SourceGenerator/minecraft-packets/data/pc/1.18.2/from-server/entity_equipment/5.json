@@ -1,0 +1,23 @@
+{
+  "entityId": 198,
+  "equipments": [
+    {
+      "slot": 0,
+      "item": {
+        "present": true,
+        "itemId": 682,
+        "itemCount": 1,
+        "nbtData": {
+          "type": "compound",
+          "name": "",
+          "value": {
+            "Damage": {
+              "type": "int",
+              "value": 0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "windowId": 0,
+  "items": [
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": true,
+      "itemId": 613,
+      "itemCount": 1,
+      "nbtData": {
+        "type": "compound",
+        "name": "",
+        "value": {
+          "map": {
+            "type": "int",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    },
+    {
+      "present": false
+    }
+  ]
+}

@@ -1,0 +1,318 @@
+{
+  "nodes": [
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 0
+      },
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 1
+      },
+      "children": [
+        10
+      ],
+      "extraNodeData": {
+        "name": "help"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 1
+      },
+      "children": [
+        11
+      ],
+      "extraNodeData": {
+        "name": "list"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        12
+      ],
+      "extraNodeData": {
+        "name": "me"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        13
+      ],
+      "extraNodeData": {
+        "name": "msg"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        14
+      ],
+      "extraNodeData": {
+        "name": "teammsg"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 1,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [],
+      "redirectNode": 4,
+      "extraNodeData": {
+        "name": "tell"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 1,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [],
+      "redirectNode": 5,
+      "extraNodeData": {
+        "name": "tm"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        15
+      ],
+      "extraNodeData": {
+        "name": "trigger"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 1,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [],
+      "redirectNode": 4,
+      "extraNodeData": {
+        "name": "w"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "command",
+        "parser": "brigadier:string",
+        "properties": "GREEDY_PHRASE"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 1
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "uuids"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "action",
+        "parser": "brigadier:string",
+        "properties": "GREEDY_PHRASE"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 2
+      },
+      "children": [
+        16
+      ],
+      "extraNodeData": {
+        "name": "targets",
+        "parser": "minecraft:entity",
+        "properties": {
+          "unused": 0,
+          "onlyAllowPlayers": 1,
+          "onlyAllowEntities": 0
+        }
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "message",
+        "parser": "minecraft:message"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 1,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [
+        17,
+        18
+      ],
+      "extraNodeData": {
+        "name": "objective",
+        "parser": "minecraft:objective",
+        "suggestionType": "minecraft:ask_server"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "message",
+        "parser": "minecraft:message"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        19
+      ],
+      "extraNodeData": {
+        "name": "add"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 0,
+        "command_node_type": 1
+      },
+      "children": [
+        19
+      ],
+      "extraNodeData": {
+        "name": "set"
+      }
+    },
+    {
+      "flags": {
+        "unused": 0,
+        "has_custom_suggestions": 0,
+        "has_redirect_node": 0,
+        "has_command": 1,
+        "command_node_type": 2
+      },
+      "children": [],
+      "extraNodeData": {
+        "name": "value",
+        "parser": "brigadier:integer",
+        "properties": {
+          "flags": {
+            "unused": 0,
+            "max_present": 0,
+            "min_present": 0
+          }
+        }
+      }
+    }
+  ],
+  "rootIndex": 0
+}
