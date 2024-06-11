@@ -1,10 +1,14 @@
-﻿using System.Buffers;
+﻿using DotNext.Buffers;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet;
 
 public static class Extensions
 {
+
+	
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void WriteVarInt(this IBufferWriter<byte> writer, int value)
 	{
@@ -24,13 +28,13 @@ public static class Extensions
 	}
 
 
-	
 
 
 
-	
 
-	
+
+
+
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ReadVarInt(this Span<byte> data, out int len)

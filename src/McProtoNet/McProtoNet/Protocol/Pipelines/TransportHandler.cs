@@ -1,5 +1,6 @@
 ﻿using DotNext;
 using System.Buffers;
+using System.Diagnostics;
 using System.IO.Pipelines;
 
 
@@ -15,7 +16,7 @@ namespace McProtoNet.Protocol
 		{
 			this.duplexPipe = duplexPipe;
 		}
-		private Stream baseStream;
+
 
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
@@ -23,46 +24,83 @@ namespace McProtoNet.Protocol
 			var send = StartSendingAsync(cancellationToken);
 			return Task.WhenAll(receive, send);
 		}
-		public void Stop()
-		{	
+		public void Complete()
+		{
 			duplexPipe.Output.Complete();
-			duplexPipe.Input.Complete();		
+			duplexPipe.Input.Complete();
 		}
 
 		private async Task StartReceiveAsync(CancellationToken cancellationToken)
 		{
-			var stream = BaseStream;
-			var output = duplexPipe.Output;
-
-			while (!cancellationToken.IsCancellationRequested)
+			try
 			{
-				try
+
+				var stream = BaseStream;
+				var output = duplexPipe.Output;
+
+				while (!cancellationToken.IsCancellationRequested)
 				{
-					Memory<byte> memory = output.GetMemory(4096);
-					int bytes = await stream.ReadAsync(memory, cancellationToken);
-					output.Advance(bytes);
+					try
+					{
+
+
+						try
+						{
+							Memory<byte> memory = output.GetMemory(4096);
+							int bytes = await stream.ReadAsync(memory, cancellationToken);
+							output.Advance(bytes);
+
+
+						}
+						catch (OperationCanceledException)
+						{
+							break;
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("Complete 1");
+							await output.CompleteAsync(ex);
+							break;
+						}
+						var result = await output.FlushAsync(cancellationToken).ConfigureAwait(false);
+
+						if (result.IsCanceled)
+						{
+							break;
+						}
+						if (result.IsCompleted)
+						{
+							break;
+						}
+					}
+					finally
+					{
+
+					}
+
 				}
-				catch (OperationCanceledException)
-				{
-					break;
-				}
-				catch (Exception ex)
-				{
-					await output.CompleteAsync(ex);
-					break;
-				}
+
+			}
+			finally
+			{
+				Debug.WriteLine("TransportHandler stop receive");
 			}
 		}
 		private async Task StartSendingAsync(CancellationToken cancellationToken)
 		{
-			var input = duplexPipe.Input;
-			var stream = BaseStream;
-
-			while (!cancellationToken.IsCancellationRequested)
+			try
 			{
-				try
+
+
+				var input = duplexPipe.Input;
+				var stream = BaseStream;
+
+				while (!cancellationToken.IsCancellationRequested)
 				{
+
 					ReadResult result = await input.ReadAsync(cancellationToken);
+
+					Debug.WriteLine($"Send {result.Buffer.Length} bytes");
 
 					ReadOnlySequence<byte> buffer = result.Buffer;
 					try
@@ -87,11 +125,13 @@ namespace McProtoNet.Protocol
 					{
 						input.AdvanceTo(buffer.End);
 					}
-				}
-				catch
-				{
 
 				}
+
+			}
+			finally
+			{
+				Debug.WriteLine("TransportHandelr stop send");
 			}
 		}
 

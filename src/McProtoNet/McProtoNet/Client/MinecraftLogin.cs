@@ -4,6 +4,7 @@ using DotNext.Buffers;
 using McProtoNet.Cryptography;
 using McProtoNet.Protocol;
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
@@ -53,12 +54,12 @@ namespace McProtoNet.Client
 				{
 					case 0x00:
 						//Disconnect
-						Console.WriteLine("Disconnect");
+						Debug.WriteLine("Disconnect");
 						inputPacket.Data.TryReadString(out string reason, out _);
 						throw new LoginRejectedException(reason);
 						break;
 					case 0x01:
-						Console.WriteLine("Encrypt");
+						Debug.WriteLine("Encrypt");
 
 						var encryptBegin = ReadEncryptionPacket(inputPacket);
 
@@ -79,18 +80,22 @@ namespace McProtoNet.Client
 						break;
 					case 0x02:
 						//Success
-						Console.WriteLine("Succes");
+						Debug.WriteLine("Success");
+						inputPacket.Data.Slice(16).TryReadString(out string nick, out int g);
+
+						Console.WriteLine("Nick: " + nick);
 						needBreak = true;
 						break;
 					case 0x03:
 						//Compress
-						Console.WriteLine("Compress");
+						Debug.WriteLine("Compress");
 						inputPacket.Data.TryReadVarInt(out threshold, out _);
 						reader.SwitchCompression(threshold);
 						sender.SwitchCompression(threshold);
 						break;
 					case 0x04:
 						//Login plugin request
+						Debug.WriteLine("Plugin");
 						ReadOnlySequence<byte> buffer = inputPacket.Data;
 						int offset = 0;
 						buffer.TryReadVarInt(out int messageId, out offset);

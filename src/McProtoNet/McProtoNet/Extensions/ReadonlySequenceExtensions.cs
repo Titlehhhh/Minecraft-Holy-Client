@@ -14,19 +14,24 @@ public static class ReadonlySequenceExtensions
 
 		scoped SequenceReader<byte> reader = new SequenceReader<byte>(data);
 
-		
+
 
 		return reader.TryReadVarInt(out value, out bytesRead);
 	}
 
 	public static bool TryReadString(this ReadOnlySequence<byte> data, out string value, out int offset)
 	{
-		data.TryReadVarInt(out int len, out int read);
+		scoped SequenceReader<byte> reader = new SequenceReader<byte>(data);
 
-		var builder = ZString.CreateUtf8StringBuilder();
+		reader.TryReadVarInt(out int len, out int read);
+
+		Utf8ValueStringBuilder builder = ZString.CreateUtf8StringBuilder();
 		try
-		{
-			builder.Write(data.Slice(len, read));
+		{	
+
+			builder.Write(reader.UnreadSequence);
+
+
 			value = builder.ToString();
 			offset = read + len;
 			return true;

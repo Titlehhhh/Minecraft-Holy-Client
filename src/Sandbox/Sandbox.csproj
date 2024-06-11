@@ -8,13 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\McProtoNet\McProtoNet.NBT\McProtoNet.NBT.csproj" />
-    <ProjectReference Include="..\McProtoNet\McProtoNet.Protocol\McProtoNet.Protocol.csproj" />
-    <ProjectReference Include="..\McProtoNet\McProtoNet.Serialization\McProtoNet.Serialization.csproj" />
-    <ProjectReference Include="..\McProtoNet\McProtoNet.Utils\McProtoNet.Utils.csproj" />
     <ProjectReference Include="..\McProtoNet\McProtoNet\McProtoNet.csproj" />
-    <ProjectReference Include="..\McProtoNet\SourceGenerator\SourceGenerator.csproj" />
-    <ProjectReference Include="..\QuickProxyNet\QuickProxyNet.csproj" />
   </ItemGroup>
 
 </Project>

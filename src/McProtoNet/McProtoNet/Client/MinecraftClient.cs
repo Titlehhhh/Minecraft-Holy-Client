@@ -2,7 +2,9 @@
 using DotNext.IO.Pipelines;
 using LibDeflate;
 using McProtoNet.Protocol;
+using McProtoNet.Serialization;
 using QuickProxyNet;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
@@ -10,77 +12,39 @@ using System.Net.Sockets;
 namespace McProtoNet.Client
 {
 
-	internal delegate void MinecraftPacketHandler(InputPacket packet);
-	public sealed class ClientContext
-	{
-		public ZlibCompressor Compressor { get; }
-		public ZlibDecompressor Decompressor { get; }
-
-		public IDuplexPipe Pipe { get; }
-
-		public int CompressionThreshold { get; set; }
-		public int ProtocolVersion { get; set; }
-	}
-
-	internal class DuplexPipe : IDuplexPipe
-	{
-		public PipeReader Input { get; private set; }
-
-		public PipeWriter Output { get; private set; }
-
-		public DuplexPipe(PipeReader input, PipeWriter output)
-		{
-			Input = input;
-			Output = output;
-		}
-	}
-
-	internal sealed class DuplexPipePair
-	{
-		public IDuplexPipe Transport { get; }
-		public IDuplexPipe Application { get; }
-
-		private readonly Pipe pipe1;
-		private readonly Pipe pipe2;
-
-		public DuplexPipePair()
-		{
-			pipe1 = new Pipe();
-			pipe2 = new Pipe();
-
-			Transport = new DuplexPipe(pipe1.Reader, pipe2.Writer);
-			Application = new DuplexPipe(pipe2.Reader, pipe1.Writer);
-		}
-
-		public void Reset()
-		{
-			pipe1.Reset();
-			pipe2.Reset();
-		}
-	}
 
 	public sealed partial class MinecraftClient : Disposable
 	{
+		#region Events
+		public event PacketHandler PacketReceived;
+		#endregion
 
+		#region Properties		
 		public string Host { get; set; }
 		public ushort Port { get; set; } = 25565;
 
 		public string Username { get; set; }
 		public int Version { get; set; }
 		public IProxyClient? Proxy { get; set; }
+		#endregion
 
 
+		#region Constans
 
 		public const int MinVersionSupport = 754;
 		public const int MaxVersionSupport = 765;
 
+		#endregion
 
+		#region Fields
 		private Stream mainStream;
 		private CancellationTokenSource CTS;
 
 
 		private readonly DuplexPipePair pipePair;
 
+		private readonly ZlibCompressor compressor = new ZlibCompressor(4);
+		private readonly ZlibDecompressor decompressor = new ZlibDecompressor();
 
 		private readonly TransportHandler transportHandler;
 		private readonly PacketPipeHandler packetPipeHandler;
@@ -89,16 +53,34 @@ namespace McProtoNet.Client
 
 
 		private Task mainTask;
+		#endregion
+
+
 
 		public MinecraftClient()
 		{
 			pipePair = new DuplexPipePair();
+
+
 			transportHandler = new TransportHandler(pipePair.Transport);
-			packetPipeHandler = new PacketPipeHandler(pipePair.Application);
+
+			packetPipeHandler = new PacketPipeHandler(
+				pipePair.Application,
+				compressor,
+				decompressor);
+
+			packetPipeHandler.PacketReceived = this.OnPacket;
 
 			mainTask = Task.CompletedTask;
-		}
 
+			tcpClient = new TcpClient();
+			tcpClient.LingerState = new LingerOption(true, 0);
+
+		}
+		private void OnPacket(object sender, InputPacket packet)
+		{
+			this.PacketReceived?.Invoke(this, packet);
+		}
 		private void Validate()
 		{
 			if (string.IsNullOrWhiteSpace(Host))
@@ -123,7 +105,8 @@ namespace McProtoNet.Client
 			CTS = new CancellationTokenSource();
 
 
-			await mainTask.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+
+			await mainTask;
 
 
 
@@ -145,15 +128,28 @@ namespace McProtoNet.Client
 		{
 			try
 			{
-				//packetPipeHandler.CompressionThreshold = loginizationResult.CompressionThreshold;
+				transportHandler.BaseStream = loginizationResult.Stream;
+
+				packetPipeHandler.CompressionThreshold = loginizationResult.CompressionThreshold;
+
+
 				Task transport = transportHandler.StartAsync(cancellationToken);
 				Task packets = packetPipeHandler.StartAsync(cancellationToken);
 				await Task.WhenAll(transport, packets);
 
 			}
+			catch (OperationCanceledException)
+			{
+				Console.WriteLine("Operation Canceeeeeeeel");
+			}
 			finally
 			{
+				Debug.WriteLine("Start Complete pipe");
+				transportHandler.Complete();
+				packetPipeHandler.Complete();
+				Debug.WriteLine("Stop Complete pipe");
 
+				pipePair.Reset();
 			}
 
 		}
@@ -162,11 +158,7 @@ namespace McProtoNet.Client
 		private async ValueTask ConnectAsync(CancellationToken cancellationToken)
 		{
 
-			if (tcpClient.Connected)
-			{
-				tcpClient.Client.Shutdown(SocketShutdown.Both);
-				await tcpClient.Client.DisconnectAsync(true, cancellationToken);
-			}
+
 
 			if (Proxy is not null)
 			{
@@ -180,29 +172,44 @@ namespace McProtoNet.Client
 			}
 
 
-
-			if (Proxy is null)
-			{
-				await tcpClient.ConnectAsync(Host, Port, cancellationToken);
-				mainStream = tcpClient.GetStream();
-			}
-			else
-			{
-				mainStream = await Proxy.ConnectAsync(Host, Port, cancellationToken);
-			}
 		}
 
 
-		public void Stop()
+		public async Task Stop()
 		{
 			CTS.Cancel();
 			tcpClient.Client.Shutdown(SocketShutdown.Both);
-			tcpClient.Client.Disconnect(true);
+			await tcpClient.Client.DisconnectAsync(true);
 		}
 
 		protected override void Dispose(bool disposing)
 		{
+			GC.SuppressFinalize(this);
+
+			CTS.Dispose();
+			tcpClient.Dispose();
+			compressor.Dispose();
+			decompressor.Dispose();
+
 			base.Dispose(disposing);
+		}
+
+		public async Task SendTest()
+		{
+			Debug.WriteLine("TestChat");
+			await this.packetPipeHandler.SendPacketAsync(CreateChatPacket(), CTS.Token);
+		}
+
+		public ReadOnlyMemory<byte> CreateChatPacket()
+		{
+			MinecraftPrimitiveWriterSlim writer = new MinecraftPrimitiveWriterSlim();
+
+			writer.WriteVarInt(0x03);
+			writer.WriteString("ASdasdasd");
+
+			using var owner = writer.GetWrittenMemory();
+
+			return owner.Memory.ToArray();
 		}
 	}
 }

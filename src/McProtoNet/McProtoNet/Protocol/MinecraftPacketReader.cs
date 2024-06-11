@@ -1,6 +1,7 @@
 ﻿using DotNext.Buffers;
 using LibDeflate;
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Protocol
@@ -27,7 +28,7 @@ namespace McProtoNet.Protocol
 
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
-
+				
 				//var buffer = ArrayPool<byte>.Shared.Rent(len);
 
 				MemoryOwner<byte> buffer = memoryAllocator.AllocateExactly(len);
@@ -119,7 +120,7 @@ namespace McProtoNet.Protocol
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
 
-
+				
 				MemoryOwner<byte> buffer = memoryAllocator.AllocateExactly(len);
 
 				try

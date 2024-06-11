@@ -2,6 +2,7 @@
 using DotNext.Buffers;
 using LibDeflate;
 using System.Buffers;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 
@@ -32,6 +33,7 @@ namespace McProtoNet.Protocol
 				try
 				{
 					result = await pipeReader.ReadAsync(cancellationToken).ConfigureAwait(false);
+
 				}
 				catch (OperationCanceledException)
 				{
