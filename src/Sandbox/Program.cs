@@ -9,20 +9,24 @@ Console.WriteLine("Start");
 MinecraftClient minecraftClient = new MinecraftClient()
 {
 	Host = "127.0.0.1",
-	Port = 4411,
-	Username = "TestBot1",
+	Port = 5554,
+	Username = "TestBot",
 	Version = 754
 };
 
-minecraftClient.PacketReceived += (s, e) =>
+minecraftClient.OnPacket += (s, e) =>
 {
-	Console.WriteLine("Received: " + e.Id);
+	//Console.WriteLine("Received: " + e.Id);
 };
 
 await minecraftClient.Start();
 
-await Task.Delay(1000);
+await Task.Delay(2000);
 
-await minecraftClient.SendTest();
+minecraftClient.Stop();
+
+
+await Task.Delay(500);
+await minecraftClient.Start();
 
 await Task.Delay(-1);

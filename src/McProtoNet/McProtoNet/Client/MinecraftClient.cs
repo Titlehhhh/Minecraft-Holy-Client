@@ -12,11 +12,49 @@ using System.Net.Sockets;
 namespace McProtoNet.Client
 {
 
+	public enum MinecraftClientState
+	{
+		Stopped,
+		Connect,
+		Errored,
+		Handshaking,
+		Login,
+		Play
+	}
+	public sealed class StateEventArgs : EventArgs
+	{
+		public MinecraftClientState State { get; }
+		public MinecraftClientState OldState { get; }
+
+		public Exception? Error { get; }
+
+		public StateEventArgs(MinecraftClientState newState, MinecraftClientState oldState)
+		{
+			State = newState;
+			OldState = oldState;
+		}
+
+		public StateEventArgs(Exception ex, MinecraftClientState newState, MinecraftClientState oldState)
+		{
+			Error = ex;
+			State = newState;
+			OldState = oldState;
+		}
+		public StateEventArgs(Exception ex, MinecraftClientState oldState)
+		{
+			Error = ex;
+			State = MinecraftClientState.Errored;
+			OldState = oldState;
+
+		}
+	}
 
 	public sealed partial class MinecraftClient : Disposable
 	{
 		#region Events
-		public event PacketHandler PacketReceived;
+		public event PacketHandler OnPacket;
+		public event EventHandler<StateEventArgs> StateChanged;
+
 		#endregion
 
 		#region Properties		
@@ -49,10 +87,14 @@ namespace McProtoNet.Client
 		private readonly TransportHandler transportHandler;
 		private readonly PacketPipeHandler packetPipeHandler;
 
-		private readonly TcpClient tcpClient;
+		MinecraftClientLogin minecraftLogin = new MinecraftClientLogin();
+
+		private TcpClient tcpClient;
 
 
 		private Task mainTask;
+
+		private MinecraftClientState _state;
 		#endregion
 
 
@@ -69,17 +111,24 @@ namespace McProtoNet.Client
 				compressor,
 				decompressor);
 
-			packetPipeHandler.PacketReceived = this.OnPacket;
+			packetPipeHandler.PacketReceived = this.PacketReceived;
 
 			mainTask = Task.CompletedTask;
 
-			tcpClient = new TcpClient();
-			tcpClient.LingerState = new LingerOption(true, 0);
+			minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
+
+
 
 		}
-		private void OnPacket(object sender, InputPacket packet)
+
+		private void MinecraftLogin_StateChanged(MinecraftClientState state)
 		{
-			this.PacketReceived?.Invoke(this, packet);
+			StateChange(state);
+		}
+
+		private void PacketReceived(object sender, InputPacket packet)
+		{
+			this.OnPacket?.Invoke(this, packet);
 		}
 		private void Validate()
 		{
@@ -96,34 +145,64 @@ namespace McProtoNet.Client
 
 		public async Task Start()
 		{
-			Validate();
-
-			if (CTS is not null)
+			try
 			{
-				CTS.Dispose();
+				Validate();
+
+
+				if (CTS is not null)
+				{
+					CTS.Dispose();
+				}
+				CTS = new CancellationTokenSource();
+
+
+
+				await mainTask;
+
+
+				StateChange(MinecraftClientState.Connect);
+				await ConnectAsync(CTS.Token);
+
+
+
+
+
+
+				var loginOptions = new LoginOptions(Host, Port, Version, Username);
+
+
+
+				var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
+
+				mainTask = MainLoop(result, CTS.Token);
 			}
-			CTS = new CancellationTokenSource();
-
-
-
-			await mainTask;
-
-
-
-			await ConnectAsync(CTS.Token);
-
-
-			MinecraftLogin minecraftLogin = new MinecraftLogin();
-
-
-			var loginOptions = new LoginOptions(Host, Port, Version, Username);
-
-			var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
-
-			mainTask = MainLoop(result, CTS.Token);
+			catch (OperationCanceledException ex)
+			{
+				if (!CTS.IsCancellationRequested)
+				{
+					OnException(ex);
+				}
+			}
+			catch (Exception ex)
+			{
+				OnException(ex);
+				throw;
+			}
+		}
+		private void StateChange(MinecraftClientState state)
+		{
+			var old = _state;
+			_state = state;
+			StateChanged?.Invoke(this, new StateEventArgs(old, state));
 		}
 
 
+		private void OnException(Exception ex)
+		{
+			CleanUp();
+			StateChanged?.Invoke(this, new StateEventArgs(ex, _state));
+		}
 		private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
 		{
 			try
@@ -138,17 +217,21 @@ namespace McProtoNet.Client
 				await Task.WhenAll(transport, packets);
 
 			}
-			catch (OperationCanceledException)
+			catch (OperationCanceledException ex)
 			{
-				Console.WriteLine("Operation Canceeeeeeeel");
+				if (!CTS.IsCancellationRequested)
+				{
+					OnException(ex);
+				}
+			}
+			catch (Exception ex)
+			{
+				OnException(ex);
 			}
 			finally
 			{
-				Debug.WriteLine("Start Complete pipe");
 				transportHandler.Complete();
 				packetPipeHandler.Complete();
-				Debug.WriteLine("Stop Complete pipe");
-
 				pipePair.Reset();
 			}
 
@@ -159,57 +242,70 @@ namespace McProtoNet.Client
 		{
 
 
+			var newTcp = new TcpClient();
+
+			Interlocked.Exchange(ref tcpClient, newTcp)?.Dispose();
+
+			newTcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+			newTcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+			newTcp.Client.NoDelay = true;
+			newTcp.LingerState = new LingerOption(false, 0);
+
 
 			if (Proxy is not null)
 			{
-				await tcpClient.ConnectAsync(Proxy.ProxyHost, Proxy.ProxyPort, cancellationToken);
-				mainStream = await Proxy.ConnectAsync(tcpClient.GetStream(), Host, Port, cancellationToken);
+				await newTcp.ConnectAsync(Proxy.ProxyHost, Proxy.ProxyPort, cancellationToken);
+				mainStream = await Proxy.ConnectAsync(newTcp.GetStream(), Host, Port, cancellationToken);
 			}
 			else
 			{
-				await tcpClient.ConnectAsync(Host, Port, cancellationToken);
-				mainStream = tcpClient.GetStream();
+				try
+				{
+					await newTcp.Client.DisconnectAsync(true, cancellationToken);
+				}
+				catch { }
+				await newTcp.ConnectAsync(Host, Port, cancellationToken);
+				mainStream = newTcp.GetStream();
 			}
+
 
 
 		}
 
 
-		public async Task Stop()
+		private void CleanUp()
 		{
-			CTS.Cancel();
-			tcpClient.Client.Shutdown(SocketShutdown.Both);
-			await tcpClient.Client.DisconnectAsync(true);
+			minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
+			if (CTS is not null)
+			{
+				CTS.Cancel();
+				CTS.Dispose();
+				CTS = null;
+			}
+			
+			Interlocked.Exchange(ref tcpClient, null)?.Dispose();
+			Interlocked.Exchange(ref mainStream, null)?.Dispose();
+		}
+
+		public void Stop()
+		{
+			CleanUp();
+
+			StateChanged?.Invoke(this, new StateEventArgs(MinecraftClientState.Stopped, _state));
 		}
 
 		protected override void Dispose(bool disposing)
 		{
 			GC.SuppressFinalize(this);
+			minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
 
 			CTS.Dispose();
-			tcpClient.Dispose();
+			mainStream.Dispose();
+			tcpClient.Dispose();			
 			compressor.Dispose();
 			decompressor.Dispose();
 
 			base.Dispose(disposing);
-		}
-
-		public async Task SendTest()
-		{
-			Debug.WriteLine("TestChat");
-			await this.packetPipeHandler.SendPacketAsync(CreateChatPacket(), CTS.Token);
-		}
-
-		public ReadOnlyMemory<byte> CreateChatPacket()
-		{
-			MinecraftPrimitiveWriterSlim writer = new MinecraftPrimitiveWriterSlim();
-
-			writer.WriteVarInt(0x03);
-			writer.WriteString("ASdasdasd");
-
-			using var owner = writer.GetWrittenMemory();
-
-			return owner.Memory.ToArray();
 		}
 	}
 }

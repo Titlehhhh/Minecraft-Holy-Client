@@ -11,12 +11,13 @@ using System.Xml.Linq;
 
 namespace McProtoNet.Client
 {
-	public sealed class MinecraftLogin
+	public sealed class MinecraftClientLogin
 	{
 		private readonly static byte[] VarIntLoginIntent;
 		private static MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator();
 
-		static MinecraftLogin()
+		public event Action<MinecraftClientState> StateChanged;
+		static MinecraftClientLogin()
 		{
 			MemoryStream ms = new MemoryStream();
 			ms.WriteVarInt(2);
@@ -35,10 +36,14 @@ namespace McProtoNet.Client
 			reader.BaseStream = mainStream;
 
 			using var handshake = CreateHandshake(options.Host, options.Port, options.ProtocolVersion);
+
+			StateChanged?.Invoke(MinecraftClientState.Handshaking);
 			await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
 
 
 			using var loginStart = CreateLoginStart(options.Username);
+
+			StateChanged?.Invoke(MinecraftClientState.Login);
 			await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
 
 			int threshold = 0;
@@ -52,15 +57,11 @@ namespace McProtoNet.Client
 
 				switch (inputPacket.Id)
 				{
-					case 0x00:
-						//Disconnect
-						Debug.WriteLine("Disconnect");
+					case 0x00:						
 						inputPacket.Data.TryReadString(out string reason, out _);
 						throw new LoginRejectedException(reason);
 						break;
-					case 0x01:
-						Debug.WriteLine("Encrypt");
-
+					case 0x01:						
 						var encryptBegin = ReadEncryptionPacket(inputPacket);
 
 						var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
@@ -78,12 +79,8 @@ namespace McProtoNet.Client
 						mainStream.SwitchEncryption(secretKey);
 
 						break;
-					case 0x02:
-						//Success
-						Debug.WriteLine("Success");
-						inputPacket.Data.Slice(16).TryReadString(out string nick, out int g);
-
-						Console.WriteLine("Nick: " + nick);
+					case 0x02:						
+						inputPacket.Data.Slice(16).TryReadString(out string nick, out int g);						
 						needBreak = true;
 						break;
 					case 0x03:
