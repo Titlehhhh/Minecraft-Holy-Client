@@ -13,12 +13,21 @@ namespace McProtoNet.Protocol
 	internal sealed class PacketPipeHandler : Disposable
 	{
 		public PacketHandler PacketReceived;
+		private int compressionThreshold;
 		private readonly IDuplexPipe duplexPipe;
 		private readonly MinecraftPacketPipeReader reader;
 		private readonly MinecraftPacketPipeWriter writer;
 
 
-		public int CompressionThreshold { get; set; }
+		public int CompressionThreshold
+		{
+			get => compressionThreshold; set
+			{
+				reader.CompressionThreshold = value;
+				writer.CompressionThreshold = value;
+				compressionThreshold = value;
+			}
+		}
 
 
 		public PacketPipeHandler(IDuplexPipe duplexPipe, ZlibCompressor compressor, ZlibDecompressor decompressor)

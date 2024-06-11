@@ -16,13 +16,13 @@ MinecraftClient minecraftClient = new MinecraftClient()
 
 minecraftClient.PacketReceived += (s, e) =>
 {
-	//Console.WriteLine("Received: " + e.Id);
+	Console.WriteLine("Received: " + e.Id);
 };
 
 await minecraftClient.Start();
 
 await Task.Delay(1000);
 
-//await minecraftClient.SendTest();
+await minecraftClient.SendTest();
 
 await Task.Delay(-1);

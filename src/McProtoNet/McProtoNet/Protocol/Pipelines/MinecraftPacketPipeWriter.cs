@@ -39,7 +39,7 @@ namespace McProtoNet.Protocol
 					pipeWriter.WriteVarInt(data.Length + 1);
 					pipeWriter.WriteVarInt(0);
 
-					return pipeWriter.FlushAsync(cancellationToken);
+					return pipeWriter.WriteAsync(data, cancellationToken);
 
 				}
 				else

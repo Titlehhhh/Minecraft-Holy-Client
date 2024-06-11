@@ -88,10 +88,13 @@ namespace McProtoNet.Client
 						break;
 					case 0x03:
 						//Compress
-						Debug.WriteLine("Compress");
-						inputPacket.Data.TryReadVarInt(out threshold, out _);
+
+						if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
+							throw new Exception("asd");
 						reader.SwitchCompression(threshold);
 						sender.SwitchCompression(threshold);
+
+						Debug.WriteLine("Compress: "+threshold);
 						break;
 					case 0x04:
 						//Login plugin request
