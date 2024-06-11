@@ -8,49 +8,25 @@ namespace McProtoNet.Protocol
 
 	internal sealed class TransportHandler : Disposable
 	{
-		public Stream BaseStream
-		{
-			get => baseStream;
-			set
-			{
-				lock (syncRoot)
-				{
-					baseStream = value;
-				}
-			}
-		}
+		public Stream BaseStream { get; set; }
 
 		private readonly IDuplexPipe duplexPipe;
 		public TransportHandler(IDuplexPipe duplexPipe)
 		{
 			this.duplexPipe = duplexPipe;
 		}
-		private CancellationTokenSource cts;
 		private Stream baseStream;
-		private readonly object syncRoot = new();
 
-		private bool _state;
-		public Task Start()
+		public Task StartAsync(CancellationToken cancellationToken)
 		{
-			if (_state)
-			{
-				return Task.CompletedTask;
-			}
-			completed = false;
-			_state = true;
-			cts = new CancellationTokenSource();
-			var receive = StartReceiveAsync(cts.Token);
-			var send = StartSendingAsync(cts.Token);
+			var receive = StartReceiveAsync(cancellationToken);
+			var send = StartSendingAsync(cancellationToken);
 			return Task.WhenAll(receive, send);
 		}
-		private bool completed = false;
 		public void Stop()
-		{
-			completed = true;
-			cts.Cancel();
+		{	
 			duplexPipe.Output.Complete();
-			duplexPipe.Input.Complete();
-			cts.Dispose();
+			duplexPipe.Input.Complete();		
 		}
 
 		private async Task StartReceiveAsync(CancellationToken cancellationToken)
