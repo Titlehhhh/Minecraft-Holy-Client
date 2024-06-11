@@ -1,6 +1,5 @@
 ﻿using DotNext;
 using LibDeflate;
-using McProtoNet.Abstractions;
 using McProtoNet.Protocol;
 using QuickProxyNet;
 using System.IO.Pipelines;
@@ -44,8 +43,8 @@ namespace McProtoNet.Client
 		private MinecraftPacketReader reader;
 		private MinecraftPacketSender sender;
 
-		private IMinecraftPrimitiveWriter primitiveWriter;
-		private IMinecraftPrimitiveReader primitiveReader;
+		//private IMinecraftPrimitiveWriter primitiveWriter;
+		//private IMinecraftPrimitiveReader primitiveReader;
 
 
 		private void Validate()

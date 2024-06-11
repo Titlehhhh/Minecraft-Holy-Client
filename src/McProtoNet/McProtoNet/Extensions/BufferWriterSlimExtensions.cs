@@ -42,11 +42,8 @@ public static class BufferWriterSlimExtensions
 		var builder = ZString.CreateUtf8StringBuilder();
 		try
 		{
-
-
-			builder.Append(value);
-			ReadOnlySpan<byte> data = builder.AsSpan();
-			writer.WriteVarInt(data.Length);
+			builder.Append(value);			
+			writer.WriteVarInt(builder.Length);
 			writer.Write(builder.AsSpan());
 		}
 		finally

@@ -1,6 +1,8 @@
-﻿using McProtoNet.NBT;
+﻿using DotNext.Buffers;
+using McProtoNet.NBT;
+using System.Buffers;
 
-namespace McProtoNet.Abstractions
+namespace McProtoNet.Serialization
 {
 
 	public interface IMinecraftPrimitiveReader
@@ -40,4 +42,6 @@ namespace McProtoNet.Abstractions
 		NbtCompound? ReadOptionalNbt();
 		NbtCompound ReadNbt();
 	}
+
+	
 }

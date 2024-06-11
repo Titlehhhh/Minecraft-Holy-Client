@@ -9,7 +9,6 @@ public static class SequenceReaderExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool TryReadVarInt(this ref SequenceReader<byte> reader, out int res, out int length)
 	{
-
 		int numRead = 0;
 		int result = 0;
 		byte read;

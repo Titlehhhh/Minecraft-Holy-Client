@@ -1,6 +1,6 @@
 ﻿using McProtoNet.NBT;
 
-namespace McProtoNet.Abstractions
+namespace McProtoNet.Serialization
 {
 	public interface IMinecraftPrimitiveWriter
 	{

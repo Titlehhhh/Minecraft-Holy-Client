@@ -1,31 +1,32 @@
-﻿using McProtoNet.Abstractions;
+﻿
+using McProtoNet.Serialization;
 
 namespace McProtoNet.Protocol
 {
 	public class CommandNode
 	{
 
-		public static CommandNode Read(IMinecraftPrimitiveReader reader)
+		public static CommandNode Read(MinecraftPrimitiveReaderSlim reader)
 		{
-			var flags = new CommandNodeFlags(reader.ReadUnsignedByte());
+			//var flags = new CommandNodeFlags(reader.ReadUnsignedByte());
 
-			int childrenCount = reader.ReadVarInt();
+			//int childrenCount = reader.ReadVarInt();
 
-			int[] children = new int[childrenCount];
+			//int[] children = new int[childrenCount];
 
-			for (int i = 0; i < childrenCount; i++)
-			{
-				children[i] = reader.ReadVarInt();
-			}
+			//for (int i = 0; i < childrenCount; i++)
+			//{
+			//	children[i] = reader.ReadVarInt();
+			//}
 
-			int? redirectNode = null;
+			//int? redirectNode = null;
 
-			switch (flags.HasRedirectNode)
-			{
-				case true:
-					redirectNode = reader.ReadVarInt();
-					break;
-			}
+			//switch (flags.HasRedirectNode)
+			//{
+			//	case true:
+			//		redirectNode = reader.ReadVarInt();
+			//		break;
+			//}
 
 
 

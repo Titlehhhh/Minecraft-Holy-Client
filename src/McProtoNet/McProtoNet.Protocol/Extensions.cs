@@ -1,4 +1,4 @@
-﻿using McProtoNet.Abstractions;
+﻿using McProtoNet.Serialization;
 
 namespace McProtoNet.Protocol
 {

@@ -1,6 +1,7 @@
 ﻿using Cysharp.Text;
 using DotNext.Buffers;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet;
@@ -12,6 +13,8 @@ public static class ReadonlySequenceExtensions
 	{
 
 		scoped SequenceReader<byte> reader = new SequenceReader<byte>(data);
+
+		
 
 		return reader.TryReadVarInt(out value, out bytesRead);
 	}

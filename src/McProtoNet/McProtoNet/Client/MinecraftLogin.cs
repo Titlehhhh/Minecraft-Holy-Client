@@ -40,6 +40,8 @@ namespace McProtoNet.Client
 			using var loginStart = CreateLoginStart(options.Username);
 			await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
 
+			int threshold = 0;
+
 
 			while (true)
 			{
@@ -83,7 +85,7 @@ namespace McProtoNet.Client
 					case 0x03:
 						//Compress
 						Console.WriteLine("Compress");
-						inputPacket.Data.TryReadVarInt(out int threshold, out _);
+						inputPacket.Data.TryReadVarInt(out threshold, out _);
 						reader.SwitchCompression(threshold);
 						sender.SwitchCompression(threshold);
 						break;
@@ -106,7 +108,7 @@ namespace McProtoNet.Client
 
 
 
-			return new LoginizationResult(mainStream, 0);
+			return new LoginizationResult(mainStream, threshold);
 		}
 
 
@@ -197,30 +199,30 @@ namespace McProtoNet.Client
 			}
 		}
 
-
-	}
-	internal readonly struct EncryptionBeginPacket
-	{
-		public readonly string ServerId;
-		public readonly byte[] PublicKey;
-		public readonly byte[] VerifyToken;
-
-		public EncryptionBeginPacket(string serverId, byte[] publicKey, byte[] verifyToken)
+		internal readonly struct EncryptionBeginPacket
 		{
-			ServerId = serverId;
-			PublicKey = publicKey;
-			VerifyToken = verifyToken;
+			public readonly string ServerId;
+			public readonly byte[] PublicKey;
+			public readonly byte[] VerifyToken;
+
+			public EncryptionBeginPacket(string serverId, byte[] publicKey, byte[] verifyToken)
+			{
+				ServerId = serverId;
+				PublicKey = publicKey;
+				VerifyToken = verifyToken;
+			}
 		}
 	}
+
 	public class LoginizationResult
 	{
-		private AesStream result;
-		private int v;
+		public readonly Stream Stream;
+		public readonly int CompressionThreshold;
 
-		public LoginizationResult(AesStream result, int v)
+		public LoginizationResult(Stream stream, int compressionThreshold)
 		{
-			this.result = result;
-			this.v = v;
+			Stream = stream;
+			CompressionThreshold = compressionThreshold;
 		}
 	}
 }
