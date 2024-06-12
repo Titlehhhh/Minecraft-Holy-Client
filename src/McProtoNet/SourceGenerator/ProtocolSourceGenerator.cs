@@ -20,6 +20,8 @@ public sealed class ProtocolSourceGenerator
 		NetNamespace netNamespace = new NetNamespace();
 		netNamespace.Name = "McProtoNet.Protocol" + Version;
 
+		netNamespace.Usings.Add("McProtoNet.Serialization");
+
 		foreach ((string nsName, Namespace side) in Protocol.Namespaces)
 		{
 			var serverPackets = side.Types["toClient"] as Namespace;
@@ -40,7 +42,7 @@ public sealed class ProtocolSourceGenerator
 		NetClass coreClass = new NetClass();
 
 		coreClass.Name = $"Protocol_{Version}";
-
+		coreClass.IsSealed = true;
 		netNamespace.Classes.Add(coreClass);
 
 		{
@@ -82,6 +84,7 @@ public sealed class ProtocolSourceGenerator
 				}
 			}
 		}
+		
 
 	}
 
@@ -89,6 +92,7 @@ public sealed class ProtocolSourceGenerator
 	{
 		NetMethod method = new NetMethod();
 
+		//method.IsAsync = true;
 		method.Name = "Send" + name.Substring("packet_".Length).Pascalize();
 
 
@@ -96,7 +100,7 @@ public sealed class ProtocolSourceGenerator
 
 		List<string> instructions = new List<string>();
 
-
+		instructions.Add("var writer = new MinecraftPrimitiveWriterSlim();");
 
 		foreach (ProtodefContainerField field in container)
 		{
@@ -125,9 +129,16 @@ public sealed class ProtocolSourceGenerator
 			{
 
 
+				
+				
+
 				string writeMethod = GenerateWriteMethod(field.Type, field.Name);
 
+
 				instructions.Add(writeMethod);
+
+				
+
 			}
 			catch (Exception ex)
 			{
@@ -138,6 +149,16 @@ public sealed class ProtocolSourceGenerator
 
 
 		}
+
+
+		instructions.Add("var buffer_codeGen = writer.GetWrittenMemory();");
+		instructions.Add("try {");
+		instructions.Add("return Task.CompletedTask;");
+
+		instructions.Add("} finally {");
+		instructions.Add("buffer_codeGen.Dispose();");
+		instructions.Add("}");
+
 		method.ReturnType = "Task";
 
 		method.Arguments = arguments;
@@ -187,10 +208,13 @@ public sealed class ProtocolSourceGenerator
 		}
 		else if (type is ProtodefArray array)
 		{
+
+			string iterator = $"i_{ depth}";
+
 			return $"{GenerateWriteMethod(array.CountType, name + ".Length", 1 + depth)}\n" +
-				$"for (int i_{depth}; i < {name}.Length; i++)\n" +
+				$"for (int {iterator} = 0; {iterator} < {name}.Length; {iterator}++)\n" +
 				$"{{\n" +
-				$"\tvar value_{depth} = {name}[i_{depth}];\n" +
+				$"\tvar value_{depth} = {name}[{iterator}];\n" +
 				$"\t{GenerateWriteMethod(array.Type, "value_" + depth, depth + 1)}\n" +
 				$"}}";
 		}
@@ -226,48 +250,6 @@ public sealed class ProtocolSourceGenerator
 			throw new Exception("Not support type: " + type.ToString());
 		}
 
-		//if (field.Type is ProtodefArray array)
-		//{
-
-
-		//}
-		//else if (field.Type is ProtodefBuffer buffer)
-		//{
-
-
-
-		//	string writeMethod = writeDict[buffer.CountType.ToString()];
-
-		//	instructions.Add($"writer.{writeMethod}({field.Name}.Length);");
-
-		//	instructions.Add($"writer.WriteBuffer({field.Name});");
-
-		//}
-		//else if (field.Type is ProtodefCustomType cus)
-		//{
-		//	string writeMethod = writeDict[cus.Name];
-
-		//	instructions.Add($"writer.{writeMethod}({field.Name});");
-		//}
-		//else if (field.Type is ProtodefOption option)
-		//{
-		//	string writeMethod
-		//		string instruction =
-		//			$"if ({field.Name} is null)" +
-		//			$"{{" +
-		//			$"\twriter.WriteBoolean(false);" +
-		//			$"}}" +
-		//			$"else" +
-		//			$"{{" +
-		//			$"\twriter.WriteBoolean(true);" +
-		//			$"\twriter.";
-		//}
-		//else
-		//{
-		//	string writeMethod = writeDict[field.Type.ToString()];
-
-		//	instructions.Add($"writer.{writeMethod}({field.Name});");
-		//}
 	}
 
 

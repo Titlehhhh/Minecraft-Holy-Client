@@ -2,6 +2,7 @@
 using SourceGenerator.MCDataModels;
 using SourceGenerator.NetTypes;
 using SourceGenerator.ProtoDefTypes;
+using System;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -99,27 +100,36 @@ public class Program
 		}
 
 
-		var proto = collection.Protocols[765];
+		string protocolDir = Path.Combine(Root, "Protocols");
 
+		if (!Directory.Exists(protocolDir))
+			Directory.CreateDirectory(protocolDir);
+		
+			
 
-		await GeneratePackets(proto.JsonPackets, "765");
-
-	}
-
-	private static Task GeneratePackets(ProtodefProtocol protocol, string version)
-	{
-
-		ProtocolSourceGenerator generator = new()
+		foreach(var item in collection.Protocols)
 		{
-			Protocol = protocol,
-			Version = version
-		};
+			ProtocolSourceGenerator generator = new()
+			{
+				Protocol = item.Value.JsonPackets,
+				Version = item.Key.ToString()
+			};
 
-		var ns = generator.Generate();
+			var ns = generator.Generate();
 
+			string fileName = $"Protocol{item.Key}.cs";
 
-		return File.WriteAllTextAsync(Testpath, ns.ToString());
+			fileName = Path.Combine(protocolDir, fileName);
+
+			await File.WriteAllTextAsync(fileName, ns.ToString());
+		}
+
+	
+		
+
 	}
+
+	
 
 
 }

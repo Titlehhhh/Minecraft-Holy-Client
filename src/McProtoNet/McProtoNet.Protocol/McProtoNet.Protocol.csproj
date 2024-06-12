@@ -10,6 +10,10 @@
     <ProjectReference Include="..\McProtoNet.Serialization\McProtoNet.Serialization.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Protocols\" />
+  </ItemGroup>
+
   
 
 

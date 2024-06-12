@@ -44,13 +44,13 @@ namespace McProtoNet.Serialization
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void WriteShort(short value)
+		public void WriteSignedShort(short value)
 		{
 			writerSlim.WriteBigEndian(value);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void WriteInt(int value)
+		public void WriteSignedInt(int value)
 		{
 			writerSlim.WriteBigEndian(value);
 		}
@@ -62,7 +62,7 @@ namespace McProtoNet.Serialization
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void WriteLong(long value)
+		public void WriteSignedLong(long value)
 		{
 			writerSlim.WriteBigEndian(value);
 		}
@@ -73,7 +73,7 @@ namespace McProtoNet.Serialization
 			writerSlim.WriteBigEndian(value);
 		}
 
-		
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void WriteFloat(float value)
@@ -83,7 +83,7 @@ namespace McProtoNet.Serialization
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void WriteDouble(float value)
+		public void WriteDouble(double value)
 		{
 			long val = BitConverter.DoubleToInt64Bits(value);
 			writerSlim.WriteBigEndian(val);
@@ -100,9 +100,16 @@ namespace McProtoNet.Serialization
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Write(ReadOnlySpan<byte> value)
+		public void WriteBuffer(ReadOnlySpan<byte> value)
 		{
 			writerSlim.Write(value);
+		}
+
+		public void WriteVarInt(int? value)
+		{
+			if (value is null)
+				throw new ArgumentNullException("value", "value is null");
+			WriteVarInt(value.Value);
 		}
 
 

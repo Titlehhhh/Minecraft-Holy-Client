@@ -9,7 +9,7 @@ namespace SourceGenerator.NetTypes
 		public string Name { get; set; }
 
 		public bool IsSealed { get; set; }
-
+		public bool IsPartial { get; set; }
 
 		public List<NetMethod> Methods { get; set; } = new();
 

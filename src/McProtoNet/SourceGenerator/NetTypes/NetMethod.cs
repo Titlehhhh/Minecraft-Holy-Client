@@ -24,7 +24,9 @@ namespace SourceGenerator.NetTypes
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 
-			stringBuilder.AppendLine($"{Modifier} {ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Item1 + " " + x.Item2))})");
+			string asy = IsAsync ? " async " : " ";
+
+			stringBuilder.AppendLine($"{Modifier}{asy}{ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Item1 + " " + x.Item2))})");
 
 			stringBuilder.AppendLine("{");
 
