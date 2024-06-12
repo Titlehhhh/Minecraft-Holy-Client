@@ -247,6 +247,8 @@ namespace McProtoNet.Client
 				writer.WriteString(host);
 				writer.WriteBigEndian(port);
 				writer.Write(VarIntLoginIntent);
+
+
 				writer.TryDetachBuffer(out MemoryOwner<byte> owner);
 				return new OutputPacket(owner);
 			}

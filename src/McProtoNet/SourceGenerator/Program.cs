@@ -36,6 +36,8 @@ public class Program
 	};
 
 
+	public static string Testpath = @"C:\Users\Title\OneDrive\Рабочий стол\Test.cs";
+
 	public static string Root = "C:\\Users\\Title\\source\\repos\\Minecraft-Holy-Client\\src\\McProtoNet\\McProtoNet.Protocol";
 
 	public static string dataPath = @"minecraft-data\data";
@@ -97,22 +99,26 @@ public class Program
 		}
 
 
+		var proto = collection.Protocols[765];
 
 
+		await GeneratePackets(proto.JsonPackets, "765");
 
 	}
 
-	private static async Task GeneratePackets(ProtodefProtocol protocol)
+	private static Task GeneratePackets(ProtodefProtocol protocol, string version)
 	{
 
 		ProtocolSourceGenerator generator = new()
 		{
 			Protocol = protocol,
-			Version = "754"
+			Version = version
 		};
 
-		generator.Generate();
+		var ns = generator.Generate();
 
+
+		return File.WriteAllTextAsync(Testpath, ns.ToString());
 	}
 
 

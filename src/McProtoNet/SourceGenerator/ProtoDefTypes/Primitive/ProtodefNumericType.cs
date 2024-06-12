@@ -2,26 +2,29 @@
 {
 	public sealed class ProtodefNumericType : ProtodefType
 	{
-		public string Name { get; }
+		public string NetName { get; }
+
+		public string OriginalName { get; }
 
 		public bool Signed { get; }
 
 		public ByteOrder Order { get; }
 
-		public ProtodefNumericType(string name, bool signed, ByteOrder order)
+		public ProtodefNumericType(string name,string originalName, bool signed, ByteOrder order)
 		{
-			Name = name;
+			NetName = name;
+			OriginalName = originalName;
 			Signed = signed;
 			Order = order;
 		}
 		public override string ToString()
 		{
-			return Name;
+			return NetName;
 		}
 
 		public override string? GetNetType()
 		{
-			return Name;
+			return NetName;
 		}
 	}
 

@@ -13,7 +13,9 @@ namespace SourceGenerator.NetTypes
 
 		public string ReturnType { get; set; }
 
-		public Dictionary<string, string> Arguments { get; set; } = new();
+
+		public bool IsAsync { get; set; } = false;
+		public List<(string, string)> Arguments { get; set; } = new();
 
 		public string Name { get; set; }
 
@@ -22,19 +24,24 @@ namespace SourceGenerator.NetTypes
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 
-			stringBuilder.AppendLine($"{Modifier} {ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Key + " " + x.Value))})");
+			stringBuilder.AppendLine($"{Modifier} {ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Item1 + " " + x.Item2))})");
 
 			stringBuilder.AppendLine("{");
 
-			foreach(var item in Instructions)
+			foreach (var item in Instructions)
 			{
-				stringBuilder.AppendLine("\t"+item);
+				stringBuilder.AppendLine("\t" + item);
 			}
 
 			stringBuilder.Append("}");
 
 			return stringBuilder.ToString();
+
+
+
 		}
 	}
+
+
 
 }
