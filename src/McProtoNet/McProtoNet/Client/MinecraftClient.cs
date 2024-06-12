@@ -12,43 +12,6 @@ using System.Net.Sockets;
 namespace McProtoNet.Client
 {
 
-	public enum MinecraftClientState
-	{
-		Stopped,
-		Connect,
-		Errored,
-		Handshaking,
-		Login,
-		Play
-	}
-	public sealed class StateEventArgs : EventArgs
-	{
-		public MinecraftClientState State { get; }
-		public MinecraftClientState OldState { get; }
-
-		public Exception? Error { get; }
-
-		public StateEventArgs(MinecraftClientState newState, MinecraftClientState oldState)
-		{
-			State = newState;
-			OldState = oldState;
-		}
-
-		public StateEventArgs(Exception ex, MinecraftClientState newState, MinecraftClientState oldState)
-		{
-			Error = ex;
-			State = newState;
-			OldState = oldState;
-		}
-		public StateEventArgs(Exception ex, MinecraftClientState oldState)
-		{
-			Error = ex;
-			State = MinecraftClientState.Errored;
-			OldState = oldState;
-
-		}
-	}
-
 	public sealed partial class MinecraftClient : Disposable
 	{
 		#region Events
@@ -179,9 +142,12 @@ namespace McProtoNet.Client
 			}
 			catch (OperationCanceledException ex)
 			{
-				if (!CTS.IsCancellationRequested)
+				if (CTS is not null)
 				{
-					OnException(ex);
+					if (!CTS.IsCancellationRequested)
+					{
+						OnException(ex);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -219,9 +185,12 @@ namespace McProtoNet.Client
 			}
 			catch (OperationCanceledException ex)
 			{
-				if (!CTS.IsCancellationRequested)
+				if (CTS is not null)
 				{
-					OnException(ex);
+					if (!CTS.IsCancellationRequested)
+					{
+						OnException(ex);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -282,7 +251,7 @@ namespace McProtoNet.Client
 				CTS.Dispose();
 				CTS = null;
 			}
-			
+
 			Interlocked.Exchange(ref tcpClient, null)?.Dispose();
 			Interlocked.Exchange(ref mainStream, null)?.Dispose();
 		}
@@ -301,7 +270,7 @@ namespace McProtoNet.Client
 
 			CTS.Dispose();
 			mainStream.Dispose();
-			tcpClient.Dispose();			
+			tcpClient.Dispose();
 			compressor.Dispose();
 			decompressor.Dispose();
 

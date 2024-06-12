@@ -1,0 +1,40 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SourceGenerator.NetTypes
+{
+
+	public sealed class NetMethod : NetType
+	{
+		public string Modifier { get; set; } = "public";
+
+		public string ReturnType { get; set; }
+
+		public Dictionary<string, string> Arguments { get; set; } = new();
+
+		public string Name { get; set; }
+
+		public List<string> Instructions { get; set; } = new();
+		public override string ToString()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+
+			stringBuilder.AppendLine($"{Modifier} {ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Key + " " + x.Value))})");
+
+			stringBuilder.AppendLine("{");
+
+			foreach(var item in Instructions)
+			{
+				stringBuilder.AppendLine("\t"+item);
+			}
+
+			stringBuilder.Append("}");
+
+			return stringBuilder.ToString();
+		}
+	}
+
+}

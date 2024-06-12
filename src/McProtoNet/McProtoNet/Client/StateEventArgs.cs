@@ -1,0 +1,30 @@
+﻿namespace McProtoNet.Client
+{
+	public sealed class StateEventArgs : EventArgs
+	{
+		public MinecraftClientState State { get; }
+		public MinecraftClientState OldState { get; }
+
+		public Exception? Error { get; }
+
+		public StateEventArgs(MinecraftClientState newState, MinecraftClientState oldState)
+		{
+			State = newState;
+			OldState = oldState;
+		}
+
+		public StateEventArgs(Exception ex, MinecraftClientState newState, MinecraftClientState oldState)
+		{
+			Error = ex;
+			State = newState;
+			OldState = oldState;
+		}
+		public StateEventArgs(Exception ex, MinecraftClientState oldState)
+		{
+			Error = ex;
+			State = MinecraftClientState.Errored;
+			OldState = oldState;
+
+		}
+	}
+}

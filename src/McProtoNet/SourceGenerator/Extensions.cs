@@ -85,13 +85,12 @@ public static class Extensions
 
             var result = x.Type.IsPrimitive()
 				|| x.Type.IsPrimitiveArray()
-				|| x.Type.IsPrimitiveSwitch()
-				|| x.Type.IsTopBitSetArray()
-				|| x.Type.IsMapper()
-				|| x.Type.IsPrimitiveLoop()
-				|| x.Type.IsBuffer()
-				|| x.Type.IsBitField()
-				|| x.Type.IsPrimitiveOption();
+				//|| x.Type.IsPrimitiveSwitch()
+				//|| x.Type.IsTopBitSetArray()
+				//|| x.Type.IsMapper()
+				//|| x.Type.IsPrimitiveLoop()				
+				//|| x.Type.IsBitField()
+				;
 
 			return result;
 		});

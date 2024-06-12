@@ -49,6 +49,11 @@ public sealed class ProtocolSourceGenerator
 				bool isSkip = false;
 				ProtodefContainer fields = type as ProtodefContainer;
 
+				if (fields.IsAllFieldsPrimitive())
+				{
+
+				}
+
 			}
 		}
 

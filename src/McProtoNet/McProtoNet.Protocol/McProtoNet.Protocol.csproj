@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Serialization\McProtoNet.Serialization.csproj" />
+  </ItemGroup>
+
   
 
 

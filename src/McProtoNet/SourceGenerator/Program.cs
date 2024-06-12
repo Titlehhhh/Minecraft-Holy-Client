@@ -1,5 +1,6 @@
 ﻿using Humanizer;
 using SourceGenerator.MCDataModels;
+using SourceGenerator.NetTypes;
 using SourceGenerator.ProtoDefTypes;
 using System.Diagnostics;
 using System.Text.Json;
@@ -41,6 +42,8 @@ public class Program
 
 	private static async Task Main(string[] args)
 	{
+
+
 		var dataPathsJson = Path.Combine(dataPath, "dataPaths.json");
 
 		dataPathsJson = await File.ReadAllTextAsync(dataPathsJson);

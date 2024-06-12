@@ -14,6 +14,8 @@ namespace McProtoNet.Client
 	public sealed class MinecraftClientLogin
 	{
 		private readonly static byte[] VarIntLoginIntent;
+		private readonly static byte[] LoginAcknowledged;
+
 		private static MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator();
 
 		public event Action<MinecraftClientState> StateChanged;
@@ -22,6 +24,12 @@ namespace McProtoNet.Client
 			MemoryStream ms = new MemoryStream();
 			ms.WriteVarInt(2);
 			VarIntLoginIntent = ms.ToArray();
+			ms.Position = 0;
+			ms.SetLength(0);
+
+			ms.WriteVarInt(0x03);
+			LoginAcknowledged = ms.ToArray();
+
 		}
 
 
@@ -41,7 +49,7 @@ namespace McProtoNet.Client
 			await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
 
 
-			using var loginStart = CreateLoginStart(options.Username);
+			using var loginStart = CreateLoginStart(options.Username, options);
 
 			StateChanged?.Invoke(MinecraftClientState.Login);
 			await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
@@ -55,13 +63,15 @@ namespace McProtoNet.Client
 
 				bool needBreak = false;
 
+				Console.WriteLine("ReadLoging: " + inputPacket.Id);
+
 				switch (inputPacket.Id)
 				{
-					case 0x00:						
+					case 0x00:
 						inputPacket.Data.TryReadString(out string reason, out _);
 						throw new LoginRejectedException(reason);
 						break;
-					case 0x01:						
+					case 0x01:
 						var encryptBegin = ReadEncryptionPacket(inputPacket);
 
 						var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
@@ -79,10 +89,15 @@ namespace McProtoNet.Client
 						mainStream.SwitchEncryption(secretKey);
 
 						break;
-					case 0x02:						
-						inputPacket.Data.Slice(16).TryReadString(out string nick, out int g);						
+					case 0x02:
 						needBreak = true;
-						break;
+
+						if (options.ProtocolVersion == 765)
+						{
+							await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
+						}
+
+						break;					
 					case 0x03:
 						//Compress
 
@@ -91,18 +106,18 @@ namespace McProtoNet.Client
 						reader.SwitchCompression(threshold);
 						sender.SwitchCompression(threshold);
 
-						Debug.WriteLine("Compress: "+threshold);
+						Debug.WriteLine("Compress: " + threshold);
 						break;
-					case 0x04:
-						//Login plugin request
-						Debug.WriteLine("Plugin");
-						ReadOnlySequence<byte> buffer = inputPacket.Data;
-						int offset = 0;
-						buffer.TryReadVarInt(out int messageId, out offset);
-						buffer = buffer.Slice(offset);
-						buffer.TryReadString(out string channel, out offset);
-						ReadOnlySequence<byte> data = buffer.Slice(offset);
-						break;
+					//case 0x04:
+					//	//Login plugin request
+					//	Debug.WriteLine("Plugin");
+					//	ReadOnlySequence<byte> buffer = inputPacket.Data;
+					//	int offset = 0;
+					//	buffer.TryReadVarInt(out int messageId, out offset);
+					//	buffer = buffer.Slice(offset);
+					//	buffer.TryReadString(out string channel, out offset);
+					//	ReadOnlySequence<byte> data = buffer.Slice(offset);
+					//	break;
 
 					default: throw new Exception("Unknown packet: " + inputPacket.Id);
 				}
@@ -112,10 +127,37 @@ namespace McProtoNet.Client
 			}
 
 
+			while (true)
+			{
+				InputPacket inputPacket = await reader.ReadNextPacketAsync().ConfigureAwait(false);
+
+				
+				Console.WriteLine("ReadConfig: " + inputPacket.Id);
+			}
+
+
 
 			return new LoginizationResult(mainStream, threshold);
 		}
 
+
+		private static OutputPacket CreateLoginAcknowledged()
+		{
+			scoped BufferWriterSlim<byte> writer = new BufferWriterSlim<byte>(1);
+
+			try
+			{
+				writer.WriteVarInt(0x03);
+
+
+				writer.TryDetachBuffer(out MemoryOwner<byte> buffer);
+				return new OutputPacket(buffer);
+			}
+			finally
+			{
+				writer.Dispose();
+			}
+		}
 
 		private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket)
 		{
@@ -157,7 +199,7 @@ namespace McProtoNet.Client
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static OutputPacket CreateLoginStart(string name)
+		private static OutputPacket CreateLoginStart(string name, LoginOptions options)
 		{
 			if (name.Length > 16)
 			{
@@ -169,6 +211,16 @@ namespace McProtoNet.Client
 			{
 				writer.WriteVarInt(0x00); //Packet Id
 				writer.WriteString(name);
+
+				if (options.ProtocolVersion == 765)
+				{
+					Guid guid = Guid.NewGuid();
+
+					byte[] data = guid.ToByteArray();
+
+					writer.Write(data);
+				}
+
 				writer.TryDetachBuffer(out MemoryOwner<byte> buffer);
 				return new OutputPacket(buffer);
 			}
