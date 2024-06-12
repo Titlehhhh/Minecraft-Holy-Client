@@ -46,13 +46,17 @@ public sealed class ProtocolSourceGenerator
 		netNamespace.Classes.Add(coreClass);
 
 		{
-			ProtodefType idMap = clientPackets.Types["packet"];
+			ProtodefContainer idMap = clientPackets.Types["packet"] as ProtodefContainer;
+			ProtodefMapper mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
+			Dictionary<string, string> nameToId = mapper.Mappings
+				.ToDictionary(id => "packet_" + id.Value, v => v.Key);
 
 
 			foreach ((string packetName, ProtodefType type) in clientPackets.Types)
 			{
 				if (packetName != "packet")
 				{
+
 					ProtodefContainer fields = type as ProtodefContainer;
 					if (fields.IsAllFieldsPrimitive())
 					{
@@ -77,18 +81,18 @@ public sealed class ProtocolSourceGenerator
 						}
 
 
-						var method = CreateSendMethod(fields, packetName);
+						var method = CreateSendMethod(fields, packetName, nameToId[packetName]);
 
 						coreClass.Methods.Add(method);
 					}
 				}
 			}
 		}
-		
+
 
 	}
 
-	private NetMethod CreateSendMethod(ProtodefContainer container, string name)
+	private NetMethod CreateSendMethod(ProtodefContainer container, string name, string id)
 	{
 		NetMethod method = new NetMethod();
 
@@ -101,7 +105,7 @@ public sealed class ProtocolSourceGenerator
 		List<string> instructions = new List<string>();
 
 		instructions.Add("var writer = new MinecraftPrimitiveWriterSlim();");
-
+		instructions.Add($"writer.WriteVarInt({id});");
 		foreach (ProtodefContainerField field in container)
 		{
 			if (field.Anon == true)
@@ -129,15 +133,15 @@ public sealed class ProtocolSourceGenerator
 			{
 
 
-				
-				
+
+
 
 				string writeMethod = GenerateWriteMethod(field.Type, field.Name);
 
 
 				instructions.Add(writeMethod);
 
-				
+
 
 			}
 			catch (Exception ex)
@@ -209,7 +213,7 @@ public sealed class ProtocolSourceGenerator
 		else if (type is ProtodefArray array)
 		{
 
-			string iterator = $"i_{ depth}";
+			string iterator = $"i_{depth}";
 
 			return $"{GenerateWriteMethod(array.CountType, name + ".Length", 1 + depth)}\n" +
 				$"for (int {iterator} = 0; {iterator} < {name}.Length; {iterator}++)\n" +
