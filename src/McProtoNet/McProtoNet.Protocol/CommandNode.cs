@@ -36,7 +36,7 @@ namespace McProtoNet.Protocol
 
 
 
-		public CommandNodeFlags Flags { get; }
+		//public CommandNodeFlags Flags { get; }
 
 		public int[] Children { get; }
 

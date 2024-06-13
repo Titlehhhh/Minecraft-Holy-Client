@@ -21,6 +21,7 @@ namespace SourceGenerator.NetTypes
 					stringBuilder.Append($"using {item};");
 				}
 				stringBuilder.AppendLine();
+				stringBuilder.AppendLine();
 			}
 
 			stringBuilder.AppendLine($"namespace {Name}")

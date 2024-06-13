@@ -13,7 +13,7 @@ namespace McProtoNet.Serialization
 	{
 		private static readonly MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator<byte>();
 
-		private BufferWriterSlim<byte> writerSlim = new BufferWriterSlim<byte>(10, s_allocator);
+		private BufferWriterSlim<byte> writerSlim = new BufferWriterSlim<byte>(64, s_allocator);
 		public MinecraftPrimitiveWriterSlim()
 		{
 

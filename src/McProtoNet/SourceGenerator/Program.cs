@@ -5,23 +5,6 @@ using SourceGenerator.ProtoDefTypes;
 using System;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-
-public sealed class ProtocolVersion
-{
-	[JsonPropertyName("minecraftVersion")]
-	public string MinecraftVersion { get; set; }
-	[JsonPropertyName("version")]
-	public int Version { get; set; }
-	[JsonPropertyName("dataVersion")]
-	public int DataVersion { get; set; }
-	[JsonPropertyName("usesNetty")]
-	public bool UsesNetty { get; set; }
-	[JsonPropertyName("majorVersion")]
-	public string MajorVersion { get; set; }
-	[JsonPropertyName("releaseType")]
-	public string ReleaseType { get; set; }
-}
 
 public sealed class Protocol
 {
@@ -33,13 +16,14 @@ public class Program
 {
 	public static Dictionary<string, string> MapWriteMethods = new Dictionary<string, string>()
 	{
-		{"","" }
+		{ "", "" }
 	};
 
 
 	public static string Testpath = @"C:\Users\Title\OneDrive\Рабочий стол\Test.cs";
 
-	public static string Root = "C:\\Users\\Title\\source\\repos\\Minecraft-Holy-Client\\src\\McProtoNet\\McProtoNet.Protocol";
+	public static string Root =
+		"C:\\Users\\Title\\source\\repos\\Minecraft-Holy-Client\\src\\McProtoNet\\McProtoNet.Protocol";
 
 	public static string dataPath = @"minecraft-data\data";
 
@@ -104,10 +88,10 @@ public class Program
 
 		if (!Directory.Exists(protocolDir))
 			Directory.CreateDirectory(protocolDir);
-		
-			
 
-		foreach(var item in collection.Protocols)
+
+
+		foreach (var item in collection.Protocols)
 		{
 			ProtocolSourceGenerator generator = new()
 			{
@@ -117,21 +101,21 @@ public class Program
 
 			var ns = generator.Generate();
 
+
+
 			string fileName = $"Protocol{item.Key}.cs";
 
 			fileName = Path.Combine(protocolDir, fileName);
 
-			await File.WriteAllTextAsync(fileName, ns.ToString());
+			string s = ns.ToString().Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+
+			await File.WriteAllTextAsync(fileName, s);
 		}
 
-	
-		
+
+
 
 	}
-
-	
-
-
 }
 
 

@@ -21,6 +21,7 @@ public sealed class ProtocolSourceGenerator
 		netNamespace.Name = "McProtoNet.Protocol" + Version;
 
 		netNamespace.Usings.Add("McProtoNet.Serialization");
+		netNamespace.Usings.Add("McProtoNet.Protocol");
 
 		foreach ((string nsName, Namespace side) in Protocol.Namespaces)
 		{
@@ -41,6 +42,7 @@ public sealed class ProtocolSourceGenerator
 	{
 		NetClass coreClass = new NetClass();
 
+		coreClass.BaseClass = "ProtocolBase";
 		coreClass.Name = $"Protocol_{Version}";
 		coreClass.IsSealed = true;
 		netNamespace.Classes.Add(coreClass);
@@ -104,7 +106,7 @@ public sealed class ProtocolSourceGenerator
 
 		List<string> instructions = new List<string>();
 
-		instructions.Add("var writer = new MinecraftPrimitiveWriterSlim();");
+		instructions.Add("scoped var writer = new MinecraftPrimitiveWriterSlim();");
 		instructions.Add($"writer.WriteVarInt({id});");
 		foreach (ProtodefContainerField field in container)
 		{
@@ -129,39 +131,14 @@ public sealed class ProtocolSourceGenerator
 
 			arguments.Add((netType, field.Name));
 
-			try
-			{
+			string writeMethod = GenerateWriteMethod(field.Type, field.Name);
 
-
-
-
-
-				string writeMethod = GenerateWriteMethod(field.Type, field.Name);
-
-
-				instructions.Add(writeMethod);
-
-
-
-			}
-			catch (Exception ex)
-			{
-
-
-				throw;
-			}
-
-
+			instructions.AddRange(writeMethod.Split("\n"));
 		}
 
 
-		instructions.Add("var buffer_codeGen = writer.GetWrittenMemory();");
-		instructions.Add("try {");
-		instructions.Add("return Task.CompletedTask;");
+		instructions.Add("return base.SendPacketCore(writer.GetWrittenMemory());");
 
-		instructions.Add("} finally {");
-		instructions.Add("buffer_codeGen.Dispose();");
-		instructions.Add("}");
 
 		method.ReturnType = "Task";
 
@@ -207,6 +184,7 @@ public sealed class ProtocolSourceGenerator
 				$"}}\n" +
 				$"else\n" +
 				$"{{\n" +
+				$"\twriter.WriteBoolean(true);\n" +
 				$"\t{GenerateWriteMethod(option.Type, name, depth + 1)}\n" +
 				$"}}\n";
 		}
