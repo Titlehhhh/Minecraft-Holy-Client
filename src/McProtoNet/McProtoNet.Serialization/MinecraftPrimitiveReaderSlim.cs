@@ -156,5 +156,17 @@ namespace McProtoNet.Serialization
 			return Unsafe.BitCast<long, double>(value);
 		}
 
+		public string ReadString()
+		{
+			//TODO
+			throw new NotImplementedException();
+		}
+        
+		public byte[] ReadRestBuffer()
+		{
+			//TODO
+			throw new NotImplementedException();
+		}
+
 	}
 }

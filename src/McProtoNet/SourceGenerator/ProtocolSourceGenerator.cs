@@ -20,6 +20,7 @@ public sealed class ProtocolSourceGenerator
         netNamespace.Usings.Add("McProtoNet.Serialization");
         netNamespace.Usings.Add("McProtoNet.Protocol");
         netNamespace.Usings.Add("McProtoNet.Abstractions");
+        netNamespace.Usings.Add("System.Reactive.Subjects");
 
         foreach ((string nsName, Namespace side) in Protocol.Namespaces)
         {
@@ -95,22 +96,38 @@ public sealed class ProtocolSourceGenerator
         }
 
         {
-            NetMethod receveMethod = new NetMethod();
+            NetMethod recieveMethod = new NetMethod();
 
-            receveMethod.IsOverride = true;
-            receveMethod.Name = "OnPacketReceived";
-            receveMethod.ReturnType = "void";
+            recieveMethod.IsOverride = true;
+            recieveMethod.Name = "OnPacketReceived";
+            recieveMethod.ReturnType = "void";
+            recieveMethod.Arguments.Add(("InputPacket", "packet"));
 
-            ProtodefContainer idMap = clientPackets.Types["packet"] as ProtodefContainer;
+            ProtodefContainer idMap = serverPackets.Types["packet"] as ProtodefContainer;
             ProtodefMapper mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
             Dictionary<string, string> nameToId = mapper.Mappings
                 .ToDictionary(id => "packet_" + id.Value, v => v.Key);
 
+            coreClass.Methods.Add(recieveMethod);
+
+            recieveMethod.Instructions.Add($"switch(packet.Id)\n{{");
 
             foreach ((string packetName, ProtodefType type) in serverPackets.Types)
             {
                 if (packetName != "packet")
                 {
+                    string clipPacketName = packetName.Substring("packet_".Length);
+                    string packetId = null;
+                    try
+                    {
+                        packetId = nameToId[packetName];
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(netNamespace.Name);
+                        throw;
+                    }
+
                     ProtodefContainer fields = type as ProtodefContainer;
                     if (fields is null)
                         Debugger.Break();
@@ -137,7 +154,32 @@ public sealed class ProtocolSourceGenerator
 
                         try
                         {
-                            NetClass packetClass = CreateClassForServerPacket(fields, packetName);
+                            NetClass packetClass = CreateClassForPacket(fields, packetName);
+
+
+                            NetField subjectField = new NetField();
+
+
+                            subjectField.Name = $"_on{clipPacketName}";
+                            subjectField.Modifier = "private";
+                            subjectField.Type = $"Subject<{packetClass.Name}>";
+                            subjectField.IsReadOnly = true;
+                            subjectField.DefaultValue = "new ()";
+                            coreClass.Fields.Add(subjectField);
+
+                            NetProperty observableProp = new NetProperty();
+
+                            observableProp.Name = $"On{clipPacketName.Pascalize()}Packet";
+                            observableProp.Type = $"IObservable<{packetClass.Name}>";
+                            observableProp.GetSet = $"=>{subjectField.Name};";
+
+                            coreClass.Properties.Add(observableProp);
+
+                            recieveMethod.Instructions.Add($"case {packetId}:");
+                            recieveMethod.Instructions.AddRange(GenerateReadInstructions(fields, subjectField.Name,
+                                packetClass.Name));
+                            recieveMethod.Instructions.Add("break;");
+
 
                             netNamespace.Classes.Add(packetClass);
                         }
@@ -147,24 +189,140 @@ public sealed class ProtocolSourceGenerator
                     }
                 }
             }
+
+            recieveMethod.Instructions.Add("}");
         }
     }
 
-    private NetClass CreateClassForServerPacket(ProtodefContainer container, string name)
+
+    private IEnumerable<string> GenerateReadInstructions(ProtodefContainer container, string subjectType,
+        string packetClassName)
     {
-        NetClass result = new();
+        yield return "{";
+        yield return $"scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);";
+        List<string> vars = new();
+        foreach (var field in container)
+        {
+            string fieldVar = field.Name.Camelize();
+            vars.Add(fieldVar);
+            yield return GenerateReadMethod(field.Type, $"var {fieldVar}");
+        }
+
+        yield return $"{subjectType}.OnNext(new {packetClassName}({string.Join(", ", vars)}));";
+        yield return "}";
+    }
+
+    private string GenerateReadMethod(ProtodefType type, string varName, int depth = 0)
+    {
+        if (type is ProtodefNumericType protodefNumeric)
+        {
+            string writeName = readDict[protodefNumeric.OriginalName];
+
+            return $"{varName} = reader.{writeName}();";
+        }
+        else if (type is ProtodefVarInt)
+        {
+            return $"{varName} = reader.ReadVarInt();";
+        }
+        else if (type is ProtodefVarLong)
+        {
+            return $"{varName} = reader.ReadVarLong();";
+        }
+        else if (type is ProtodefString str)
+        {
+            return $"{varName} = reader.ReadString();";
+        }
+        else if (type is ProtodefVoid)
+        {
+            return "";
+        }
+        else if (type is ProtodefBool)
+        {
+            return $"{varName} = reader.ReadBoolean();";
+        }
+        else if (type is ProtodefOption option)
+        {
+            return $"if(!reader.ReadBoolean())\n" +
+                   $"{{\n" +
+                   $"{varName} = null;\n" +
+                   $"}}\n" +
+                   $"else\n" +
+                   $"{{" +
+                   $"\t{GenerateReadMethod(option.Type, varName, depth + 1)}\n" +
+                   $"}}";
+        }
+        else if (type is ProtodefArray array)
+        {
+            string iterator = $"i_{depth}";
+            string tmpArrname = $"tempArray_{depth}";
+            string lenName = $"tempArrayLength_{depth}";
+            string len = "var " + lenName;
+            string first = GenerateReadMethod(array.CountType, len, depth + 1);
+
+
+            string netType = GetNetType(array.Type);
+            return $"{first}\n" +
+                   $"var {tmpArrname} = new {netType}[{lenName}];\n" +
+                   $"for({GetNetType(array.CountType)} {iterator} =0;{iterator}< {lenName};{iterator}++)\n" +
+                   $"{{\n" +
+                   $"\t{GenerateReadMethod(array.Type, $"var for_item_{depth}", depth + 1)}\n" +
+                   $"\t{tmpArrname}[{iterator}] = for_item_{depth};\n" +
+                   $"}}\n" +
+                   $"{varName} = {tmpArrname};";
+        }
+        else if (type is ProtodefBuffer buffer)
+        {
+            if (buffer.CountType is not null)
+            {
+                string lenName = $"tempArrayLength_{depth}";
+                string len = "var " + lenName;
+                string first = GenerateReadMethod(buffer.CountType, len, depth + 1);
+
+                return $"{first}\n" +
+                       $"{varName} = reader.ReadBuffer({lenName});";
+            }
+            else if (buffer.Count is not null)
+            {
+                string lenName = $"tempArrayLength_{depth}";
+                return $"var {lenName} = reader.ReadVarInt();\n" +
+                       $"{varName} = reader.ReadBuffer({lenName})";
+            }
+            else if (buffer.Rest == true)
+            {
+                return $"{varName} = reader.ReadRestBuffer();";
+            }
+            else
+            {
+                throw new Exception("Buffer fatal");
+            }
+        }
+        else if (type is ProtodefCustomType cus)
+        {
+            string writeName = readDict[cus.Name];
+
+            return $"{varName} = reader.{writeName}();";
+        }
+        else
+        {
+            throw new Exception("Not support type: " + type.ToString());
+        }
+    }
+
+    private NetClass CreateClassForPacket(ProtodefContainer container, string name)
+    {
+        NetClass @result = new();
         result.Name = name.Pascalize();
 
         NetClass.NetConstructor constructor = new NetClass.NetConstructor();
         result.Constructors.Add(constructor);
         foreach (var field in container)
         {
-            string netType = GetNetType(field);
+            string netType = GetNetType(field.Type);
 
             string fieldNamePascalCase = field.Name.Pascalize();
             result.Properties.Add(new NetProperty()
             {
-                GetSet = "{ get; }",
+                GetSet = "{ get; internal set; }",
                 Modifier = "public",
                 Name = fieldNamePascalCase,
                 Type = netType
@@ -176,10 +334,6 @@ public sealed class ProtocolSourceGenerator
         }
 
         return result;
-    }
-
-    private void AddDeserializationReceive()
-    {
     }
 
     private NetMethod CreateSendMethod(ProtodefContainer container, string name, string id)
@@ -202,7 +356,7 @@ public sealed class ProtocolSourceGenerator
             if (field.Anon == true)
                 throw new NotSupportedException("Anon no support");
 
-            string netType = GetNetType(field);
+            string netType = GetNetType(field.Type);
 
             arguments.Add((netType, field.Name));
 
@@ -308,21 +462,21 @@ public sealed class ProtocolSourceGenerator
         }
     }
 
-    private string GetNetType(ProtodefContainerField field)
+    private string GetNetType(ProtodefType type)
     {
         string? netType = null;
-        if (field.Type is ProtodefCustomType customType)
+        if (type is ProtodefCustomType customType)
         {
             netType = customToNet[customType.Name];
         }
         else
         {
-            netType = field.Type.GetNetType();
+            netType = type.GetNetType();
         }
 
         if (netType == null)
         {
-            throw new TypeNotSupportedException(field.Type.ToString());
+            throw new TypeNotSupportedException(type.ToString());
         }
 
         return netType;
