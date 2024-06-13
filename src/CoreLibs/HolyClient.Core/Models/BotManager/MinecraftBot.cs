@@ -1,5 +1,4 @@
-﻿using McProtoNet;
-using McProtoNet.Utils;
+﻿using McProtoNet.Utils;
 using Serilog;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;

@@ -8,6 +8,11 @@
 		public string Type { get; set; }
 
 		public string GetSet { get; set; } = "{ get; set; }";
+
+		public override string ToString()
+		{
+			return $"{Modifier} {Type} {Name} {GetSet}";
+		}
 	}
 
 }

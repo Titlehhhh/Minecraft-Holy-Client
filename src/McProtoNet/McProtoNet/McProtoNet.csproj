@@ -25,6 +25,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\QuickProxyNet\QuickProxyNet.csproj" />
+	  <ProjectReference Include="..\McProtoNet.Abstractions\McProtoNet.Abstractions.csproj" />
 	  <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj" />
 	  <ProjectReference Include="..\McProtoNet.Serialization\McProtoNet.Serialization.csproj" />
 	</ItemGroup>

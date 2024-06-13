@@ -3,7 +3,6 @@ using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
 using HolyClient.ViewModels.Pages.StressTest.Dialogs;
-using McProtoNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;

@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "src\Sandbox\Sand
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "McProtoNet.Serialization", "src\McProtoNet\McProtoNet.Serialization\McProtoNet.Serialization.csproj", "{B6144ABE-E679-4B15-9585-440B0718F87C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McProtoNet.Abstractions", "src\McProtoNet\McProtoNet.Abstractions\McProtoNet.Abstractions.csproj", "{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,10 @@ Global
 		{B6144ABE-E679-4B15-9585-440B0718F87C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6144ABE-E679-4B15-9585-440B0718F87C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6144ABE-E679-4B15-9585-440B0718F87C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +196,7 @@ Global
 		{59B24766-4950-4A48-BD1D-05F140D9B911} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 		{CAD26A2F-C6A0-4914-86CE-EA7932BA2A59} = {0F7BA8C4-5BDB-4810-9312-EDC17D450259}
 		{B6144ABE-E679-4B15-9585-440B0718F87C} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
+		{CC58A1F6-715A-4AB3-BA23-B9ECE14E4E45} = {E8DD8BFD-216D-4435-B9F8-E34C03D29FF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {41AEE66A-568B-4B2B-A50B-5AC57D067A07}

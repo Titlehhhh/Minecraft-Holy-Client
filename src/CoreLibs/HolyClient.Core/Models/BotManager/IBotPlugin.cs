@@ -1,5 +1,4 @@
-﻿using McProtoNet;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 
 namespace HolyClient.Core.Models.BotManager
 {

@@ -15,6 +15,9 @@ namespace SourceGenerator.NetTypes
 
 
 		public bool IsAsync { get; set; } = false;
+
+		public bool IsOverride { get; set; } = false;
+		
 		public List<(string, string)> Arguments { get; set; } = new();
 
 		public string Name { get; set; }
@@ -26,7 +29,9 @@ namespace SourceGenerator.NetTypes
 
 			string asy = IsAsync ? " async " : " ";
 
-			stringBuilder.AppendLine($"{Modifier}{asy}{ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Item1 + " " + x.Item2))})");
+			string ovr = IsOverride ? " override " : "";
+			
+			stringBuilder.AppendLine($"{Modifier}{ovr}{asy}{ReturnType} {Name}({string.Join(", ", Arguments.Select(x => x.Item1 + " " + x.Item2))})");
 
 			stringBuilder.AppendLine("{");
 

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\McProtoNet.Abstractions\McProtoNet.Abstractions.csproj" />
     <ProjectReference Include="..\McProtoNet.Serialization\McProtoNet.Serialization.csproj" />
   </ItemGroup>
 

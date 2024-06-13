@@ -5,11 +5,12 @@ using Org.BouncyCastle.Bcpg;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Reactive.Subjects;
+using McProtoNet.Abstractions;
 
 
 namespace McProtoNet.Protocol
 {
-	public delegate void PacketHandler(object sender, InputPacket inputPacket);
+	
 	internal sealed class PacketPipeHandler : Disposable
 	{
 		public PacketHandler PacketReceived;

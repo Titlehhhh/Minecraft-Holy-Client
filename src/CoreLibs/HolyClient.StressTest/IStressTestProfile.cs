@@ -1,7 +1,6 @@
 ﻿using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
-using McProtoNet;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 

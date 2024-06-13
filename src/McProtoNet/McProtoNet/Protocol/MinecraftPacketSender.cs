@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Bcpg;
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol
 {

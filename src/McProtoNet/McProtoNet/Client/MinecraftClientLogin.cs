@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
+using McProtoNet.Abstractions;
 
 namespace McProtoNet.Client
 {
@@ -108,16 +109,16 @@ namespace McProtoNet.Client
 
 						Debug.WriteLine("Compress: " + threshold);
 						break;
-					//case 0x04:
-					//	//Login plugin request
-					//	Debug.WriteLine("Plugin");
-					//	ReadOnlySequence<byte> buffer = inputPacket.Data;
-					//	int offset = 0;
-					//	buffer.TryReadVarInt(out int messageId, out offset);
-					//	buffer = buffer.Slice(offset);
-					//	buffer.TryReadString(out string channel, out offset);
-					//	ReadOnlySequence<byte> data = buffer.Slice(offset);
-					//	break;
+					case 0x04:
+						//Login plugin request
+						Debug.WriteLine("Plugin");
+						ReadOnlySequence<byte> buffer = inputPacket.Data;
+						int offset = 0;
+						buffer.TryReadVarInt(out int messageId, out offset);
+						buffer = buffer.Slice(offset);
+						buffer.TryReadString(out string channel, out offset);
+						ReadOnlySequence<byte> data = buffer.Slice(offset);
+						break;
 
 					default: throw new Exception("Unknown packet: " + inputPacket.Id);
 				}
@@ -127,13 +128,7 @@ namespace McProtoNet.Client
 			}
 
 
-			while (true)
-			{
-				InputPacket inputPacket = await reader.ReadNextPacketAsync().ConfigureAwait(false);
-
-				
-				Console.WriteLine("ReadConfig: " + inputPacket.Id);
-			}
+			
 
 
 

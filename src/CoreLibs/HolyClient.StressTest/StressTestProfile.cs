@@ -4,7 +4,6 @@ using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
-using McProtoNet;
 using McProtoNet.Utils;
 using MessagePack;
 using QuickProxyNet;

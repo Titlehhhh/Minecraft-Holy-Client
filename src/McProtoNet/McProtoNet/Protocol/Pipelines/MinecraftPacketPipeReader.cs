@@ -5,6 +5,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
+using McProtoNet.Abstractions;
 
 
 namespace McProtoNet.Protocol

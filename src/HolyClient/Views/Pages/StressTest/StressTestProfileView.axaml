@@ -19,8 +19,7 @@
 			 xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 			 xmlns:converters="using:HolyClient.Converters"
-			 xmlns:minecraft="using:McProtoNet"			 
-			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
              x:Class="HolyClient.Views.StressTestProfileView">
 	<UserControl.Resources>
 		<converters:MinecraftVersionToStringConverter x:Key="VersionToStringConverter"/>

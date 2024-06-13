@@ -1,6 +1,5 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
-using McProtoNet;
 using QuickProxyNet;
 using Serilog;
 using Serilog.Core;
