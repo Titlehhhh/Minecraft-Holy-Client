@@ -2,8 +2,7 @@
 
 namespace McProtoNet.Protocol
 {
-	public sealed class Ingredient : Collection<Slot>
-	{
-
-	}
+    public sealed class Ingredient : Collection<Slot>
+    {
+    }
 }

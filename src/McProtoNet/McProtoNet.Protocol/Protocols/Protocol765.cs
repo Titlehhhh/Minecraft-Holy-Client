@@ -14,11 +14,15 @@ namespace McProtoNet.Protocol765
         private readonly Subject<PacketSpawnEntity> _onspawn_entity = new();
         private readonly Subject<PacketSpawnEntityExperienceOrb> _onspawn_entity_experience_orb = new();
         private readonly Subject<PacketAnimation> _onanimation = new();
+        private readonly Subject<PacketBlockBreakAnimation> _onblock_break_animation = new();
+        private readonly Subject<PacketBlockAction> _onblock_action = new();
+        private readonly Subject<PacketBlockChange> _onblock_change = new();
         private readonly Subject<PacketDifficulty> _ondifficulty = new();
         private readonly Subject<PacketChunkBatchFinished> _onchunk_batch_finished = new();
         private readonly Subject<PacketChunkBatchStart> _onchunk_batch_start = new();
         private readonly Subject<PacketCloseWindow> _onclose_window = new();
         private readonly Subject<PacketCraftProgressBar> _oncraft_progress_bar = new();
+        private readonly Subject<PacketSetSlot> _onset_slot = new();
         private readonly Subject<PacketSetCooldown> _onset_cooldown = new();
         private readonly Subject<PacketChatSuggestions> _onchat_suggestions = new();
         private readonly Subject<PacketEntityStatus> _onentity_status = new();
@@ -26,11 +30,13 @@ namespace McProtoNet.Protocol765
         private readonly Subject<PacketGameStateChange> _ongame_state_change = new();
         private readonly Subject<PacketOpenHorseWindow> _onopen_horse_window = new();
         private readonly Subject<PacketKeepAlive> _onkeep_alive = new();
+        private readonly Subject<PacketWorldEvent> _onworld_event = new();
         private readonly Subject<PacketRelEntityMove> _onrel_entity_move = new();
         private readonly Subject<PacketEntityMoveLook> _onentity_move_look = new();
         private readonly Subject<PacketEntityLook> _onentity_look = new();
         private readonly Subject<PacketVehicleMove> _onvehicle_move = new();
         private readonly Subject<PacketOpenBook> _onopen_book = new();
+        private readonly Subject<PacketOpenSignEntity> _onopen_sign_entity = new();
         private readonly Subject<PacketCraftRecipeResponse> _oncraft_recipe_response = new();
         private readonly Subject<PacketAbilities> _onabilities = new();
         private readonly Subject<PacketEndCombatEvent> _onend_combat_event = new();
@@ -50,6 +56,7 @@ namespace McProtoNet.Protocol765
         private readonly Subject<PacketExperience> _onexperience = new();
         private readonly Subject<PacketUpdateHealth> _onupdate_health = new();
         private readonly Subject<PacketSetPassengers> _onset_passengers = new();
+        private readonly Subject<PacketSpawnPosition> _onspawn_position = new();
         private readonly Subject<PacketUpdateTime> _onupdate_time = new();
         private readonly Subject<PacketCollect> _oncollect = new();
         private readonly Subject<PacketEntityTeleport> _onentity_teleport = new();
@@ -77,11 +84,15 @@ namespace McProtoNet.Protocol765
             _onspawn_entity_experience_orb;
 
         public IObservable<PacketAnimation> OnAnimationPacket => _onanimation;
+        public IObservable<PacketBlockBreakAnimation> OnBlockBreakAnimationPacket => _onblock_break_animation;
+        public IObservable<PacketBlockAction> OnBlockActionPacket => _onblock_action;
+        public IObservable<PacketBlockChange> OnBlockChangePacket => _onblock_change;
         public IObservable<PacketDifficulty> OnDifficultyPacket => _ondifficulty;
         public IObservable<PacketChunkBatchFinished> OnChunkBatchFinishedPacket => _onchunk_batch_finished;
         public IObservable<PacketChunkBatchStart> OnChunkBatchStartPacket => _onchunk_batch_start;
         public IObservable<PacketCloseWindow> OnCloseWindowPacket => _onclose_window;
         public IObservable<PacketCraftProgressBar> OnCraftProgressBarPacket => _oncraft_progress_bar;
+        public IObservable<PacketSetSlot> OnSetSlotPacket => _onset_slot;
         public IObservable<PacketSetCooldown> OnSetCooldownPacket => _onset_cooldown;
         public IObservable<PacketChatSuggestions> OnChatSuggestionsPacket => _onchat_suggestions;
         public IObservable<PacketEntityStatus> OnEntityStatusPacket => _onentity_status;
@@ -89,11 +100,13 @@ namespace McProtoNet.Protocol765
         public IObservable<PacketGameStateChange> OnGameStateChangePacket => _ongame_state_change;
         public IObservable<PacketOpenHorseWindow> OnOpenHorseWindowPacket => _onopen_horse_window;
         public IObservable<PacketKeepAlive> OnKeepAlivePacket => _onkeep_alive;
+        public IObservable<PacketWorldEvent> OnWorldEventPacket => _onworld_event;
         public IObservable<PacketRelEntityMove> OnRelEntityMovePacket => _onrel_entity_move;
         public IObservable<PacketEntityMoveLook> OnEntityMoveLookPacket => _onentity_move_look;
         public IObservable<PacketEntityLook> OnEntityLookPacket => _onentity_look;
         public IObservable<PacketVehicleMove> OnVehicleMovePacket => _onvehicle_move;
         public IObservable<PacketOpenBook> OnOpenBookPacket => _onopen_book;
+        public IObservable<PacketOpenSignEntity> OnOpenSignEntityPacket => _onopen_sign_entity;
         public IObservable<PacketCraftRecipeResponse> OnCraftRecipeResponsePacket => _oncraft_recipe_response;
         public IObservable<PacketAbilities> OnAbilitiesPacket => _onabilities;
         public IObservable<PacketEndCombatEvent> OnEndCombatEventPacket => _onend_combat_event;
@@ -116,6 +129,7 @@ namespace McProtoNet.Protocol765
         public IObservable<PacketExperience> OnExperiencePacket => _onexperience;
         public IObservable<PacketUpdateHealth> OnUpdateHealthPacket => _onupdate_health;
         public IObservable<PacketSetPassengers> OnSetPassengersPacket => _onset_passengers;
+        public IObservable<PacketSpawnPosition> OnSpawnPositionPacket => _onspawn_position;
         public IObservable<PacketUpdateTime> OnUpdateTimePacket => _onupdate_time;
         public IObservable<PacketCollect> OnCollectPacket => _oncollect;
         public IObservable<PacketEntityTeleport> OnEntityTeleportPacket => _onentity_teleport;
@@ -150,6 +164,15 @@ namespace McProtoNet.Protocol765
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x00);
             writer.WriteVarInt(teleportId);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendQueryBlockNbt(int transactionId, Position location)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x01);
+            writer.WriteVarInt(transactionId);
+            writer.WritePosition(location);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -279,6 +302,17 @@ namespace McProtoNet.Protocol765
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
+        public Task SendUpdateCommandBlock(Position location, string command, int mode, byte flags)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x2d);
+            writer.WritePosition(location);
+            writer.WriteString(command);
+            writer.WriteVarInt(mode);
+            writer.WriteUnsignedByte(flags);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
         public Task SendUpdateCommandBlockMinecart(int entityId, string command, bool track_output)
         {
             scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -286,6 +320,31 @@ namespace McProtoNet.Protocol765
             writer.WriteVarInt(entityId);
             writer.WriteString(command);
             writer.WriteBoolean(track_output);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offset_x,
+            sbyte offset_y, sbyte offset_z, sbyte size_x, sbyte size_y, sbyte size_z, int mirror, int rotation,
+            string metadata, float integrity, int seed, byte flags)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x31);
+            writer.WritePosition(location);
+            writer.WriteVarInt(action);
+            writer.WriteVarInt(mode);
+            writer.WriteString(name);
+            writer.WriteSignedByte(offset_x);
+            writer.WriteSignedByte(offset_y);
+            writer.WriteSignedByte(offset_z);
+            writer.WriteSignedByte(size_x);
+            writer.WriteSignedByte(size_y);
+            writer.WriteSignedByte(size_z);
+            writer.WriteVarInt(mirror);
+            writer.WriteVarInt(rotation);
+            writer.WriteString(metadata);
+            writer.WriteFloat(integrity);
+            writer.WriteVarInt(seed);
+            writer.WriteUnsignedByte(flags);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -336,6 +395,16 @@ namespace McProtoNet.Protocol765
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x0e);
             writer.WriteUnsignedByte(windowId);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendGenerateStructure(Position location, int levels, bool keepJigsaws)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x14);
+            writer.WritePosition(location);
+            writer.WriteVarInt(levels);
+            writer.WriteBoolean(keepJigsaws);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -436,6 +505,17 @@ namespace McProtoNet.Protocol765
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
+        public Task SendBlockDig(int status, Position location, sbyte face, int sequence)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x21);
+            writer.WriteVarInt(status);
+            writer.WritePosition(location);
+            writer.WriteSignedByte(face);
+            writer.WriteVarInt(sequence);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
         public Task SendEntityAction(int entityId, int actionId, int jumpBoost)
         {
             scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -491,6 +571,45 @@ namespace McProtoNet.Protocol765
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
+        public Task SendSetCreativeSlot(short slot, Slot? item)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x2f);
+            writer.WriteSignedShort(slot);
+            writer.WriteSlot(item);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendUpdateJigsawBlock(Position location, string name, string target, string pool, string finalState,
+            string jointType, int selection_priority, int placement_priority)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x30);
+            writer.WritePosition(location);
+            writer.WriteString(name);
+            writer.WriteString(target);
+            writer.WriteString(pool);
+            writer.WriteString(finalState);
+            writer.WriteString(jointType);
+            writer.WriteVarInt(selection_priority);
+            writer.WriteVarInt(placement_priority);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendUpdateSign(Position location, bool isFrontText, string text1, string text2, string text3,
+            string text4)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x32);
+            writer.WritePosition(location);
+            writer.WriteBoolean(isFrontText);
+            writer.WriteString(text1);
+            writer.WriteString(text2);
+            writer.WriteString(text3);
+            writer.WriteString(text4);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
         public Task SendArmAnimation(int hand)
         {
             scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -504,6 +623,22 @@ namespace McProtoNet.Protocol765
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x34);
             writer.WriteUUID(target);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY,
+            float cursorZ, bool insideBlock, int sequence)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x35);
+            writer.WriteVarInt(hand);
+            writer.WritePosition(location);
+            writer.WriteVarInt(direction);
+            writer.WriteFloat(cursorX);
+            writer.WriteFloat(cursorY);
+            writer.WriteFloat(cursorZ);
+            writer.WriteBoolean(insideBlock);
+            writer.WriteVarInt(sequence);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -570,551 +705,744 @@ namespace McProtoNet.Protocol765
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
-        public override void OnPacketReceived(InputPacket packet)
+        protected override void OnPacketReceived(InputPacket packet)
         {
             switch (packet.Id)
             {
                 case 0x01:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var objectUUID = reader.ReadUUID();
-                    var type = reader.ReadVarInt();
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var pitch = reader.ReadSignedByte();
-                    var yaw = reader.ReadSignedByte();
-                    var headPitch = reader.ReadSignedByte();
-                    var objectData = reader.ReadVarInt();
-                    var velocityX = reader.ReadSignedShort();
-                    var velocityY = reader.ReadSignedShort();
-                    var velocityZ = reader.ReadSignedShort();
-                    _onspawn_entity.OnNext(new PacketSpawnEntity(entityId, objectUUID, type, x, y, z, pitch, yaw,
-                        headPitch, objectData, velocityX, velocityY, velocityZ));
-                }
+                    if (_onspawn_entity.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        Guid objectUUID = reader.ReadUUID();
+                        int type = reader.ReadVarInt();
+                        double x = reader.ReadDouble();
+                        double y = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        sbyte pitch = reader.ReadSignedByte();
+                        sbyte yaw = reader.ReadSignedByte();
+                        sbyte headPitch = reader.ReadSignedByte();
+                        int objectData = reader.ReadVarInt();
+                        short velocityX = reader.ReadSignedShort();
+                        short velocityY = reader.ReadSignedShort();
+                        short velocityZ = reader.ReadSignedShort();
+                        _onspawn_entity.OnNext(new PacketSpawnEntity(entityId, objectUUID, type, x, y, z, pitch, yaw,
+                            headPitch, objectData, velocityX, velocityY, velocityZ));
+                    }
+
                     break;
                 case 0x02:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var count = reader.ReadSignedShort();
-                    _onspawn_entity_experience_orb.OnNext(new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
-                }
+                    if (_onspawn_entity_experience_orb.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        double x = reader.ReadDouble();
+                        double y = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        short count = reader.ReadSignedShort();
+                        _onspawn_entity_experience_orb.OnNext(
+                            new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
+                    }
+
                     break;
                 case 0x03:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var animation = reader.ReadUnsignedByte();
-                    _onanimation.OnNext(new PacketAnimation(entityId, animation));
-                }
+                    if (_onanimation.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        byte animation = reader.ReadUnsignedByte();
+                        _onanimation.OnNext(new PacketAnimation(entityId, animation));
+                    }
+
+                    break;
+                case 0x06:
+                    if (_onblock_break_animation.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        Position location = reader.ReadPosition();
+                        sbyte destroyStage = reader.ReadSignedByte();
+                        _onblock_break_animation.OnNext(new PacketBlockBreakAnimation(entityId, location,
+                            destroyStage));
+                    }
+
+                    break;
+                case 0x08:
+                    if (_onblock_action.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        Position location = reader.ReadPosition();
+                        byte byte1 = reader.ReadUnsignedByte();
+                        byte byte2 = reader.ReadUnsignedByte();
+                        int blockId = reader.ReadVarInt();
+                        _onblock_action.OnNext(new PacketBlockAction(location, byte1, byte2, blockId));
+                    }
+
+                    break;
+                case 0x09:
+                    if (_onblock_change.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        Position location = reader.ReadPosition();
+                        int type = reader.ReadVarInt();
+                        _onblock_change.OnNext(new PacketBlockChange(location, type));
+                    }
+
                     break;
                 case 0x0b:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var difficulty = reader.ReadUnsignedByte();
-                    var difficultyLocked = reader.ReadBoolean();
-                    _ondifficulty.OnNext(new PacketDifficulty(difficulty, difficultyLocked));
-                }
+                    if (_ondifficulty.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        byte difficulty = reader.ReadUnsignedByte();
+                        bool difficultyLocked = reader.ReadBoolean();
+                        _ondifficulty.OnNext(new PacketDifficulty(difficulty, difficultyLocked));
+                    }
+
                     break;
                 case 0x0c:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var batchSize = reader.ReadVarInt();
-                    _onchunk_batch_finished.OnNext(new PacketChunkBatchFinished(batchSize));
-                }
+                    if (_onchunk_batch_finished.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int batchSize = reader.ReadVarInt();
+                        _onchunk_batch_finished.OnNext(new PacketChunkBatchFinished(batchSize));
+                    }
+
                     break;
                 case 0x0d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    _onchunk_batch_start.OnNext(new PacketChunkBatchStart());
-                }
+                    if (_onchunk_batch_start.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        _onchunk_batch_start.OnNext(new PacketChunkBatchStart());
+                    }
+
                     break;
                 case 0x12:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var windowId = reader.ReadUnsignedByte();
-                    _onclose_window.OnNext(new PacketCloseWindow(windowId));
-                }
+                    if (_onclose_window.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        byte windowId = reader.ReadUnsignedByte();
+                        _onclose_window.OnNext(new PacketCloseWindow(windowId));
+                    }
+
                     break;
                 case 0x14:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var windowId = reader.ReadUnsignedByte();
-                    var property = reader.ReadSignedShort();
-                    var value = reader.ReadSignedShort();
-                    _oncraft_progress_bar.OnNext(new PacketCraftProgressBar(windowId, property, value));
-                }
+                    if (_oncraft_progress_bar.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        byte windowId = reader.ReadUnsignedByte();
+                        short property = reader.ReadSignedShort();
+                        short value = reader.ReadSignedShort();
+                        _oncraft_progress_bar.OnNext(new PacketCraftProgressBar(windowId, property, value));
+                    }
+
+                    break;
+                case 0x15:
+                    if (_onset_slot.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        sbyte windowId = reader.ReadSignedByte();
+                        int stateId = reader.ReadVarInt();
+                        short slot = reader.ReadSignedShort();
+                        Slot? item = reader.ReadSlot();
+                        _onset_slot.OnNext(new PacketSetSlot(windowId, stateId, slot, item));
+                    }
+
                     break;
                 case 0x16:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var itemID = reader.ReadVarInt();
-                    var cooldownTicks = reader.ReadVarInt();
-                    _onset_cooldown.OnNext(new PacketSetCooldown(itemID, cooldownTicks));
-                }
+                    if (_onset_cooldown.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int itemID = reader.ReadVarInt();
+                        int cooldownTicks = reader.ReadVarInt();
+                        _onset_cooldown.OnNext(new PacketSetCooldown(itemID, cooldownTicks));
+                    }
+
                     break;
                 case 0x17:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var action = reader.ReadVarInt();
-                    var tempArrayLength_0 = reader.ReadVarInt();
-                    var tempArray_0 = new string[tempArrayLength_0];
-                    for (int i_0 = 0; i_0 < tempArrayLength_0; i_0++)
+                    if (_onchat_suggestions.HasObservers)
                     {
-                        var for_item_0 = reader.ReadString();
-                        tempArray_0[i_0] = for_item_0;
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int action = reader.ReadVarInt();
+                        var tempArrayLength_1_0 = reader.ReadVarInt();
+                        var tempArray_1_0 = new string[tempArrayLength_1_0];
+                        for (int i_1_0 = 0; i_1_0 < tempArrayLength_1_0; i_1_0++)
+                        {
+                            var for_item_1_0 = reader.ReadString();
+                            tempArray_1_0[i_1_0] = for_item_1_0;
+                        }
+
+                        string[] entries = tempArray_1_0;
+                        _onchat_suggestions.OnNext(new PacketChatSuggestions(action, entries));
                     }
 
-                    var entries = tempArray_0;
-                    _onchat_suggestions.OnNext(new PacketChatSuggestions(action, entries));
-                }
                     break;
                 case 0x1d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadSignedInt();
-                    var entityStatus = reader.ReadSignedByte();
-                    _onentity_status.OnNext(new PacketEntityStatus(entityId, entityStatus));
-                }
+                    if (_onentity_status.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadSignedInt();
+                        sbyte entityStatus = reader.ReadSignedByte();
+                        _onentity_status.OnNext(new PacketEntityStatus(entityId, entityStatus));
+                    }
+
                     break;
                 case 0x1f:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var chunkZ = reader.ReadSignedInt();
-                    var chunkX = reader.ReadSignedInt();
-                    _onunload_chunk.OnNext(new PacketUnloadChunk(chunkZ, chunkX));
-                }
+                    if (_onunload_chunk.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int chunkZ = reader.ReadSignedInt();
+                        int chunkX = reader.ReadSignedInt();
+                        _onunload_chunk.OnNext(new PacketUnloadChunk(chunkZ, chunkX));
+                    }
+
                     break;
                 case 0x20:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var reason = reader.ReadUnsignedByte();
-                    var gameMode = reader.ReadFloat();
-                    _ongame_state_change.OnNext(new PacketGameStateChange(reason, gameMode));
-                }
+                    if (_ongame_state_change.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        byte reason = reader.ReadUnsignedByte();
+                        float gameMode = reader.ReadFloat();
+                        _ongame_state_change.OnNext(new PacketGameStateChange(reason, gameMode));
+                    }
+
                     break;
                 case 0x21:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var windowId = reader.ReadUnsignedByte();
-                    var nbSlots = reader.ReadVarInt();
-                    var entityId = reader.ReadSignedInt();
-                    _onopen_horse_window.OnNext(new PacketOpenHorseWindow(windowId, nbSlots, entityId));
-                }
+                    if (_onopen_horse_window.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        byte windowId = reader.ReadUnsignedByte();
+                        int nbSlots = reader.ReadVarInt();
+                        int entityId = reader.ReadSignedInt();
+                        _onopen_horse_window.OnNext(new PacketOpenHorseWindow(windowId, nbSlots, entityId));
+                    }
+
                     break;
                 case 0x24:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var keepAliveId = reader.ReadSignedLong();
-                    _onkeep_alive.OnNext(new PacketKeepAlive(keepAliveId));
-                }
+                    if (_onkeep_alive.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        long keepAliveId = reader.ReadSignedLong();
+                        _onkeep_alive.OnNext(new PacketKeepAlive(keepAliveId));
+                    }
+
+                    break;
+                case 0x26:
+                    if (_onworld_event.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int effectId = reader.ReadSignedInt();
+                        Position location = reader.ReadPosition();
+                        int data = reader.ReadSignedInt();
+                        bool global = reader.ReadBoolean();
+                        _onworld_event.OnNext(new PacketWorldEvent(effectId, location, data, global));
+                    }
+
                     break;
                 case 0x2c:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var dX = reader.ReadSignedShort();
-                    var dY = reader.ReadSignedShort();
-                    var dZ = reader.ReadSignedShort();
-                    var onGround = reader.ReadBoolean();
-                    _onrel_entity_move.OnNext(new PacketRelEntityMove(entityId, dX, dY, dZ, onGround));
-                }
+                    if (_onrel_entity_move.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        short dX = reader.ReadSignedShort();
+                        short dY = reader.ReadSignedShort();
+                        short dZ = reader.ReadSignedShort();
+                        bool onGround = reader.ReadBoolean();
+                        _onrel_entity_move.OnNext(new PacketRelEntityMove(entityId, dX, dY, dZ, onGround));
+                    }
+
                     break;
                 case 0x2d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var dX = reader.ReadSignedShort();
-                    var dY = reader.ReadSignedShort();
-                    var dZ = reader.ReadSignedShort();
-                    var yaw = reader.ReadSignedByte();
-                    var pitch = reader.ReadSignedByte();
-                    var onGround = reader.ReadBoolean();
-                    _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch, onGround));
-                }
+                    if (_onentity_move_look.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        short dX = reader.ReadSignedShort();
+                        short dY = reader.ReadSignedShort();
+                        short dZ = reader.ReadSignedShort();
+                        sbyte yaw = reader.ReadSignedByte();
+                        sbyte pitch = reader.ReadSignedByte();
+                        bool onGround = reader.ReadBoolean();
+                        _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch,
+                            onGround));
+                    }
+
                     break;
                 case 0x2e:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var yaw = reader.ReadSignedByte();
-                    var pitch = reader.ReadSignedByte();
-                    var onGround = reader.ReadBoolean();
-                    _onentity_look.OnNext(new PacketEntityLook(entityId, yaw, pitch, onGround));
-                }
+                    if (_onentity_look.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        sbyte yaw = reader.ReadSignedByte();
+                        sbyte pitch = reader.ReadSignedByte();
+                        bool onGround = reader.ReadBoolean();
+                        _onentity_look.OnNext(new PacketEntityLook(entityId, yaw, pitch, onGround));
+                    }
+
                     break;
                 case 0x2f:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var yaw = reader.ReadFloat();
-                    var pitch = reader.ReadFloat();
-                    _onvehicle_move.OnNext(new PacketVehicleMove(x, y, z, yaw, pitch));
-                }
+                    if (_onvehicle_move.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double x = reader.ReadDouble();
+                        double y = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        float yaw = reader.ReadFloat();
+                        float pitch = reader.ReadFloat();
+                        _onvehicle_move.OnNext(new PacketVehicleMove(x, y, z, yaw, pitch));
+                    }
+
                     break;
                 case 0x30:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var hand = reader.ReadVarInt();
-                    _onopen_book.OnNext(new PacketOpenBook(hand));
-                }
+                    if (_onopen_book.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int hand = reader.ReadVarInt();
+                        _onopen_book.OnNext(new PacketOpenBook(hand));
+                    }
+
+                    break;
+                case 0x32:
+                    if (_onopen_sign_entity.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        Position location = reader.ReadPosition();
+                        bool isFrontText = reader.ReadBoolean();
+                        _onopen_sign_entity.OnNext(new PacketOpenSignEntity(location, isFrontText));
+                    }
+
                     break;
                 case 0x35:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var windowId = reader.ReadSignedByte();
-                    var recipe = reader.ReadString();
-                    _oncraft_recipe_response.OnNext(new PacketCraftRecipeResponse(windowId, recipe));
-                }
+                    if (_oncraft_recipe_response.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        sbyte windowId = reader.ReadSignedByte();
+                        string recipe = reader.ReadString();
+                        _oncraft_recipe_response.OnNext(new PacketCraftRecipeResponse(windowId, recipe));
+                    }
+
                     break;
                 case 0x36:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var flags = reader.ReadSignedByte();
-                    var flyingSpeed = reader.ReadFloat();
-                    var walkingSpeed = reader.ReadFloat();
-                    _onabilities.OnNext(new PacketAbilities(flags, flyingSpeed, walkingSpeed));
-                }
+                    if (_onabilities.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        sbyte flags = reader.ReadSignedByte();
+                        float flyingSpeed = reader.ReadFloat();
+                        float walkingSpeed = reader.ReadFloat();
+                        _onabilities.OnNext(new PacketAbilities(flags, flyingSpeed, walkingSpeed));
+                    }
+
                     break;
                 case 0x38:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var duration = reader.ReadVarInt();
-                    _onend_combat_event.OnNext(new PacketEndCombatEvent(duration));
-                }
+                    if (_onend_combat_event.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int duration = reader.ReadVarInt();
+                        _onend_combat_event.OnNext(new PacketEndCombatEvent(duration));
+                    }
+
                     break;
                 case 0x39:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    _onenter_combat_event.OnNext(new PacketEnterCombatEvent());
-                }
+                    if (_onenter_combat_event.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        _onenter_combat_event.OnNext(new PacketEnterCombatEvent());
+                    }
+
                     break;
                 case 0x3e:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var yaw = reader.ReadFloat();
-                    var pitch = reader.ReadFloat();
-                    var flags = reader.ReadSignedByte();
-                    var teleportId = reader.ReadVarInt();
-                    _onposition.OnNext(new PacketPosition(x, y, z, yaw, pitch, flags, teleportId));
-                }
+                    if (_onposition.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double x = reader.ReadDouble();
+                        double y = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        float yaw = reader.ReadFloat();
+                        float pitch = reader.ReadFloat();
+                        sbyte flags = reader.ReadSignedByte();
+                        int teleportId = reader.ReadVarInt();
+                        _onposition.OnNext(new PacketPosition(x, y, z, yaw, pitch, flags, teleportId));
+                    }
+
                     break;
                 case 0x40:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var tempArrayLength_0 = reader.ReadVarInt();
-                    var tempArray_0 = new int[tempArrayLength_0];
-                    for (int i_0 = 0; i_0 < tempArrayLength_0; i_0++)
+                    if (_onentity_destroy.HasObservers)
                     {
-                        var for_item_0 = reader.ReadVarInt();
-                        tempArray_0[i_0] = for_item_0;
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        var tempArrayLength_0_0 = reader.ReadVarInt();
+                        var tempArray_0_0 = new int[tempArrayLength_0_0];
+                        for (int i_0_0 = 0; i_0_0 < tempArrayLength_0_0; i_0_0++)
+                        {
+                            var for_item_0_0 = reader.ReadVarInt();
+                            tempArray_0_0[i_0_0] = for_item_0_0;
+                        }
+
+                        int[] entityIds = tempArray_0_0;
+                        _onentity_destroy.OnNext(new PacketEntityDestroy(entityIds));
                     }
 
-                    var entityIds = tempArray_0;
-                    _onentity_destroy.OnNext(new PacketEntityDestroy(entityIds));
-                }
                     break;
                 case 0x41:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var effectId = reader.ReadVarInt();
-                    _onremove_entity_effect.OnNext(new PacketRemoveEntityEffect(entityId, effectId));
-                }
+                    if (_onremove_entity_effect.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        int effectId = reader.ReadVarInt();
+                        _onremove_entity_effect.OnNext(new PacketRemoveEntityEffect(entityId, effectId));
+                    }
+
                     break;
                 case 0x42:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityName = reader.ReadString();
-                    if (!reader.ReadBoolean())
+                    if (_onreset_score.HasObservers)
                     {
-                        var objectiveName = null;
-                    }
-                    else
-                    {
-                        var objectiveName = reader.ReadString();
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        string entityName = reader.ReadString();
+                        string? objectiveName = null;
+                        if (reader.ReadBoolean())
+                        {
+                            objectiveName = reader.ReadString();
+                        }
+
+                        _onreset_score.OnNext(new PacketResetScore(entityName, objectiveName));
                     }
 
-                    _onreset_score.OnNext(new PacketResetScore(entityName, objectiveName));
-                }
                     break;
                 case 0x46:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var headYaw = reader.ReadSignedByte();
-                    _onentity_head_rotation.OnNext(new PacketEntityHeadRotation(entityId, headYaw));
-                }
+                    if (_onentity_head_rotation.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        sbyte headYaw = reader.ReadSignedByte();
+                        _onentity_head_rotation.OnNext(new PacketEntityHeadRotation(entityId, headYaw));
+                    }
+
                     break;
                 case 0x50:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var cameraId = reader.ReadVarInt();
-                    _oncamera.OnNext(new PacketCamera(cameraId));
-                }
+                    if (_oncamera.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int cameraId = reader.ReadVarInt();
+                        _oncamera.OnNext(new PacketCamera(cameraId));
+                    }
+
                     break;
                 case 0x51:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var slot = reader.ReadSignedByte();
-                    _onheld_item_slot.OnNext(new PacketHeldItemSlot(slot));
-                }
+                    if (_onheld_item_slot.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        sbyte slot = reader.ReadSignedByte();
+                        _onheld_item_slot.OnNext(new PacketHeldItemSlot(slot));
+                    }
+
                     break;
                 case 0x52:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var chunkX = reader.ReadVarInt();
-                    var chunkZ = reader.ReadVarInt();
-                    _onupdate_view_position.OnNext(new PacketUpdateViewPosition(chunkX, chunkZ));
-                }
+                    if (_onupdate_view_position.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int chunkX = reader.ReadVarInt();
+                        int chunkZ = reader.ReadVarInt();
+                        _onupdate_view_position.OnNext(new PacketUpdateViewPosition(chunkX, chunkZ));
+                    }
+
                     break;
                 case 0x53:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var viewDistance = reader.ReadVarInt();
-                    _onupdate_view_distance.OnNext(new PacketUpdateViewDistance(viewDistance));
-                }
+                    if (_onupdate_view_distance.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int viewDistance = reader.ReadVarInt();
+                        _onupdate_view_distance.OnNext(new PacketUpdateViewDistance(viewDistance));
+                    }
+
                     break;
                 case 0x55:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var position = reader.ReadVarInt();
-                    var name = reader.ReadString();
-                    _onscoreboard_display_objective.OnNext(new PacketScoreboardDisplayObjective(position, name));
-                }
+                    if (_onscoreboard_display_objective.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int position = reader.ReadVarInt();
+                        string name = reader.ReadString();
+                        _onscoreboard_display_objective.OnNext(new PacketScoreboardDisplayObjective(position, name));
+                    }
+
                     break;
                 case 0x57:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadSignedInt();
-                    var vehicleId = reader.ReadSignedInt();
-                    _onattach_entity.OnNext(new PacketAttachEntity(entityId, vehicleId));
-                }
+                    if (_onattach_entity.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadSignedInt();
+                        int vehicleId = reader.ReadSignedInt();
+                        _onattach_entity.OnNext(new PacketAttachEntity(entityId, vehicleId));
+                    }
+
                     break;
                 case 0x58:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var velocityX = reader.ReadSignedShort();
-                    var velocityY = reader.ReadSignedShort();
-                    var velocityZ = reader.ReadSignedShort();
-                    _onentity_velocity.OnNext(new PacketEntityVelocity(entityId, velocityX, velocityY, velocityZ));
-                }
+                    if (_onentity_velocity.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        short velocityX = reader.ReadSignedShort();
+                        short velocityY = reader.ReadSignedShort();
+                        short velocityZ = reader.ReadSignedShort();
+                        _onentity_velocity.OnNext(new PacketEntityVelocity(entityId, velocityX, velocityY, velocityZ));
+                    }
+
                     break;
                 case 0x5a:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var experienceBar = reader.ReadFloat();
-                    var level = reader.ReadVarInt();
-                    var totalExperience = reader.ReadVarInt();
-                    _onexperience.OnNext(new PacketExperience(experienceBar, level, totalExperience));
-                }
+                    if (_onexperience.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        float experienceBar = reader.ReadFloat();
+                        int level = reader.ReadVarInt();
+                        int totalExperience = reader.ReadVarInt();
+                        _onexperience.OnNext(new PacketExperience(experienceBar, level, totalExperience));
+                    }
+
                     break;
                 case 0x5b:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var health = reader.ReadFloat();
-                    var food = reader.ReadVarInt();
-                    var foodSaturation = reader.ReadFloat();
-                    _onupdate_health.OnNext(new PacketUpdateHealth(health, food, foodSaturation));
-                }
+                    if (_onupdate_health.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        float health = reader.ReadFloat();
+                        int food = reader.ReadVarInt();
+                        float foodSaturation = reader.ReadFloat();
+                        _onupdate_health.OnNext(new PacketUpdateHealth(health, food, foodSaturation));
+                    }
+
                     break;
                 case 0x5d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var tempArrayLength_0 = reader.ReadVarInt();
-                    var tempArray_0 = new int[tempArrayLength_0];
-                    for (int i_0 = 0; i_0 < tempArrayLength_0; i_0++)
+                    if (_onset_passengers.HasObservers)
                     {
-                        var for_item_0 = reader.ReadVarInt();
-                        tempArray_0[i_0] = for_item_0;
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        var tempArrayLength_1_0 = reader.ReadVarInt();
+                        var tempArray_1_0 = new int[tempArrayLength_1_0];
+                        for (int i_1_0 = 0; i_1_0 < tempArrayLength_1_0; i_1_0++)
+                        {
+                            var for_item_1_0 = reader.ReadVarInt();
+                            tempArray_1_0[i_1_0] = for_item_1_0;
+                        }
+
+                        int[] passengers = tempArray_1_0;
+                        _onset_passengers.OnNext(new PacketSetPassengers(entityId, passengers));
                     }
 
-                    var passengers = tempArray_0;
-                    _onset_passengers.OnNext(new PacketSetPassengers(entityId, passengers));
-                }
+                    break;
+                case 0x54:
+                    if (_onspawn_position.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        Position location = reader.ReadPosition();
+                        float angle = reader.ReadFloat();
+                        _onspawn_position.OnNext(new PacketSpawnPosition(location, angle));
+                    }
+
                     break;
                 case 0x62:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var age = reader.ReadSignedLong();
-                    var time = reader.ReadSignedLong();
-                    _onupdate_time.OnNext(new PacketUpdateTime(age, time));
-                }
-                    break;
-                case 0x6c:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var collectedEntityId = reader.ReadVarInt();
-                    var collectorEntityId = reader.ReadVarInt();
-                    var pickupItemCount = reader.ReadVarInt();
-                    _oncollect.OnNext(new PacketCollect(collectedEntityId, collectorEntityId, pickupItemCount));
-                }
-                    break;
-                case 0x6d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var yaw = reader.ReadSignedByte();
-                    var pitch = reader.ReadSignedByte();
-                    var onGround = reader.ReadBoolean();
-                    _onentity_teleport.OnNext(new PacketEntityTeleport(entityId, x, y, z, yaw, pitch, onGround));
-                }
-                    break;
-                case 0x48:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    if (!reader.ReadBoolean())
+                    if (_onupdate_time.HasObservers)
                     {
-                        var id = null;
-                    }
-                    else
-                    {
-                        var id = reader.ReadString();
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        long age = reader.ReadSignedLong();
+                        long time = reader.ReadSignedLong();
+                        _onupdate_time.OnNext(new PacketUpdateTime(age, time));
                     }
 
-                    _onselect_advancement_tab.OnNext(new PacketSelectAdvancementTab(id));
-                }
+                    break;
+                case 0x6c:
+                    if (_oncollect.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int collectedEntityId = reader.ReadVarInt();
+                        int collectorEntityId = reader.ReadVarInt();
+                        int pickupItemCount = reader.ReadVarInt();
+                        _oncollect.OnNext(new PacketCollect(collectedEntityId, collectorEntityId, pickupItemCount));
+                    }
+
+                    break;
+                case 0x6d:
+                    if (_onentity_teleport.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        double x = reader.ReadDouble();
+                        double y = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        sbyte yaw = reader.ReadSignedByte();
+                        sbyte pitch = reader.ReadSignedByte();
+                        bool onGround = reader.ReadBoolean();
+                        _onentity_teleport.OnNext(new PacketEntityTeleport(entityId, x, y, z, yaw, pitch, onGround));
+                    }
+
+                    break;
+                case 0x48:
+                    if (_onselect_advancement_tab.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        string? id = null;
+                        if (reader.ReadBoolean())
+                        {
+                            id = reader.ReadString();
+                        }
+
+                        _onselect_advancement_tab.OnNext(new PacketSelectAdvancementTab(id));
+                    }
+
                     break;
                 case 0x05:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var sequenceId = reader.ReadVarInt();
-                    _onacknowledge_player_digging.OnNext(new PacketAcknowledgePlayerDigging(sequenceId));
-                }
+                    if (_onacknowledge_player_digging.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int sequenceId = reader.ReadVarInt();
+                        _onacknowledge_player_digging.OnNext(new PacketAcknowledgePlayerDigging(sequenceId));
+                    }
+
                     break;
                 case 0x0f:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var reset = reader.ReadBoolean();
-                    _onclear_titles.OnNext(new PacketClearTitles(reset));
-                }
+                    if (_onclear_titles.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        bool reset = reader.ReadBoolean();
+                        _onclear_titles.OnNext(new PacketClearTitles(reset));
+                    }
+
                     break;
                 case 0x23:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var x = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    var oldDiameter = reader.ReadDouble();
-                    var newDiameter = reader.ReadDouble();
-                    var speed = reader.ReadVarInt();
-                    var portalTeleportBoundary = reader.ReadVarInt();
-                    var warningBlocks = reader.ReadVarInt();
-                    var warningTime = reader.ReadVarInt();
-                    _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter, newDiameter,
-                        speed, portalTeleportBoundary, warningBlocks, warningTime));
-                }
+                    if (_oninitialize_world_border.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double x = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        double oldDiameter = reader.ReadDouble();
+                        double newDiameter = reader.ReadDouble();
+                        int speed = reader.ReadVarInt();
+                        int portalTeleportBoundary = reader.ReadVarInt();
+                        int warningBlocks = reader.ReadVarInt();
+                        int warningTime = reader.ReadVarInt();
+                        _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter,
+                            newDiameter, speed, portalTeleportBoundary, warningBlocks, warningTime));
+                    }
+
                     break;
                 case 0x4b:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var x = reader.ReadDouble();
-                    var z = reader.ReadDouble();
-                    _onworld_border_center.OnNext(new PacketWorldBorderCenter(x, z));
-                }
+                    if (_onworld_border_center.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double x = reader.ReadDouble();
+                        double z = reader.ReadDouble();
+                        _onworld_border_center.OnNext(new PacketWorldBorderCenter(x, z));
+                    }
+
                     break;
                 case 0x4c:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var oldDiameter = reader.ReadDouble();
-                    var newDiameter = reader.ReadDouble();
-                    var speed = reader.ReadVarInt();
-                    _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter, speed));
-                }
+                    if (_onworld_border_lerp_size.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double oldDiameter = reader.ReadDouble();
+                        double newDiameter = reader.ReadDouble();
+                        int speed = reader.ReadVarInt();
+                        _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter,
+                            speed));
+                    }
+
                     break;
                 case 0x4d:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var diameter = reader.ReadDouble();
-                    _onworld_border_size.OnNext(new PacketWorldBorderSize(diameter));
-                }
+                    if (_onworld_border_size.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        double diameter = reader.ReadDouble();
+                        _onworld_border_size.OnNext(new PacketWorldBorderSize(diameter));
+                    }
+
                     break;
                 case 0x4e:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var warningTime = reader.ReadVarInt();
-                    _onworld_border_warning_delay.OnNext(new PacketWorldBorderWarningDelay(warningTime));
-                }
+                    if (_onworld_border_warning_delay.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int warningTime = reader.ReadVarInt();
+                        _onworld_border_warning_delay.OnNext(new PacketWorldBorderWarningDelay(warningTime));
+                    }
+
                     break;
                 case 0x4f:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var warningBlocks = reader.ReadVarInt();
-                    _onworld_border_warning_reach.OnNext(new PacketWorldBorderWarningReach(warningBlocks));
-                }
+                    if (_onworld_border_warning_reach.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int warningBlocks = reader.ReadVarInt();
+                        _onworld_border_warning_reach.OnNext(new PacketWorldBorderWarningReach(warningBlocks));
+                    }
+
                     break;
                 case 0x33:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var id = reader.ReadSignedInt();
-                    _onping.OnNext(new PacketPing(id));
-                }
+                    if (_onping.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int id = reader.ReadSignedInt();
+                        _onping.OnNext(new PacketPing(id));
+                    }
+
                     break;
                 case 0x34:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var id = reader.ReadSignedLong();
-                    _onping_response.OnNext(new PacketPingResponse(id));
-                }
+                    if (_onping_response.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        long id = reader.ReadSignedLong();
+                        _onping_response.OnNext(new PacketPingResponse(id));
+                    }
+
                     break;
                 case 0x64:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var fadeIn = reader.ReadSignedInt();
-                    var stay = reader.ReadSignedInt();
-                    var fadeOut = reader.ReadSignedInt();
-                    _onset_title_time.OnNext(new PacketSetTitleTime(fadeIn, stay, fadeOut));
-                }
+                    if (_onset_title_time.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int fadeIn = reader.ReadSignedInt();
+                        int stay = reader.ReadSignedInt();
+                        int fadeOut = reader.ReadSignedInt();
+                        _onset_title_time.OnNext(new PacketSetTitleTime(fadeIn, stay, fadeOut));
+                    }
+
                     break;
                 case 0x60:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var distance = reader.ReadVarInt();
-                    _onsimulation_distance.OnNext(new PacketSimulationDistance(distance));
-                }
+                    if (_onsimulation_distance.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int distance = reader.ReadVarInt();
+                        _onsimulation_distance.OnNext(new PacketSimulationDistance(distance));
+                    }
+
                     break;
                 case 0x22:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var entityId = reader.ReadVarInt();
-                    var yaw = reader.ReadFloat();
-                    _onhurt_animation.OnNext(new PacketHurtAnimation(entityId, yaw));
-                }
+                    if (_onhurt_animation.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int entityId = reader.ReadVarInt();
+                        float yaw = reader.ReadFloat();
+                        _onhurt_animation.OnNext(new PacketHurtAnimation(entityId, yaw));
+                    }
+
                     break;
                 case 0x67:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    _onstart_configuration.OnNext(new PacketStartConfiguration());
-                }
+                    if (_onstart_configuration.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        _onstart_configuration.OnNext(new PacketStartConfiguration());
+                    }
+
                     break;
                 case 0x6e:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var tickRate = reader.ReadFloat();
-                    var isFrozen = reader.ReadBoolean();
-                    _onset_ticking_state.OnNext(new PacketSetTickingState(tickRate, isFrozen));
-                }
+                    if (_onset_ticking_state.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        float tickRate = reader.ReadFloat();
+                        bool isFrozen = reader.ReadBoolean();
+                        _onset_ticking_state.OnNext(new PacketSetTickingState(tickRate, isFrozen));
+                    }
+
                     break;
                 case 0x6f:
-                {
-                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-                    var tickSteps = reader.ReadVarInt();
-                    _onstep_tick.OnNext(new PacketStepTick(tickSteps));
-                }
+                    if (_onstep_tick.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int tickSteps = reader.ReadVarInt();
+                        _onstep_tick.OnNext(new PacketStepTick(tickSteps));
+                    }
+
                     break;
             }
         }
@@ -1185,6 +1513,48 @@ namespace McProtoNet.Protocol765
         public byte Animation { get; internal set; }
     }
 
+    public class PacketBlockBreakAnimation
+    {
+        public PacketBlockBreakAnimation(int entityId, Position location, sbyte destroyStage)
+        {
+            EntityId = entityId;
+            Location = location;
+            DestroyStage = destroyStage;
+        }
+
+        public int EntityId { get; internal set; }
+        public Position Location { get; internal set; }
+        public sbyte DestroyStage { get; internal set; }
+    }
+
+    public class PacketBlockAction
+    {
+        public PacketBlockAction(Position location, byte byte1, byte byte2, int blockId)
+        {
+            Location = location;
+            Byte1 = byte1;
+            Byte2 = byte2;
+            BlockId = blockId;
+        }
+
+        public Position Location { get; internal set; }
+        public byte Byte1 { get; internal set; }
+        public byte Byte2 { get; internal set; }
+        public int BlockId { get; internal set; }
+    }
+
+    public class PacketBlockChange
+    {
+        public PacketBlockChange(Position location, int type)
+        {
+            Location = location;
+            Type = type;
+        }
+
+        public Position Location { get; internal set; }
+        public int Type { get; internal set; }
+    }
+
     public class PacketDifficulty
     {
         public PacketDifficulty(byte difficulty, bool difficultyLocked)
@@ -1236,6 +1606,22 @@ namespace McProtoNet.Protocol765
         public byte WindowId { get; internal set; }
         public short Property { get; internal set; }
         public short Value { get; internal set; }
+    }
+
+    public class PacketSetSlot
+    {
+        public PacketSetSlot(sbyte windowId, int stateId, short slot, Slot? item)
+        {
+            WindowId = windowId;
+            StateId = stateId;
+            Slot = slot;
+            Item = item;
+        }
+
+        public sbyte WindowId { get; internal set; }
+        public int StateId { get; internal set; }
+        public short Slot { get; internal set; }
+        public Slot? Item { get; internal set; }
     }
 
     public class PacketSetCooldown
@@ -1322,6 +1708,22 @@ namespace McProtoNet.Protocol765
         public long KeepAliveId { get; internal set; }
     }
 
+    public class PacketWorldEvent
+    {
+        public PacketWorldEvent(int effectId, Position location, int data, bool global)
+        {
+            EffectId = effectId;
+            Location = location;
+            Data = data;
+            Global = global;
+        }
+
+        public int EffectId { get; internal set; }
+        public Position Location { get; internal set; }
+        public int Data { get; internal set; }
+        public bool Global { get; internal set; }
+    }
+
     public class PacketRelEntityMove
     {
         public PacketRelEntityMove(int entityId, short dX, short dY, short dZ, bool onGround)
@@ -1404,6 +1806,18 @@ namespace McProtoNet.Protocol765
         }
 
         public int Hand { get; internal set; }
+    }
+
+    public class PacketOpenSignEntity
+    {
+        public PacketOpenSignEntity(Position location, bool isFrontText)
+        {
+            Location = location;
+            IsFrontText = isFrontText;
+        }
+
+        public Position Location { get; internal set; }
+        public bool IsFrontText { get; internal set; }
     }
 
     public class PacketCraftRecipeResponse
@@ -1637,6 +2051,18 @@ namespace McProtoNet.Protocol765
 
         public int EntityId { get; internal set; }
         public int[] Passengers { get; internal set; }
+    }
+
+    public class PacketSpawnPosition
+    {
+        public PacketSpawnPosition(Position location, float angle)
+        {
+            Location = location;
+            Angle = angle;
+        }
+
+        public Position Location { get; internal set; }
+        public float Angle { get; internal set; }
     }
 
     public class PacketUpdateTime

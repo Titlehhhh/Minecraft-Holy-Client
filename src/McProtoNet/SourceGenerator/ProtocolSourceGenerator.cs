@@ -98,6 +98,7 @@ public sealed class ProtocolSourceGenerator
         {
             NetMethod recieveMethod = new NetMethod();
 
+            recieveMethod.Modifier = "protected";
             recieveMethod.IsOverride = true;
             recieveMethod.Name = "OnPacketReceived";
             recieveMethod.ReturnType = "void";
@@ -198,21 +199,23 @@ public sealed class ProtocolSourceGenerator
     private IEnumerable<string> GenerateReadInstructions(ProtodefContainer container, string subjectType,
         string packetClassName)
     {
-        yield return "{";
+        yield return $"if({subjectType}.HasObservers){{";
         yield return $"scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);";
         List<string> vars = new();
+        int number = 0;
         foreach (var field in container)
         {
             string fieldVar = field.Name.Camelize();
             vars.Add(fieldVar);
-            yield return GenerateReadMethod(field.Type, $"var {fieldVar}");
+            yield return GenerateReadMethod(field.Type, $"{GetNetType(field.Type)} {fieldVar}", depth: 0,
+                number: number++);
         }
 
         yield return $"{subjectType}.OnNext(new {packetClassName}({string.Join(", ", vars)}));";
         yield return "}";
     }
 
-    private string GenerateReadMethod(ProtodefType type, string varName, int depth = 0)
+    private string GenerateReadMethod(ProtodefType type, string varName, int number, int depth = 0)
     {
         if (type is ProtodefNumericType protodefNumeric)
         {
@@ -242,21 +245,21 @@ public sealed class ProtocolSourceGenerator
         }
         else if (type is ProtodefOption option)
         {
-            return $"if(!reader.ReadBoolean())\n" +
+            int index = varName.IndexOf(" ");
+            string a = index != -1 ? varName.Substring(index) : varName;
+            return $"{varName} = null;" +
+                   $"if(reader.ReadBoolean())\n" +
                    $"{{\n" +
-                   $"{varName} = null;\n" +
-                   $"}}\n" +
-                   $"else\n" +
-                   $"{{" +
-                   $"\t{GenerateReadMethod(option.Type, varName, depth + 1)}\n" +
+                   $"\t{GenerateReadMethod(option.Type, a, depth + 1)}\n" +
                    $"}}";
         }
         else if (type is ProtodefArray array)
         {
-            string iterator = $"i_{depth}";
-            string tmpArrname = $"tempArray_{depth}";
-            string lenName = $"tempArrayLength_{depth}";
+            string iterator = $"i_{number}_{depth}";
+            string tmpArrname = $"tempArray_{number}_{depth}";
+            string lenName = $"tempArrayLength_{number}_{depth}";
             string len = "var " + lenName;
+            string forItem = $"for_item_{number}_{depth}";
             string first = GenerateReadMethod(array.CountType, len, depth + 1);
 
 
@@ -265,8 +268,8 @@ public sealed class ProtocolSourceGenerator
                    $"var {tmpArrname} = new {netType}[{lenName}];\n" +
                    $"for({GetNetType(array.CountType)} {iterator} =0;{iterator}< {lenName};{iterator}++)\n" +
                    $"{{\n" +
-                   $"\t{GenerateReadMethod(array.Type, $"var for_item_{depth}", depth + 1)}\n" +
-                   $"\t{tmpArrname}[{iterator}] = for_item_{depth};\n" +
+                   $"\t{GenerateReadMethod(array.Type, "var " + forItem, depth + 1)}\n" +
+                   $"\t{tmpArrname}[{iterator}] = {forItem};\n" +
                    $"}}\n" +
                    $"{varName} = {tmpArrname};";
         }
@@ -274,7 +277,7 @@ public sealed class ProtocolSourceGenerator
         {
             if (buffer.CountType is not null)
             {
-                string lenName = $"tempArrayLength_{depth}";
+                string lenName = $"tempArrayLength_{number}_{depth}";
                 string len = "var " + lenName;
                 string first = GenerateReadMethod(buffer.CountType, len, depth + 1);
 
@@ -283,9 +286,7 @@ public sealed class ProtocolSourceGenerator
             }
             else if (buffer.Count is not null)
             {
-                string lenName = $"tempArrayLength_{depth}";
-                return $"var {lenName} = reader.ReadVarInt();\n" +
-                       $"{varName} = reader.ReadBuffer({lenName})";
+                return $"{varName} = reader.ReadBuffer({buffer.Count})";
             }
             else if (buffer.Rest == true)
             {
@@ -485,7 +486,8 @@ public sealed class ProtocolSourceGenerator
     private Dictionary<string, string> customToNet = new Dictionary<string, string>
     {
         { "UUID", "Guid" },
-        //{"position","Position" }
+        {"position","Position" },
+        {"slot","Slot?" }
     };
 
     private Dictionary<string, string> readDict = new Dictionary<string, string>
@@ -505,7 +507,9 @@ public sealed class ProtocolSourceGenerator
         { "f32", "ReadFloat" },
         { "f64", "ReadDouble" },
         { "UUID", "ReadUUID" },
-        { "restBuffer", "ReadRestBuffer" }
+        { "restBuffer", "ReadRestBuffer" },
+        { "position", "ReadPosition" },
+        { "slot", "ReadSlot" }
     };
 
 
@@ -527,6 +531,8 @@ public sealed class ProtocolSourceGenerator
         { "f64", "WriteDouble" },
         { "UUID", "WriteUUID" },
         { "restBuffer", "WriteRestBuffer" },
+        { "position", "WritePosition" },
+        { "slot", "WriteSlot" },
     };
 
     public ProtocolSourceGenerator()
@@ -536,15 +542,5 @@ public sealed class ProtocolSourceGenerator
     private static string FieldToNetType(ProtodefContainerField field)
     {
         return field.Type.GetNetType();
-    }
-}
-
-public sealed class TypeNotSupportedException : Exception
-{
-    public string Type { get; set; }
-
-    public TypeNotSupportedException(string type)
-    {
-        Type = type;
     }
 }

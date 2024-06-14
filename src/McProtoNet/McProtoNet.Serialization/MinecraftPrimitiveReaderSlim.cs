@@ -161,12 +161,21 @@ namespace McProtoNet.Serialization
 			//TODO
 			throw new NotImplementedException();
 		}
-        
+
+		public Guid ReadUUID()
+		{
+			//TODO
+			throw new NotImplementedException();
+		}
 		public byte[] ReadRestBuffer()
 		{
 			//TODO
 			throw new NotImplementedException();
 		}
-
+		public byte[] ReadBuffer(int length)
+		{
+			//TODO
+			throw new NotImplementedException();
+		}
 	}
 }

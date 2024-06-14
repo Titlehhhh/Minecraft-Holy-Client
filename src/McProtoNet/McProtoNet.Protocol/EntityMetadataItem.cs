@@ -1,7 +1,6 @@
 ﻿namespace McProtoNet.Protocol
 {
-	public sealed class EntityMetadataItem
-	{
-
-	}
+    public sealed class EntityMetadataItem
+    {
+    }
 }
