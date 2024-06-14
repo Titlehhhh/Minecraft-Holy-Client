@@ -28,6 +28,7 @@ namespace McProtoNet.Protocol754
         private readonly Subject<PacketCraftProgressBar> _oncraft_progress_bar = new();
         private readonly Subject<PacketSetSlot> _onset_slot = new();
         private readonly Subject<PacketSetCooldown> _onset_cooldown = new();
+        private readonly Subject<PacketCustomPayload> _oncustom_payload = new();
         private readonly Subject<PacketNamedSoundEffect> _onnamed_sound_effect = new();
         private readonly Subject<PacketKickDisconnect> _onkick_disconnect = new();
         private readonly Subject<PacketEntityStatus> _onentity_status = new();
@@ -36,6 +37,7 @@ namespace McProtoNet.Protocol754
         private readonly Subject<PacketOpenHorseWindow> _onopen_horse_window = new();
         private readonly Subject<PacketKeepAlive> _onkeep_alive = new();
         private readonly Subject<PacketWorldEvent> _onworld_event = new();
+        private readonly Subject<PacketUpdateLight> _onupdate_light = new();
         private readonly Subject<PacketRelEntityMove> _onrel_entity_move = new();
         private readonly Subject<PacketEntityMoveLook> _onentity_move_look = new();
         private readonly Subject<PacketEntityLook> _onentity_look = new();
@@ -91,6 +93,7 @@ namespace McProtoNet.Protocol754
         public IObservable<PacketCraftProgressBar> OnCraftProgressBarPacket => _oncraft_progress_bar;
         public IObservable<PacketSetSlot> OnSetSlotPacket => _onset_slot;
         public IObservable<PacketSetCooldown> OnSetCooldownPacket => _onset_cooldown;
+        public IObservable<PacketCustomPayload> OnCustomPayloadPacket => _oncustom_payload;
         public IObservable<PacketNamedSoundEffect> OnNamedSoundEffectPacket => _onnamed_sound_effect;
         public IObservable<PacketKickDisconnect> OnKickDisconnectPacket => _onkick_disconnect;
         public IObservable<PacketEntityStatus> OnEntityStatusPacket => _onentity_status;
@@ -99,6 +102,7 @@ namespace McProtoNet.Protocol754
         public IObservable<PacketOpenHorseWindow> OnOpenHorseWindowPacket => _onopen_horse_window;
         public IObservable<PacketKeepAlive> OnKeepAlivePacket => _onkeep_alive;
         public IObservable<PacketWorldEvent> OnWorldEventPacket => _onworld_event;
+        public IObservable<PacketUpdateLight> OnUpdateLightPacket => _onupdate_light;
         public IObservable<PacketRelEntityMove> OnRelEntityMovePacket => _onrel_entity_move;
         public IObservable<PacketEntityMoveLook> OnEntityMoveLookPacket => _onentity_move_look;
         public IObservable<PacketEntityLook> OnEntityLookPacket => _onentity_look;
@@ -338,6 +342,15 @@ namespace McProtoNet.Protocol754
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x0a);
             writer.WriteUnsignedByte(windowId);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendCustomPayload(string channel, byte[] data)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x0b);
+            writer.WriteString(channel);
+            writer.WriteBuffer(data);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -804,6 +817,16 @@ namespace McProtoNet.Protocol754
                     }
 
                     break;
+                case 0x17:
+                    if (_oncustom_payload.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        string channel = reader.ReadString();
+                        byte[] data = reader.ReadRestBuffer();
+                        _oncustom_payload.OnNext(new PacketCustomPayload(channel, data));
+                    }
+
+                    break;
                 case 0x18:
                     if (_onnamed_sound_effect.HasObservers)
                     {
@@ -888,6 +911,23 @@ namespace McProtoNet.Protocol754
                         int data = reader.ReadSignedInt();
                         bool global = reader.ReadBoolean();
                         _onworld_event.OnNext(new PacketWorldEvent(effectId, location, data, global));
+                    }
+
+                    break;
+                case 0x23:
+                    if (_onupdate_light.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        int chunkX = reader.ReadVarInt();
+                        int chunkZ = reader.ReadVarInt();
+                        bool trustEdges = reader.ReadBoolean();
+                        int skyLightMask = reader.ReadVarInt();
+                        int blockLightMask = reader.ReadVarInt();
+                        int emptySkyLightMask = reader.ReadVarInt();
+                        int emptyBlockLightMask = reader.ReadVarInt();
+                        byte[] data = reader.ReadRestBuffer();
+                        _onupdate_light.OnNext(new PacketUpdateLight(chunkX, chunkZ, trustEdges, skyLightMask,
+                            blockLightMask, emptySkyLightMask, emptyBlockLightMask, data));
                     }
 
                     break;
@@ -1576,6 +1616,18 @@ namespace McProtoNet.Protocol754
         public int CooldownTicks { get; internal set; }
     }
 
+    public class PacketCustomPayload
+    {
+        public PacketCustomPayload(string channel, byte[] data)
+        {
+            Channel = channel;
+            Data = data;
+        }
+
+        public string Channel { get; internal set; }
+        public byte[] Data { get; internal set; }
+    }
+
     public class PacketNamedSoundEffect
     {
         public PacketNamedSoundEffect(string soundName, int soundCategory, int x, int y, int z, float volume,
@@ -1683,6 +1735,31 @@ namespace McProtoNet.Protocol754
         public Position Location { get; internal set; }
         public int Data { get; internal set; }
         public bool Global { get; internal set; }
+    }
+
+    public class PacketUpdateLight
+    {
+        public PacketUpdateLight(int chunkX, int chunkZ, bool trustEdges, int skyLightMask, int blockLightMask,
+            int emptySkyLightMask, int emptyBlockLightMask, byte[] data)
+        {
+            ChunkX = chunkX;
+            ChunkZ = chunkZ;
+            TrustEdges = trustEdges;
+            SkyLightMask = skyLightMask;
+            BlockLightMask = blockLightMask;
+            EmptySkyLightMask = emptySkyLightMask;
+            EmptyBlockLightMask = emptyBlockLightMask;
+            Data = data;
+        }
+
+        public int ChunkX { get; internal set; }
+        public int ChunkZ { get; internal set; }
+        public bool TrustEdges { get; internal set; }
+        public int SkyLightMask { get; internal set; }
+        public int BlockLightMask { get; internal set; }
+        public int EmptySkyLightMask { get; internal set; }
+        public int EmptyBlockLightMask { get; internal set; }
+        public byte[] Data { get; internal set; }
     }
 
     public class PacketRelEntityMove

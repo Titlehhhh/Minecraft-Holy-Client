@@ -104,6 +104,8 @@ namespace McProtoNet.Serialization
 		{
 			writerSlim.Write(value);
 		}
+		
+		
 
 		public void WriteVarInt(int? value)
 		{

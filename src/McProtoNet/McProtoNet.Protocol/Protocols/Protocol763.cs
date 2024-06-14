@@ -25,6 +25,7 @@ namespace McProtoNet.Protocol763
         private readonly Subject<PacketSetSlot> _onset_slot = new();
         private readonly Subject<PacketSetCooldown> _onset_cooldown = new();
         private readonly Subject<PacketChatSuggestions> _onchat_suggestions = new();
+        private readonly Subject<PacketCustomPayload> _oncustom_payload = new();
         private readonly Subject<PacketKickDisconnect> _onkick_disconnect = new();
         private readonly Subject<PacketProfilelessChat> _onprofileless_chat = new();
         private readonly Subject<PacketEntityStatus> _onentity_status = new();
@@ -101,6 +102,7 @@ namespace McProtoNet.Protocol763
         public IObservable<PacketSetSlot> OnSetSlotPacket => _onset_slot;
         public IObservable<PacketSetCooldown> OnSetCooldownPacket => _onset_cooldown;
         public IObservable<PacketChatSuggestions> OnChatSuggestionsPacket => _onchat_suggestions;
+        public IObservable<PacketCustomPayload> OnCustomPayloadPacket => _oncustom_payload;
         public IObservable<PacketKickDisconnect> OnKickDisconnectPacket => _onkick_disconnect;
         public IObservable<PacketProfilelessChat> OnProfilelessChatPacket => _onprofileless_chat;
         public IObservable<PacketEntityStatus> OnEntityStatusPacket => _onentity_status;
@@ -204,12 +206,12 @@ namespace McProtoNet.Protocol763
             {
                 writer.WriteBoolean(true);
                 writer.WriteVarInt(256);
-                writer.WriteBuffer(signature);
+                writer.WriteBuffer(signature.AsSpan(0, 256));
             }
 
             writer.WriteVarInt(offset);
             writer.WriteVarInt(3);
-            writer.WriteBuffer(acknowledged);
+            writer.WriteBuffer(acknowledged.AsSpan(0, 3));
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -407,6 +409,15 @@ namespace McProtoNet.Protocol763
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x0c);
             writer.WriteUnsignedByte(windowId);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendCustomPayload(string channel, byte[] data)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x0d);
+            writer.WriteString(channel);
+            writer.WriteBuffer(data);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -859,6 +870,16 @@ namespace McProtoNet.Protocol763
 
                         string[] entries = tempArray_1_0;
                         _onchat_suggestions.OnNext(new PacketChatSuggestions(action, entries));
+                    }
+
+                    break;
+                case 0x17:
+                    if (_oncustom_payload.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        string channel = reader.ReadString();
+                        byte[] data = reader.ReadRestBuffer();
+                        _oncustom_payload.OnNext(new PacketCustomPayload(channel, data));
                     }
 
                     break;
@@ -1735,6 +1756,18 @@ namespace McProtoNet.Protocol763
 
         public int Action { get; internal set; }
         public string[] Entries { get; internal set; }
+    }
+
+    public class PacketCustomPayload
+    {
+        public PacketCustomPayload(string channel, byte[] data)
+        {
+            Channel = channel;
+            Data = data;
+        }
+
+        public string Channel { get; internal set; }
+        public byte[] Data { get; internal set; }
     }
 
     public class PacketKickDisconnect

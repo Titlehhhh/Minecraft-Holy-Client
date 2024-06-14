@@ -440,7 +440,7 @@ public sealed class ProtocolSourceGenerator
             else if (buffer.Count is not null)
             {
                 return $"writer.WriteVarInt({buffer.Count});\n" +
-                       $"writer.WriteBuffer({name});";
+                       $"writer.WriteBuffer({name}.AsSpan(0, {buffer.Count}));";
             }
             else if (buffer.Rest == true)
             {
@@ -487,7 +487,8 @@ public sealed class ProtocolSourceGenerator
     {
         { "UUID", "Guid" },
         {"position","Position" },
-        {"slot","Slot?" }
+        {"slot","Slot?" },
+        {"restBuffer","byte[]" },
     };
 
     private Dictionary<string, string> readDict = new Dictionary<string, string>
@@ -509,7 +510,8 @@ public sealed class ProtocolSourceGenerator
         { "UUID", "ReadUUID" },
         { "restBuffer", "ReadRestBuffer" },
         { "position", "ReadPosition" },
-        { "slot", "ReadSlot" }
+        { "slot", "ReadSlot" },
+       
     };
 
 
@@ -530,9 +532,10 @@ public sealed class ProtocolSourceGenerator
         { "f32", "WriteFloat" },
         { "f64", "WriteDouble" },
         { "UUID", "WriteUUID" },
-        { "restBuffer", "WriteRestBuffer" },
+        { "restBuffer", "WriteBuffer" },
         { "position", "WritePosition" },
         { "slot", "WriteSlot" },
+        
     };
 
     public ProtocolSourceGenerator()

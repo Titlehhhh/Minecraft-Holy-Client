@@ -27,6 +27,7 @@ namespace McProtoNet.Protocol755
         private readonly Subject<PacketCraftProgressBar> _oncraft_progress_bar = new();
         private readonly Subject<PacketSetSlot> _onset_slot = new();
         private readonly Subject<PacketSetCooldown> _onset_cooldown = new();
+        private readonly Subject<PacketCustomPayload> _oncustom_payload = new();
         private readonly Subject<PacketNamedSoundEffect> _onnamed_sound_effect = new();
         private readonly Subject<PacketKickDisconnect> _onkick_disconnect = new();
         private readonly Subject<PacketEntityStatus> _onentity_status = new();
@@ -103,6 +104,7 @@ namespace McProtoNet.Protocol755
         public IObservable<PacketCraftProgressBar> OnCraftProgressBarPacket => _oncraft_progress_bar;
         public IObservable<PacketSetSlot> OnSetSlotPacket => _onset_slot;
         public IObservable<PacketSetCooldown> OnSetCooldownPacket => _onset_cooldown;
+        public IObservable<PacketCustomPayload> OnCustomPayloadPacket => _oncustom_payload;
         public IObservable<PacketNamedSoundEffect> OnNamedSoundEffectPacket => _onnamed_sound_effect;
         public IObservable<PacketKickDisconnect> OnKickDisconnectPacket => _onkick_disconnect;
         public IObservable<PacketEntityStatus> OnEntityStatusPacket => _onentity_status;
@@ -348,6 +350,15 @@ namespace McProtoNet.Protocol755
             scoped var writer = new MinecraftPrimitiveWriterSlim();
             writer.WriteVarInt(0x09);
             writer.WriteUnsignedByte(windowId);
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+
+        public Task SendCustomPayload(string channel, byte[] data)
+        {
+            scoped var writer = new MinecraftPrimitiveWriterSlim();
+            writer.WriteVarInt(0x0a);
+            writer.WriteString(channel);
+            writer.WriteBuffer(data);
             return base.SendPacketCore(writer.GetWrittenMemory());
         }
 
@@ -808,6 +819,16 @@ namespace McProtoNet.Protocol755
                         int itemID = reader.ReadVarInt();
                         int cooldownTicks = reader.ReadVarInt();
                         _onset_cooldown.OnNext(new PacketSetCooldown(itemID, cooldownTicks));
+                    }
+
+                    break;
+                case 0x18:
+                    if (_oncustom_payload.HasObservers)
+                    {
+                        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                        string channel = reader.ReadString();
+                        byte[] data = reader.ReadRestBuffer();
+                        _oncustom_payload.OnNext(new PacketCustomPayload(channel, data));
                     }
 
                     break;
@@ -1710,6 +1731,18 @@ namespace McProtoNet.Protocol755
 
         public int ItemID { get; internal set; }
         public int CooldownTicks { get; internal set; }
+    }
+
+    public class PacketCustomPayload
+    {
+        public PacketCustomPayload(string channel, byte[] data)
+        {
+            Channel = channel;
+            Data = data;
+        }
+
+        public string Channel { get; internal set; }
+        public byte[] Data { get; internal set; }
     }
 
     public class PacketNamedSoundEffect
