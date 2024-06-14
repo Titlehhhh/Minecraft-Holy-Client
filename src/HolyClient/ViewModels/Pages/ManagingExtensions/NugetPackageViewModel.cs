@@ -1,168 +1,151 @@
-﻿using NuGet.Common;
+﻿using System;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Threading;
+using System.Windows.Input;
+using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading;
-using System.Windows.Input;
 
-namespace HolyClient.ViewModels
+namespace HolyClient.ViewModels;
+
+public sealed class NugetPackageViewModel : ReactiveObject, IActivatableViewModel
 {
-	public sealed class NugetPackageViewModel : ReactiveObject, IActivatableViewModel
-	{
+    private NuGetVersion? _lastVersion;
+
+    public NugetPackageViewModel(IPackageSearchMetadata model)
+    {
+        this.model = model;
+        Icon = model.IconUrl;
+        Id = model.Identity.Id;
+        Description = model.Description;
+        DownloadCount = model.DownloadCount;
+        Authors = model.Authors;
+
+        this.WhenActivated(d =>
+        {
+            LoadVersionsAndDownlaodCount();
 
 
-		[Reactive]
-		public bool IsLoadingVersions { get; set; } = true;
-		[Reactive]
-		public bool IsLoadingMetadata { get; set; } = true;
+            this.WhenAnyValue(x => x.SelectedVersion)
+                .Subscribe(OnChangeSelectedVersion)
+                .DisposeWith(d);
+        });
+    }
 
-		[Reactive]
-		public NugetMetadataViewModel Metadata { get; set; }
-
-
-
-		#region Nuget Properties
+    public NugetPackageViewModel()
+    {
+    }
 
 
+    [Reactive] public bool IsLoadingVersions { get; set; } = true;
 
-		public Uri? Icon { get; set; }
-		public string Authors { get; set; }
+    [Reactive] public bool IsLoadingMetadata { get; set; } = true;
 
-		public string Description { get; set; }
+    [Reactive] public NugetMetadataViewModel Metadata { get; set; }
 
-		[Reactive]
-		public long? DownloadCount { get; set; }
+    public ICommand InstallCommand { get; }
 
-		public string Id { get; set; }
+    public ViewModelActivator Activator { get; } = new();
 
-		public string Owners { get; set; }
+    private async void OnChangeSelectedVersion(NuGetVersion version)
+    {
+        IsLoadingMetadata = true;
+        try
+        {
+            var logger = NullLogger.Instance;
+            var cancellationToken = CancellationToken.None;
 
-		public bool PrefixReserved { get; set; }
+            var cache = new SourceCacheContext();
+            var repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+            var resource = await repository.GetResourceAsync<PackageMetadataResource>();
 
-		[Reactive]
-		public NuGetVersion? SelectedVersion { get; set; }
+            var metadata =
+                await resource.GetMetadataAsync(new PackageIdentity(Id, version), cache, logger, cancellationToken);
 
-		[Reactive]
-		public NuGetVersion[] Versions { get; set; }
+            var vm = new NugetMetadataViewModel(metadata);
 
-		private readonly IPackageSearchMetadata model;
-		#endregion
-		public NugetPackageViewModel(IPackageSearchMetadata model)
-		{
-			this.model = model;
-			this.Icon = model.IconUrl;
-			this.Id = model.Identity.Id;
-			this.Description = model.Description;
-			this.DownloadCount = model.DownloadCount;
-			this.Authors = model.Authors;
+            Metadata = vm;
+        }
+        catch
+        {
+        }
+        finally
+        {
+            IsLoadingMetadata = false;
+        }
+    }
 
-			this.WhenActivated(d =>
-			{
+    private async void LoadVersionsAndDownlaodCount()
+    {
+        IsLoadingVersions = true;
+        try
+        {
+            var versions = await model.GetVersionsAsync();
 
+            if (DownloadCount is null)
+                DownloadCount = versions.Select(x => x.DownloadCount).FirstOrDefault(x => x is not null);
 
-
-				LoadVersionsAndDownlaodCount();
-
-
-				this.WhenAnyValue(x => x.SelectedVersion)
-					.Subscribe(this.OnChangeSelectedVersion)
-					.DisposeWith(d);
-			});
-
-		}
-		private async void OnChangeSelectedVersion(NuGetVersion version)
-		{
-			IsLoadingMetadata = true;
-			try
-			{
-
-				ILogger logger = NullLogger.Instance;
-				CancellationToken cancellationToken = CancellationToken.None;
-
-				SourceCacheContext cache = new SourceCacheContext();
-				SourceRepository repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
-				PackageMetadataResource resource = await repository.GetResourceAsync<PackageMetadataResource>();
-
-				var metadata = await resource.GetMetadataAsync(new PackageIdentity(this.Id, version), cache, logger, cancellationToken);
-
-				var vm = new NugetMetadataViewModel(metadata);
-
-				this.Metadata = vm;
-			}
-			catch
-			{
-
-			}
-			finally
-			{
-				IsLoadingMetadata = false;
-			}
-		}
-		private NuGetVersion? _lastVersion;
-		private async void LoadVersionsAndDownlaodCount()
-		{
-			IsLoadingVersions = true;
-			try
-			{
+            var versions2 = versions.OrderByDescending(x => x.Version)
+                .Select(x => x.Version);
+            _lastVersion = versions2.FirstOrDefault();
+            Versions = versions2.ToArray();
+            SelectedVersion = _lastVersion;
+        }
+        catch
+        {
+        }
+        finally
+        {
+            IsLoadingVersions = false;
+        }
+    }
 
 
-				var versions = (await model.GetVersionsAsync());
+    #region Nuget Properties
 
-				if (DownloadCount is null)
-					DownloadCount = versions.Select(x => x.DownloadCount).FirstOrDefault(x => x is not null);
+    public Uri? Icon { get; set; }
+    public string Authors { get; set; }
 
-				var versions2 = versions.OrderByDescending(x => x.Version)
-								.Select(x => x.Version);
-				_lastVersion = versions2.FirstOrDefault();
-				Versions = versions2.ToArray();
-				SelectedVersion = _lastVersion;
-			}
-			catch
-			{
+    public string Description { get; set; }
 
-			}
-			finally
-			{
-				IsLoadingVersions = false;
-			}
+    [Reactive] public long? DownloadCount { get; set; }
 
+    public string Id { get; set; }
 
-		}
+    public string Owners { get; set; }
 
-		public NugetPackageViewModel()
-		{
-		}
+    public bool PrefixReserved { get; set; }
 
-		public ICommand InstallCommand { get; }
+    [Reactive] public NuGetVersion? SelectedVersion { get; set; }
 
-		public ViewModelActivator Activator { get; } = new();
-	}
+    [Reactive] public NuGetVersion[] Versions { get; set; }
 
-	public class NugetMetadataViewModel
-	{
-		public string Description { get; }
+    private readonly IPackageSearchMetadata model;
 
-		public string Authors { get; }
-		public long? DownloadCount { get; }
-		public DateTimeOffset? Published { get; }
+    #endregion
+}
 
-		public string Version { get; }
+public class NugetMetadataViewModel
+{
+    public NugetMetadataViewModel(IPackageSearchMetadata metadata)
+    {
+        Description = metadata.Description;
+        Authors = metadata.Authors;
+        DownloadCount = metadata.DownloadCount;
+        Published = metadata.Published;
+        Version = metadata.Identity.Version.Version.ToString();
+    }
 
-		public NugetMetadataViewModel(IPackageSearchMetadata metadata)
-		{
-			Description = metadata.Description;
-			Authors = metadata.Authors;
-			DownloadCount = metadata.DownloadCount;
-			Published = metadata.Published;
-			Version = metadata.Identity.Version.Version.ToString();
-		}
-	}
+    public string Description { get; }
 
+    public string Authors { get; }
+    public long? DownloadCount { get; }
+    public DateTimeOffset? Published { get; }
+
+    public string Version { get; }
 }

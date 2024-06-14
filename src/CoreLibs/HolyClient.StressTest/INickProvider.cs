@@ -1,7 +1,6 @@
-﻿namespace HolyClient.StressTest
+﻿namespace HolyClient.StressTest;
+
+public interface INickProvider
 {
-	public interface INickProvider
-	{
-		public string GetNextNick();
-	}
+    public string GetNextNick();
 }

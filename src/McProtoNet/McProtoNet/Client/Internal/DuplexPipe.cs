@@ -1,17 +1,16 @@
 ﻿using System.IO.Pipelines;
 
-namespace McProtoNet.Client
+namespace McProtoNet.Client;
+
+internal sealed class DuplexPipe : IDuplexPipe
 {
-	internal sealed class DuplexPipe : IDuplexPipe
-	{
-		public PipeReader Input { get; private set; }
+    public DuplexPipe(PipeReader input, PipeWriter output)
+    {
+        Input = input;
+        Output = output;
+    }
 
-		public PipeWriter Output { get; private set; }
+    public PipeReader Input { get; }
 
-		public DuplexPipe(PipeReader input, PipeWriter output)
-		{
-			Input = input;
-			Output = output;
-		}
-	}
+    public PipeWriter Output { get; }
 }

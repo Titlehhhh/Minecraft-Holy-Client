@@ -5,8 +5,8 @@ namespace HolyClient;
 
 public partial class RootView : ReactiveUserControl<RootViewModel>
 {
-	public RootView()
-	{
-		InitializeComponent();
-	}
+    public RootView()
+    {
+        InitializeComponent();
+    }
 }

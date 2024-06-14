@@ -1,7 +1,6 @@
-﻿namespace HolyClient.LoadPlugins.Models
+﻿namespace HolyClient.LoadPlugins.Models;
+
+internal class RuntimeConfig
 {
-	internal class RuntimeConfig
-	{
-		public RuntimeOptions? runtimeOptions { get; set; }
-	}
+    public RuntimeOptions? runtimeOptions { get; set; }
 }

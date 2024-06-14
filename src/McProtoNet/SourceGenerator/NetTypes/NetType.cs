@@ -1,22 +1,21 @@
 ﻿using System.Text;
 
-namespace SourceGenerator.NetTypes
+namespace SourceGenerator.NetTypes;
+
+public abstract class NetType
 {
-	public abstract class NetType
-	{
-		protected string ToStringTypes(IEnumerable<NetType> types)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (var item in types)
-			{
-				string str = item.ToString();
+    protected string ToStringTypes(IEnumerable<NetType> types)
+    {
+        var stringBuilder = new StringBuilder();
+        foreach (var item in types)
+        {
+            var str = item.ToString();
 
-				str = "\t" + str.Replace(Environment.NewLine, Environment.NewLine + "\t");
+            str = "\t" + str.Replace(Environment.NewLine, Environment.NewLine + "\t");
 
-				stringBuilder.AppendLine(str);
-			}
-			return stringBuilder.ToString();
-		}
-	}
+            stringBuilder.AppendLine(str);
+        }
 
+        return stringBuilder.ToString();
+    }
 }

@@ -1,4 +1,1 @@
-﻿namespace HolyClient.Contracts.Models
-{
-
-}
+﻿namespace HolyClient.Contracts.Models;

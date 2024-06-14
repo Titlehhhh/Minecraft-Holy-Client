@@ -1,26 +1,21 @@
-﻿using Avalonia.Controls;
+﻿using System.Reactive.Disposables;
+using Avalonia.Controls;
 using ReactiveUI;
-using System.Reactive.Disposables;
 
-namespace HolyClient.Abstractions.StressTest
+namespace HolyClient.Abstractions.StressTest;
+
+public interface IStressTestBehavior
 {
+    ReactiveObject? DefaultViewModel { get; }
+
+    ReactiveObject? ProcessViewModel { get; }
 
 
-	public interface IStressTestBehavior
-	{
+    ResourceDictionary? Resources { get; }
 
-
-		ReactiveObject? DefaultViewModel { get; }
-
-		ReactiveObject? ProcessViewModel { get; }
-
-
-		ResourceDictionary? Resources { get; }
-
-		public Task Activate(
-			CompositeDisposable disposables,
-			IEnumerable<IStressTestBot> bots,
-			Serilog.ILogger logger,
-			CancellationToken cancellationToken);
-	}
+    public Task Activate(
+        CompositeDisposable disposables,
+        IEnumerable<IStressTestBot> bots,
+        Serilog.ILogger logger,
+        CancellationToken cancellationToken);
 }

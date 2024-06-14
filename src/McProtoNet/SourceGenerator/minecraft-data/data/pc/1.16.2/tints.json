@@ -373,67 +373,99 @@
   "redstone": {
     "data": [
       {
-        "keys": [0],
+        "keys": [
+          0
+        ],
         "color": 4915200
       },
       {
-        "keys": [1],
+        "keys": [
+          1
+        ],
         "color": 7274496
       },
       {
-        "keys": [2],
+        "keys": [
+          2
+        ],
         "color": 7929856
       },
       {
-        "keys": [3],
+        "keys": [
+          3
+        ],
         "color": 8519680
       },
       {
-        "keys": [4],
+        "keys": [
+          4
+        ],
         "color": 9175040
       },
       {
-        "keys": [5],
+        "keys": [
+          5
+        ],
         "color": 9895936
       },
       {
-        "keys": [6],
+        "keys": [
+          6
+        ],
         "color": 10551296
       },
       {
-        "keys": [7],
+        "keys": [
+          7
+        ],
         "color": 11206656
       },
       {
-        "keys": [8],
+        "keys": [
+          8
+        ],
         "color": 11862016
       },
       {
-        "keys": [9],
+        "keys": [
+          9
+        ],
         "color": 12517376
       },
       {
-        "keys": [10],
+        "keys": [
+          10
+        ],
         "color": 13238272
       },
       {
-        "keys": [11],
+        "keys": [
+          11
+        ],
         "color": 13828096
       },
       {
-        "keys": [12],
+        "keys": [
+          12
+        ],
         "color": 14483456
       },
       {
-        "keys": [13],
+        "keys": [
+          13
+        ],
         "color": 15140352
       },
       {
-        "keys": [14],
+        "keys": [
+          14
+        ],
         "color": 15801088
       },
       {
-        "keys": [15],
+        "keys": [
+          15
+        ],
         "color": 16527616
       }
     ],
@@ -442,15 +474,21 @@
   "constant": {
     "data": [
       {
-        "keys": ["birch_leaves"],
+        "keys": [
+          "birch_leaves"
+        ],
         "color": 8431445
       },
       {
-        "keys": ["spruce_leaves"],
+        "keys": [
+          "spruce_leaves"
+        ],
         "color": 6396257
       },
       {
-        "keys": ["lily_pad"],
+        "keys": [
+          "lily_pad"
+        ],
         "color": 2129968
       }
     ],

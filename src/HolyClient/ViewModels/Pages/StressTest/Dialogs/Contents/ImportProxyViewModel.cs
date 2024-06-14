@@ -1,19 +1,19 @@
-﻿using QuickProxyNet;
-using System;
+﻿using System;
+using QuickProxyNet;
 
 namespace HolyClient.ViewModels;
 
 public abstract class ImportProxyViewModel
 {
-	public string Title { get; set; }
-	public ProxyType Type { get; set; }
+    protected ImportProxyViewModel(string title)
+    {
+        Title = title;
+    }
 
-	public ProxyType[] AvailableTypes { get; } = Enum.GetValues<ProxyType>();
+    public string Title { get; set; }
+    public ProxyType Type { get; set; }
 
-	public abstract bool IsValid();
+    public ProxyType[] AvailableTypes { get; } = Enum.GetValues<ProxyType>();
 
-	protected ImportProxyViewModel(string title)
-	{
-		Title = title;
-	}
+    public abstract bool IsValid();
 }

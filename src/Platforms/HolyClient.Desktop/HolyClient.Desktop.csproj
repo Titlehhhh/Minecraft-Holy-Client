@@ -1,38 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
+    <PropertyGroup>
 
-		<!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
+        <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
     One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
-		<TargetFramework>net8.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		
-		<RuntimeIdentifiers>win-x86;win-x64;linux-x64;linux-arm;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-	</PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<OutputType>Exe</OutputType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<OutputType>WinExe</OutputType>
-	</PropertyGroup>
+        <RuntimeIdentifiers>win-x86;win-x64;linux-x64;linux-arm;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    </PropertyGroup>
 
-	<PropertyGroup>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<ApplicationIcon>icon.ico</ApplicationIcon>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <OutputType>WinExe</OutputType>
+    </PropertyGroup>
 
-
-	<ItemGroup>
-		
-
-		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
-		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-	</ItemGroup>
+    <PropertyGroup>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
+    </PropertyGroup>
 
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\HolyClient\HolyClient.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+
+
+        <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\HolyClient\HolyClient.csproj"/>
+    </ItemGroup>
 </Project>

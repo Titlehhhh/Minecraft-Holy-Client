@@ -1,18 +1,13 @@
 ﻿using ReactiveUI;
 
-namespace HolyClient.ViewModels
+namespace HolyClient.ViewModels;
+
+public class PluginViewModel : ReactiveObject
 {
-	public class PluginViewModel : ReactiveObject
-	{
+    public PluginViewModel(string fullName)
+    {
+        FullName = fullName;
+    }
 
-
-		public PluginViewModel(string fullName)
-		{
-			FullName = fullName;
-		}
-
-		public string FullName { get; }
-
-	}
-
+    public string FullName { get; }
 }

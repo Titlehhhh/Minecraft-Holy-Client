@@ -1,10 +1,5 @@
-﻿namespace HolyClient.Contracts.Models
+﻿namespace HolyClient.Contracts.Models;
+
+public interface IExtensionManager
 {
-
-	public interface IExtensionManager
-	{
-
-	}
-
 }
-

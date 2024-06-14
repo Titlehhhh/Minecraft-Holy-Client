@@ -1,33 +1,27 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace SourceGenerator.ProtoDefTypes
+namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefContainerField : ProtodefType
 {
-	public sealed class ProtodefContainerField : ProtodefType
-	{
+    [JsonConstructor]
+    public ProtodefContainerField(bool? anon, string? name, ProtodefType type)
+    {
+        Anon = anon;
+        Name = name;
+        Type = type;
+    }
 
-		[JsonConstructor]
-		public ProtodefContainerField(bool? anon, string? name, ProtodefType type)
-		{
-			Anon = anon;
-			Name = name;
-			Type = type;
-		}
+    //public bool IsAnon => Anon;
 
-		//public bool IsAnon => Anon;
+    [JsonPropertyName("anon")] public bool? Anon { get; }
 
-		[JsonPropertyName("anon")]
-		public bool? Anon { get; }
-		[JsonPropertyName("name")]
-		public string? Name { get; }
-		[JsonPropertyName("type")]
-		public ProtodefType Type { get; }
+    [JsonPropertyName("name")] public string? Name { get; }
 
-		public override void OnDeserialized()
-		{
-			Type.Parent = this;
-		}
+    [JsonPropertyName("type")] public ProtodefType Type { get; }
 
-	}
-
-
+    public override void OnDeserialized()
+    {
+        Type.Parent = this;
+    }
 }

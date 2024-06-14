@@ -2,17 +2,13 @@
 {
     public ProtocolCollection()
     {
-        Protocols = new();
+        Protocols = new Dictionary<int, Protocol>();
     }
 
     public Dictionary<int, Protocol> Protocols { get; }
 
     public void Add(int version, Protocol protocol)
     {
-        if (!Protocols.ContainsKey(version))
-        {
-            Protocols.Add(version, protocol);
-        }
+        if (!Protocols.ContainsKey(version)) Protocols.Add(version, protocol);
     }
 }
-

@@ -1,7 +1,5 @@
-﻿namespace McProtoNet.Serialization
-{
-	public class Class1
-	{
+﻿namespace McProtoNet.Serialization;
 
-	}
+public class Class1
+{
 }

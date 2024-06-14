@@ -1,24 +1,16 @@
 ﻿using QuickProxyNet;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+public struct ProxyCheckResult
 {
-	public struct ProxyCheckResult
-	{
-		public bool Success { get; }
-		public IProxyClient ProxyClient { get; }
+    public bool Success { get; }
+    public IProxyClient ProxyClient { get; }
 
 
-
-		public ProxyCheckResult(bool success, IProxyClient proxyClient)
-		{
-			Success = success;
-			ProxyClient = proxyClient;
-
-		}
-
-
-
-	}
-
-
+    public ProxyCheckResult(bool success, IProxyClient proxyClient)
+    {
+        Success = success;
+        ProxyClient = proxyClient;
+    }
 }

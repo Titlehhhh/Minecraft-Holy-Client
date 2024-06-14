@@ -1,17 +1,14 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefVarLong : ProtodefType
 {
-	public sealed class ProtodefVarLong : ProtodefType
-	{
-		public override string ToString()
-		{
-			return "varlong";
-		}
+    public override string ToString()
+    {
+        return "varlong";
+    }
 
-		public override string? GetNetType()
-		{
-			return "long";
-		}
-	}
-
-
+    public override string? GetNetType()
+    {
+        return "long";
+    }
 }

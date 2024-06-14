@@ -1,119 +1,96 @@
-﻿using LibDeflate;
-using Org.BouncyCastle.Bcpg;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using LibDeflate;
 using McProtoNet.Abstractions;
 
-namespace McProtoNet.Protocol
+namespace McProtoNet.Protocol;
+
+public sealed class MinecraftPacketSender : IDisposable
 {
-	public sealed class MinecraftPacketSender : IDisposable
-	{
-
-		public Stream BaseStream { get; set; }
+    private const int ZERO_VARLENGTH = 1;
+    private static readonly byte[] ZERO_VARINT = { 0 };
 
 
+    private readonly ZlibCompressor compressor = new(6);
 
+    private int _compressionThreshold;
+    public Stream BaseStream { get; set; }
 
-		private readonly ZlibCompressor compressor = new ZlibCompressor(6);
+    public void Dispose()
+    {
+        compressor.Dispose();
+    }
 
-		private const int ZERO_VARLENGTH = 1;
-		private static readonly byte[] ZERO_VARINT = { 0 };
+    public async ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
+    {
+        if (_compressionThreshold > 0)
+        {
+            var uncompressedSize = data.Length;
 
-		public async ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
-		{
+            if (uncompressedSize >= _compressionThreshold)
+            {
+                var length = compressor.GetBound(uncompressedSize);
 
+                var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
 
-			try
-			{
+                try
+                {
+                    var bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
 
+                    var compressedLength = bytesCompress;
 
-				if (_compressionThreshold > 0)
-				{
+                    var fullsize = compressedLength + uncompressedSize.GetVarIntLength();
 
+                    await BaseStream.WriteVarIntAsync(fullsize, token).ConfigureAwait(false);
+                    await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
+                    //await BaseStream.WriteAsync(compressed.Memory, token);
 
-					int uncompressedSize = data.Length;
+                    await BaseStream.WriteAsync(compressedBuffer.AsMemory(0, bytesCompress), token)
+                        .ConfigureAwait(false);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(compressedBuffer);
+                }
+            }
+            else
+            {
+                uncompressedSize++;
 
-					if (uncompressedSize >= _compressionThreshold)
-					{
-						int length = compressor.GetBound(uncompressedSize);
+                await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
+                await BaseStream.WriteAsync(ZERO_VARINT, token).ConfigureAwait(false);
+                await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            await SendPacketWithoutCompressionAsync(data, token).ConfigureAwait(false);
+        }
 
-						var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
+        await BaseStream.FlushAsync(token);
+    }
 
-						try
-						{
-							int bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
+    public void SwitchCompression(int threshold)
+    {
+        _compressionThreshold = threshold;
+    }
 
-							int compressedLength = bytesCompress;
+    #region Send
 
-							int fullsize = compressedLength + uncompressedSize.GetVarIntLength();
+    public ValueTask SendPacketAsync(OutputPacket packet, CancellationToken token = default)
+    {
+        return SendPacketAsync(packet.Memory, token);
+    }
 
-							await BaseStream.WriteVarIntAsync(fullsize, token).ConfigureAwait(false);
-							await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
-							//await BaseStream.WriteAsync(compressed.Memory, token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    private async ValueTask SendPacketWithoutCompressionAsync(ReadOnlyMemory<byte> data, CancellationToken token)
+    {
+        var len = data.Length;
 
-							await BaseStream.WriteAsync(compressedBuffer.AsMemory(0, bytesCompress), token).ConfigureAwait(false);
-						}
-						finally
-						{
-							ArrayPool<byte>.Shared.Return(compressedBuffer);
-						}
+        await BaseStream.WriteVarIntAsync(len, token).ConfigureAwait(false);
 
+        await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
+    }
 
-
-					}
-					else
-					{
-						uncompressedSize++;
-
-						await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
-						await BaseStream.WriteAsync(ZERO_VARINT, token).ConfigureAwait(false);
-						await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
-					}
-
-				}
-				else
-				{
-					await SendPacketWithoutCompressionAsync(data, token).ConfigureAwait(false);
-				}
-				await BaseStream.FlushAsync(token);
-			}
-			finally
-			{
-
-			}
-		}
-
-		#region Send        
-		public ValueTask SendPacketAsync(OutputPacket packet, CancellationToken token = default)
-		{
-			return SendPacketAsync(packet.Memory, token);
-
-
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		private async ValueTask SendPacketWithoutCompressionAsync(ReadOnlyMemory<byte> data, CancellationToken token)
-		{
-
-			int len = data.Length;
-
-			await BaseStream.WriteVarIntAsync(len, token).ConfigureAwait(false);
-
-			await BaseStream.WriteAsync(data, token).ConfigureAwait(false);
-
-
-
-		}
-		#endregion
-
-		private int _compressionThreshold;
-		public void SwitchCompression(int threshold)
-		{
-			_compressionThreshold = threshold;
-		}
-
-		public void Dispose()
-		{
-			compressor.Dispose();
-		}
-	}
+    #endregion
 }

@@ -18,6 +18,7 @@ public readonly struct InputPacket : IDisposable
         Id = id;
         Data = data;
     }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public InputPacket(int id, MemoryOwner<byte> owner, int offset = 0)
     {

@@ -1,9 +1,8 @@
 ﻿using QuickProxyNet;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+public interface IProxyProvider : IDisposable
 {
-	public interface IProxyProvider : IDisposable
-	{
-		public ValueTask<IProxyClient> GetNextProxy();
-	}
+    public ValueTask<IProxyClient> GetNextProxy();
 }

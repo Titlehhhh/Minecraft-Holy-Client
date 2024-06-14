@@ -1,12 +1,10 @@
 ﻿using McProtoNet.Abstractions;
-using McProtoNet.Protocol;
 
-namespace McProtoNet.Client
+namespace McProtoNet.Client;
+
+public interface IPacketChannel
 {
-	public interface IPacketChannel
-	{
-		IObservable<InputPacket> OnPacket { get; }
+    IObservable<InputPacket> OnPacket { get; }
 
-		ValueTask SendPacketAsync(OutputPacket packet);
-	}
+    ValueTask SendPacketAsync(OutputPacket packet);
 }

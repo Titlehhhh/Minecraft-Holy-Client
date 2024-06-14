@@ -5,132 +5,122 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace McProtoNet.Tests
+namespace McProtoNet.Tests;
+
+public class TestMemoryPool : MemoryPool<byte>
 {
-	public class TestMemoryPool : MemoryPool<byte>
-	{
-		private MemoryPool<byte> _pool = Shared;
+    internal const int DefaultMaxBufferSize = 4096;
 
-		private bool _disposed;
+    private bool _disposed;
+    private readonly MemoryPool<byte> _pool = Shared;
+    public override int MaxBufferSize => DefaultMaxBufferSize;
 
-		public override IMemoryOwner<byte> Rent(int minBufferSize = -1)
-		{
-			CheckDisposed();
-			return new PooledMemory(_pool.Rent(minBufferSize), this);
-		}
+    public override IMemoryOwner<byte> Rent(int minBufferSize = -1)
+    {
+        CheckDisposed();
+        return new PooledMemory(_pool.Rent(minBufferSize), this);
+    }
 
-		protected override void Dispose(bool disposing)
-		{
-			_disposed = true;
-		}
+    protected override void Dispose(bool disposing)
+    {
+        _disposed = true;
+    }
 
-		internal const int DefaultMaxBufferSize = 4096;
-		public override int MaxBufferSize => DefaultMaxBufferSize;
+    internal void CheckDisposed()
+    {
+        if (_disposed) throw new ObjectDisposedException(nameof(TestMemoryPool));
+    }
 
-		internal void CheckDisposed()
-		{
-			if (_disposed)
-			{
-				throw new ObjectDisposedException(nameof(TestMemoryPool));
-			}
-		}
+    private class PooledMemory : MemoryManager<byte>
+    {
+        private readonly TestMemoryPool _pool;
 
-		private class PooledMemory : MemoryManager<byte>
-		{
-			private IMemoryOwner<byte> _owner;
+        private readonly string _leaser;
+        private readonly IMemoryOwner<byte> _owner;
 
-			private readonly TestMemoryPool _pool;
+        private int _referenceCount;
 
-			private int _referenceCount;
+        private bool _returned;
 
-			private bool _returned;
+        public PooledMemory(IMemoryOwner<byte> owner, TestMemoryPool pool)
+        {
+            _owner = owner;
+            _pool = pool;
+            _leaser = Environment.StackTrace;
+            _referenceCount = 1;
+        }
 
-			private string _leaser;
+        public override Memory<byte> Memory
+        {
+            get
+            {
+                _pool.CheckDisposed();
+                return _owner.Memory;
+            }
+        }
 
-			public PooledMemory(IMemoryOwner<byte> owner, TestMemoryPool pool)
-			{
-				_owner = owner;
-				_pool = pool;
-				_leaser = Environment.StackTrace;
-				_referenceCount = 1;
-			}
+        ~PooledMemory()
+        {
+            Debug.Assert(_returned,
+                $"Block being garbage collected instead of returned to pool{Environment.NewLine}{_leaser}");
+        }
 
-			~PooledMemory()
-			{
-				Debug.Assert(_returned, $"Block being garbage collected instead of returned to pool{Environment.NewLine}{_leaser}");
-			}
+        protected override void Dispose(bool disposing)
+        {
+            _pool.CheckDisposed();
+        }
 
-			protected override void Dispose(bool disposing)
-			{
-				_pool.CheckDisposed();
-			}
+        public override MemoryHandle Pin(int elementIndex = 0)
+        {
+            _pool.CheckDisposed();
+            Interlocked.Increment(ref _referenceCount);
 
-			public override MemoryHandle Pin(int elementIndex = 0)
-			{
-				_pool.CheckDisposed();
-				Interlocked.Increment(ref _referenceCount);
+            if (!MemoryMarshal.TryGetArray(_owner.Memory, out ArraySegment<byte> segment))
+                throw new InvalidOperationException();
 
-				if (!MemoryMarshal.TryGetArray(_owner.Memory, out ArraySegment<byte> segment))
-				{
-					throw new InvalidOperationException();
-				}
+            unsafe
+            {
+                try
+                {
+                    if ((uint)elementIndex > (uint)segment.Count)
+                        throw new ArgumentOutOfRangeException(nameof(elementIndex));
 
-				unsafe
-				{
-					try
-					{
-						if ((uint)elementIndex > (uint)segment.Count)
-						{
-							throw new ArgumentOutOfRangeException(nameof(elementIndex));
-						}
+                    var handle = GCHandle.Alloc(segment.Array, GCHandleType.Pinned);
 
-						GCHandle handle = GCHandle.Alloc(segment.Array, GCHandleType.Pinned);
+                    return new MemoryHandle(
+                        Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), elementIndex + segment.Offset), handle,
+                        this);
+                }
+                catch
+                {
+                    Unpin();
+                    throw;
+                }
+            }
+        }
 
-						return new MemoryHandle(Unsafe.Add<byte>(((void*)handle.AddrOfPinnedObject()), elementIndex + segment.Offset), handle, this);
-					}
-					catch
-					{
-						Unpin();
-						throw;
-					}
-				}
-			}
+        public override void Unpin()
+        {
+            _pool.CheckDisposed();
 
-			public override void Unpin()
-			{
-				_pool.CheckDisposed();
+            var newRefCount = Interlocked.Decrement(ref _referenceCount);
 
-				int newRefCount = Interlocked.Decrement(ref _referenceCount);
+            if (newRefCount < 0)
+                throw new InvalidOperationException();
 
-				if (newRefCount < 0)
-					throw new InvalidOperationException();
+            if (newRefCount == 0) _returned = true;
+        }
 
-				if (newRefCount == 0)
-				{
-					_returned = true;
-				}
-			}
+        protected override bool TryGetArray(out ArraySegment<byte> segment)
+        {
+            _pool.CheckDisposed();
+            return MemoryMarshal.TryGetArray(_owner.Memory, out segment);
+        }
 
-			protected override bool TryGetArray(out ArraySegment<byte> segment)
-			{
-				_pool.CheckDisposed();
-				return MemoryMarshal.TryGetArray(_owner.Memory, out segment);
-			}
-
-			public override Memory<byte> Memory
-			{
-				get
-				{
-					_pool.CheckDisposed();
-					return _owner.Memory;
-				}
-			}
-
-			public override Span<byte> GetSpan()
-			{
-				_pool.CheckDisposed();
-				return _owner.Memory.Span;
-			}
-		}
-	}
+        public override Span<byte> GetSpan()
+        {
+            _pool.CheckDisposed();
+            return _owner.Memory.Span;
+        }
+    }
 }

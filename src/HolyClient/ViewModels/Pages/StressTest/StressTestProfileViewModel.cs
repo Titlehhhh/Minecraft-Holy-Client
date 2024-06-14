@@ -1,4 +1,12 @@
-﻿using DynamicData;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
 using HolyClient.StressTest;
@@ -9,373 +17,297 @@ using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 using ReactiveUI.Validation.States;
 using Splat;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using ILogger = Serilog.ILogger;
 
 namespace HolyClient.ViewModels;
 
 public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRoutableViewModel, IActivatableViewModel
 {
-	private static string GetTr(string key)
-	{
-		return $"StressTest.Profile.GeneralSettings.Validation.{key}";
-	}
+    private readonly SelectImportSourceProxyViewModel _selectProxyImportSourceViewModel = new();
 
-	public Guid Id { get; private set; }
+    private readonly IStressTestProfile _state;
 
-	public ViewModelActivator Activator { get; } = new();
+    public StressTestProfileViewModel(IStressTestProfile state)
+    {
+        _state = state;
 
-	public string? UrlPathSegment => "Profile";
+        #region Bind to state
 
-	public IScreen HostScreen { get; private set; }
+        Id = state.Id;
+        Name = state.Name;
+        Server = state.Server;
+        Version = state.Version;
+        BotsNickname = state.BotsNickname;
+        NumberOfBots = state.NumberOfBots;
+        UseProxy = state.UseProxy;
+        CheckDNS = state.OptimizeDNS;
 
-	[Reactive]
-	public string Name { get; set; }
+        this.WhenAnyValue(x => x.Name)
+            .BindTo(state, x => x.Name);
 
+        this.WhenAnyValue(x => x.CheckDNS)
+            .BindTo(state, x => x.OptimizeDNS);
 
+        this.WhenAnyValue(x => x.Server)
+            .BindTo(state, x => x.Server);
 
-	private SelectImportSourceProxyViewModel _selectProxyImportSourceViewModel = new();
 
-	private IStressTestProfile _state;
+        this.WhenAnyValue(x => x.Version)
+            .BindTo(state, x => x.Version);
 
-	public StressTestProfileViewModel(IStressTestProfile state)
-	{
+        this.WhenAnyValue(x => x.BotsNickname)
+            .BindTo(state, x => x.BotsNickname);
 
-		_state = state;
+        this.WhenAnyValue(x => x.NumberOfBots)
+            .BindTo(state, x => x.NumberOfBots);
 
-		#region Bind to state
-		this.Id = state.Id;
-		this.Name = state.Name;
-		this.Server = state.Server;
-		this.Version = state.Version;
-		this.BotsNickname = state.BotsNickname;
-		this.NumberOfBots = state.NumberOfBots;
-		this.UseProxy = state.UseProxy;
-		this.CheckDNS = state.OptimizeDNS;
+        this.WhenAnyValue(x => x.UseProxy)
+            .BindTo(state, x => x.UseProxy);
 
-		this.WhenAnyValue(x => x.Name)
-			.BindTo(state, x => x.Name);
+        #endregion
 
-		this.WhenAnyValue(x => x.CheckDNS)
-			.BindTo(state, x => x.OptimizeDNS);
+        //HostScreen = hostScreen;
 
-		this.WhenAnyValue(x => x.Server)
-			.BindTo(state, x => x.Server);
+        #region Configure validation
 
+        this.WhenActivated(d =>
+        {
+            this.ValidationRule(
+                viewModel => viewModel.Server,
+                name => !string.IsNullOrWhiteSpace(name),
+                GetTr("Address")).DisposeWith(d);
 
-		this.WhenAnyValue(x => x.Version)
-			.BindTo(state, x => x.Version);
 
-		this.WhenAnyValue(x => x.BotsNickname)
-			.BindTo(state, x => x.BotsNickname);
+            var botsNicknameValid =
+                this.WhenAnyValue(x => x.BotsNickname)
+                    .Select(name =>
+                    {
+                        if (string.IsNullOrWhiteSpace(name)) return ValidationState.Valid;
+                        if (name.Length >= 14) return new ValidationState(false, GetTr("BotsNickname.Long"));
+                        return ValidationState.Valid;
+                    });
 
-		this.WhenAnyValue(x => x.NumberOfBots)
-			.BindTo(state, x => x.NumberOfBots);
+            this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
-		this.WhenAnyValue(x => x.UseProxy)
-			.BindTo(state, x => x.UseProxy);
-		#endregion
 
-		//HostScreen = hostScreen;
-		#region Configure validation
+            StartCommand = ReactiveCommand.CreateFromTask(StartStressTest, this.IsValid());
+        });
 
+        #endregion
 
-		this.WhenActivated(d =>
-		{
 
+        #region Configure proxies
 
+        this.WhenActivated(d =>
+        {
+            state.Proxies.Connect()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Transform(x => new ProxySourceViewModel(x))
+                .Bind(out _proxies)
+                .DisposeMany()
+                .Subscribe()
+                .DisposeWith(d);
+            this.RaisePropertyChanged(nameof(Proxies));
+        });
 
-			this.ValidationRule(
-			   viewModel => viewModel.Server,
-			   name => !string.IsNullOrWhiteSpace(name),
-			   GetTr("Address")).DisposeWith(d);
+        this.WhenActivated(d =>
+        {
+            AddSourceProxyCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var ok = await SelectProxyImportSourceDialog.Handle(_selectProxyImportSourceViewModel);
+                if (ok)
+                {
+                    var source = _selectProxyImportSourceViewModel.SelectedSource.SourceType;
 
+                    IProxySource proxySource = null;
 
+                    ImportProxyViewModel importVm = null;
 
-			IObservable<IValidationState> botsNicknameValid =
-				this.WhenAnyValue(x => x.BotsNickname)
-					.Select(name =>
-					{
-						if (string.IsNullOrWhiteSpace(name))
-						{
-							return ValidationState.Valid;
-						}
-						if (name.Length >= 14)
-						{
-							return new ValidationState(false, GetTr("BotsNickname.Long"));
-						}
-						return ValidationState.Valid;
-					});
 
-			this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
+                    if (source == ImportSource.InMemory)
+                    {
+                        InMemoryImportProxyDialogViewModel vm = new("ManualEntry");
 
+                        ok = await ImportProxyDialog.Handle(vm);
 
+                        proxySource = new InMemoryProxySource(vm.Type, vm.Lines);
+                        importVm = vm;
+                    }
+                    else if (source == ImportSource.File)
+                    {
+                        FileImportProxyDialogViewModel vm = new("File");
 
-			StartCommand = ReactiveCommand.CreateFromTask(this.StartStressTest, this.IsValid());
-		});
-		#endregion
+                        ok = await ImportProxyDialog.Handle(vm);
 
+                        proxySource = new FileProxySource(vm.Type, vm.FilePath);
+                        importVm = vm;
+                    }
+                    else if (source == ImportSource.Url)
+                    {
+                        UrlImportProxyDialogViewModel vm = new("Url");
 
+                        ok = await ImportProxyDialog.Handle(vm);
 
+                        proxySource = new UrlProxySource(vm.Type, vm.URL);
+                        importVm = vm;
+                    }
 
-		#region Configure proxies
+                    if (importVm.IsValid())
+                        if (proxySource is not null)
+                            state.Proxies.AddOrUpdate(proxySource);
+                }
+            });
 
-		this.WhenActivated(d =>
-		{
-			state.Proxies.Connect()
-				.ObserveOn(RxApp.MainThreadScheduler)
-				.Transform(x => new ProxySourceViewModel(x))
-				.Bind(out _proxies)
-				.DisposeMany()
-				.Subscribe()
-				.DisposeWith(d);
-			this.RaisePropertyChanged(nameof(Proxies));
-		});
 
-		this.WhenActivated(d =>
-		{
+            var canExecuteDeleteAll = state.Proxies.CountChanged
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Select(x => x > 0);
 
+            DeleteAllProxyCommand = ReactiveCommand.CreateFromTask(async () =>
+                {
+                    if (await ConfirmDeleteProxyDialog.Handle(default)) state.Proxies.Clear();
+                }, canExecuteDeleteAll)
+                .DisposeWith(d);
 
-			AddSourceProxyCommand = ReactiveCommand.CreateFromTask(async () =>
-			{
+            DeleteProxyCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                if (!await ConfirmDeleteProxyDialog.Handle(Unit.Default))
+                    return;
+                if (SelectedProxy is not null) state.Proxies.Remove(SelectedProxy.Id);
+            }, canExecuteDeleteAll).DisposeWith(d);
+        });
 
-				bool ok = await SelectProxyImportSourceDialog.Handle(_selectProxyImportSourceViewModel);
-				if (ok)
-				{
-					ImportSource source = _selectProxyImportSourceViewModel.SelectedSource.SourceType;
+        #endregion
 
-					IProxySource proxySource = null;
+        #region Configure plugins
 
-					ImportProxyViewModel importVm = null;
+        CurrentBehavior = state.Behavior;
 
+        state.WhenAnyValue(x => x.Behavior)
+            .BindTo(this, x => x.CurrentBehavior);
 
 
-					if (source == ImportSource.InMemory)
-					{
-						InMemoryImportProxyDialogViewModel vm = new("ManualEntry");
+        var pluginProvider = Locator.Current.GetService<IPluginProvider>();
 
-						ok = await ImportProxyDialog.Handle(vm);
+        pluginProvider.AvailableStressTestPlugins
+            .Connect()
+            .Transform(x => new StressTestPluginViewModel(x, state))
+            .Bind(out var plugins)
+            .DisposeMany()
+            .Subscribe();
 
-						proxySource = new InMemoryProxySource(vm.Type, vm.Lines);
-						importVm = vm;
+        AvailableBehaviors = plugins;
 
-					}
-					else if (source == ImportSource.File)
-					{
-						FileImportProxyDialogViewModel vm = new("File");
 
-						ok = await ImportProxyDialog.Handle(vm);
+        SelectedBehavior = plugins.FirstOrDefault();
 
-						proxySource = new FileProxySource(vm.Type, vm.FilePath);
-						importVm = vm;
-					}
-					else if (source == ImportSource.Url)
-					{
-						UrlImportProxyDialogViewModel vm = new("Url");
+        #endregion
+    }
 
-						ok = await ImportProxyDialog.Handle(vm);
+    public Guid Id { get; private set; }
 
-						proxySource = new UrlProxySource(vm.Type, vm.URL);
-						importVm = vm;
-					}
+    [Reactive] public string Name { get; set; }
 
-					if (importVm.IsValid())
-					{
-						if (proxySource is not null)
-						{
-							state.Proxies.AddOrUpdate(proxySource);
-						}
-					}
-				}
+    [Reactive] public IStressTestBehavior? CurrentBehavior { get; }
 
-			});
+    [Reactive] public IPluginSource? InstalledBehavior { get; }
 
+    public ViewModelActivator Activator { get; } = new();
 
-			var canExecuteDeleteAll = state.Proxies.CountChanged
-				.ObserveOn(RxApp.MainThreadScheduler)
-				.Select(x => x > 0);
+    public string? UrlPathSegment => "Profile";
 
-			DeleteAllProxyCommand = ReactiveCommand.CreateFromTask(async () =>
-			{
-				if (await ConfirmDeleteProxyDialog.Handle(default))
-				{
-					state.Proxies.Clear();
-				}
-			}, canExecuteDeleteAll)
-			.DisposeWith(d);
+    public IScreen HostScreen { get; }
 
-			DeleteProxyCommand = ReactiveCommand.CreateFromTask(async () =>
-			{
+    private static string GetTr(string key)
+    {
+        return $"StressTest.Profile.GeneralSettings.Validation.{key}";
+    }
 
-				if (!await ConfirmDeleteProxyDialog.Handle(Unit.Default))
-					return;
-				if (SelectedProxy is { })
-				{
-					state.Proxies.Remove(SelectedProxy.Id);
-				}
 
+    private async Task StartStressTest()
+    {
+        var rootScreen = Locator.Current.GetService<IScreen>("Root");
 
+        var loggerWrapper = new LoggerWrapper();
 
-			}, canExecuteDeleteAll).DisposeWith(d);
+        ILogger logger = loggerWrapper;
 
-		});
+        try
+        {
+            var cancelCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var mainVM = Locator.Current.GetService<MainViewModel>();
 
+                await rootScreen.Router.Navigate.Execute(mainVM);
+                await _state.Stop();
+            });
 
 
-		#endregion
+            var proccess = new StressTestProcessViewModel(cancelCommand, _state, loggerWrapper);
+            await rootScreen.Router.Navigate.Execute(proccess);
 
-		#region Configure plugins
 
+            await _state.Start(logger);
+        }
+        catch (TaskCanceledException)
+        {
+            logger.Information("[STRESS TEST] Завершился из-за отмены");
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "[STRESS TEST] завершился с ошибкой");
+        }
+    }
 
 
-		this.CurrentBehavior = state.Behavior;
+    #region General Settings
 
-		state.WhenAnyValue(x => x.Behavior)
-			.BindTo(this, x => x.CurrentBehavior);
+    [Reactive] public string Server { get; set; }
 
+    [Reactive] public string BotsNickname { get; set; }
 
+    [Reactive] public int NumberOfBots { get; set; }
 
+    [Reactive] public bool UseProxy { get; set; }
 
-		var pluginProvider = Locator.Current.GetService<IPluginProvider>();
+    [Reactive] public bool CheckDNS { get; set; }
 
-		pluginProvider.AvailableStressTestPlugins
-			.Connect()
-			.Transform(x => new StressTestPluginViewModel(x, state))
-			.Bind(out var plugins)
-			.DisposeMany()
-			.Subscribe();
+    public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
 
-		AvailableBehaviors = plugins;
+    [Reactive] public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
 
+    #endregion
 
-		SelectedBehavior = plugins.FirstOrDefault();
+    #region Behavior
 
+    [Reactive] public StressTestPluginViewModel? SelectedBehavior { get; set; }
 
+    [Reactive] public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
 
+    #endregion
 
-		#endregion
-	}
+    #region Proxy
 
+    public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
+    public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
+    public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
+    public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
 
-	private async Task StartStressTest()
-	{
+    [Reactive] public ICommand AddSourceProxyCommand { get; private set; }
 
+    [Reactive] public ICommand ExportProxyCommand { get; }
 
-		var rootScreen = Locator.Current.GetService<IScreen>("Root");
+    [Reactive] public ICommand DeleteProxyCommand { get; private set; }
 
-		LoggerWrapper loggerWrapper = new LoggerWrapper();
+    [Reactive] public ICommand DeleteAllProxyCommand { get; private set; }
 
-		Serilog.ILogger logger = loggerWrapper;
+    [Reactive] public ICommand StartCommand { get; private set; }
 
-		try
-		{
-			var cancelCommand = ReactiveCommand.CreateFromTask(async () =>
-			{
+    [Reactive] public ProxySourceViewModel? SelectedProxy { get; set; }
 
+    public ReadOnlyObservableCollection<ProxySourceViewModel> _proxies;
 
-				var mainVM = Locator.Current.GetService<MainViewModel>();
+    public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
 
-				await rootScreen.Router.Navigate.Execute(mainVM);
-				await _state.Stop();
-
-			});
-
-
-
-			StressTestProcessViewModel proccess = new StressTestProcessViewModel(cancelCommand, _state, loggerWrapper);
-			await rootScreen.Router.Navigate.Execute(proccess);
-
-
-
-			await _state.Start(logger);
-
-
-		}
-		catch (TaskCanceledException)
-		{
-			logger.Information("[STRESS TEST] Завершился из-за отмены");
-		}
-		catch (Exception ex)
-		{
-			logger.Error(ex, "[STRESS TEST] завершился с ошибкой");
-		}
-		finally
-		{
-
-		}
-	}
-
-
-
-
-	#region General Settings
-	[Reactive]
-	public string Server { get; set; }
-	[Reactive]
-	public string BotsNickname { get; set; }
-	[Reactive]
-	public int NumberOfBots { get; set; }
-
-	[Reactive]
-	public bool UseProxy { get; set; }
-	[Reactive]
-	public bool CheckDNS { get; set; }
-	public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
-
-	[Reactive]
-	public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-
-	#endregion
-
-	#region Behavior
-
-
-	[Reactive]
-	public StressTestPluginViewModel? SelectedBehavior { get; set; }
-
-	[Reactive]
-	public ReadOnlyObservableCollection<StressTestPluginViewModel> AvailableBehaviors { get; private set; }
-
-
-	#endregion
-
-	[Reactive]
-	public IStressTestBehavior? CurrentBehavior { get; private set; }
-
-	[Reactive]
-	public IPluginSource? InstalledBehavior { get; private set; }
-	#region Proxy
-
-
-	public Interaction<SelectImportSourceProxyViewModel, bool> SelectProxyImportSourceDialog { get; } = new();
-	public Interaction<ImportProxyViewModel, bool> ImportProxyDialog { get; } = new();
-	public Interaction<Unit, Unit> ExportProxyDialog { get; } = new();
-	public Interaction<Unit, bool> ConfirmDeleteProxyDialog { get; } = new();
-
-	[Reactive]
-	public ICommand AddSourceProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand ExportProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteProxyCommand { get; private set; }
-	[Reactive]
-	public ICommand DeleteAllProxyCommand { get; private set; }
-
-	[Reactive]
-	public ICommand StartCommand { get; private set; }
-
-	[Reactive]
-	public ProxySourceViewModel? SelectedProxy { get; set; }
-
-	public ReadOnlyObservableCollection<ProxySourceViewModel> _proxies;
-
-	public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
-
-	#endregion
+    #endregion
 }

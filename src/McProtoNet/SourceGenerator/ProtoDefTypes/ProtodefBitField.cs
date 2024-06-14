@@ -1,28 +1,24 @@
 ﻿using System.Collections;
 
-namespace SourceGenerator.ProtoDefTypes
+namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefBitField : ProtodefType, IEnumerable<ProtodefBitFieldNode>, IEnumerable
 {
+    //public override string TypeName => "Bitfield";
+    private readonly List<ProtodefBitFieldNode> nodes = new();
 
-	public sealed class ProtodefBitField : ProtodefType, IEnumerable<ProtodefBitFieldNode>, IEnumerable
-	{
-		//public override string TypeName => "Bitfield";
-		private List<ProtodefBitFieldNode> nodes = new();
+    public ProtodefBitField(List<ProtodefBitFieldNode> nodes)
+    {
+        this.nodes = nodes;
+    }
 
-		public ProtodefBitField(List<ProtodefBitFieldNode> nodes)
-		{
-			this.nodes = nodes;
-		}
+    public IEnumerator<ProtodefBitFieldNode> GetEnumerator()
+    {
+        return nodes.GetEnumerator();
+    }
 
-		public IEnumerator<ProtodefBitFieldNode> GetEnumerator()
-		{
-			return nodes.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return nodes.GetEnumerator();
-		}
-	}
-
-
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return nodes.GetEnumerator();
+    }
 }

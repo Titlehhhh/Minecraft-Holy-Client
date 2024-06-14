@@ -2,78 +2,71 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SourceGenerator.ProtoDefTypes
+namespace SourceGenerator.ProtoDefTypes;
+
+public class ProtocolConverter : JsonConverter<ProtodefProtocol>
 {
+    public override ProtodefProtocol? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
 
-	public class ProtocolConverter : JsonConverter<ProtodefProtocol>
-	{
-		public override ProtodefProtocol? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		{
-			throw new NotImplementedException();
-		}
+    public override void Write(Utf8JsonWriter writer, ProtodefProtocol value, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+}
 
-		public override void Write(Utf8JsonWriter writer, ProtodefProtocol value, JsonSerializerOptions options)
-		{
-			throw new NotImplementedException();
-		}
-	}
+public class ProtodefProtocol : IJsonOnDeserialized
+{
+    [JsonConstructor]
+    public ProtodefProtocol()
+    {
+        Namespaces = new Dictionary<string, Namespace>();
+    }
 
-	public class ProtodefProtocol : IJsonOnDeserialized
-	{
+    [JsonPropertyName("types")] public Dictionary<string, ProtodefType> Types { get; set; }
 
-		[JsonPropertyName("types")]
-		public Dictionary<string, ProtodefType> Types { get; set; }
+    [JsonExtensionData]
+    public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 
-		[JsonExtensionData]
-		public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
-
-		[JsonIgnore]
-		public Dictionary<string, Namespace> Namespaces { get; private set; }
-
-		[JsonConstructor]
-		public ProtodefProtocol()
-		{
-			Namespaces = new Dictionary<string, Namespace>();
-		}
-
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			System.Console.WriteLine("GetObjectData");
-
-		}
+    [JsonIgnore] public Dictionary<string, Namespace> Namespaces { get; }
 
 
-		public void OnDeserialized()
-		{
-			foreach (var (key, value) in AdditionalData)
-			{
+    public void OnDeserialized()
+    {
+        foreach (var (key, value) in AdditionalData)
+        {
+            var namespaceObj = ParseNamespace(value);
+            Namespaces[key] = namespaceObj;
+        }
+    }
 
-				var namespaceObj = ParseNamespace(value);
-				Namespaces[key] = namespaceObj;
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        Console.WriteLine("GetObjectData");
+    }
 
-			}
+    private Namespace ParseNamespace(JsonElement element)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            var types = new Dictionary<string, ProtodefType>();
+            foreach (var item in element.EnumerateObject())
+            {
+                if (item.NameEquals("types"))
+                {
+                    types = item.Value.Deserialize<Dictionary<string, ProtodefType>>();
+                    break;
+                }
 
-		}
+                var namespaceObj = ParseNamespace(item.Value);
+                types[item.Name] = namespaceObj;
+            }
 
-		private Namespace ParseNamespace(JsonElement element)
-		{
-			if (element.ValueKind == JsonValueKind.Object)
-			{
-				var types = new Dictionary<string, ProtodefType>();
-				foreach (var item in element.EnumerateObject())
-				{
-					if (item.NameEquals("types"))
-					{
+            return new Namespace { Types = types };
+        }
 
-						types = item.Value.Deserialize<Dictionary<string, ProtodefType>>();
-						break;
-					}
-					var namespaceObj = ParseNamespace(item.Value);
-					types[item.Name] = namespaceObj;
-				}
-				return new Namespace() { Types = types };
-			}
-			throw new JsonException("Invalid namespace format.");
-		}
-	}
+        throw new JsonException("Invalid namespace format.");
+    }
 }

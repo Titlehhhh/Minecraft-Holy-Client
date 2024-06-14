@@ -172,41 +172,35 @@
     "name": "village_plains",
     "appearance": "Plains Village",
     "visibleInItemFrame": true
-  }
-  ,
+  },
   {
     "id": 29,
     "name": "village_savanna",
     "appearance": "Savanna Village",
     "visibleInItemFrame": true
-  }
-  ,
+  },
   {
     "id": 30,
     "name": "village_snowy",
     "appearance": "Snowy Village",
     "visibleInItemFrame": true
-  }
-  ,
+  },
   {
     "id": 31,
     "name": "village_taiga",
     "appearance": "Taiga Village",
     "visibleInItemFrame": true
-  }
-  ,
+  },
   {
     "id": 32,
     "name": "jungle_temple",
     "appearance": "Jungle Temple",
     "visibleInItemFrame": true
-  }
-  ,
+  },
   {
     "id": 33,
     "name": "swamp_hut",
     "appearance": "Swap Hut",
     "visibleInItemFrame": true
   }
-  
 ]

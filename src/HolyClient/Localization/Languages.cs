@@ -1,28 +1,24 @@
 ﻿using System.Reflection;
 
-namespace HolyClient.Localization
+namespace HolyClient.Localization;
+
+public static class Languages
 {
-	public static class Languages
-	{
+    public static void Init()
+    {
+        Loc.Instance.LogOutMissingTranslations = true;
 
+        LocalizationLoader.Instance.FileLanguageLoaders.Add(new JsonFileLoader());
 
-		public static void Init()
-		{
-			Loc.Instance.LogOutMissingTranslations = true;
+        ReloadFiles();
+    }
 
-			LocalizationLoader.Instance.FileLanguageLoaders.Add(new JsonFileLoader());
+    public static void ReloadFiles()
+    {
+        LocalizationLoader.Instance.ClearAllTranslations();
 
-			ReloadFiles();
-		}
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("HolyClient.lang.words.loc.json");
 
-		public static void ReloadFiles()
-		{
-
-			LocalizationLoader.Instance.ClearAllTranslations();
-
-			using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("HolyClient.lang.words.loc.json");
-
-			LocalizationLoader.Instance.AddFile(stream);
-		}
-	}
+        LocalizationLoader.Instance.AddFile(stream);
+    }
 }

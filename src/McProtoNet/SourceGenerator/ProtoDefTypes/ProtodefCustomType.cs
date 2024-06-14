@@ -1,19 +1,16 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefCustomType : ProtodefType
 {
-	public sealed class ProtodefCustomType : ProtodefType
-	{
-		public string Name { get; }
+    public ProtodefCustomType(string name)
+    {
+        Name = name;
+    }
 
-		public ProtodefCustomType(string name)
-		{
-			Name = name;
-		}
+    public string Name { get; }
 
-		public override string ToString()
-		{
-			return Name;
-		}
-	}
-
-
+    public override string ToString()
+    {
+        return Name;
+    }
 }

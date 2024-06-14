@@ -1,20 +1,18 @@
-﻿namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
+﻿namespace HolyClient.ViewModels.Pages.StressTest.Dialogs;
+
+public class ImportSourceViewModel
 {
-	public class ImportSourceViewModel
-	{
-		public string Icon { get; }
-		public string Description { get; }
-		public string Name { get; }
-		public ImportSource SourceType { get; }
+    public ImportSourceViewModel(string icon, ImportSource sourceType)
+    {
+        SourceType = sourceType;
+        Icon = icon;
+        var baseTr = $"StressTest.Configuration.Proxy.Dialog.SelectSource.{icon}";
+        Description = $"{baseTr}.Description";
+        Name = baseTr;
+    }
 
-		public ImportSourceViewModel(string icon, ImportSource sourceType)
-		{
-
-			SourceType = sourceType;
-			Icon = icon;
-			string baseTr = $"StressTest.Configuration.Proxy.Dialog.SelectSource.{icon}";
-			Description = $"{baseTr}.Description";
-			Name = baseTr;
-		}
-	}
+    public string Icon { get; }
+    public string Description { get; }
+    public string Name { get; }
+    public ImportSource SourceType { get; }
 }

@@ -1,20 +1,72 @@
-﻿using SourceGenerator.ProtoDefTypes;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Diagnostics;
 using Humanizer;
 using SourceGenerator.NetTypes;
-using System;
+using SourceGenerator.ProtoDefTypes;
 
 public sealed class ProtocolSourceGenerator
 {
+    private readonly Dictionary<string, string> customToNet = new()
+    {
+        { "UUID", "Guid" },
+        { "position", "Position" },
+        { "slot", "Slot?" },
+        { "restBuffer", "byte[]" }
+    };
+
     public ProtodefProtocol Protocol;
-    public string Version;
     public int ProtocolVersion;
+
+    private readonly Dictionary<string, string> readDict = new()
+    {
+        { "varint", "ReadVarInt" },
+        { "varlong", "ReadVarLong" },
+        { "string", "ReadString" },
+        { "bool", "ReadBoolean" },
+        { "u8", "ReadUnsignedByte" },
+        { "i8", "ReadSignedByte" },
+        { "u16", "ReadUnsignedShort" },
+        { "i16", "ReadSignedShort" },
+        { "u32", "ReadUnsignedInt" },
+        { "i32", "ReadSignedInt" },
+        { "u64", "ReadUnsignedLong" },
+        { "i64", "ReadSignedLong" },
+        { "f32", "ReadFloat" },
+        { "f64", "ReadDouble" },
+        { "UUID", "ReadUUID" },
+        { "restBuffer", "ReadRestBuffer" },
+        { "position", "ReadPosition" },
+        { "slot", "ReadSlot" }
+    };
+
+    public string Version;
+
+
+    private readonly Dictionary<string, string> writeDict = new()
+    {
+        { "varint", "WriteVarInt" },
+        { "varlong", "WriteVarLong" },
+        { "string", "WriteString" },
+        { "bool", "WriteBoolean" },
+        { "u8", "WriteUnsignedByte" },
+        { "i8", "WriteSignedByte" },
+        { "u16", "WriteUnsignedShort" },
+        { "i16", "WriteSignedShort" },
+        { "u32", "WriteUnsignedInt" },
+        { "i32", "WriteSignedInt" },
+        { "u64", "WriteUnsignedLong" },
+        { "i64", "WriteSignedLong" },
+        { "f32", "WriteFloat" },
+        { "f64", "WriteDouble" },
+        { "UUID", "WriteUUID" },
+        { "restBuffer", "WriteBuffer" },
+        { "position", "WritePosition" },
+        { "slot", "WriteSlot" }
+    };
 
 
     public NetNamespace Generate()
     {
-        NetNamespace netNamespace = new NetNamespace();
+        var netNamespace = new NetNamespace();
         netNamespace.Name = "McProtoNet.Protocol" + Version;
 
         netNamespace.Usings.Add("McProtoNet.Serialization");
@@ -22,15 +74,12 @@ public sealed class ProtocolSourceGenerator
         netNamespace.Usings.Add("McProtoNet.Abstractions");
         netNamespace.Usings.Add("System.Reactive.Subjects");
 
-        foreach ((string nsName, Namespace side) in Protocol.Namespaces)
+        foreach (var (nsName, side) in Protocol.Namespaces)
         {
             var serverPackets = side.Types["toClient"] as Namespace;
             var clientPackets = side.Types["toServer"] as Namespace;
 
-            if (nsName == "play")
-            {
-                GenerateCore(netNamespace, clientPackets, serverPackets, nsName);
-            }
+            if (nsName == "play") GenerateCore(netNamespace, clientPackets, serverPackets, nsName);
         }
 
         return netNamespace;
@@ -39,7 +88,7 @@ public sealed class ProtocolSourceGenerator
 
     private void GenerateCore(NetNamespace netNamespace, Namespace clientPackets, Namespace serverPackets, string name)
     {
-        NetClass coreClass = new NetClass();
+        var coreClass = new NetClass();
 
         coreClass.BaseClass = "ProtocolBase";
         coreClass.Name = $"Protocol_{Version}";
@@ -54,37 +103,29 @@ public sealed class ProtocolSourceGenerator
         coreClass.Constructors.Add(constructor);
 
         {
-            ProtodefContainer idMap = clientPackets.Types["packet"] as ProtodefContainer;
-            ProtodefMapper mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
-            Dictionary<string, string> nameToId = mapper.Mappings
+            var idMap = clientPackets.Types["packet"] as ProtodefContainer;
+            var mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
+            var nameToId = mapper.Mappings
                 .ToDictionary(id => "packet_" + id.Value, v => v.Key);
 
 
-            foreach ((string packetName, ProtodefType type) in clientPackets.Types)
-            {
+            foreach (var (packetName, type) in clientPackets.Types)
                 if (packetName != "packet")
                 {
-                    ProtodefContainer fields = type as ProtodefContainer;
+                    var fields = type as ProtodefContainer;
                     if (fields.IsAllFieldsPrimitive())
                     {
-                        bool needContinue = false;
+                        var needContinue = false;
 
                         foreach (var f in fields)
-                        {
                             if (f.Type is ProtodefCustomType cus)
-                            {
                                 if (!customToNet.ContainsKey(cus.Name))
                                 {
                                     needContinue = true;
                                     break;
                                 }
-                            }
-                        }
 
-                        if (needContinue)
-                        {
-                            continue;
-                        }
+                        if (needContinue) continue;
 
 
                         var method = CreateSendMethod(fields, packetName, nameToId[packetName]);
@@ -92,11 +133,10 @@ public sealed class ProtocolSourceGenerator
                         coreClass.Methods.Add(method);
                     }
                 }
-            }
         }
 
         {
-            NetMethod recieveMethod = new NetMethod();
+            var recieveMethod = new NetMethod();
 
             recieveMethod.Modifier = "protected";
             recieveMethod.IsOverride = true;
@@ -104,20 +144,19 @@ public sealed class ProtocolSourceGenerator
             recieveMethod.ReturnType = "void";
             recieveMethod.Arguments.Add(("InputPacket", "packet"));
 
-            ProtodefContainer idMap = serverPackets.Types["packet"] as ProtodefContainer;
-            ProtodefMapper mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
-            Dictionary<string, string> nameToId = mapper.Mappings
+            var idMap = serverPackets.Types["packet"] as ProtodefContainer;
+            var mapper = (ProtodefMapper)idMap.First(x => x.Name == "name").Type;
+            var nameToId = mapper.Mappings
                 .ToDictionary(id => "packet_" + id.Value, v => v.Key);
 
             coreClass.Methods.Add(recieveMethod);
 
-            recieveMethod.Instructions.Add($"switch(packet.Id)\n{{");
+            recieveMethod.Instructions.Add("switch(packet.Id)\n{");
 
-            foreach ((string packetName, ProtodefType type) in serverPackets.Types)
-            {
+            foreach (var (packetName, type) in serverPackets.Types)
                 if (packetName != "packet")
                 {
-                    string clipPacketName = packetName.Substring("packet_".Length);
+                    var clipPacketName = packetName.Substring("packet_".Length);
                     string packetId = null;
                     try
                     {
@@ -129,36 +168,29 @@ public sealed class ProtocolSourceGenerator
                         throw;
                     }
 
-                    ProtodefContainer fields = type as ProtodefContainer;
+                    var fields = type as ProtodefContainer;
                     if (fields is null)
                         Debugger.Break();
                     if (fields.IsAllFieldsPrimitive())
                     {
-                        bool needContinue = false;
+                        var needContinue = false;
 
                         foreach (var f in fields)
-                        {
                             if (f.Type is ProtodefCustomType cus)
-                            {
                                 if (!customToNet.ContainsKey(cus.Name))
                                 {
                                     needContinue = true;
                                     break;
                                 }
-                            }
-                        }
 
-                        if (needContinue)
-                        {
-                            continue;
-                        }
+                        if (needContinue) continue;
 
                         try
                         {
-                            NetClass packetClass = CreateClassForPacket(fields, packetName);
+                            var packetClass = CreateClassForPacket(fields, packetName);
 
 
-                            NetField subjectField = new NetField();
+                            var subjectField = new NetField();
 
 
                             subjectField.Name = $"_on{clipPacketName}";
@@ -168,7 +200,7 @@ public sealed class ProtocolSourceGenerator
                             subjectField.DefaultValue = "new ()";
                             coreClass.Fields.Add(subjectField);
 
-                            NetProperty observableProp = new NetProperty();
+                            var observableProp = new NetProperty();
 
                             observableProp.Name = $"On{clipPacketName.Pascalize()}Packet";
                             observableProp.Type = $"IObservable<{packetClass.Name}>";
@@ -189,7 +221,6 @@ public sealed class ProtocolSourceGenerator
                         }
                     }
                 }
-            }
 
             recieveMethod.Instructions.Add("}");
         }
@@ -200,12 +231,12 @@ public sealed class ProtocolSourceGenerator
         string packetClassName)
     {
         yield return $"if({subjectType}.HasObservers){{";
-        yield return $"scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);";
+        yield return "scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);";
         List<string> vars = new();
-        int number = 0;
+        var number = 0;
         foreach (var field in container)
         {
-            string fieldVar = field.Name.Camelize();
+            var fieldVar = field.Name.Camelize();
             vars.Add(fieldVar);
             yield return GenerateReadMethod(field.Type, $"{GetNetType(field.Type)} {fieldVar}", depth: 0,
                 number: number++);
@@ -219,51 +250,43 @@ public sealed class ProtocolSourceGenerator
     {
         if (type is ProtodefNumericType protodefNumeric)
         {
-            string writeName = readDict[protodefNumeric.OriginalName];
+            var writeName = readDict[protodefNumeric.OriginalName];
 
             return $"{varName} = reader.{writeName}();";
         }
-        else if (type is ProtodefVarInt)
+
+        if (type is ProtodefVarInt) return $"{varName} = reader.ReadVarInt();";
+
+        if (type is ProtodefVarLong) return $"{varName} = reader.ReadVarLong();";
+
+        if (type is ProtodefString str) return $"{varName} = reader.ReadString();";
+
+        if (type is ProtodefVoid) return "";
+
+        if (type is ProtodefBool) return $"{varName} = reader.ReadBoolean();";
+
+        if (type is ProtodefOption option)
         {
-            return $"{varName} = reader.ReadVarInt();";
-        }
-        else if (type is ProtodefVarLong)
-        {
-            return $"{varName} = reader.ReadVarLong();";
-        }
-        else if (type is ProtodefString str)
-        {
-            return $"{varName} = reader.ReadString();";
-        }
-        else if (type is ProtodefVoid)
-        {
-            return "";
-        }
-        else if (type is ProtodefBool)
-        {
-            return $"{varName} = reader.ReadBoolean();";
-        }
-        else if (type is ProtodefOption option)
-        {
-            int index = varName.IndexOf(" ");
-            string a = index != -1 ? varName.Substring(index) : varName;
+            var index = varName.IndexOf(" ");
+            var a = index != -1 ? varName.Substring(index) : varName;
             return $"{varName} = null;" +
                    $"if(reader.ReadBoolean())\n" +
                    $"{{\n" +
                    $"\t{GenerateReadMethod(option.Type, a, depth + 1)}\n" +
                    $"}}";
         }
-        else if (type is ProtodefArray array)
+
+        if (type is ProtodefArray array)
         {
-            string iterator = $"i_{number}_{depth}";
-            string tmpArrname = $"tempArray_{number}_{depth}";
-            string lenName = $"tempArrayLength_{number}_{depth}";
-            string len = "var " + lenName;
-            string forItem = $"for_item_{number}_{depth}";
-            string first = GenerateReadMethod(array.CountType, len, depth + 1);
+            var iterator = $"i_{number}_{depth}";
+            var tmpArrname = $"tempArray_{number}_{depth}";
+            var lenName = $"tempArrayLength_{number}_{depth}";
+            var len = "var " + lenName;
+            var forItem = $"for_item_{number}_{depth}";
+            var first = GenerateReadMethod(array.CountType, len, depth + 1);
 
 
-            string netType = GetNetType(array.Type);
+            var netType = GetNetType(array.Type);
             return $"{first}\n" +
                    $"var {tmpArrname} = new {netType}[{lenName}];\n" +
                    $"for({GetNetType(array.CountType)} {iterator} =0;{iterator}< {lenName};{iterator}++)\n" +
@@ -273,55 +296,49 @@ public sealed class ProtocolSourceGenerator
                    $"}}\n" +
                    $"{varName} = {tmpArrname};";
         }
-        else if (type is ProtodefBuffer buffer)
+
+        if (type is ProtodefBuffer buffer)
         {
             if (buffer.CountType is not null)
             {
-                string lenName = $"tempArrayLength_{number}_{depth}";
-                string len = "var " + lenName;
-                string first = GenerateReadMethod(buffer.CountType, len, depth + 1);
+                var lenName = $"tempArrayLength_{number}_{depth}";
+                var len = "var " + lenName;
+                var first = GenerateReadMethod(buffer.CountType, len, depth + 1);
 
                 return $"{first}\n" +
                        $"{varName} = reader.ReadBuffer({lenName});";
             }
-            else if (buffer.Count is not null)
-            {
+
+            if (buffer.Count is not null)
                 return $"{varName} = reader.ReadBuffer({buffer.Count})";
-            }
-            else if (buffer.Rest == true)
-            {
+            if (buffer.Rest == true)
                 return $"{varName} = reader.ReadRestBuffer();";
-            }
-            else
-            {
-                throw new Exception("Buffer fatal");
-            }
+            throw new Exception("Buffer fatal");
         }
-        else if (type is ProtodefCustomType cus)
+
+        if (type is ProtodefCustomType cus)
         {
-            string writeName = readDict[cus.Name];
+            var writeName = readDict[cus.Name];
 
             return $"{varName} = reader.{writeName}();";
         }
-        else
-        {
-            throw new Exception("Not support type: " + type.ToString());
-        }
+
+        throw new Exception("Not support type: " + type);
     }
 
     private NetClass CreateClassForPacket(ProtodefContainer container, string name)
     {
-        NetClass @result = new();
+        NetClass result = new();
         result.Name = name.Pascalize();
 
-        NetClass.NetConstructor constructor = new NetClass.NetConstructor();
+        var constructor = new NetClass.NetConstructor();
         result.Constructors.Add(constructor);
         foreach (var field in container)
         {
-            string netType = GetNetType(field.Type);
+            var netType = GetNetType(field.Type);
 
-            string fieldNamePascalCase = field.Name.Pascalize();
-            result.Properties.Add(new NetProperty()
+            var fieldNamePascalCase = field.Name.Pascalize();
+            result.Properties.Add(new NetProperty
             {
                 GetSet = "{ get; internal set; }",
                 Modifier = "public",
@@ -339,7 +356,7 @@ public sealed class ProtocolSourceGenerator
 
     private NetMethod CreateSendMethod(ProtodefContainer container, string name, string id)
     {
-        NetMethod method = new NetMethod();
+        var method = new NetMethod();
 
 
         //method.IsAsync = true;
@@ -348,20 +365,20 @@ public sealed class ProtocolSourceGenerator
 
         List<(string, string)> arguments = new();
 
-        List<string> instructions = new List<string>();
+        var instructions = new List<string>();
 
         instructions.Add("scoped var writer = new MinecraftPrimitiveWriterSlim();");
         instructions.Add($"writer.WriteVarInt({id});");
-        foreach (ProtodefContainerField field in container)
+        foreach (var field in container)
         {
             if (field.Anon == true)
                 throw new NotSupportedException("Anon no support");
 
-            string netType = GetNetType(field.Type);
+            var netType = GetNetType(field.Type);
 
             arguments.Add((netType, field.Name));
 
-            string writeMethod = GenerateWriteMethod(field.Type, field.Name);
+            var writeMethod = GenerateWriteMethod(field.Type, field.Name);
 
             instructions.AddRange(writeMethod.Split("\n"));
         }
@@ -383,32 +400,22 @@ public sealed class ProtocolSourceGenerator
     {
         if (type is ProtodefNumericType protodefNumeric)
         {
-            string writeName = writeDict[protodefNumeric.OriginalName];
+            var writeName = writeDict[protodefNumeric.OriginalName];
 
             return $"writer.{writeName}({name});";
         }
-        else if (type is ProtodefVarInt)
-        {
-            return $"writer.WriteVarInt({name});";
-        }
-        else if (type is ProtodefVarLong)
-        {
-            return $"writer.WriteVarLong({name});";
-        }
-        else if (type is ProtodefString str)
-        {
-            return $"writer.WriteString({name});";
-        }
-        else if (type is ProtodefVoid)
-        {
-            return "";
-        }
-        else if (type is ProtodefBool)
-        {
-            return $"writer.WriteBoolean({name});";
-        }
-        else if (type is ProtodefOption option)
-        {
+
+        if (type is ProtodefVarInt) return $"writer.WriteVarInt({name});";
+
+        if (type is ProtodefVarLong) return $"writer.WriteVarLong({name});";
+
+        if (type is ProtodefString str) return $"writer.WriteString({name});";
+
+        if (type is ProtodefVoid) return "";
+
+        if (type is ProtodefBool) return $"writer.WriteBoolean({name});";
+
+        if (type is ProtodefOption option)
             return $"if ({name} is null)\n" +
                    $"{{\n" +
                    $"\twriter.WriteBoolean(false);\n" +
@@ -418,10 +425,10 @@ public sealed class ProtocolSourceGenerator
                    $"\twriter.WriteBoolean(true);\n" +
                    $"\t{GenerateWriteMethod(option.Type, name, depth + 1)}\n" +
                    $"}}\n";
-        }
-        else if (type is ProtodefArray array)
+
+        if (type is ProtodefArray array)
         {
-            string iterator = $"i_{depth}";
+            var iterator = $"i_{depth}";
 
             return $"{GenerateWriteMethod(array.CountType, name + ".Length", 1 + depth)}\n" +
                    $"for (int {iterator} = 0; {iterator} < {name}.Length; {iterator}++)\n" +
@@ -430,116 +437,41 @@ public sealed class ProtocolSourceGenerator
                    $"\t{GenerateWriteMethod(array.Type, "value_" + depth, depth + 1)}\n" +
                    $"}}";
         }
-        else if (type is ProtodefBuffer buffer)
+
+        if (type is ProtodefBuffer buffer)
         {
             if (buffer.CountType is not null)
-            {
                 return $"{GenerateWriteMethod(buffer.CountType, name + ".Length", 1 + depth)}\n" +
                        $"writer.WriteBuffer({name});";
-            }
-            else if (buffer.Count is not null)
-            {
+            if (buffer.Count is not null)
                 return $"writer.WriteVarInt({buffer.Count});\n" +
                        $"writer.WriteBuffer({name}.AsSpan(0, {buffer.Count}));";
-            }
-            else if (buffer.Rest == true)
-            {
+            if (buffer.Rest == true)
                 return $"writer.WriteRestBuffer({name});";
-            }
-            else
-            {
-                throw new Exception("Buffer fatal");
-            }
+            throw new Exception("Buffer fatal");
         }
-        else if (type is ProtodefCustomType cus)
+
+        if (type is ProtodefCustomType cus)
         {
-            string writeName = writeDict[cus.Name];
+            var writeName = writeDict[cus.Name];
 
             return $"writer.{writeName}({name});";
         }
-        else
-        {
-            throw new Exception("Not support type: " + type.ToString());
-        }
+
+        throw new Exception("Not support type: " + type);
     }
 
     private string GetNetType(ProtodefType type)
     {
         string? netType = null;
         if (type is ProtodefCustomType customType)
-        {
             netType = customToNet[customType.Name];
-        }
         else
-        {
             netType = type.GetNetType();
-        }
 
-        if (netType == null)
-        {
-            throw new TypeNotSupportedException(type.ToString());
-        }
+        if (netType == null) throw new TypeNotSupportedException(type.ToString());
 
         return netType;
-    }
-
-    private Dictionary<string, string> customToNet = new Dictionary<string, string>
-    {
-        { "UUID", "Guid" },
-        {"position","Position" },
-        {"slot","Slot?" },
-        {"restBuffer","byte[]" },
-    };
-
-    private Dictionary<string, string> readDict = new Dictionary<string, string>
-    {
-        { "varint", "ReadVarInt" },
-        { "varlong", "ReadVarLong" },
-        { "string", "ReadString" },
-        { "bool", "ReadBoolean" },
-        { "u8", "ReadUnsignedByte" },
-        { "i8", "ReadSignedByte" },
-        { "u16", "ReadUnsignedShort" },
-        { "i16", "ReadSignedShort" },
-        { "u32", "ReadUnsignedInt" },
-        { "i32", "ReadSignedInt" },
-        { "u64", "ReadUnsignedLong" },
-        { "i64", "ReadSignedLong" },
-        { "f32", "ReadFloat" },
-        { "f64", "ReadDouble" },
-        { "UUID", "ReadUUID" },
-        { "restBuffer", "ReadRestBuffer" },
-        { "position", "ReadPosition" },
-        { "slot", "ReadSlot" },
-       
-    };
-
-
-    private Dictionary<string, string> writeDict = new Dictionary<string, string>
-    {
-        { "varint", "WriteVarInt" },
-        { "varlong", "WriteVarLong" },
-        { "string", "WriteString" },
-        { "bool", "WriteBoolean" },
-        { "u8", "WriteUnsignedByte" },
-        { "i8", "WriteSignedByte" },
-        { "u16", "WriteUnsignedShort" },
-        { "i16", "WriteSignedShort" },
-        { "u32", "WriteUnsignedInt" },
-        { "i32", "WriteSignedInt" },
-        { "u64", "WriteUnsignedLong" },
-        { "i64", "WriteSignedLong" },
-        { "f32", "WriteFloat" },
-        { "f64", "WriteDouble" },
-        { "UUID", "WriteUUID" },
-        { "restBuffer", "WriteBuffer" },
-        { "position", "WritePosition" },
-        { "slot", "WriteSlot" },
-        
-    };
-
-    public ProtocolSourceGenerator()
-    {
     }
 
     private static string FieldToNetType(ProtodefContainerField field)

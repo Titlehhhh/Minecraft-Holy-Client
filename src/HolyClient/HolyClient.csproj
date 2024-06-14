@@ -1,100 +1,100 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
 
-  
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+    </PropertyGroup>
 
-  
-  <ItemGroup>
-    <AvaloniaXaml Remove="Models\StressTest\**" />
-    <AvaloniaXaml Remove="Views\Pages\StressTest\Behavior\**" />
-    <Compile Remove="Models\StressTest\**" />
-    <Compile Remove="Views\Pages\StressTest\Behavior\**" />
-    <EmbeddedResource Remove="Models\StressTest\**" />
-    <EmbeddedResource Remove="Views\Pages\StressTest\Behavior\**" />
-    <None Remove="Models\StressTest\**" />
-    <None Remove="Views\Pages\StressTest\Behavior\**" />
-  </ItemGroup>
 
-  
-  <ItemGroup>
-    <None Remove="lang\words.loc.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  
-  <ItemGroup>
-    <EmbeddedResource Include="lang\words.loc.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="akavache" Version="9.1.20" />
-    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
-	  
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />	
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Xaml.Interactivity" Version="$(AvaloniaVersion)" />
-   
-    <PackageReference Include="bodong.Avalonia.PropertyGrid" Version="11.0.6.3" />
-   
-    
-    <PackageReference Include="DialogHost.Avalonia" Version="0.7.7" />
-    <PackageReference Include="FluentAvaloniaUI" Version="2.0.5" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc2" />
-    
-    
-    <PackageReference Include="MessagePackAnalyzer" Version="2.6.100-alpha">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
-    <PackageReference Include="NuGet.Protocol" Version="6.9.1" />
-    <PackageReference Include="NuGet.Resolver" Version="6.9.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
-    <PackageReference Include="ReactiveUI.Validation" Version="3.1.7" />
-    <PackageReference Include="SkiaSharp.Skottie" Version="2.88.7" />
-    <PackageReference Include="SpacedGrid-Avalonia" Version="11.0.0" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
-    <PackageReference Include="System.ComponentModel.Composition.Registration" Version="8.0.0" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaXaml Remove="Models\StressTest\**"/>
+        <AvaloniaXaml Remove="Views\Pages\StressTest\Behavior\**"/>
+        <Compile Remove="Models\StressTest\**"/>
+        <Compile Remove="Views\Pages\StressTest\Behavior\**"/>
+        <EmbeddedResource Remove="Models\StressTest\**"/>
+        <EmbeddedResource Remove="Views\Pages\StressTest\Behavior\**"/>
+        <None Remove="Models\StressTest\**"/>
+        <None Remove="Views\Pages\StressTest\Behavior\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
-      <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pages\StressTest\Dialogs\SelectImportSourceProxyDialogContent.axaml.cs">
-      <DependentUpon>SelectImportSourceProxyDialogContent.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\RootView.axaml.cs">
-      <DependentUpon>RootView.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Assets\Fonts\" />
-    <Folder Include="Commands\" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="lang\words.loc.json"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Designer\NavigationItemStyles.axaml" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CoreLibs\HolyClient.Common\HolyClient.Common.csproj" />
-    <ProjectReference Include="..\CoreLibs\HolyClient.Core\HolyClient.Core.csproj" />
-    <ProjectReference Include="..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj" />
-    <ProjectReference Include="..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="lang\words.loc.json">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="akavache" Version="9.1.20"/>
+        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)"/>
+
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Avalonia.Xaml.Interactivity" Version="$(AvaloniaVersion)"/>
+
+        <PackageReference Include="bodong.Avalonia.PropertyGrid" Version="11.0.6.3"/>
+
+
+        <PackageReference Include="DialogHost.Avalonia" Version="0.7.7"/>
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.5"/>
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc2"/>
+
+
+        <PackageReference Include="MessagePackAnalyzer" Version="2.6.100-alpha">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0"/>
+        <PackageReference Include="NuGet.Protocol" Version="6.9.1"/>
+        <PackageReference Include="NuGet.Resolver" Version="6.9.1"/>
+        <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
+        <PackageReference Include="ReactiveUI.Validation" Version="3.1.7"/>
+        <PackageReference Include="SkiaSharp.Skottie" Version="2.88.7"/>
+        <PackageReference Include="SpacedGrid-Avalonia" Version="11.0.0"/>
+        <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0"/>
+        <PackageReference Include="System.ComponentModel.Composition.Registration" Version="8.0.0"/>
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Views\Pages\ManagingExtensions\AssemblyManagerView.axaml.cs">
+            <DependentUpon>AssemblyManagerView.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Views\Pages\StressTest\Dialogs\SelectImportSourceProxyDialogContent.axaml.cs">
+            <DependentUpon>SelectImportSourceProxyDialogContent.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Views\RootView.axaml.cs">
+            <DependentUpon>RootView.axaml</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Assets\Fonts\"/>
+        <Folder Include="Commands\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Designer\NavigationItemStyles.axaml"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CoreLibs\HolyClient.Common\HolyClient.Common.csproj"/>
+        <ProjectReference Include="..\CoreLibs\HolyClient.Core\HolyClient.Core.csproj"/>
+        <ProjectReference Include="..\CoreLibs\HolyClient.SDK\HolyClient.SDK.csproj"/>
+        <ProjectReference Include="..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj"/>
+    </ItemGroup>
 </Project>

@@ -231,7 +231,7 @@
   "createWorld.customize.custom.preset.caveChaos": "Caves of Chaos",
   "createWorld.customize.custom.preset.goodLuck": "Good Luck",
   "createWorld.preparing": "Preparing for world creation...",
-  "datapackFailure.title":  "Errors in currently selected datapacks prevented world from loading.\nYou can either try to load only with vanilla datapack (\"safe mode\") or go back to title screen and fix it manually.",
+  "datapackFailure.title": "Errors in currently selected datapacks prevented world from loading.\nYou can either try to load only with vanilla datapack (\"safe mode\") or go back to title screen and fix it manually.",
   "datapackFailure.safeMode": "Safe Mode",
   "editGamerule.title": "Edit Game Rules",
   "editGamerule.default": "Default: %s",

@@ -1,78 +1,52 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO.Pipelines;
-using System.IO;
-using System.Threading;
-using System.IO.Compression;
-using System.Diagnostics;
+﻿namespace McProtoNet.Tests;
 
-namespace McProtoNet.Tests
-{
+//[TestClass]
+//public class ExperimentalTest
+//{
+//	[TestMethod]
+//	public async Task SenderTest()
+//	{
 
-	//[TestClass]
-	//public class ExperimentalTest
-	//{
-	//	[TestMethod]
-	//	public async Task SenderTest()
-	//	{
+//		byte[] for_parsing = new byte[300];
 
+//		int id = Random.Shared.Next(0, 100);
 
-	//		byte[] for_parsing = new byte[300];
+//		Random.Shared.NextBytes(for_parsing);
 
-	//		int id = Random.Shared.Next(0, 100);
+//		var ms = new MemoryStream();
+//		var originalSender = new MinecraftPacketSender();
 
-	//		Random.Shared.NextBytes(for_parsing);
+//		originalSender.SwitchCompression(128);
 
+//		originalSender.BaseStream = ms;
 
+//		var packetStream = new MemoryStream();
 
+//		//await packetStream.WriteVarIntAsync(id);
+//		await packetStream.WriteAsync(for_parsing);
 
+//		var buffer = packetStream.ToArray();
+//		packetStream.Position = 0;
 
-	//		var ms = new MemoryStream();
-	//		var originalSender = new MinecraftPacketSender();
+//		//await originalSender.SendPacketAsync(new (0, buffer.Length, buffer, null));
+//		await originalSender.SendPacketAsync(new Packet(id, packetStream));
 
-	//		originalSender.SwitchCompression(128);
+//		if (ms.Length != 1024)
+//		{
+//			//Assert.Fail(ms.Length.ToString());
+//		}
 
-	//		originalSender.BaseStream = ms;
+//		var reader = new MinecraftPacketReaderNew();
+//		reader.SwitchCompression(256);
+//		reader.BaseStream = ms;
+//		ms.Position = 0;
+//		var read = await reader.ReadNextPacketAsync();
 
-	//		var packetStream = new MemoryStream();
+//		Assert.AreEqual(read.Id, id);
 
-	//		//await packetStream.WriteVarIntAsync(id);
-	//		await packetStream.WriteAsync(for_parsing);
+//		//Assert.AreEqual(for_parsing.LongLength, read.Data.Length);
 
-	//		var buffer = packetStream.ToArray();
-	//		packetStream.Position = 0;
+//		CollectionAssert.AreEqual(for_parsing, read.Span.ToArray(), $"{read.Span.ToArray()}");
+//	}
 
-	//		//await originalSender.SendPacketAsync(new (0, buffer.Length, buffer, null));
-	//		await originalSender.SendPacketAsync(new Packet(id, packetStream));
-
-	//		if (ms.Length != 1024)
-	//		{
-	//			//Assert.Fail(ms.Length.ToString());
-	//		}
-
-
-	//		var reader = new MinecraftPacketReaderNew();
-	//		reader.SwitchCompression(256);
-	//		reader.BaseStream = ms;
-	//		ms.Position = 0;
-	//		var read = await reader.ReadNextPacketAsync();
-
-	//		Assert.AreEqual(read.Id, id);
-
-	//		//Assert.AreEqual(for_parsing.LongLength, read.Data.Length);
-
-
-
-	//		CollectionAssert.AreEqual(for_parsing, read.Span.ToArray(), $"{read.Span.ToArray()}");
-	//	}
-		
-		
-		
-
-
-	//}
-}
+//}

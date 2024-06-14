@@ -1,104 +1,99 @@
-﻿using System.Buffers;
-using System.IO.Compression;
-using System.IO.Pipelines;
+﻿using System.IO.Pipelines;
 
 internal class Program
 {
-	private static async Task Main(string[] args)
-	{
-		
+    private static async Task Main(string[] args)
+    {
+        CancellationTokenSource cts = new();
+        var pipe = new Pipe();
 
-		CancellationTokenSource cts = new();
-		Pipe pipe = new Pipe();
+        var data = new byte[10_000_000];
 
-		var data = new byte[10_000_000];
+        Random.Shared.NextBytes(data);
 
-		Random.Shared.NextBytes(data);
+        var ms = new MemoryStream(data);
 
-		MemoryStream ms = new MemoryStream(data);
-
-		ms.Position = 0;
+        ms.Position = 0;
 
 
+        var fill = FillStream(ms, pipe.Writer, cts.Token);
+        var read = ReadStream(pipe.Reader, cts.Token);
 
-		var fill = FillStream(ms, pipe.Writer, cts.Token);
-		var read = ReadStream(pipe.Reader, cts.Token);
+        await Task.WhenAll(fill, read);
+    }
 
-		await Task.WhenAll(fill, read);
+    private static async Task ReadStream(PipeReader reader, CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var result = await reader.ReadAsync(token);
 
-	}
+                var buffer = result.Buffer;
 
-	private static async Task ReadStream(PipeReader reader, CancellationToken token)
-	{
-		try
-		{
-			while (!token.IsCancellationRequested)
-			{
-				var result = await reader.ReadAsync(token);
+                buffer = buffer.Slice(100);
 
-				ReadOnlySequence<byte> buffer = result.Buffer;
+                reader.AdvanceTo(buffer.Start, buffer.End);
 
-				buffer = buffer.Slice(100);
+                if (result.Buffer.IsEmpty)
+                {
+                    Console.WriteLine("empty");
+                    return;
+                }
 
-				reader.AdvanceTo(buffer.Start, buffer.End);
+                if (result.IsCanceled)
+                {
+                    Console.WriteLine("Canel");
+                    return;
+                }
+            }
+        }
+        finally
+        {
+            await reader.CompleteAsync();
+        }
+    }
 
-				if (result.Buffer.IsEmpty)
-				{
-					Console.WriteLine("empty");
-					return;
-				}
-				if (result.IsCanceled)
-				{
-					Console.WriteLine("Canel");
-					return;
-				}
+    private static async Task FillStream(Stream stream, PipeWriter writer, CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var buffer = writer.GetMemory(1024);
 
-			}
-		}
-		finally
-		{
-			await reader.CompleteAsync();
-		}
-	}
-	private static async Task FillStream(Stream stream, PipeWriter writer, CancellationToken token)
-	{
-		try
-		{
-			while (!token.IsCancellationRequested)
-			{
-				Memory<byte> buffer = writer.GetMemory(1024);
+                var bytes = await stream.ReadAsync(buffer, token);
 
-				int bytes = await stream.ReadAsync(buffer, token);
+                if (bytes <= 0)
+                {
+                }
 
-				if (bytes <= 0)
-				{
+                writer.Advance(bytes);
 
-				}
+                var flushResult = await writer.FlushAsync(token);
 
-				writer.Advance(bytes);
+                if (flushResult.IsCanceled)
+                {
+                    Console.WriteLine("cancel");
+                    return;
+                }
 
-				FlushResult flushResult = await writer.FlushAsync(token);
-
-				if (flushResult.IsCanceled)
-				{
-					Console.WriteLine("cancel");
-					return;
-				}
-				if (flushResult.IsCompleted)
-				{
-					Console.WriteLine("Complete");
-					return;
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine("ReadEx: " + ex);
-		}
-		finally
-		{
-			Console.WriteLine("CompelteAsync");
-			await writer.CompleteAsync();
-		}
-	}
+                if (flushResult.IsCompleted)
+                {
+                    Console.WriteLine("Complete");
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("ReadEx: " + ex);
+        }
+        finally
+        {
+            Console.WriteLine("CompelteAsync");
+            await writer.CompleteAsync();
+        }
+    }
 }

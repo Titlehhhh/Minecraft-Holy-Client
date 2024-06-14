@@ -1,11 +1,8 @@
 ﻿using DynamicData;
 
-namespace HolyClient.Core.Infrastructure
+namespace HolyClient.Core.Infrastructure;
+
+public interface IPluginProvider
 {
-	public interface IPluginProvider
-	{
-		IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins { get; }
-
-
-	}
+    IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins { get; }
 }

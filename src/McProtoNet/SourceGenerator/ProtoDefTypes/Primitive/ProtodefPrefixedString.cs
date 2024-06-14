@@ -1,26 +1,19 @@
-﻿using SourceGenerator.ProtoDefTypes.Attributes;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace SourceGenerator.ProtoDefTypes
+namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefPrefixedString : ProtodefType
 {
-	
-	public sealed class ProtodefPrefixedString : ProtodefType
-	{
-		[JsonPropertyName("countType")]
-		public ProtodefType CountType { get; }
+    [JsonConstructor]
+    public ProtodefPrefixedString(ProtodefType countType)
+    {
+        CountType = countType;
+    }
 
+    [JsonPropertyName("countType")] public ProtodefType CountType { get; }
 
-
-		[JsonConstructor]
-		public ProtodefPrefixedString(ProtodefType countType)
-		{
-			CountType = countType;
-		}
-		public override string? GetNetType()
-		{
-			return "string";
-		}
-	}
-
-
+    public override string? GetNetType()
+    {
+        return "string";
+    }
 }

@@ -16,7 +16,7 @@ public abstract class ProtocolBase
 
     private void ClientPacketReceived(object sender, InputPacket inputpacket)
     {
-        this.OnPacketReceived(inputpacket);
+        OnPacketReceived(inputpacket);
     }
 
     private void ClientOnDisposed()

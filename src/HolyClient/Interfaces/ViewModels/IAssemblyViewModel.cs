@@ -1,16 +1,13 @@
 ﻿using System;
 
-namespace HolyClient.ViewModels
+namespace HolyClient.ViewModels;
+
+public interface IAssemblyViewModel
 {
-	public interface IAssemblyViewModel
-	{
+    string Description { get; }
+    Version Version { get; }
 
-		string Description { get; }
-		Version Version { get; }
+    string Path { get; }
 
-		string Path { get; }
-
-		string Name { get; }
-
-	}
+    string Name { get; }
 }

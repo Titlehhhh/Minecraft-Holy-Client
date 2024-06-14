@@ -4,9 +4,8 @@ namespace HolyClient;
 
 public partial class SplashContent : UserControl
 {
-	public SplashContent()
-	{
-		InitializeComponent();
-
-	}
+    public SplashContent()
+    {
+        InitializeComponent();
+    }
 }

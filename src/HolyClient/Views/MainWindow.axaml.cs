@@ -1,27 +1,22 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Diagnostics;
 using FluentAvalonia.UI.Windowing;
 
-namespace HolyClient.Views
+namespace HolyClient.Views;
+
+public partial class MainWindow : AppWindow
 {
-	public partial class MainWindow : AppWindow
-	{
-		public MainWindow()
-		{
-			InitializeComponent();
+    public MainWindow()
+    {
+        InitializeComponent();
 
 #if DEBUG
 
-			this.AttachDevTools(new DevToolsOptions()
-			{
-
-			});
+        this.AttachDevTools(new DevToolsOptions());
 #endif
 
-			this.WindowState = Avalonia.Controls.WindowState.Maximized;
-			SplashScreen = new ApplicationSplashScreen(this);
-		}
-
-
-	}
+        WindowState = WindowState.Maximized;
+        SplashScreen = new ApplicationSplashScreen(this);
+    }
 }

@@ -1,4 +1,1 @@
-﻿namespace McProtoNet.Client
-{
-	
-}
+﻿namespace McProtoNet.Client;

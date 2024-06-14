@@ -1,27 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>		
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
-		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
-		<PackageReference Include="bodong.PropertyModels" Version="11.0.6.2" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All"/>
+        <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0"/>
+        <PackageReference Include="System.Reactive" Version="6.0.1-preview.1"/>
+        <PackageReference Include="bodong.PropertyModels" Version="11.0.6.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj">
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
-		</ProjectReference>
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\HolyClient.Abstractions\HolyClient.Abstractions.csproj">
+            <Private>false</Private>
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </ProjectReference>
+    </ItemGroup>
 
 
-	
-
-	
 </Project>

@@ -1,10 +1,8 @@
-﻿namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
-{
+﻿namespace HolyClient.ViewModels.Pages.StressTest.Dialogs;
 
-	public enum ImportSource
-	{
-		InMemory,
-		File,
-		Url
-	}
+public enum ImportSource
+{
+    InMemory,
+    File,
+    Url
 }

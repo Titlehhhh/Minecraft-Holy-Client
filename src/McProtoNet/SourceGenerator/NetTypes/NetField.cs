@@ -1,39 +1,35 @@
 ﻿using System.Text;
 
-namespace SourceGenerator.NetTypes
+namespace SourceGenerator.NetTypes;
+
+public sealed class NetField : NetType
 {
-    public sealed class NetField : NetType
+    public string Modifier { get; set; } = "public";
+
+    public string Name { get; set; }
+
+    public bool IsReadOnly { get; set; }
+
+    public string Type { get; set; }
+
+    public string DefaultValue { get; set; }
+
+
+    public override string ToString()
     {
-        public string Modifier { get; set; } = "public";
+        StringBuilder sb = new();
 
-        public string Name { get; set; }
+        sb.Append(Modifier + " ");
+        if (IsReadOnly)
+            sb.Append("readonly ");
 
-        public bool IsReadOnly { get; set; }
+        sb.Append(Type + " ");
+        sb.Append(Name);
 
-        public string Type { get; set; }
+        if (!string.IsNullOrWhiteSpace(DefaultValue)) sb.Append(" = " + DefaultValue);
 
-        public string DefaultValue { get; set; }
+        sb.Append(";");
 
-
-        public override string ToString()
-        {
-            StringBuilder sb = new();
-
-            sb.Append(Modifier + " ");
-            if (IsReadOnly)
-                sb.Append("readonly ");
-
-            sb.Append(Type + " ");
-            sb.Append(Name);
-
-            if (!string.IsNullOrWhiteSpace(DefaultValue))
-            {
-                sb.Append(" = " + DefaultValue);
-            }
-
-            sb.Append(";");
-
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }

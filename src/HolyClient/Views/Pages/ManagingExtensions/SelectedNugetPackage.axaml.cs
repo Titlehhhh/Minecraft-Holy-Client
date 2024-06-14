@@ -5,8 +5,8 @@ namespace HolyClient.Views;
 
 public partial class SelectedNugetPackage : ReactiveUserControl<NugetPackageViewModel>
 {
-	public SelectedNugetPackage()
-	{
-		InitializeComponent();
-	}
+    public SelectedNugetPackage()
+    {
+        InitializeComponent();
+    }
 }

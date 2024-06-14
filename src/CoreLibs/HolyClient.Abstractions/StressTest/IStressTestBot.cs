@@ -1,12 +1,7 @@
-﻿namespace HolyClient.Abstractions.StressTest
+﻿namespace HolyClient.Abstractions.StressTest;
+
+public interface IStressTestBot
 {
-
-	public interface IStressTestBot
-	{
-		public Task Restart(bool changeNickAndProxy);
-
-
-		public MinecraftClient Client { get; }
-	}
-
+    public MinecraftClient Client { get; }
+    public Task Restart(bool changeNickAndProxy);
 }

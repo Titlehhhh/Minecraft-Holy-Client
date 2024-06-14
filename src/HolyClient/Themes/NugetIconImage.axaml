@@ -1,20 +1,20 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    
-					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<Design.PreviewWith>
-		<Border Padding="10">
-			<NugetIconImage/>
-		</Border>
-	</Design.PreviewWith>
 
-	<ControlTheme x:Key="{x:Type NugetIconImage}" TargetType="NugetIconImage">
-		<ControlTheme.Setters>
-			<Setter Property="Template">
-				<Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Red">
-					<Image Name="PART_Image"/>
-					<Image Stretch="Uniform" Source="/Assets/nugetIcon.png"/>
-				</Panel>
-			</Setter>
-		</ControlTheme.Setters>
-	</ControlTheme>
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="10">
+            <NugetIconImage />
+        </Border>
+    </Design.PreviewWith>
+
+    <ControlTheme x:Key="{x:Type NugetIconImage}" TargetType="NugetIconImage">
+        <ControlTheme.Setters>
+            <Setter Property="Template">
+                <Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Red">
+                    <Image Name="PART_Image" />
+                    <Image Stretch="Uniform" Source="/Assets/nugetIcon.png" />
+                </Panel>
+            </Setter>
+        </ControlTheme.Setters>
+    </ControlTheme>
 </ResourceDictionary>

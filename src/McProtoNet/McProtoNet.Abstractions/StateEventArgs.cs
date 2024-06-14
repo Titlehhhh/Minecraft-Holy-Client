@@ -2,11 +2,6 @@
 
 public sealed class StateEventArgs : EventArgs
 {
-    public MinecraftClientState State { get; }
-    public MinecraftClientState OldState { get; }
-
-    public Exception? Error { get; }
-
     public StateEventArgs(MinecraftClientState newState, MinecraftClientState oldState)
     {
         State = newState;
@@ -19,11 +14,16 @@ public sealed class StateEventArgs : EventArgs
         State = newState;
         OldState = oldState;
     }
+
     public StateEventArgs(Exception ex, MinecraftClientState oldState)
     {
         Error = ex;
         State = MinecraftClientState.Errored;
         OldState = oldState;
-
     }
+
+    public MinecraftClientState State { get; }
+    public MinecraftClientState OldState { get; }
+
+    public Exception? Error { get; }
 }

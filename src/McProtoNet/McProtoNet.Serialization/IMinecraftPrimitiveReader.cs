@@ -1,47 +1,40 @@
-﻿using DotNext.Buffers;
-using McProtoNet.NBT;
-using System.Buffers;
+﻿using McProtoNet.NBT;
 
-namespace McProtoNet.Serialization
+namespace McProtoNet.Serialization;
+
+public interface IMinecraftPrimitiveReader
 {
+    bool ReadBoolean();
 
-	public interface IMinecraftPrimitiveReader
-	{
+    sbyte ReadSignedByte();
+    byte ReadUnsignedByte();
 
-		bool ReadBoolean();
+    short ReadShort();
+    ushort ReadUnsignedShort();
 
-		sbyte ReadSignedByte();
-		byte ReadUnsignedByte();
+    int ReadInt();
+    uint ReadUnsignedInt();
 
-		short ReadShort();
-		ushort ReadUnsignedShort();
+    long ReadLong();
+    ulong ReadUnsignedLong();
 
-		int ReadInt();
-		uint ReadUnsignedInt();
-
-		long ReadLong();
-		ulong ReadUnsignedLong();
-
-		float ReadFloat();
-		double ReadDouble();
+    float ReadFloat();
+    double ReadDouble();
 
 
-		int ReadVarInt();
-		long ReadVarLong();
+    int ReadVarInt();
+    long ReadVarLong();
 
-		Guid ReadUUID();
+    Guid ReadUUID();
 
-		string ReadString(int maxLength = 32767);
-
-
-		byte[] ReadBuffer();
-
-		byte[] ReadRestBuffer();
+    string ReadString(int maxLength = 32767);
 
 
-		NbtCompound? ReadOptionalNbt();
-		NbtCompound ReadNbt();
-	}
+    byte[] ReadBuffer();
 
-	
+    byte[] ReadRestBuffer();
+
+
+    NbtCompound? ReadOptionalNbt();
+    NbtCompound ReadNbt();
 }

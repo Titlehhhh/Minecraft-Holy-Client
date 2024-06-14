@@ -1,9 +1,6 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public interface IPathTypeEnumerable
 {
-	public interface IPathTypeEnumerable
-	{
-		IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator();
-	}
-
-
+    IEnumerator<KeyValuePair<string, ProtodefType>> GetEnumerator();
 }

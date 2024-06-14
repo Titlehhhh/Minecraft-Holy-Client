@@ -3,10 +3,8 @@ using MessagePack;
 
 namespace HolyClient.Models;
 
-[MessagePackObject(keyAsPropertyName: true)]
+[MessagePackObject(true)]
 public class SettingsState
 {
-
-	public string Language { get; set; } = Loc.Instance.CurrentLanguage;
+    public string Language { get; set; } = Loc.Instance.CurrentLanguage;
 }
-

@@ -1,17 +1,17 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-	<Design.PreviewWith>
-		<Border Padding="20">
-			<ListBox SelectedIndex="0">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <ListBox SelectedIndex="0">
 
-				<ListBoxItem>Test hsfug h8gh 87dfhg8 7dhg87hedr8ghe87rhg8eh ruygheru7 gh8er7g8uy ehrg8heruyhg 8u7</ListBoxItem>
-				<ListBoxItem>Test</ListBoxItem>
-				<ListBoxItem>Test</ListBoxItem>
-				<ListBoxItem>Test</ListBoxItem>
-			</ListBox>
-		</Border>
-	</Design.PreviewWith>
+                <ListBoxItem>Test hsfug h8gh 87dfhg8 7dhg87hedr8ghe87rhg8eh ruygheru7 gh8er7g8uy ehrg8heruyhg 8u7</ListBoxItem>
+                <ListBoxItem>Test</ListBoxItem>
+                <ListBoxItem>Test</ListBoxItem>
+                <ListBoxItem>Test</ListBoxItem>
+            </ListBox>
+        </Border>
+    </Design.PreviewWith>
 
-	
+
 </ResourceDictionary>

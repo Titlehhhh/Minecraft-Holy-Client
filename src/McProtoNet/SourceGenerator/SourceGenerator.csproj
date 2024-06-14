@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	 
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
 
-  <ItemGroup>
-    <Compile Remove="PacketTemplate.cs" />
-  </ItemGroup>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Humanizer" Version="3.0.0-beta.54" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="PacketTemplate.cs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<None Update="minecraft-data\**">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
- 
+    <ItemGroup>
+        <PackageReference Include="Humanizer" Version="3.0.0-beta.54"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="minecraft-data\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 
 </Project>

@@ -1,8 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace McProtoNet.Protocol
+namespace McProtoNet.Protocol;
+
+public sealed class Ingredient : Collection<Slot>
 {
-    public sealed class Ingredient : Collection<Slot>
-    {
-    }
 }

@@ -1,110 +1,94 @@
-﻿using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
+using HolyClient.StressTest;
+using MessagePack;
+using MessagePack.Resolvers;
+using ReactiveUI;
 
-namespace HolyClient.Services
+namespace HolyClient.Services;
+
+public class DefaultSuspensionDriver<TAppState> : ISuspensionDriver
+    where TAppState : class
 {
+    private readonly string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-	public class DefaultSuspensionDriver<TAppState> : ISuspensionDriver
-	where TAppState : class
-	{
-		private IFormatterResolver resolver;
-		private MessagePackSerializerOptions options;
-		public DefaultSuspensionDriver()
-		{
-			resolver = MessagePack.Resolvers.CompositeResolver.Create(
-				CompositeResolver.Create(new IMessagePackFormatter[] { HolyClient.StressTest.PluginTypeRefFormatter.Instance }),
+    private readonly string dataFileName = "appstate.dat";
+    private MessagePackSerializerOptions options;
+    private readonly IFormatterResolver resolver;
 
-				MessagePack.Resolvers.BuiltinResolver.Instance,
-			   MessagePack.Resolvers.AttributeFormatterResolver.Instance,
+    public DefaultSuspensionDriver()
+    {
+        resolver = CompositeResolver.Create(
+            CompositeResolver.Create(PluginTypeRefFormatter.Instance),
+            BuiltinResolver.Instance,
+            AttributeFormatterResolver.Instance,
 
-			   // replace enum resolver
-			   MessagePack.Resolvers.DynamicEnumAsStringResolver.Instance,
+            // replace enum resolver
+            DynamicEnumAsStringResolver.Instance,
+            DynamicGenericResolver.Instance,
+            DynamicUnionResolver.Instance,
+            DynamicObjectResolver.Instance,
+            PrimitiveObjectResolver.Instance,
 
-			   MessagePack.Resolvers.DynamicGenericResolver.Instance,
-			   MessagePack.Resolvers.DynamicUnionResolver.Instance,
-			   MessagePack.Resolvers.DynamicObjectResolver.Instance,
+            // final fallback(last priority)
+            DynamicContractlessObjectResolver.Instance
+        );
+        options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+    }
 
-			   MessagePack.Resolvers.PrimitiveObjectResolver.Instance,
+    public IObservable<Unit> InvalidateState()
+    {
+        return Observable.Empty<Unit>();
+    }
 
-			   // final fallback(last priority)
-			   MessagePack.Resolvers.DynamicContractlessObjectResolver.Instance
-		   );
-			options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
-		}
+    public IObservable<object> LoadState()
+    {
+        try
+        {
+            var path = Path.Combine(appData, App.AppName);
+            if (Directory.Exists(path))
+            {
+                path = Path.Combine(path, dataFileName);
 
-		private string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                if (File.Exists(path))
+                {
+                    var data = File.ReadAllBytes(path);
 
-		private string dataFileName = "appstate.dat";
+                    var state = MessagePackSerializer.Deserialize<TAppState>(data);
+                    if (state is null) throw new NullReferenceException("App State is null");
 
-		public IObservable<Unit> InvalidateState() => Observable.Empty<Unit>();
+                    return Observable.Return(state);
+                }
 
-		public IObservable<object> LoadState()
-		{
+                throw new FileNotFoundException($"Не найден файл с состоянием на пути: {path}");
+            }
 
-			try
-			{
-				string path = Path.Combine(appData, App.AppName);
-				if (Directory.Exists(path))
-				{
+            throw new DirectoryNotFoundException($"Не найдена папка приложения: {path}");
+        }
+        catch (Exception ex)
+        {
+            return Observable.Throw<object>(ex);
+        }
+    }
 
-					path = Path.Combine(path, dataFileName);
+    public IObservable<Unit> SaveState(object state)
+    {
+        var path = Path.Combine(appData, App.AppName);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
 
-					if (File.Exists(path))
-					{
-						var data = File.ReadAllBytes(path);
-
-						var state = MessagePackSerializer.Deserialize<TAppState>(data);
-						if (state is null)
-						{
-
-							throw new NullReferenceException("App State is null");
-						}
-
-						return Observable.Return(state);
-
-					}
-					throw new FileNotFoundException($"Не найден файл с состоянием на пути: {path}");
-				}
-				throw new DirectoryNotFoundException($"Не найдена папка приложения: {path}");
-			}
-			catch (Exception ex)
-			{
-
-				return Observable.Throw<object>(ex);
-			}
-
-
-		}
-
-		public IObservable<Unit> SaveState(object state)
-		{
-			string path = Path.Combine(appData, App.AppName);
-			if (!Directory.Exists(path))
-				Directory.CreateDirectory(path);
-
-			path = Path.Combine(path, dataFileName);
+        path = Path.Combine(path, dataFileName);
 
 
+        var data = MessagePackSerializer.Serialize((TAppState)state);
 
+        using (var sw = new StreamWriter(path))
+        {
+            sw.BaseStream.Write(data);
+        }
 
-
-
-			var data = MessagePackSerializer.Serialize<TAppState>((TAppState)state);
-
-			using (var sw = new StreamWriter(path))
-			{
-				sw.BaseStream.Write(data);
-			}
-
-			return Observable.Return(Unit.Default);
-
-		}
-	}
-
+        return Observable.Return(Unit.Default);
+    }
 }

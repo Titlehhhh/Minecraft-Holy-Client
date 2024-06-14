@@ -1,278 +1,241 @@
-﻿using Org.BouncyCastle.Crypto;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Org.BouncyCastle.Crypto;
 
-namespace McProtoNet.Cryptography
+namespace McProtoNet.Cryptography;
+
+public class AsyncCipherStream : Stream
 {
-	public class AsyncCipherStream : Stream
-	{
-		internal Stream stream;
-		internal IBufferedCipher inCipher, outCipher;
-		private byte[] mInBuf;
-		private int mInPos;
-		private bool inStreamEnded;
+    internal Stream stream;
+    internal IBufferedCipher inCipher, outCipher;
+    private byte[] mInBuf;
+    private int mInPos;
+    private bool inStreamEnded;
 
-		public AsyncCipherStream(
-			Stream stream,
-			IBufferedCipher readCipher,
-			IBufferedCipher writeCipher)
-		{
-			this.stream = stream;
+    public AsyncCipherStream(
+        Stream stream,
+        IBufferedCipher readCipher,
+        IBufferedCipher writeCipher)
+    {
+        this.stream = stream;
 
-			if (readCipher != null)
-			{
-				this.inCipher = readCipher;
-				mInBuf = null;
-			}
+        if (readCipher != null)
+        {
+            inCipher = readCipher;
+            mInBuf = null;
+        }
 
-			if (writeCipher != null)
-			{
-				this.outCipher = writeCipher;
-			}
-		}
+        if (writeCipher != null) outCipher = writeCipher;
+    }
 
-		public IBufferedCipher ReadCipher
-		{
-			get { return inCipher; }
-		}
+    public IBufferedCipher ReadCipher => inCipher;
 
-		public IBufferedCipher WriteCipher
-		{
-			get { return outCipher; }
-		}
+    public IBufferedCipher WriteCipher => outCipher;
 
-		public override int ReadByte()
-		{
-			if (inCipher == null)
-				return stream.ReadByte();
+    public override int ReadByte()
+    {
+        if (inCipher == null)
+            return stream.ReadByte();
 
-			if (mInBuf == null || mInPos >= mInBuf.Length)
-			{
-				if (!FillInBuf())
-					return -1;
-			}
+        if (mInBuf == null || mInPos >= mInBuf.Length)
+            if (!FillInBuf())
+                return -1;
 
-			return mInBuf[mInPos++];
-		}
-		public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-		{
-			if (inCipher == null)
-				return await stream.ReadAsync(buffer, offset, count, cancellationToken);
+        return mInBuf[mInPos++];
+    }
 
-			int num = 0;
-			while (num < count)
-			{
-				if (mInBuf == null || mInPos >= mInBuf.Length)
-				{
-					if (!await FillInBufAsync(cancellationToken))
-						break;
-				}
+    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count,
+        CancellationToken cancellationToken)
+    {
+        if (inCipher == null)
+            return await stream.ReadAsync(buffer, offset, count, cancellationToken);
 
-				int numToCopy = System.Math.Min(count - num, mInBuf.Length - mInPos);
-				Array.Copy(mInBuf, mInPos, buffer, offset + num, numToCopy);
-				mInPos += numToCopy;
-				num += numToCopy;
-			}
+        var num = 0;
+        while (num < count)
+        {
+            if (mInBuf == null || mInPos >= mInBuf.Length)
+                if (!await FillInBufAsync(cancellationToken))
+                    break;
 
-			return num;
-		}
-		public override int Read(
-			byte[] buffer,
-			int offset,
-			int count)
-		{
-			if (inCipher == null)
-				return stream.Read(buffer, offset, count);
+            var numToCopy = Math.Min(count - num, mInBuf.Length - mInPos);
+            Array.Copy(mInBuf, mInPos, buffer, offset + num, numToCopy);
+            mInPos += numToCopy;
+            num += numToCopy;
+        }
 
-			int num = 0;
-			while (num < count)
-			{
-				if (mInBuf == null || mInPos >= mInBuf.Length)
-				{
-					if (!FillInBuf())
-						break;
-				}
+        return num;
+    }
 
-				int numToCopy = System.Math.Min(count - num, mInBuf.Length - mInPos);
-				Array.Copy(mInBuf, mInPos, buffer, offset + num, numToCopy);
-				mInPos += numToCopy;
-				num += numToCopy;
-			}
+    public override int Read(
+        byte[] buffer,
+        int offset,
+        int count)
+    {
+        if (inCipher == null)
+            return stream.Read(buffer, offset, count);
 
-			return num;
-		}
-		private async ValueTask<bool> FillInBufAsync(CancellationToken cancellation)
-		{
-			if (inStreamEnded)
-				return false;
-			mInPos = 0;
+        var num = 0;
+        while (num < count)
+        {
+            if (mInBuf == null || mInPos >= mInBuf.Length)
+                if (!FillInBuf())
+                    break;
 
-			do
-			{
-				mInBuf = await ReadAndProcessBlockAsync(cancellation);
-			}
-			while (!inStreamEnded && mInBuf == null);
+            var numToCopy = Math.Min(count - num, mInBuf.Length - mInPos);
+            Array.Copy(mInBuf, mInPos, buffer, offset + num, numToCopy);
+            mInPos += numToCopy;
+            num += numToCopy;
+        }
 
-			return mInBuf != null;
-		}
-		private bool FillInBuf()
-		{
+        return num;
+    }
 
+    private async ValueTask<bool> FillInBufAsync(CancellationToken cancellation)
+    {
+        if (inStreamEnded)
+            return false;
+        mInPos = 0;
 
+        do
+        {
+            mInBuf = await ReadAndProcessBlockAsync(cancellation);
+        } while (!inStreamEnded && mInBuf == null);
 
-			if (inStreamEnded)
-				return false;
+        return mInBuf != null;
+    }
 
-			mInPos = 0;
+    private bool FillInBuf()
+    {
+        if (inStreamEnded)
+            return false;
 
-			do
-			{
-				mInBuf = ReadAndProcessBlock();
-			}
-			while (!inStreamEnded && mInBuf == null);
+        mInPos = 0;
 
-			return mInBuf != null;
-		}
-		private async Task<byte[]> ReadAndProcessBlockAsync(CancellationToken cancellation)
-		{
-			int blockSize = inCipher.GetBlockSize();
-			int readSize = (blockSize == 0) ? 256 : blockSize;
+        do
+        {
+            mInBuf = ReadAndProcessBlock();
+        } while (!inStreamEnded && mInBuf == null);
 
-			byte[] block = new byte[readSize];
-			int numRead = 0;
-			do
-			{
-				int count = await stream.ReadAsync(block, numRead, block.Length - numRead);
-				if (count <= 0)
-				{
-					throw new EndOfStreamException();
-					inStreamEnded = true;
-					break;
-				}
-				numRead += count;
-			}
-			while (numRead < block.Length);
+        return mInBuf != null;
+    }
 
-			Debug.Assert(inStreamEnded || numRead == block.Length);
+    private async Task<byte[]> ReadAndProcessBlockAsync(CancellationToken cancellation)
+    {
+        var blockSize = inCipher.GetBlockSize();
+        var readSize = blockSize == 0 ? 256 : blockSize;
 
-			byte[] bytes = inStreamEnded
-				? inCipher.DoFinal(block, 0, numRead)
-				: inCipher.ProcessBytes(block);
+        var block = new byte[readSize];
+        var numRead = 0;
+        do
+        {
+            var count = await stream.ReadAsync(block, numRead, block.Length - numRead);
+            if (count <= 0)
+            {
+                throw new EndOfStreamException();
+                inStreamEnded = true;
+                break;
+            }
 
-			if (bytes != null && bytes.Length == 0)
-			{
-				bytes = null;
-			}
+            numRead += count;
+        } while (numRead < block.Length);
 
-			return bytes;
-		}
-		private byte[] ReadAndProcessBlock()
-		{
-			int blockSize = inCipher.GetBlockSize();
-			int readSize = (blockSize == 0) ? 256 : blockSize;
+        Debug.Assert(inStreamEnded || numRead == block.Length);
 
-			byte[] block = new byte[readSize];
-			int numRead = 0;
-			do
-			{
-				int count = stream.Read(block, numRead, block.Length - numRead);
-				if (count < 1)
-				{
-					inStreamEnded = true;
-					break;
-				}
-				numRead += count;
-			}
-			while (numRead < block.Length);
+        var bytes = inStreamEnded
+            ? inCipher.DoFinal(block, 0, numRead)
+            : inCipher.ProcessBytes(block);
 
-			Debug.Assert(inStreamEnded || numRead == block.Length);
+        if (bytes != null && bytes.Length == 0) bytes = null;
 
-			byte[] bytes = inStreamEnded
-				? inCipher.DoFinal(block, 0, numRead)
-				: inCipher.ProcessBytes(block);
+        return bytes;
+    }
 
-			if (bytes != null && bytes.Length == 0)
-			{
-				bytes = null;
-			}
+    private byte[] ReadAndProcessBlock()
+    {
+        var blockSize = inCipher.GetBlockSize();
+        var readSize = blockSize == 0 ? 256 : blockSize;
 
-			return bytes;
-		}
-		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-		{
-			byte[] data = outCipher.ProcessBytes(buffer, offset, count);
-			if (data != null)
-			{
-				return stream.WriteAsync(data, 0, data.Length, cancellationToken);
-			}
-			return Task.CompletedTask;
-		}
-		public override void Write(
-			byte[] buffer,
-			int offset,
-			int count)
-		{
-			Debug.Assert(buffer != null);
-			Debug.Assert(0 <= offset && offset <= buffer.Length);
-			Debug.Assert(count >= 0);
+        var block = new byte[readSize];
+        var numRead = 0;
+        do
+        {
+            var count = stream.Read(block, numRead, block.Length - numRead);
+            if (count < 1)
+            {
+                inStreamEnded = true;
+                break;
+            }
 
-			int end = offset + count;
+            numRead += count;
+        } while (numRead < block.Length);
 
-			Debug.Assert(0 <= end && end <= buffer.Length);
+        Debug.Assert(inStreamEnded || numRead == block.Length);
 
-			if (outCipher == null)
-			{
-				stream.Write(buffer, offset, count);
-				return;
-			}
+        var bytes = inStreamEnded
+            ? inCipher.DoFinal(block, 0, numRead)
+            : inCipher.ProcessBytes(block);
 
-			byte[] data = outCipher.ProcessBytes(buffer, offset, count);
-			if (data != null)
-			{
-				stream.Write(data, 0, data.Length);
-			}
-		}
+        if (bytes != null && bytes.Length == 0) bytes = null;
 
-		public override void WriteByte(
-			byte b)
-		{
-			if (outCipher == null)
-			{
-				stream.WriteByte(b);
-				return;
-			}
+        return bytes;
+    }
 
-			byte[] data = outCipher.ProcessByte(b);
-			if (data != null)
-			{
-				stream.Write(data, 0, data.Length);
-			}
-		}
+    public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+    {
+        var data = outCipher.ProcessBytes(buffer, offset, count);
+        if (data != null) return stream.WriteAsync(data, 0, data.Length, cancellationToken);
 
-		public override bool CanRead
-		{
-			get { return stream.CanRead && (inCipher != null); }
-		}
+        return Task.CompletedTask;
+    }
 
-		public override bool CanWrite
-		{
-			get { return stream.CanWrite && (outCipher != null); }
-		}
+    public override void Write(
+        byte[] buffer,
+        int offset,
+        int count)
+    {
+        Debug.Assert(buffer != null);
+        Debug.Assert(0 <= offset && offset <= buffer.Length);
+        Debug.Assert(count >= 0);
 
-		public override bool CanSeek
-		{
-			get { return false; }
-		}
+        var end = offset + count;
 
-		public sealed override long Length
-		{
-			get { throw new NotSupportedException(); }
-		}
+        Debug.Assert(0 <= end && end <= buffer.Length);
 
-		public sealed override long Position
-		{
-			get { throw new NotSupportedException(); }
-			set { throw new NotSupportedException(); }
-		}
+        if (outCipher == null)
+        {
+            stream.Write(buffer, offset, count);
+            return;
+        }
+
+        var data = outCipher.ProcessBytes(buffer, offset, count);
+        if (data != null) stream.Write(data, 0, data.Length);
+    }
+
+    public override void WriteByte(
+        byte b)
+    {
+        if (outCipher == null)
+        {
+            stream.WriteByte(b);
+            return;
+        }
+
+        var data = outCipher.ProcessByte(b);
+        if (data != null) stream.Write(data, 0, data.Length);
+    }
+
+    public override bool CanRead => stream.CanRead && inCipher != null;
+
+    public override bool CanWrite => stream.CanWrite && outCipher != null;
+
+    public override bool CanSeek => false;
+
+    public sealed override long Length => throw new NotSupportedException();
+
+    public sealed override long Position
+    {
+        get => throw new NotSupportedException();
+        set => throw new NotSupportedException();
+    }
 
 #if PORTABLE
         protected override void Dispose(bool disposing)
@@ -290,36 +253,35 @@ namespace McProtoNet.Cryptography
             base.Dispose(disposing);
         }
 #else
-		public override void Close()
-		{
-			if (outCipher != null)
-			{
-				byte[] data = outCipher.DoFinal();
-				stream.Write(data, 0, data.Length);
-				stream.Flush();
-			}
+    public override void Close()
+    {
+        if (outCipher != null)
+        {
+            var data = outCipher.DoFinal();
+            stream.Write(data, 0, data.Length);
+            stream.Flush();
+        }
 
-			base.Close();
-		}
+        base.Close();
+    }
 #endif
 
-		public override void Flush()
-		{
-			// Note: outCipher.DoFinal is only called during Close()
-			stream.Flush();
-		}
+    public override void Flush()
+    {
+        // Note: outCipher.DoFinal is only called during Close()
+        stream.Flush();
+    }
 
-		public sealed override long Seek(
-			long offset,
-			SeekOrigin origin)
-		{
-			throw new NotSupportedException();
-		}
+    public sealed override long Seek(
+        long offset,
+        SeekOrigin origin)
+    {
+        throw new NotSupportedException();
+    }
 
-		public sealed override void SetLength(
-			long length)
-		{
-			throw new NotSupportedException();
-		}
-	}
+    public sealed override void SetLength(
+        long length)
+    {
+        throw new NotSupportedException();
+    }
 }

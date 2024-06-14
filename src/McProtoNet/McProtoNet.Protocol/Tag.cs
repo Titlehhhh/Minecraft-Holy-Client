@@ -1,8 +1,7 @@
-﻿namespace McProtoNet.Protocol
+﻿namespace McProtoNet.Protocol;
+
+public sealed class Tag
 {
-    public sealed class Tag
-    {
-        public string TagName { get; private set; }
-        public int[] Entries { get; private set; }
-    }
+    public string TagName { get; }
+    public int[] Entries { get; }
 }

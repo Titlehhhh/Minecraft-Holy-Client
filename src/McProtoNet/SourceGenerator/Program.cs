@@ -1,10 +1,6 @@
-﻿using Humanizer;
+﻿using System.Text.Json;
 using SourceGenerator.MCDataModels;
-using SourceGenerator.NetTypes;
 using SourceGenerator.ProtoDefTypes;
-using System;
-using System.Diagnostics;
-using System.Text.Json;
 
 public sealed class Protocol
 {
@@ -14,7 +10,7 @@ public sealed class Protocol
 
 public class Program
 {
-    public static Dictionary<string, string> MapWriteMethods = new Dictionary<string, string>()
+    public static Dictionary<string, string> MapWriteMethods = new()
     {
         { "", "" }
     };
@@ -49,39 +45,37 @@ public class Program
 
         foreach (var item in paths.Pc)
         {
-            string protocol_path = Path.Combine(dataPath, item.Value.Protocol, "protocol.json");
-            string version_path = Path.Combine(dataPath, item.Value.Version, "version.json");
+            var protocol_path = Path.Combine(dataPath, item.Value.Protocol, "protocol.json");
+            var version_path = Path.Combine(dataPath, item.Value.Version, "version.json");
 
             if (File.Exists(version_path))
-            {
                 if (File.Exists(protocol_path))
                 {
-                    string version_json = await File.ReadAllTextAsync(version_path);
+                    var version_json = await File.ReadAllTextAsync(version_path);
 
 
                     var version = JsonSerializer.Deserialize<VersionInfo>(version_json);
 
                     if (version.Version >= 754 && version.Version != 1073741839)
                     {
-                        string protocol_json = await File.ReadAllTextAsync(protocol_path);
+                        var protocol_json = await File.ReadAllTextAsync(protocol_path);
 
                         ProtodefParser parser = new(protocol_json);
 
                         var protocol = parser.Parse();
 
 
-                        collection.Add(version.Version, new Protocol()
+                        collection.Add(version.Version, new Protocol
                         {
                             JsonPackets = protocol,
                             Version = version
                         });
                     }
                 }
-            }
         }
 
 
-        string protocolDir = Path.Combine(Root, "Protocols");
+        var protocolDir = Path.Combine(Root, "Protocols");
 
         if (!Directory.Exists(protocolDir))
             Directory.CreateDirectory(protocolDir);
@@ -98,11 +92,11 @@ public class Program
             var ns = generator.Generate();
 
 
-            string fileName = $"Protocol{item.Key}.cs";
+            var fileName = $"Protocol{item.Key}.cs";
 
             fileName = Path.Combine(protocolDir, fileName);
 
-            string s = ns.ToString().Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+            var s = ns.ToString().Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
 
             await File.WriteAllTextAsync(fileName, s);
         }

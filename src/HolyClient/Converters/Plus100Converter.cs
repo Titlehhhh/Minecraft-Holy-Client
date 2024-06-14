@@ -1,24 +1,21 @@
-﻿using Avalonia.Data.Converters;
-using System;
+﻿using System;
 using System.Globalization;
+using Avalonia.Data.Converters;
 
-namespace HolyClient.Converters
+namespace HolyClient.Converters;
+
+public class Plus100Converter : IValueConverter
 {
-	public class Plus100Converter : IValueConverter
-	{
-		public static Plus100Converter Instance { get; } = new();
-		public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-		{
-			if (value is double v)
-			{
-				return v + 100;
-			}
-			return value;
-		}
+    public static Plus100Converter Instance { get; } = new();
 
-		public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-		{
-			throw new NotImplementedException();
-		}
-	}
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is double v) return v + 100;
+        return value;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
 }

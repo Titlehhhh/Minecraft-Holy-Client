@@ -2,9 +2,7 @@
 
 public sealed class DataPath
 {
-	[JsonPropertyName("protocol")]
-	public string Protocol { get; set; }
+    [JsonPropertyName("protocol")] public string Protocol { get; set; }
 
-	[JsonPropertyName("version")]
-	public string Version { get; set; }
+    [JsonPropertyName("version")] public string Version { get; set; }
 }

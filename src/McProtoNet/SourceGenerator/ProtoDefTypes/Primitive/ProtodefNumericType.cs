@@ -1,32 +1,30 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefNumericType : ProtodefType
 {
-	public sealed class ProtodefNumericType : ProtodefType
-	{
-		public string NetName { get; }
+    public ProtodefNumericType(string name, string originalName, bool signed, ByteOrder order)
+    {
+        NetName = name;
+        OriginalName = originalName;
+        Signed = signed;
+        Order = order;
+    }
 
-		public string OriginalName { get; }
+    public string NetName { get; }
 
-		public bool Signed { get; }
+    public string OriginalName { get; }
 
-		public ByteOrder Order { get; }
+    public bool Signed { get; }
 
-		public ProtodefNumericType(string name,string originalName, bool signed, ByteOrder order)
-		{
-			NetName = name;
-			OriginalName = originalName;
-			Signed = signed;
-			Order = order;
-		}
-		public override string ToString()
-		{
-			return NetName;
-		}
+    public ByteOrder Order { get; }
 
-		public override string? GetNetType()
-		{
-			return NetName;
-		}
-	}
+    public override string ToString()
+    {
+        return NetName;
+    }
 
-
+    public override string? GetNetType()
+    {
+        return NetName;
+    }
 }

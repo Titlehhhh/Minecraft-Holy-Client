@@ -1,10 +1,7 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public enum ByteOrder
 {
-	public enum ByteOrder
-	{
-		BigEndian,
-		LittleEndian
-	}
-
-
+    BigEndian,
+    LittleEndian
 }

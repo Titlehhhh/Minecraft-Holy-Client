@@ -2,53 +2,47 @@
 using MessagePack;
 using QuickProxyNet;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+[MessagePackObject(true)]
+public class FileProxySource : IProxySource
 {
-	[MessagePackObject(keyAsPropertyName: true)]
-	public class FileProxySource : IProxySource
-	{
-		public ProxyType Type { get; set; }
-		public string FilePath { get; set; }
+    public FileProxySource()
+    {
+    }
 
-		[IgnoreMember]
-		public string Name => this.FilePath;
+    public FileProxySource(ProxyType type, string filePath)
+    {
+        Type = type;
+        FilePath = filePath;
+    }
 
-		public Guid Id { get; set; } = Guid.NewGuid();
+    public string FilePath { get; set; }
+    public ProxyType Type { get; set; }
+
+    [IgnoreMember] public string Name => FilePath;
+
+    public Guid Id { get; set; } = Guid.NewGuid();
 
 
+    public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
+    {
+        List<ProxyInfo> proxies = new();
+        try
+        {
+            using (var sr = new StreamReader(FilePath))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var line = await sr.ReadLineAsync();
+                    if (ProxyInfo.TryParse(line.Trim(), Type, out var proxy)) proxies.Add(proxy);
+                }
+            }
+        }
+        catch
+        {
+        }
 
-		public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
-		{
-			List<ProxyInfo> proxies = new();
-			try
-			{
-				using (StreamReader sr = new StreamReader(FilePath))
-				{
-					while (!sr.EndOfStream)
-					{
-						var line = await sr.ReadLineAsync();
-						if (ProxyInfo.TryParse(line.Trim(), this.Type, out var proxy))
-						{
-							proxies.Add(proxy);
-						}
-					}
-				}
-			}
-			catch
-			{
-
-			}
-			return proxies;
-		}
-		public FileProxySource()
-		{
-
-		}
-		public FileProxySource(ProxyType type, string filePath)
-		{
-			Type = type;
-			FilePath = filePath;
-		}
-	}
-
+        return proxies;
+    }
 }

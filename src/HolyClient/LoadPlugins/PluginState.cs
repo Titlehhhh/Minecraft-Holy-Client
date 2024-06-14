@@ -1,12 +1,11 @@
-﻿namespace HolyClient.LoadPlugins
+﻿namespace HolyClient.LoadPlugins;
+
+public enum PluginState
 {
-	public enum PluginState
-	{
-		None,
-		Errored,
-		Loading,
-		Loaded,
-		Unloading,
-		Unloaded
-	}
+    None,
+    Errored,
+    Loading,
+    Loaded,
+    Unloading,
+    Unloaded
 }

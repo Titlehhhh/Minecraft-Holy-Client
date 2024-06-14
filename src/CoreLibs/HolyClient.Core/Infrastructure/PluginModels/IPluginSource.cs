@@ -1,14 +1,11 @@
 ﻿using HolyClient.Abstractions.StressTest;
 
-namespace HolyClient.Core.Infrastructure
+namespace HolyClient.Core.Infrastructure;
+
+public interface IPluginSource
 {
-	public interface IPluginSource
-	{
-		PluginMetadata Metadata { get; }
-		PluginTypeReference Reference { get; }
+    PluginMetadata Metadata { get; }
+    PluginTypeReference Reference { get; }
 
-		T CreateInstance<T>() where T : IStressTestBehavior;
-	}
-
-
+    T CreateInstance<T>() where T : IStressTestBehavior;
 }

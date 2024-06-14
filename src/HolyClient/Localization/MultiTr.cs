@@ -1,198 +1,196 @@
-﻿using Avalonia;
-using Avalonia.Data;
-using Avalonia.Data.Converters;
-using Avalonia.Markup.Xaml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using Avalonia;
+using Avalonia.Data;
+using Avalonia.Data.Converters;
+using Avalonia.Markup.Xaml;
 
-namespace HolyClient.Localization
+namespace HolyClient.Localization;
+
+/// <summary>
+///     Allow to Concatenate Multiple Tr Results with a string.Format or a separator.
+/// </summary>
+public class MultiTr : MarkupExtension
 {
 	/// <summary>
-	/// Allow to Concatenate Multiple Tr Results with a string.Format or a separator.
+	///     To specify the way translations are concatenate
 	/// </summary>
-	public class MultiTr : MarkupExtension
-	{
-		#region Constructors and args Management
+	public string StringFormat { get; set; }
 
-		public MultiTr()
-		{ }
+	/// <summary>
+	///     A separator text to concat between each translations
+	///     Used if StringFormat is not set.
+	/// </summary>
+	public string Separator { get; set; } = " ";
 
-		public MultiTr(object arg1, object arg2)
-		{
-			ManageArg(new List<object> { arg1, arg2 });
-		}
+	/// <summary>
+	///     A collection of sub translations to concatenate
+	/// </summary>
+	public Collection<Tr> Collection { get; } = new();
 
-		public MultiTr(object arg1, object arg2, object arg3)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3 });
-		}
+	/// <summary>
+	///     Converter to apply on the result text
+	/// </summary>
+	public IValueConverter Converter { get; set; }
 
-		public MultiTr(object arg1, object arg2, object arg3, object arg4)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3, arg4 });
-		}
+	/// <summary>
+	///     The parameter to pass to the converter
+	/// </summary>
+	public object ConverterParameter { get; set; }
 
-		public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5 });
-		}
+	/// <summary>
+	///     The culture to pass to the converter
+	/// </summary>
+	public CultureInfo ConverterCulture { get; set; }
 
-		public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6 });
-		}
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        if (serviceProvider.GetService(typeof(IProvideValueTarget)) is not IProvideValueTarget service) return this;
 
-		public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-		}
+        var dependencyObject = service.TargetObject as AvaloniaObject;
+        var dependencyProperty = service.TargetProperty as AvaloniaProperty;
 
-		public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8)
-		{
-			ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-		}
+        var providedValues = Collection.Select(tr => tr.ProvideValue(serviceProvider, true) as IBinding ?? (object)tr);
 
-		private void ManageArg(List<object> args)
-		{
-			args.ForEach(arg =>
-			{
-				if (arg is Tr tr)
-					Collection.Add(tr);
-				else
-					Collection.Add(new Tr(arg));
-			});
-		}
+        if (providedValues.All(p => p is IBinding))
+        {
+            var internalConverter = new ForMultiTrMarkupInternalStringFormatMultiValuesConverter
+            {
+                StringFormat = StringFormat ?? string.Join(Separator,
+                    Enumerable.Range(0, Collection.Count).Select(i => "{" + i + "}")),
+                MultiTrConverter = Converter,
+                MultiTrConverterParameter = ConverterParameter,
+                MultiTrConverterCulture = ConverterCulture
+            };
 
-		#endregion
+            MultiBinding multiBinding = new()
+            {
+                Converter = internalConverter
+            };
 
-		/// <summary>
-		/// To specify the way translations are concatenate
-		/// </summary>
-		public string StringFormat { get; set; }
+            Collection.ToList().ForEach(tr =>
+            {
+                var bindingBase = tr.ProvideValue(serviceProvider, true) as IBinding;
 
-		/// <summary>
-		/// A separator text to concat between each translations
-		/// Used if StringFormat is not set.
-		/// </summary>
-		public string Separator { get; set; } = " ";
+                if (bindingBase is MultiBinding trMultiBinding)
+                    trMultiBinding.Bindings.ToList().ForEach(multiBinding.Bindings.Add);
+                else
+                    multiBinding.Bindings.Add(bindingBase);
 
-		/// <summary>
-		/// A collection of sub translations to concatenate
-		/// </summary>
-		public Collection<Tr> Collection { get; } = new Collection<Tr>();
+                internalConverter.StringFormatBindings.Add(bindingBase);
+            });
 
-		/// <summary>
-		/// Converter to apply on the result text
-		/// </summary>
-		public IValueConverter Converter { get; set; }
+            if (dependencyObject == null || dependencyProperty == null)
+            {
+                return multiBinding;
+            }
 
-		/// <summary>
-		/// The parameter to pass to the converter
-		/// </summary>
-		public object ConverterParameter { get; set; }
+            dependencyObject.Bind(dependencyProperty, multiBinding, dependencyObject);
 
-		/// <summary>
-		/// The culture to pass to the converter
-		/// </summary>
-		public CultureInfo ConverterCulture { get; set; }
+            return "";
+        }
 
-		public override object ProvideValue(IServiceProvider serviceProvider)
-		{
-			if (serviceProvider.GetService(typeof(IProvideValueTarget)) is not IProvideValueTarget service)
-			{
-				return this;
-			}
+        return this;
+    }
 
-			AvaloniaObject dependencyObject = service.TargetObject as AvaloniaObject;
-			AvaloniaProperty dependencyProperty = service.TargetProperty as AvaloniaProperty;
+    protected class ForMultiTrMarkupInternalStringFormatMultiValuesConverter : IMultiValueConverter
+    {
+        internal string StringFormat { get; set; }
+        internal List<IBinding> StringFormatBindings { get; } = new();
+        internal IValueConverter MultiTrConverter { get; set; }
+        internal object MultiTrConverterParameter { get; set; }
+        internal CultureInfo MultiTrConverterCulture { get; set; }
 
-			IEnumerable<object> providedValues = Collection.Select(tr => tr.ProvideValue(serviceProvider, true) as IBinding ?? (object)tr);
+        public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
+        {
+            List<object> stringFormatValues = new();
 
-			if (providedValues.All(p => p is IBinding))
-			{
-				var internalConverter = new ForMultiTrMarkupInternalStringFormatMultiValuesConverter()
-				{
-					StringFormat = StringFormat ?? string.Join(Separator, Enumerable.Range(0, Collection.Count).Select(i => "{" + i.ToString() + "}")),
-					MultiTrConverter = Converter,
-					MultiTrConverterParameter = ConverterParameter,
-					MultiTrConverterCulture = ConverterCulture,
-				};
+            var offset = 0;
 
-				MultiBinding multiBinding = new()
-				{
-					Converter = internalConverter
-				};
+            StringFormatBindings.ForEach(bindingBase =>
+            {
+                if (bindingBase is MultiBinding multiBinding)
+                {
+                    stringFormatValues.Add(multiBinding.Converter.Convert(
+                        values.Skip(offset).Take(multiBinding.Bindings.Count).ToArray(), null,
+                        multiBinding.ConverterParameter, MultiTrConverterCulture));
+                    offset += multiBinding.Bindings.Count;
+                }
+                else
+                {
+                    stringFormatValues.Add(values[offset]);
+                    offset++;
+                }
+            });
 
-				Collection.ToList().ForEach(tr =>
-				{
-					IBinding bindingBase = tr.ProvideValue(serviceProvider, true) as IBinding;
+            var result = string.Format(StringFormat, stringFormatValues.ToArray());
 
-					if (bindingBase is MultiBinding trMultiBinding)
-					{
-						trMultiBinding.Bindings.ToList().ForEach(multiBinding.Bindings.Add);
-					}
-					else
-					{
-						multiBinding.Bindings.Add(bindingBase);
-					}
+            return MultiTrConverter == null
+                ? result
+                : MultiTrConverter.Convert(result, null, MultiTrConverterParameter, MultiTrConverterCulture);
+        }
 
-					internalConverter.StringFormatBindings.Add(bindingBase);
-				});
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
-				if (dependencyObject == null || dependencyProperty == null)
-				{
-					return multiBinding;
-				}
-				else
-				{
-					dependencyObject.Bind(dependencyProperty, multiBinding, dependencyObject);
+    #region Constructors and args Management
 
-					return "";
-				}
-			}
-			else
-			{
-				return this;
-			}
-		}
+    public MultiTr()
+    {
+    }
 
-		protected class ForMultiTrMarkupInternalStringFormatMultiValuesConverter : IMultiValueConverter
-		{
-			internal string StringFormat { get; set; }
-			internal List<IBinding> StringFormatBindings { get; } = new();
-			internal IValueConverter MultiTrConverter { get; set; }
-			internal object MultiTrConverterParameter { get; set; }
-			internal CultureInfo MultiTrConverterCulture { get; set; }
+    public MultiTr(object arg1, object arg2)
+    {
+        ManageArg(new List<object> { arg1, arg2 });
+    }
 
-			public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
-			{
-				List<object> stringFormatValues = new();
+    public MultiTr(object arg1, object arg2, object arg3)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3 });
+    }
 
-				int offset = 0;
+    public MultiTr(object arg1, object arg2, object arg3, object arg4)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3, arg4 });
+    }
 
-				StringFormatBindings.ForEach(bindingBase =>
-				{
-					if (bindingBase is MultiBinding multiBinding)
-					{
-						stringFormatValues.Add(multiBinding.Converter.Convert(values.Skip(offset).Take(multiBinding.Bindings.Count).ToArray(), null, multiBinding.ConverterParameter, MultiTrConverterCulture));
-						offset += multiBinding.Bindings.Count;
-					}
-					else
-					{
-						stringFormatValues.Add(values[offset]);
-						offset++;
-					}
-				});
+    public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5 });
+    }
 
-				var result = string.Format(StringFormat, stringFormatValues.ToArray());
+    public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6 });
+    }
 
-				return MultiTrConverter == null ? result : MultiTrConverter.Convert(result, null, MultiTrConverterParameter, MultiTrConverterCulture);
-			}
+    public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
+    }
 
-			public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => throw new NotImplementedException();
-		}
-	}
+    public MultiTr(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
+        object arg8)
+    {
+        ManageArg(new List<object> { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
+    }
+
+    private void ManageArg(List<object> args)
+    {
+        args.ForEach(arg =>
+        {
+            if (arg is Tr tr)
+                Collection.Add(tr);
+            else
+                Collection.Add(new Tr(arg));
+        });
+    }
+
+    #endregion
 }

@@ -2,28 +2,27 @@
 using System.Text.Json.Serialization;
 using SourceGenerator.ProtoDefTypes;
 
-namespace SourceGenerator.MCDataModels
+namespace SourceGenerator.MCDataModels;
+
+public class ProtodefParser
 {
-    public class ProtodefParser
+    private readonly string json;
+
+    public ProtodefParser(string json)
     {
-        private readonly string json;
+        this.json = json;
+    }
 
-        public ProtodefParser(string json)
+    public ProtodefProtocol Parse()
+    {
+        JsonSerializerOptions options = new()
         {
-            this.json = json;
-        }
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
 
-        public ProtodefProtocol Parse()
-        {
-            JsonSerializerOptions options = new()
-            {
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
-            };
-
-            //options.Converters.Add(new DataTypeConverter());
+        //options.Converters.Add(new DataTypeConverter());
 
 
-            return JsonSerializer.Deserialize<ProtodefProtocol>(json, options);
-        }
+        return JsonSerializer.Deserialize<ProtodefProtocol>(json, options);
     }
 }

@@ -1,53 +1,47 @@
-﻿using McProtoNet.Core.Protocol;
-using BenchmarkDotNet.Attributes;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using BenchmarkDotNet.Attributes;
 
-namespace McProtoNet.Benchmark
+namespace McProtoNet.Benchmark;
+
+[MemoryDiagnoser()]
+public class OldSendBenchmarks
 {
+    private MemoryStream ms;
 
-	[MemoryDiagnoser(true)]
-	public class OldSendBenchmarks
-	{
-		[Params(0, 256)]
-		public int CompressionThreshold { get; set; }
+    private Packet packet;
 
-		[Params(64, 512)]
-		public int PacketSize { get; set; }
+    private MinecraftPacketSender sender;
 
-		[Params(1, 1_000_000)]
-		public int Count { get; set; }
+    [Params(0, 256)] public int CompressionThreshold { get; set; }
 
-		private MinecraftPacketSender sender;
-		private MemoryStream ms;
+    [Params(64, 512)] public int PacketSize { get; set; }
 
-		private Packet packet;
+    [Params(1, 1_000_000)] public int Count { get; set; }
 
-		[GlobalSetup]
-		public void Setup()
-		{
-			sender = new();
-			ms = new(1024);
+    [GlobalSetup]
+    public void Setup()
+    {
+        sender = new();
+        ms = new MemoryStream(1024);
 
-			byte[] data = new byte[PacketSize];
+        var data = new byte[PacketSize];
 
-			Random.Shared.NextBytes(data);
+        Random.Shared.NextBytes(data);
 
-			packet = new Packet(3, new MemoryStream(data));
-		}
+        packet = new Packet(3, new MemoryStream(data));
+    }
 
-		[Benchmark]
-		public async ValueTask OldSend()
-		{
-			sender.BaseStream = ms;
-			sender.SwitchCompression(CompressionThreshold);
-			for (int i = 0; i < Count; i++)
-			{
-				ms.Position = 0;
-				await sender.SendPacketAsync(packet);
-			}
-		}
-	}
-
+    [Benchmark]
+    public async ValueTask OldSend()
+    {
+        sender.BaseStream = ms;
+        sender.SwitchCompression(CompressionThreshold);
+        for (var i = 0; i < Count; i++)
+        {
+            ms.Position = 0;
+            await sender.SendPacketAsync(packet);
+        }
+    }
 }

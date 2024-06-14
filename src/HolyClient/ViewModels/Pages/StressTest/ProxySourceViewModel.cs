@@ -1,34 +1,34 @@
-﻿using HolyClient.StressTest;
+﻿using System;
+using HolyClient.StressTest;
 using QuickProxyNet;
 using ReactiveUI;
-using System;
 
 namespace HolyClient.ViewModels;
 
 public class ProxySourceViewModel : ReactiveObject
 {
-	public Guid Id { get; private set; }
-	//public int AveragePing => Random.Shared.Next(100, 500);
+    public ProxySourceViewModel(IProxySource proxySource)
+    {
+        Id = proxySource.Id;
 
-	public string Name { get; set; }
+        Name = proxySource.Name;
 
-	public string Icon { get; private set; }
+        Type = proxySource.Type;
 
-	public ProxyType Type { get; set; }
-	public ProxySourceViewModel(IProxySource proxySource)
-	{
-		Id = proxySource.Id;
+        Icon = proxySource switch
+        {
+            UrlProxySource => "UrlProxy",
+            FileProxySource => "FileProxy",
+            InMemoryProxySource => "InMemoryProxy"
+        };
+    }
 
-		Name = proxySource.Name;
+    public Guid Id { get; private set; }
+    //public int AveragePing => Random.Shared.Next(100, 500);
 
-		Type = proxySource.Type;
+    public string Name { get; set; }
 
-		Icon = proxySource switch
-		{
-			UrlProxySource => "UrlProxy",
-			FileProxySource => "FileProxy",
-			InMemoryProxySource => "InMemoryProxy"
-		};
+    public string Icon { get; private set; }
 
-	}
+    public ProxyType Type { get; set; }
 }

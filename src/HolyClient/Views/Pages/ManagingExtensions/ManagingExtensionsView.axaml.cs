@@ -6,13 +6,9 @@ namespace HolyClient.Views;
 
 public partial class ManagingExtensionsView : ReactiveUserControl<ManagingExtensionsViewModel>
 {
-	public ManagingExtensionsView()
-	{
-		InitializeComponent();
-		this.WhenActivated(d =>
-		{
-
-		});
-
-	}
+    public ManagingExtensionsView()
+    {
+        InitializeComponent();
+        this.WhenActivated(d => { });
+    }
 }

@@ -5,291 +5,291 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace HolyClient.Localization
+namespace HolyClient.Localization;
+
+internal class WeakDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable
+    where TKey : class
+    where TValue : class
 {
-	internal class WeakDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable
-		where TKey : class
-		where TValue : class
-	{
-		private readonly object locker = new();
-		private ConditionalWeakTable<TKey, WeakKeyHolder> keyHolderMap = new();
-		private Dictionary<WeakReference, TValue> valueMap = new(new ObjectReferenceEqualityComparer<WeakReference>());
+    private readonly object locker = new();
 
-		private class WeakKeyHolder
-		{
-			private readonly WeakDictionary<TKey, TValue> outer;
+    private bool bAlive = true;
+    private ConditionalWeakTable<TKey, WeakKeyHolder> keyHolderMap = new();
+    private Dictionary<WeakReference, TValue> valueMap = new(new ObjectReferenceEqualityComparer<WeakReference>());
 
-			public WeakKeyHolder(WeakDictionary<TKey, TValue> outer, TKey key)
-			{
-				this.outer = outer;
-				WeakRef = new WeakReference(key);
-			}
+    private Dictionary<TKey, TValue> CurrentDictionary
+    {
+        get
+        {
+            lock (locker)
+            {
+                ManualShrink();
+                return valueMap.ToDictionary(p => (TKey)p.Key.Target, p => p.Value);
+            }
+        }
+    }
 
-			public WeakReference WeakRef { get; }
+    public TValue this[TKey key]
+    {
+        get
+        {
+            if (TryGetValue(key, out var val))
+                return val;
 
-			~WeakKeyHolder()
-			{
-				outer?.OnKeyDrop(WeakRef);  // Nullable operator used just in case this.outer gets set to null by GC before this finalizer runs. But I haven't had this happen.
-			}
-		}
+            throw new KeyNotFoundException();
+        }
 
-		private void OnKeyDrop(WeakReference weakKeyRef)
-		{
-			lock (locker)
-			{
-				if (!bAlive)
-					return;
+        set => Set(key, value, true);
+    }
 
-				valueMap.Remove(weakKeyRef);
-			}
-		}
+    public ICollection<TKey> Keys
+    {
+        get
+        {
+            lock (locker)
+            {
+                ManualShrink();
+                return valueMap.Keys.Select(k => (TKey)k.Target).ToList();
+            }
+        }
+    }
 
-		public void ManualShrink()
-		{
-			foreach (var key in valueMap.Keys.Where(k => !k.IsAlive).ToList())
-				valueMap.Remove(key);
-		}
+    public ICollection<TValue> Values
+    {
+        get
+        {
+            lock (locker)
+            {
+                ManualShrink();
+                return valueMap.Select(p => p.Value).ToList();
+            }
+        }
+    }
 
-		private Dictionary<TKey, TValue> CurrentDictionary
-		{
-			get
-			{
-				lock (locker)
-				{
-					ManualShrink();
-					return valueMap.ToDictionary(p => (TKey)p.Key.Target, p => p.Value);
-				}
-			}
-		}
+    public int Count
+    {
+        get
+        {
+            lock (locker)
+            {
+                ManualShrink();
+                return valueMap.Count;
+            }
+        }
+    }
 
-		public TValue this[TKey key]
-		{
-			get
-			{
-				if (TryGetValue(key, out var val))
-					return val;
+    public bool IsReadOnly => false;
 
-				throw new KeyNotFoundException();
-			}
+    public void Add(TKey key, TValue value)
+    {
+        if (!Set(key, value, false))
+            throw new ArgumentException("Key already exists");
+    }
 
-			set
-			{
-				Set(key, value, isUpdateOkay: true);
-			}
-		}
+    public void Add(KeyValuePair<TKey, TValue> item)
+    {
+        Add(item.Key, item.Value);
+    }
 
-		private bool Set(TKey key, TValue val, bool isUpdateOkay)
-		{
-			lock (locker)
-			{
-				if (keyHolderMap.TryGetValue(key, out var weakKeyHolder))
-				{
-					if (!isUpdateOkay)
-						return false;
+    public void Clear()
+    {
+        lock (locker)
+        {
+            keyHolderMap = new ConditionalWeakTable<TKey, WeakKeyHolder>();
+            valueMap.Clear();
+        }
+    }
 
-					valueMap[weakKeyHolder.WeakRef] = val;
-					return true;
-				}
+    public bool Contains(KeyValuePair<TKey, TValue> item)
+    {
+        object curVal = null;
 
-				weakKeyHolder = new WeakKeyHolder(this, key);
-				keyHolderMap.Add(key, weakKeyHolder);
+        lock (locker)
+        {
+            if (!keyHolderMap.TryGetValue(item.Key, out var weakKeyHolder))
+                return false;
 
-				valueMap.Add(weakKeyHolder.WeakRef, val);
+            curVal = weakKeyHolder.WeakRef.Target;
+        }
 
-				return true;
-			}
-		}
+        return curVal?.Equals(item.Value) == true;
+    }
 
-		public ICollection<TKey> Keys
-		{
-			get
-			{
-				lock (locker)
-				{
-					ManualShrink();
-					return valueMap.Keys.Select(k => (TKey)k.Target).ToList();
-				}
-			}
-		}
+    public bool ContainsKey(TKey key)
+    {
+        lock (locker)
+        {
+            return keyHolderMap.TryGetValue(key, out var weakKeyHolder);
+        }
+    }
 
-		public ICollection<TValue> Values
-		{
-			get
-			{
-				lock (locker)
-				{
-					ManualShrink();
-					return valueMap.Select(p => p.Value).ToList();
-				}
-			}
-		}
+    public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+    {
+        ((IDictionary<TKey, TValue>)CurrentDictionary).CopyTo(array, arrayIndex);
+    }
 
-		public int Count
-		{
-			get
-			{
-				lock (locker)
-				{
-					ManualShrink();
-					return valueMap.Count;
-				}
-			}
-		}
+    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+    {
+        return CurrentDictionary.GetEnumerator();
+    }
 
-		public bool IsReadOnly => false;
+    public bool Remove(TKey key)
+    {
+        lock (locker)
+        {
+            if (!keyHolderMap.TryGetValue(key, out var weakKeyHolder))
+                return false;
 
-		public void Add(TKey key, TValue value)
-		{
-			if (!Set(key, value, isUpdateOkay: false))
-				throw new ArgumentException("Key already exists");
-		}
+            keyHolderMap.Remove(key);
+            valueMap.Remove(weakKeyHolder.WeakRef);
 
-		public void Add(KeyValuePair<TKey, TValue> item)
-		{
-			Add(item.Key, item.Value);
-		}
+            return true;
+        }
+    }
 
-		public void Clear()
-		{
-			lock (locker)
-			{
-				keyHolderMap = new ConditionalWeakTable<TKey, WeakKeyHolder>();
-				valueMap.Clear();
-			}
-		}
+    public bool Remove(KeyValuePair<TKey, TValue> item)
+    {
+        lock (locker)
+        {
+            if (!keyHolderMap.TryGetValue(item.Key, out var weakKeyHolder))
+                return false;
 
-		public bool Contains(KeyValuePair<TKey, TValue> item)
-		{
-			object curVal = null;
+            if (weakKeyHolder.WeakRef.Target?.Equals(item.Value) != true)
+                return false;
 
-			lock (locker)
-			{
-				if (!keyHolderMap.TryGetValue(item.Key, out WeakKeyHolder weakKeyHolder))
-					return false;
+            keyHolderMap.Remove(item.Key);
+            valueMap.Remove(weakKeyHolder.WeakRef);
 
-				curVal = weakKeyHolder.WeakRef.Target;
-			}
+            return true;
+        }
+    }
 
-			return curVal?.Equals(item.Value) == true;
-		}
+    public bool TryGetValue(TKey key, out TValue value)
+    {
+        lock (locker)
+        {
+            if (!keyHolderMap.TryGetValue(key, out var weakKeyHolder))
+            {
+                value = default;
+                return false;
+            }
 
-		public bool ContainsKey(TKey key)
-		{
-			lock (locker)
-			{
-				return keyHolderMap.TryGetValue(key, out var weakKeyHolder);
-			}
-		}
+            value = valueMap[weakKeyHolder.WeakRef];
+            return true;
+        }
+    }
 
-		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-		{
-			((IDictionary<TKey, TValue>)CurrentDictionary).CopyTo(array, arrayIndex);
-		}
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 
-		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-		{
-			return CurrentDictionary.GetEnumerator();
-		}
+    /// <summary>
+    ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+    }
 
-		public bool Remove(TKey key)
-		{
-			lock (locker)
-			{
-				if (!keyHolderMap.TryGetValue(key, out var weakKeyHolder))
-					return false;
+    private void OnKeyDrop(WeakReference weakKeyRef)
+    {
+        lock (locker)
+        {
+            if (!bAlive)
+                return;
 
-				keyHolderMap.Remove(key);
-				valueMap.Remove(weakKeyHolder.WeakRef);
+            valueMap.Remove(weakKeyRef);
+        }
+    }
 
-				return true;
-			}
-		}
+    public void ManualShrink()
+    {
+        foreach (var key in valueMap.Keys.Where(k => !k.IsAlive).ToList())
+            valueMap.Remove(key);
+    }
 
-		public bool Remove(KeyValuePair<TKey, TValue> item)
-		{
-			lock (locker)
-			{
-				if (!keyHolderMap.TryGetValue(item.Key, out var weakKeyHolder))
-					return false;
+    private bool Set(TKey key, TValue val, bool isUpdateOkay)
+    {
+        lock (locker)
+        {
+            if (keyHolderMap.TryGetValue(key, out var weakKeyHolder))
+            {
+                if (!isUpdateOkay)
+                    return false;
 
-				if (weakKeyHolder.WeakRef.Target?.Equals(item.Value) != true)
-					return false;
+                valueMap[weakKeyHolder.WeakRef] = val;
+                return true;
+            }
 
-				keyHolderMap.Remove(item.Key);
-				valueMap.Remove(weakKeyHolder.WeakRef);
+            weakKeyHolder = new WeakKeyHolder(this, key);
+            keyHolderMap.Add(key, weakKeyHolder);
 
-				return true;
-			}
-		}
+            valueMap.Add(weakKeyHolder.WeakRef, val);
 
-		public bool TryGetValue(TKey key, out TValue value)
-		{
-			lock (locker)
-			{
-				if (!keyHolderMap.TryGetValue(key, out var weakKeyHolder))
-				{
-					value = default;
-					return false;
-				}
+            return true;
+        }
+    }
 
-				value = valueMap[weakKeyHolder.WeakRef];
-				return true;
-			}
-		}
+    protected void Dispose(bool bManual)
+    {
+        if (bManual)
+        {
+            Monitor.Enter(locker);
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+            if (!bAlive)
+                return;
+        }
 
-		private bool bAlive = true;
+        try
+        {
+            keyHolderMap = null;
+            valueMap = null;
+            bAlive = false;
+        }
+        finally
+        {
+            if (bManual)
+                Monitor.Exit(locker);
+        }
+    }
 
-		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		/// </summary>
-		public void Dispose() => Dispose(true);
+    ~WeakDictionary()
+    {
+        Dispose(false);
+    }
 
-		protected void Dispose(bool bManual)
-		{
-			if (bManual)
-			{
-				Monitor.Enter(locker);
+    private class WeakKeyHolder
+    {
+        private readonly WeakDictionary<TKey, TValue> outer;
 
-				if (!bAlive)
-					return;
-			}
+        public WeakKeyHolder(WeakDictionary<TKey, TValue> outer, TKey key)
+        {
+            this.outer = outer;
+            WeakRef = new WeakReference(key);
+        }
 
-			try
-			{
-				keyHolderMap = null;
-				valueMap = null;
-				bAlive = false;
-			}
-			finally
-			{
-				if (bManual)
-					Monitor.Exit(locker);
-			}
-		}
+        public WeakReference WeakRef { get; }
 
-		~WeakDictionary()
-		{
-			Dispose(false);
-		}
-	}
+        ~WeakKeyHolder()
+        {
+            outer?.OnKeyDrop(
+                WeakRef); // Nullable operator used just in case this.outer gets set to null by GC before this finalizer runs. But I haven't had this happen.
+        }
+    }
+}
 
-	internal class ObjectReferenceEqualityComparer<T> : IEqualityComparer<T>
-	{
-		public static ObjectReferenceEqualityComparer<T> Default = new();
+internal class ObjectReferenceEqualityComparer<T> : IEqualityComparer<T>
+{
+    public static ObjectReferenceEqualityComparer<T> Default = new();
 
-		public bool Equals(T x, T y)
-		{
-			return ReferenceEquals(x, y);
-		}
+    public bool Equals(T x, T y)
+    {
+        return ReferenceEquals(x, y);
+    }
 
-		public int GetHashCode(T obj)
-		{
-			return RuntimeHelpers.GetHashCode(obj);
-		}
-	}
+    public int GetHashCode(T obj)
+    {
+        return RuntimeHelpers.GetHashCode(obj);
+    }
 }

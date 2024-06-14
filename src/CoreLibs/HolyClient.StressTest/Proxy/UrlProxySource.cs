@@ -2,68 +2,62 @@
 using MessagePack;
 using QuickProxyNet;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+[MessagePackObject(true)]
+public class UrlProxySource : IProxySource
 {
-	[MessagePackObject(keyAsPropertyName: true)]
-	public class UrlProxySource : IProxySource
-	{
-		public Guid Id { get; set; } = Guid.NewGuid();
-		public ProxyType Type { get; set; }
-		public string Url { get; set; }
+    public UrlProxySource()
+    {
+    }
 
-		[IgnoreMember]
-		public string Name => this.Url;
+    public UrlProxySource(ProxyType type, string url)
+    {
+        Type = type;
+        Url = url;
+    }
 
-		public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
-		{
-			List<ProxyInfo> proxies = new();
-			try
-			{
-				using HttpClient httpClient = new HttpClient();
+    public string Url { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public ProxyType Type { get; set; }
 
-				for (int i = 0; i < 3; i++)
-				{
-					Stream? stream = null;
-					try
-					{
-						stream = await httpClient.GetStreamAsync(Url);
-					}
-					catch
-					{
-						continue;
-					}
+    [IgnoreMember] public string Name => Url;
 
-					using (StreamReader sr = new StreamReader(stream))
-					{
-						while (!sr.EndOfStream)
-						{
-							var line = await sr.ReadLineAsync();
-							if (ProxyInfo.TryParse(line.Trim(), this.Type, out var proxy))
-							{
+    public async Task<IEnumerable<ProxyInfo>> GetProxiesAsync()
+    {
+        List<ProxyInfo> proxies = new();
+        try
+        {
+            using var httpClient = new HttpClient();
 
-								proxies.Add(proxy);
-							}
-						}
-					}
-					break;
+            for (var i = 0; i < 3; i++)
+            {
+                Stream? stream = null;
+                try
+                {
+                    stream = await httpClient.GetStreamAsync(Url);
+                }
+                catch
+                {
+                    continue;
+                }
 
-				}
-			}
-			catch
-			{
+                using (var sr = new StreamReader(stream))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        var line = await sr.ReadLineAsync();
+                        if (ProxyInfo.TryParse(line.Trim(), Type, out var proxy)) proxies.Add(proxy);
+                    }
+                }
 
-			}
-			return proxies;
-		}
-		public UrlProxySource()
-		{
+                break;
+            }
+        }
+        catch
+        {
+        }
 
-		}
-		public UrlProxySource(ProxyType type, string url)
-		{
-			Type = type;
-			Url = url;
-		}
-	}
-
+        return proxies;
+    }
 }

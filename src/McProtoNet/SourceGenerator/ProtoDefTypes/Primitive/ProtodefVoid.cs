@@ -1,12 +1,9 @@
-﻿namespace SourceGenerator.ProtoDefTypes
+﻿namespace SourceGenerator.ProtoDefTypes;
+
+public sealed class ProtodefVoid : ProtodefType
 {
-	public sealed class ProtodefVoid : ProtodefType
-	{
-		public override string ToString()
-		{
-			return "void";
-		}		
-	}
-
-
+    public override string ToString()
+    {
+        return "void";
+    }
 }

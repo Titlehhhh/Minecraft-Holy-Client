@@ -1,7 +1,5 @@
-﻿namespace HolyClient.Services
-{
-	public class Class1
-	{
+﻿namespace HolyClient.Services;
 
-	}
+public class Class1
+{
 }

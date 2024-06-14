@@ -1,62 +1,54 @@
-﻿using BenchmarkDotNet.Attributes;
-using McProtoNet.Core.Protocol;
-using System;
+﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
+using BenchmarkDotNet.Attributes;
 
+namespace McProtoNet.Benchmark;
 
-
-namespace McProtoNet.Benchmark
+[MemoryDiagnoser()]
+public class OldReadBenchmarks
 {
-	[MemoryDiagnoser(true)]
-	public class OldReadBenchmarks
-	{
-		[Params(0, 256)]
-		public int CompressionThreshold { get; set; }
+    private MemoryStream ms;
 
-		[Params(64, 512)]
-		public int PacketSize { get; set; }
+    private MinecraftPacketReader reader;
 
-		[Params(1, 1_000_000)]
-		public int Count { get; set; }
+    [Params(0, 256)] public int CompressionThreshold { get; set; }
 
-		private MinecraftPacketReader reader;
-		private MemoryStream ms;
+    [Params(64, 512)] public int PacketSize { get; set; }
 
-		//private Packet packet;
+    [Params(1, 1_000_000)] public int Count { get; set; }
 
-		[GlobalSetup]
-		public void Setup()
-		{
-			reader = new();
-			ms = new(1024);
+    //private Packet packet;
 
-			byte[] data = new byte[PacketSize];
+    [GlobalSetup]
+    public void Setup()
+    {
+        reader = new();
+        ms = new MemoryStream(1024);
 
-			Random.Shared.NextBytes(data);
+        var data = new byte[PacketSize];
 
-			var packet = new Packet(3, new MemoryStream(data));
+        Random.Shared.NextBytes(data);
 
-			var sender = new MinecraftPacketSender(ms);
-			sender.SwitchCompression(CompressionThreshold);
-			ms.Position = 0;
-			sender.SendPacketAsync(packet).GetAwaiter().GetResult();
-		}
+        var packet = new Packet(3, new MemoryStream(data));
 
-		[Benchmark]
-		public async ValueTask OldRead()
-		{
-			reader.BaseStream = ms;
-			reader.SwitchCompression(CompressionThreshold);
-			for (int i = 0; i < Count; i++)
-			{
-				ms.Position = 0;
-				var packet = await reader.ReadNextPacketAsync();
+        var sender = new MinecraftPacketSender(ms);
+        sender.SwitchCompression(CompressionThreshold);
+        ms.Position = 0;
+        sender.SendPacketAsync(packet).GetAwaiter().GetResult();
+    }
 
-				packet.Dispose();
-			}
-		}
-	}
+    [Benchmark]
+    public async ValueTask OldRead()
+    {
+        reader.BaseStream = ms;
+        reader.SwitchCompression(CompressionThreshold);
+        for (var i = 0; i < Count; i++)
+        {
+            ms.Position = 0;
+            var packet = await reader.ReadNextPacketAsync();
 
+            packet.Dispose();
+        }
+    }
 }
