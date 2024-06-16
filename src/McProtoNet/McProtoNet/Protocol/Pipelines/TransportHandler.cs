@@ -31,40 +31,35 @@ internal sealed class TransportHandler : Disposable
 
     private async Task StartReceiveAsync(CancellationToken cancellationToken)
     {
-        try
+        var stream = BaseStream;
+        var output = duplexPipe.Output;
+
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var stream = BaseStream;
-            var output = duplexPipe.Output;
+            try
+            {
+                var memory = output.GetMemory(4096);
+                var bytes = await stream.ReadAsync(memory, cancellationToken);
+                output.Advance(bytes);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Complete 1");
+                await output.CompleteAsync(ex);
+                break;
+            }
 
-            while (!cancellationToken.IsCancellationRequested)
-                try
-                {
-                    var memory = output.GetMemory(4096);
-                    var bytes = await stream.ReadAsync(memory, cancellationToken);
-                    output.Advance(bytes);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Complete 1");
-                    await output.CompleteAsync(ex);
-                    break;
-                }
+            var result = await output.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-                var result = await output.FlushAsync(cancellationToken).ConfigureAwait(false);
+            if (result.IsCanceled)
+                break;
 
-                if (result.IsCanceled)
-                    break;
-
-                if (result.IsCompleted)
-                    break;
-        }
-        finally
-        {
-            Debug.WriteLine("TransportHandler stop receive");
+            if (result.IsCompleted)
+                break;
         }
     }
 

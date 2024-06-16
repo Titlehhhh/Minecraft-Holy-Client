@@ -172,10 +172,26 @@ public ref struct MinecraftPrimitiveWriterSlim
         }
     }
 
-
-    public void WriteNbt(NbtCompound value)
+    public void WriteOptionalNbt(NbtTag? value)
     {
-        throw new InvalidOperationException();
+        if (value is null)
+        {
+            WriteBoolean(false);
+        }
+        else
+        {
+            WriteBoolean(true);
+            WriteNbt(value);
+        }
+    }
+    public void WriteNbt(NbtTag value)
+    {
+        MemoryStream ms = new MemoryStream();
+        NbtWriter nbtWriter = new NbtWriter(ms, "");
+
+        nbtWriter.WriteTag(value);
+
+        this.WriteBuffer(ms.ToArray());
     }
 
     public void Clear(bool reuseBuffer = false)
@@ -189,4 +205,6 @@ public ref struct MinecraftPrimitiveWriterSlim
             throw new InvalidOperationException("Don't detach buffer");
         return result;
     }
+
+    
 }

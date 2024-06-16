@@ -1,6 +1,8 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Text;
 using McProtoNet.NBT;
+using DotNext.IO;
 
 namespace McProtoNet.Serialization;
 
@@ -161,35 +163,70 @@ public ref struct MinecraftPrimitiveReaderSlim
 
     public string ReadString()
     {
-        //TODO
-        throw new NotImplementedException();
+        int len = ReadVarInt();
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(len);
+        try
+        {
+            return Encoding.UTF8.GetString(buffer);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 
-    public Guid ReadUUID()
+    public unsafe Guid ReadUUID()
     {
-        //TODO
-        throw new NotImplementedException();
+        long x = ReadSignedLong();
+        long y = ReadSignedLong();
+
+        long* ptr = stackalloc long[2];
+        ptr[0] = x;
+        ptr[1] = y;
+        return *(Guid*)ptr;
     }
 
     public byte[] ReadRestBuffer()
     {
-        //TODO
-        throw new NotImplementedException();
+        return this.reader.UnreadSequence.ToArray();
     }
 
     public byte[] ReadBuffer(int length)
     {
-        //TODO
-        throw new NotImplementedException();
+        if (length > reader.Remaining)
+        {
+            throw new ArgumentOutOfRangeException(nameof(length), "the buffer is less than the requested length");
+        }
+
+        this.reader.TryReadExact(length, out var result);
+
+        return result.ToArray();
     }
 
     public NbtTag? ReadOptionalNbt()
     {
-        throw new NotImplementedException();
+        if (ReadBoolean())
+        {
+            return ReadNbt();
+        }
+
+        return null;
+
     }
 
     public NbtTag ReadNbt()
     {
-        throw new NotImplementedException();
+        using (MemoryStream ms = new MemoryStream())
+        {
+            ms.Write(reader.UnreadSequence.ToArray());
+            ms.Position = 0;
+
+            NbtReader nbtReader = new NbtReader(ms);
+
+            NbtTag result = nbtReader.ReadAsTag();
+
+            reader.Advance(ms.Position);
+            return result;
+        }
     }
 }

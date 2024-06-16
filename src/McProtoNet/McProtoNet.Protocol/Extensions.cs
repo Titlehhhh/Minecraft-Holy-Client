@@ -36,17 +36,34 @@ public static class Extensions
 
     public static void WritePosition(this MinecraftPrimitiveWriterSlim writer, Position position)
     {
-        //TODO
+        var bytes = (((ulong)position.X & 0x3FFFFFF) << 38) |
+                    (((ulong)position.Z & 0x3FFFFFF) << 12) |
+                    ((ulong)position.Y & 0xFFF);
+
+
+        writer.WriteUnsignedLong(bytes);
     }
 
     public static void WriteSlot(this MinecraftPrimitiveWriterSlim writer, Slot? slot)
     {
-        //Todo
+        if (slot is null)
+        {
+            writer.WriteBoolean(false);
+        }
+        else
+        {
+            writer.WriteBoolean(true);
+            writer.WriteVarInt(slot.ItemId);
+            writer.WriteSignedByte(slot.ItemCount);
+            writer.WriteOptionalNbt(slot.Nbt);
+        }
     }
 
     public static Slot? ReadSlot(this MinecraftPrimitiveReaderSlim reader)
     {
-        //TODO
-        throw new NotImplementedException();
+        if (reader.ReadBoolean())
+            return new Slot(reader.ReadVarInt(), reader.ReadSignedByte(), reader.ReadOptionalNbt());
+
+        return null;
     }
 }
