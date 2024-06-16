@@ -1,5 +1,6 @@
 using System.Reactive.Subjects;
 using McProtoNet.Abstractions;
+using McProtoNet.NBT;
 using McProtoNet.Protocol;
 using McProtoNet.Serialization;
 
@@ -46,6 +47,7 @@ public sealed class Protocol_760 : ProtocolBase
     private readonly Subject<PacketMessageHeader> _onmessage_header = new();
     private readonly Subject<PacketNamedEntitySpawn> _onnamed_entity_spawn = new();
     private readonly Subject<PacketNamedSoundEffect> _onnamed_sound_effect = new();
+    private readonly Subject<PacketNbtQueryResponse> _onnbt_query_response = new();
     private readonly Subject<PacketOpenBook> _onopen_book = new();
     private readonly Subject<PacketOpenHorseWindow> _onopen_horse_window = new();
     private readonly Subject<PacketOpenSignEntity> _onopen_sign_entity = new();
@@ -68,11 +70,11 @@ public sealed class Protocol_760 : ProtocolBase
     private readonly Subject<PacketShouldDisplayChatPreview> _onshould_display_chat_preview = new();
     private readonly Subject<PacketSimulationDistance> _onsimulation_distance = new();
     private readonly Subject<PacketSoundEffect> _onsound_effect = new();
-
     private readonly Subject<PacketSpawnEntity> _onspawn_entity = new();
     private readonly Subject<PacketSpawnEntityExperienceOrb> _onspawn_entity_experience_orb = new();
     private readonly Subject<PacketSpawnPosition> _onspawn_position = new();
     private readonly Subject<PacketSystemChat> _onsystem_chat = new();
+    private readonly Subject<PacketTileEntityData> _ontile_entity_data = new();
     private readonly Subject<PacketUnloadChunk> _onunload_chunk = new();
     private readonly Subject<PacketUpdateHealth> _onupdate_health = new();
     private readonly Subject<PacketUpdateTime> _onupdate_time = new();
@@ -98,10 +100,12 @@ public sealed class Protocol_760 : ProtocolBase
     public IObservable<PacketNamedEntitySpawn> OnNamedEntitySpawnPacket => _onnamed_entity_spawn;
     public IObservable<PacketAnimation> OnAnimationPacket => _onanimation;
     public IObservable<PacketBlockBreakAnimation> OnBlockBreakAnimationPacket => _onblock_break_animation;
+    public IObservable<PacketTileEntityData> OnTileEntityDataPacket => _ontile_entity_data;
     public IObservable<PacketBlockAction> OnBlockActionPacket => _onblock_action;
     public IObservable<PacketBlockChange> OnBlockChangePacket => _onblock_change;
     public IObservable<PacketDifficulty> OnDifficultyPacket => _ondifficulty;
     public IObservable<PacketChatPreview> OnChatPreviewPacket => _onchat_preview;
+    public IObservable<PacketNbtQueryResponse> OnNbtQueryResponsePacket => _onnbt_query_response;
     public IObservable<PacketCloseWindow> OnCloseWindowPacket => _onclose_window;
     public IObservable<PacketOpenWindow> OnOpenWindowPacket => _onopen_window;
     public IObservable<PacketCraftProgressBar> OnCraftProgressBarPacket => _oncraft_progress_bar;
@@ -170,13 +174,8 @@ public sealed class Protocol_760 : ProtocolBase
     public IObservable<PacketWorldBorderCenter> OnWorldBorderCenterPacket => _onworld_border_center;
     public IObservable<PacketWorldBorderLerpSize> OnWorldBorderLerpSizePacket => _onworld_border_lerp_size;
     public IObservable<PacketWorldBorderSize> OnWorldBorderSizePacket => _onworld_border_size;
-
-    public IObservable<PacketWorldBorderWarningDelay> OnWorldBorderWarningDelayPacket =>
-        _onworld_border_warning_delay;
-
-    public IObservable<PacketWorldBorderWarningReach> OnWorldBorderWarningReachPacket =>
-        _onworld_border_warning_reach;
-
+    public IObservable<PacketWorldBorderWarningDelay> OnWorldBorderWarningDelayPacket => _onworld_border_warning_delay;
+    public IObservable<PacketWorldBorderWarningReach> OnWorldBorderWarningReachPacket => _onworld_border_warning_reach;
     public IObservable<PacketPing> OnPingPacket => _onping;
     public IObservable<PacketSetTitleSubtitle> OnSetTitleSubtitlePacket => _onset_title_subtitle;
     public IObservable<PacketSetTitleText> OnSetTitleTextPacket => _onset_title_text;
@@ -631,8 +630,8 @@ public sealed class Protocol_760 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY,
-        float cursorZ, bool insideBlock, int sequence)
+    public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY, float cursorZ,
+        bool insideBlock, int sequence)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x31);
@@ -699,8 +698,7 @@ public sealed class Protocol_760 : ProtocolBase
                     var y = reader.ReadDouble();
                     var z = reader.ReadDouble();
                     var count = reader.ReadSignedShort();
-                    _onspawn_entity_experience_orb.OnNext(
-                        new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
+                    _onspawn_entity_experience_orb.OnNext(new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
                 }
 
                 break;
@@ -715,8 +713,7 @@ public sealed class Protocol_760 : ProtocolBase
                     var z = reader.ReadDouble();
                     var yaw = reader.ReadSignedByte();
                     var pitch = reader.ReadSignedByte();
-                    _onnamed_entity_spawn.OnNext(new PacketNamedEntitySpawn(entityId, playerUUID, x, y, z, yaw,
-                        pitch));
+                    _onnamed_entity_spawn.OnNext(new PacketNamedEntitySpawn(entityId, playerUUID, x, y, z, yaw, pitch));
                 }
 
                 break;
@@ -737,8 +734,18 @@ public sealed class Protocol_760 : ProtocolBase
                     var entityId = reader.ReadVarInt();
                     var location = reader.ReadPosition();
                     var destroyStage = reader.ReadSignedByte();
-                    _onblock_break_animation.OnNext(new PacketBlockBreakAnimation(entityId, location,
-                        destroyStage));
+                    _onblock_break_animation.OnNext(new PacketBlockBreakAnimation(entityId, location, destroyStage));
+                }
+
+                break;
+            case 0x07:
+                if (_ontile_entity_data.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var location = reader.ReadPosition();
+                    var action = reader.ReadVarInt();
+                    var nbtData = reader.ReadOptionalNbt();
+                    _ontile_entity_data.OnNext(new PacketTileEntityData(location, action, nbtData));
                 }
 
                 break;
@@ -781,8 +788,17 @@ public sealed class Protocol_760 : ProtocolBase
                     var queryId = reader.ReadSignedInt();
                     string? message = null;
                     if (reader.ReadBoolean()) message = reader.ReadString();
-
                     _onchat_preview.OnNext(new PacketChatPreview(queryId, message));
+                }
+
+                break;
+            case 0x64:
+                if (_onnbt_query_response.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var transactionId = reader.ReadVarInt();
+                    var nbt = reader.ReadOptionalNbt();
+                    _onnbt_query_response.OnNext(new PacketNbtQueryResponse(transactionId, nbt));
                 }
 
                 break;
@@ -879,8 +895,8 @@ public sealed class Protocol_760 : ProtocolBase
                     var volume = reader.ReadFloat();
                     var pitch = reader.ReadFloat();
                     var seed = reader.ReadSignedLong();
-                    _onnamed_sound_effect.OnNext(new PacketNamedSoundEffect(soundName, soundCategory, x, y, z,
-                        volume, pitch, seed));
+                    _onnamed_sound_effect.OnNext(new PacketNamedSoundEffect(soundName, soundCategory, x, y, z, volume,
+                        pitch, seed));
                 }
 
                 break;
@@ -989,8 +1005,7 @@ public sealed class Protocol_760 : ProtocolBase
                     var yaw = reader.ReadSignedByte();
                     var pitch = reader.ReadSignedByte();
                     var onGround = reader.ReadBoolean();
-                    _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch,
-                        onGround));
+                    _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch, onGround));
                 }
 
                 break;
@@ -1139,7 +1154,6 @@ public sealed class Protocol_760 : ProtocolBase
                     var forced = reader.ReadBoolean();
                     string? promptMessage = null;
                     if (reader.ReadBoolean()) promptMessage = reader.ReadString();
-
                     _onresource_pack_send.OnNext(new PacketResourcePackSend(url, hash, forced, promptMessage));
                 }
 
@@ -1196,8 +1210,7 @@ public sealed class Protocol_760 : ProtocolBase
                 {
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     var shouldDisplayChatPreview = reader.ReadBoolean();
-                    _onshould_display_chat_preview.OnNext(
-                        new PacketShouldDisplayChatPreview(shouldDisplayChatPreview));
+                    _onshould_display_chat_preview.OnNext(new PacketShouldDisplayChatPreview(shouldDisplayChatPreview));
                 }
 
                 break;
@@ -1303,8 +1316,8 @@ public sealed class Protocol_760 : ProtocolBase
                     var volume = reader.ReadFloat();
                     var pitch = reader.ReadFloat();
                     var seed = reader.ReadSignedLong();
-                    _onentity_sound_effect.OnNext(new PacketEntitySoundEffect(soundId, soundCategory, entityId,
-                        volume, pitch, seed));
+                    _onentity_sound_effect.OnNext(new PacketEntitySoundEffect(soundId, soundCategory, entityId, volume,
+                        pitch, seed));
                 }
 
                 break;
@@ -1320,8 +1333,7 @@ public sealed class Protocol_760 : ProtocolBase
                     var volume = reader.ReadFloat();
                     var pitch = reader.ReadFloat();
                     var seed = reader.ReadSignedLong();
-                    _onsound_effect.OnNext(new PacketSoundEffect(soundId, soundCategory, x, y, z, volume, pitch,
-                        seed));
+                    _onsound_effect.OnNext(new PacketSoundEffect(soundId, soundCategory, x, y, z, volume, pitch, seed));
                 }
 
                 break;
@@ -1377,7 +1389,6 @@ public sealed class Protocol_760 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     string? id = null;
                     if (reader.ReadBoolean()) id = reader.ReadString();
-
                     _onselect_advancement_tab.OnNext(new PacketSelectAdvancementTab(id));
                 }
 
@@ -1388,10 +1399,8 @@ public sealed class Protocol_760 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     string? motd = null;
                     if (reader.ReadBoolean()) motd = reader.ReadString();
-
                     string? icon = null;
                     if (reader.ReadBoolean()) icon = reader.ReadString();
-
                     var previewsChat = reader.ReadBoolean();
                     var enforcesSecureChat = reader.ReadBoolean();
                     _onserver_data.OnNext(new PacketServerData(motd, icon, previewsChat, enforcesSecureChat));
@@ -1428,8 +1437,8 @@ public sealed class Protocol_760 : ProtocolBase
                     var portalTeleportBoundary = reader.ReadVarInt();
                     var warningBlocks = reader.ReadVarInt();
                     var warningTime = reader.ReadVarInt();
-                    _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter,
-                        newDiameter, speed, portalTeleportBoundary, warningBlocks, warningTime));
+                    _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter, newDiameter,
+                        speed, portalTeleportBoundary, warningBlocks, warningTime));
                 }
 
                 break;
@@ -1459,8 +1468,7 @@ public sealed class Protocol_760 : ProtocolBase
                     var oldDiameter = reader.ReadDouble();
                     var newDiameter = reader.ReadDouble();
                     var speed = reader.ReadVarInt();
-                    _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter,
-                        speed));
+                    _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter, speed));
                 }
 
                 break;
@@ -1618,8 +1626,7 @@ public class PacketSpawnEntityExperienceOrb
 
 public class PacketNamedEntitySpawn
 {
-    public PacketNamedEntitySpawn(int entityId, Guid playerUUID, double x, double y, double z, sbyte yaw,
-        sbyte pitch)
+    public PacketNamedEntitySpawn(int entityId, Guid playerUUID, double x, double y, double z, sbyte yaw, sbyte pitch)
     {
         EntityId = entityId;
         PlayerUUID = playerUUID;
@@ -1663,6 +1670,20 @@ public class PacketBlockBreakAnimation
     public int EntityId { get; internal set; }
     public Position Location { get; internal set; }
     public sbyte DestroyStage { get; internal set; }
+}
+
+public class PacketTileEntityData
+{
+    public PacketTileEntityData(Position location, int action, NbtTag? nbtData)
+    {
+        Location = location;
+        Action = action;
+        NbtData = nbtData;
+    }
+
+    public Position Location { get; internal set; }
+    public int Action { get; internal set; }
+    public NbtTag? NbtData { get; internal set; }
 }
 
 public class PacketBlockAction
@@ -1715,6 +1736,18 @@ public class PacketChatPreview
 
     public int QueryId { get; internal set; }
     public string? Message { get; internal set; }
+}
+
+public class PacketNbtQueryResponse
+{
+    public PacketNbtQueryResponse(int transactionId, NbtTag? nbt)
+    {
+        TransactionId = transactionId;
+        Nbt = nbt;
+    }
+
+    public int TransactionId { get; internal set; }
+    public NbtTag? Nbt { get; internal set; }
 }
 
 public class PacketCloseWindow
@@ -1809,8 +1842,8 @@ public class PacketCustomPayload
 
 public class PacketNamedSoundEffect
 {
-    public PacketNamedSoundEffect(string soundName, int soundCategory, int x, int y, int z, float volume,
-        float pitch, long seed)
+    public PacketNamedSoundEffect(string soundName, int soundCategory, int x, int y, int z, float volume, float pitch,
+        long seed)
     {
         SoundName = soundName;
         SoundCategory = soundCategory;
@@ -2311,8 +2344,7 @@ public class PacketUpdateTime
 
 public class PacketEntitySoundEffect
 {
-    public PacketEntitySoundEffect(int soundId, int soundCategory, int entityId, float volume, float pitch,
-        long seed)
+    public PacketEntitySoundEffect(int soundId, int soundCategory, int entityId, float volume, float pitch, long seed)
     {
         SoundId = soundId;
         SoundCategory = soundCategory;
@@ -2332,8 +2364,7 @@ public class PacketEntitySoundEffect
 
 public class PacketSoundEffect
 {
-    public PacketSoundEffect(int soundId, int soundCategory, int x, int y, int z, float volume, float pitch,
-        long seed)
+    public PacketSoundEffect(int soundId, int soundCategory, int x, int y, int z, float volume, float pitch, long seed)
     {
         SoundId = soundId;
         SoundCategory = soundCategory;

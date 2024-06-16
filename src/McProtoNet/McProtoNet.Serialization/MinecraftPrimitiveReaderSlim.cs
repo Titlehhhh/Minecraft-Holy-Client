@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using McProtoNet.NBT;
 
 namespace McProtoNet.Serialization;
 
@@ -179,6 +180,16 @@ public ref struct MinecraftPrimitiveReaderSlim
     public byte[] ReadBuffer(int length)
     {
         //TODO
+        throw new NotImplementedException();
+    }
+
+    public NbtTag? ReadOptionalNbt()
+    {
+        throw new NotImplementedException();
+    }
+
+    public NbtTag ReadNbt()
+    {
         throw new NotImplementedException();
     }
 }

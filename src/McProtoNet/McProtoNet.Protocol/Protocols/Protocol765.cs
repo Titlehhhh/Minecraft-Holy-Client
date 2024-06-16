@@ -1,5 +1,6 @@
 using System.Reactive.Subjects;
 using McProtoNet.Abstractions;
+using McProtoNet.NBT;
 using McProtoNet.Protocol;
 using McProtoNet.Serialization;
 
@@ -9,6 +10,7 @@ public sealed class Protocol_765 : ProtocolBase
 {
     private readonly Subject<PacketAbilities> _onabilities = new();
     private readonly Subject<PacketAcknowledgePlayerDigging> _onacknowledge_player_digging = new();
+    private readonly Subject<PacketActionBar> _onaction_bar = new();
     private readonly Subject<PacketAnimation> _onanimation = new();
     private readonly Subject<PacketAttachEntity> _onattach_entity = new();
     private readonly Subject<PacketBlockAction> _onblock_action = new();
@@ -24,6 +26,7 @@ public sealed class Protocol_765 : ProtocolBase
     private readonly Subject<PacketCraftProgressBar> _oncraft_progress_bar = new();
     private readonly Subject<PacketCraftRecipeResponse> _oncraft_recipe_response = new();
     private readonly Subject<PacketCustomPayload> _oncustom_payload = new();
+    private readonly Subject<PacketDeathCombatEvent> _ondeath_combat_event = new();
     private readonly Subject<PacketDifficulty> _ondifficulty = new();
     private readonly Subject<PacketEndCombatEvent> _onend_combat_event = new();
     private readonly Subject<PacketEnterCombatEvent> _onenter_combat_event = new();
@@ -40,29 +43,37 @@ public sealed class Protocol_765 : ProtocolBase
     private readonly Subject<PacketHurtAnimation> _onhurt_animation = new();
     private readonly Subject<PacketInitializeWorldBorder> _oninitialize_world_border = new();
     private readonly Subject<PacketKeepAlive> _onkeep_alive = new();
+    private readonly Subject<PacketKickDisconnect> _onkick_disconnect = new();
+    private readonly Subject<PacketNbtQueryResponse> _onnbt_query_response = new();
     private readonly Subject<PacketOpenBook> _onopen_book = new();
     private readonly Subject<PacketOpenHorseWindow> _onopen_horse_window = new();
     private readonly Subject<PacketOpenSignEntity> _onopen_sign_entity = new();
+    private readonly Subject<PacketOpenWindow> _onopen_window = new();
     private readonly Subject<PacketPing> _onping = new();
     private readonly Subject<PacketPingResponse> _onping_response = new();
+    private readonly Subject<PacketPlayerlistHeader> _onplayerlist_header = new();
     private readonly Subject<PacketPosition> _onposition = new();
     private readonly Subject<PacketRelEntityMove> _onrel_entity_move = new();
     private readonly Subject<PacketRemoveEntityEffect> _onremove_entity_effect = new();
     private readonly Subject<PacketResetScore> _onreset_score = new();
     private readonly Subject<PacketScoreboardDisplayObjective> _onscoreboard_display_objective = new();
     private readonly Subject<PacketSelectAdvancementTab> _onselect_advancement_tab = new();
+    private readonly Subject<PacketServerData> _onserver_data = new();
     private readonly Subject<PacketSetCooldown> _onset_cooldown = new();
     private readonly Subject<PacketSetPassengers> _onset_passengers = new();
     private readonly Subject<PacketSetSlot> _onset_slot = new();
     private readonly Subject<PacketSetTickingState> _onset_ticking_state = new();
+    private readonly Subject<PacketSetTitleSubtitle> _onset_title_subtitle = new();
+    private readonly Subject<PacketSetTitleText> _onset_title_text = new();
     private readonly Subject<PacketSetTitleTime> _onset_title_time = new();
     private readonly Subject<PacketSimulationDistance> _onsimulation_distance = new();
-
     private readonly Subject<PacketSpawnEntity> _onspawn_entity = new();
     private readonly Subject<PacketSpawnEntityExperienceOrb> _onspawn_entity_experience_orb = new();
     private readonly Subject<PacketSpawnPosition> _onspawn_position = new();
     private readonly Subject<PacketStartConfiguration> _onstart_configuration = new();
     private readonly Subject<PacketStepTick> _onstep_tick = new();
+    private readonly Subject<PacketSystemChat> _onsystem_chat = new();
+    private readonly Subject<PacketTileEntityData> _ontile_entity_data = new();
     private readonly Subject<PacketUnloadChunk> _onunload_chunk = new();
     private readonly Subject<PacketUpdateHealth> _onupdate_health = new();
     private readonly Subject<PacketUpdateTime> _onupdate_time = new();
@@ -87,17 +98,21 @@ public sealed class Protocol_765 : ProtocolBase
 
     public IObservable<PacketAnimation> OnAnimationPacket => _onanimation;
     public IObservable<PacketBlockBreakAnimation> OnBlockBreakAnimationPacket => _onblock_break_animation;
+    public IObservable<PacketTileEntityData> OnTileEntityDataPacket => _ontile_entity_data;
     public IObservable<PacketBlockAction> OnBlockActionPacket => _onblock_action;
     public IObservable<PacketBlockChange> OnBlockChangePacket => _onblock_change;
     public IObservable<PacketDifficulty> OnDifficultyPacket => _ondifficulty;
     public IObservable<PacketChunkBatchFinished> OnChunkBatchFinishedPacket => _onchunk_batch_finished;
     public IObservable<PacketChunkBatchStart> OnChunkBatchStartPacket => _onchunk_batch_start;
+    public IObservable<PacketNbtQueryResponse> OnNbtQueryResponsePacket => _onnbt_query_response;
     public IObservable<PacketCloseWindow> OnCloseWindowPacket => _onclose_window;
+    public IObservable<PacketOpenWindow> OnOpenWindowPacket => _onopen_window;
     public IObservable<PacketCraftProgressBar> OnCraftProgressBarPacket => _oncraft_progress_bar;
     public IObservable<PacketSetSlot> OnSetSlotPacket => _onset_slot;
     public IObservable<PacketSetCooldown> OnSetCooldownPacket => _onset_cooldown;
     public IObservable<PacketChatSuggestions> OnChatSuggestionsPacket => _onchat_suggestions;
     public IObservable<PacketCustomPayload> OnCustomPayloadPacket => _oncustom_payload;
+    public IObservable<PacketKickDisconnect> OnKickDisconnectPacket => _onkick_disconnect;
     public IObservable<PacketEntityStatus> OnEntityStatusPacket => _onentity_status;
     public IObservable<PacketUnloadChunk> OnUnloadChunkPacket => _onunload_chunk;
     public IObservable<PacketGameStateChange> OnGameStateChangePacket => _ongame_state_change;
@@ -114,6 +129,7 @@ public sealed class Protocol_765 : ProtocolBase
     public IObservable<PacketAbilities> OnAbilitiesPacket => _onabilities;
     public IObservable<PacketEndCombatEvent> OnEndCombatEventPacket => _onend_combat_event;
     public IObservable<PacketEnterCombatEvent> OnEnterCombatEventPacket => _onenter_combat_event;
+    public IObservable<PacketDeathCombatEvent> OnDeathCombatEventPacket => _ondeath_combat_event;
     public IObservable<PacketPosition> OnPositionPacket => _onposition;
     public IObservable<PacketEntityDestroy> OnEntityDestroyPacket => _onentity_destroy;
     public IObservable<PacketRemoveEntityEffect> OnRemoveEntityEffectPacket => _onremove_entity_effect;
@@ -134,27 +150,28 @@ public sealed class Protocol_765 : ProtocolBase
     public IObservable<PacketSetPassengers> OnSetPassengersPacket => _onset_passengers;
     public IObservable<PacketSpawnPosition> OnSpawnPositionPacket => _onspawn_position;
     public IObservable<PacketUpdateTime> OnUpdateTimePacket => _onupdate_time;
+    public IObservable<PacketSystemChat> OnSystemChatPacket => _onsystem_chat;
+    public IObservable<PacketPlayerlistHeader> OnPlayerlistHeaderPacket => _onplayerlist_header;
     public IObservable<PacketCollect> OnCollectPacket => _oncollect;
     public IObservable<PacketEntityTeleport> OnEntityTeleportPacket => _onentity_teleport;
     public IObservable<PacketSelectAdvancementTab> OnSelectAdvancementTabPacket => _onselect_advancement_tab;
+    public IObservable<PacketServerData> OnServerDataPacket => _onserver_data;
 
     public IObservable<PacketAcknowledgePlayerDigging> OnAcknowledgePlayerDiggingPacket =>
         _onacknowledge_player_digging;
 
     public IObservable<PacketClearTitles> OnClearTitlesPacket => _onclear_titles;
     public IObservable<PacketInitializeWorldBorder> OnInitializeWorldBorderPacket => _oninitialize_world_border;
+    public IObservable<PacketActionBar> OnActionBarPacket => _onaction_bar;
     public IObservable<PacketWorldBorderCenter> OnWorldBorderCenterPacket => _onworld_border_center;
     public IObservable<PacketWorldBorderLerpSize> OnWorldBorderLerpSizePacket => _onworld_border_lerp_size;
     public IObservable<PacketWorldBorderSize> OnWorldBorderSizePacket => _onworld_border_size;
-
-    public IObservable<PacketWorldBorderWarningDelay> OnWorldBorderWarningDelayPacket =>
-        _onworld_border_warning_delay;
-
-    public IObservable<PacketWorldBorderWarningReach> OnWorldBorderWarningReachPacket =>
-        _onworld_border_warning_reach;
-
+    public IObservable<PacketWorldBorderWarningDelay> OnWorldBorderWarningDelayPacket => _onworld_border_warning_delay;
+    public IObservable<PacketWorldBorderWarningReach> OnWorldBorderWarningReachPacket => _onworld_border_warning_reach;
     public IObservable<PacketPing> OnPingPacket => _onping;
     public IObservable<PacketPingResponse> OnPingResponsePacket => _onping_response;
+    public IObservable<PacketSetTitleSubtitle> OnSetTitleSubtitlePacket => _onset_title_subtitle;
+    public IObservable<PacketSetTitleText> OnSetTitleTextPacket => _onset_title_text;
     public IObservable<PacketSetTitleTime> OnSetTitleTimePacket => _onset_title_time;
     public IObservable<PacketSimulationDistance> OnSimulationDistancePacket => _onsimulation_distance;
     public IObservable<PacketHurtAnimation> OnHurtAnimationPacket => _onhurt_animation;
@@ -638,8 +655,8 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY,
-        float cursorZ, bool insideBlock, int sequence)
+    public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY, float cursorZ,
+        bool insideBlock, int sequence)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x35);
@@ -752,8 +769,7 @@ public sealed class Protocol_765 : ProtocolBase
                     var y = reader.ReadDouble();
                     var z = reader.ReadDouble();
                     var count = reader.ReadSignedShort();
-                    _onspawn_entity_experience_orb.OnNext(
-                        new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
+                    _onspawn_entity_experience_orb.OnNext(new PacketSpawnEntityExperienceOrb(entityId, x, y, z, count));
                 }
 
                 break;
@@ -774,8 +790,18 @@ public sealed class Protocol_765 : ProtocolBase
                     var entityId = reader.ReadVarInt();
                     var location = reader.ReadPosition();
                     var destroyStage = reader.ReadSignedByte();
-                    _onblock_break_animation.OnNext(new PacketBlockBreakAnimation(entityId, location,
-                        destroyStage));
+                    _onblock_break_animation.OnNext(new PacketBlockBreakAnimation(entityId, location, destroyStage));
+                }
+
+                break;
+            case 0x07:
+                if (_ontile_entity_data.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var location = reader.ReadPosition();
+                    var action = reader.ReadVarInt();
+                    var nbtData = reader.ReadOptionalNbt();
+                    _ontile_entity_data.OnNext(new PacketTileEntityData(location, action, nbtData));
                 }
 
                 break;
@@ -828,12 +854,33 @@ public sealed class Protocol_765 : ProtocolBase
                 }
 
                 break;
+            case 0x6b:
+                if (_onnbt_query_response.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var transactionId = reader.ReadVarInt();
+                    var nbt = reader.ReadOptionalNbt();
+                    _onnbt_query_response.OnNext(new PacketNbtQueryResponse(transactionId, nbt));
+                }
+
+                break;
             case 0x12:
                 if (_onclose_window.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     var windowId = reader.ReadUnsignedByte();
                     _onclose_window.OnNext(new PacketCloseWindow(windowId));
+                }
+
+                break;
+            case 0x31:
+                if (_onopen_window.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var windowId = reader.ReadVarInt();
+                    var inventoryType = reader.ReadVarInt();
+                    var windowTitle = reader.ReadNbt();
+                    _onopen_window.OnNext(new PacketOpenWindow(windowId, inventoryType, windowTitle));
                 }
 
                 break;
@@ -895,6 +942,15 @@ public sealed class Protocol_765 : ProtocolBase
                     var channel = reader.ReadString();
                     var data = reader.ReadRestBuffer();
                     _oncustom_payload.OnNext(new PacketCustomPayload(channel, data));
+                }
+
+                break;
+            case 0x1b:
+                if (_onkick_disconnect.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var reason = reader.ReadNbt();
+                    _onkick_disconnect.OnNext(new PacketKickDisconnect(reason));
                 }
 
                 break;
@@ -984,8 +1040,7 @@ public sealed class Protocol_765 : ProtocolBase
                     var yaw = reader.ReadSignedByte();
                     var pitch = reader.ReadSignedByte();
                     var onGround = reader.ReadBoolean();
-                    _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch,
-                        onGround));
+                    _onentity_move_look.OnNext(new PacketEntityMoveLook(entityId, dX, dY, dZ, yaw, pitch, onGround));
                 }
 
                 break;
@@ -1071,6 +1126,16 @@ public sealed class Protocol_765 : ProtocolBase
                 }
 
                 break;
+            case 0x3a:
+                if (_ondeath_combat_event.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var playerId = reader.ReadVarInt();
+                    var message = reader.ReadNbt();
+                    _ondeath_combat_event.OnNext(new PacketDeathCombatEvent(playerId, message));
+                }
+
+                break;
             case 0x3e:
                 if (_onposition.HasObservers)
                 {
@@ -1120,7 +1185,6 @@ public sealed class Protocol_765 : ProtocolBase
                     var entityName = reader.ReadString();
                     string? objectiveName = null;
                     if (reader.ReadBoolean()) objectiveName = reader.ReadString();
-
                     _onreset_score.OnNext(new PacketResetScore(entityName, objectiveName));
                 }
 
@@ -1264,6 +1328,26 @@ public sealed class Protocol_765 : ProtocolBase
                 }
 
                 break;
+            case 0x69:
+                if (_onsystem_chat.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var content = reader.ReadNbt();
+                    var isActionBar = reader.ReadBoolean();
+                    _onsystem_chat.OnNext(new PacketSystemChat(content, isActionBar));
+                }
+
+                break;
+            case 0x6a:
+                if (_onplayerlist_header.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var header = reader.ReadNbt();
+                    var footer = reader.ReadNbt();
+                    _onplayerlist_header.OnNext(new PacketPlayerlistHeader(header, footer));
+                }
+
+                break;
             case 0x6c:
                 if (_oncollect.HasObservers)
                 {
@@ -1296,8 +1380,24 @@ public sealed class Protocol_765 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     string? id = null;
                     if (reader.ReadBoolean()) id = reader.ReadString();
-
                     _onselect_advancement_tab.OnNext(new PacketSelectAdvancementTab(id));
+                }
+
+                break;
+            case 0x49:
+                if (_onserver_data.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var motd = reader.ReadNbt();
+                    byte[]? iconBytes = null;
+                    if (reader.ReadBoolean())
+                    {
+                        var tempArrayLength_1_0 = reader.ReadVarInt();
+                        iconBytes = reader.ReadBuffer(tempArrayLength_1_0);
+                    }
+
+                    var enforcesSecureChat = reader.ReadBoolean();
+                    _onserver_data.OnNext(new PacketServerData(motd, iconBytes, enforcesSecureChat));
                 }
 
                 break;
@@ -1331,8 +1431,17 @@ public sealed class Protocol_765 : ProtocolBase
                     var portalTeleportBoundary = reader.ReadVarInt();
                     var warningBlocks = reader.ReadVarInt();
                     var warningTime = reader.ReadVarInt();
-                    _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter,
-                        newDiameter, speed, portalTeleportBoundary, warningBlocks, warningTime));
+                    _oninitialize_world_border.OnNext(new PacketInitializeWorldBorder(x, z, oldDiameter, newDiameter,
+                        speed, portalTeleportBoundary, warningBlocks, warningTime));
+                }
+
+                break;
+            case 0x4a:
+                if (_onaction_bar.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var text = reader.ReadNbt();
+                    _onaction_bar.OnNext(new PacketActionBar(text));
                 }
 
                 break;
@@ -1353,8 +1462,7 @@ public sealed class Protocol_765 : ProtocolBase
                     var oldDiameter = reader.ReadDouble();
                     var newDiameter = reader.ReadDouble();
                     var speed = reader.ReadVarInt();
-                    _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter,
-                        speed));
+                    _onworld_border_lerp_size.OnNext(new PacketWorldBorderLerpSize(oldDiameter, newDiameter, speed));
                 }
 
                 break;
@@ -1400,6 +1508,24 @@ public sealed class Protocol_765 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
                     var id = reader.ReadSignedLong();
                     _onping_response.OnNext(new PacketPingResponse(id));
+                }
+
+                break;
+            case 0x61:
+                if (_onset_title_subtitle.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var text = reader.ReadNbt();
+                    _onset_title_subtitle.OnNext(new PacketSetTitleSubtitle(text));
+                }
+
+                break;
+            case 0x63:
+                if (_onset_title_text.HasObservers)
+                {
+                    scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    var text = reader.ReadNbt();
+                    _onset_title_text.OnNext(new PacketSetTitleText(text));
                 }
 
                 break;
@@ -1543,6 +1669,20 @@ public class PacketBlockBreakAnimation
     public sbyte DestroyStage { get; internal set; }
 }
 
+public class PacketTileEntityData
+{
+    public PacketTileEntityData(Position location, int action, NbtTag? nbtData)
+    {
+        Location = location;
+        Action = action;
+        NbtData = nbtData;
+    }
+
+    public Position Location { get; internal set; }
+    public int Action { get; internal set; }
+    public NbtTag? NbtData { get; internal set; }
+}
+
 public class PacketBlockAction
 {
     public PacketBlockAction(Position location, byte byte1, byte byte2, int blockId)
@@ -1597,6 +1737,18 @@ public class PacketChunkBatchStart
 {
 }
 
+public class PacketNbtQueryResponse
+{
+    public PacketNbtQueryResponse(int transactionId, NbtTag? nbt)
+    {
+        TransactionId = transactionId;
+        Nbt = nbt;
+    }
+
+    public int TransactionId { get; internal set; }
+    public NbtTag? Nbt { get; internal set; }
+}
+
 public class PacketCloseWindow
 {
     public PacketCloseWindow(byte windowId)
@@ -1605,6 +1757,20 @@ public class PacketCloseWindow
     }
 
     public byte WindowId { get; internal set; }
+}
+
+public class PacketOpenWindow
+{
+    public PacketOpenWindow(int windowId, int inventoryType, NbtTag windowTitle)
+    {
+        WindowId = windowId;
+        InventoryType = inventoryType;
+        WindowTitle = windowTitle;
+    }
+
+    public int WindowId { get; internal set; }
+    public int InventoryType { get; internal set; }
+    public NbtTag WindowTitle { get; internal set; }
 }
 
 public class PacketCraftProgressBar
@@ -1671,6 +1837,16 @@ public class PacketCustomPayload
 
     public string Channel { get; internal set; }
     public byte[] Data { get; internal set; }
+}
+
+public class PacketKickDisconnect
+{
+    public PacketKickDisconnect(NbtTag reason)
+    {
+        Reason = reason;
+    }
+
+    public NbtTag Reason { get; internal set; }
 }
 
 public class PacketEntityStatus
@@ -1883,6 +2059,18 @@ public class PacketEndCombatEvent
 
 public class PacketEnterCombatEvent
 {
+}
+
+public class PacketDeathCombatEvent
+{
+    public PacketDeathCombatEvent(int playerId, NbtTag message)
+    {
+        PlayerId = playerId;
+        Message = message;
+    }
+
+    public int PlayerId { get; internal set; }
+    public NbtTag Message { get; internal set; }
 }
 
 public class PacketPosition
@@ -2099,6 +2287,30 @@ public class PacketUpdateTime
     public long Time { get; internal set; }
 }
 
+public class PacketSystemChat
+{
+    public PacketSystemChat(NbtTag content, bool isActionBar)
+    {
+        Content = content;
+        IsActionBar = isActionBar;
+    }
+
+    public NbtTag Content { get; internal set; }
+    public bool IsActionBar { get; internal set; }
+}
+
+public class PacketPlayerlistHeader
+{
+    public PacketPlayerlistHeader(NbtTag header, NbtTag footer)
+    {
+        Header = header;
+        Footer = footer;
+    }
+
+    public NbtTag Header { get; internal set; }
+    public NbtTag Footer { get; internal set; }
+}
+
 public class PacketCollect
 {
     public PacketCollect(int collectedEntityId, int collectorEntityId, int pickupItemCount)
@@ -2145,6 +2357,20 @@ public class PacketSelectAdvancementTab
     public string? Id { get; internal set; }
 }
 
+public class PacketServerData
+{
+    public PacketServerData(NbtTag motd, byte[]? iconBytes, bool enforcesSecureChat)
+    {
+        Motd = motd;
+        IconBytes = iconBytes;
+        EnforcesSecureChat = enforcesSecureChat;
+    }
+
+    public NbtTag Motd { get; internal set; }
+    public byte[]? IconBytes { get; internal set; }
+    public bool EnforcesSecureChat { get; internal set; }
+}
+
 public class PacketAcknowledgePlayerDigging
 {
     public PacketAcknowledgePlayerDigging(int sequenceId)
@@ -2188,6 +2414,16 @@ public class PacketInitializeWorldBorder
     public int PortalTeleportBoundary { get; internal set; }
     public int WarningBlocks { get; internal set; }
     public int WarningTime { get; internal set; }
+}
+
+public class PacketActionBar
+{
+    public PacketActionBar(NbtTag text)
+    {
+        Text = text;
+    }
+
+    public NbtTag Text { get; internal set; }
 }
 
 public class PacketWorldBorderCenter
@@ -2264,6 +2500,26 @@ public class PacketPingResponse
     }
 
     public long Id { get; internal set; }
+}
+
+public class PacketSetTitleSubtitle
+{
+    public PacketSetTitleSubtitle(NbtTag text)
+    {
+        Text = text;
+    }
+
+    public NbtTag Text { get; internal set; }
+}
+
+public class PacketSetTitleText
+{
+    public PacketSetTitleText(NbtTag text)
+    {
+        Text = text;
+    }
+
+    public NbtTag Text { get; internal set; }
 }
 
 public class PacketSetTitleTime

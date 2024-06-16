@@ -10,7 +10,11 @@ public sealed class ProtocolSourceGenerator
         { "UUID", "Guid" },
         { "position", "Position" },
         { "slot", "Slot?" },
-        { "restBuffer", "byte[]" }
+        { "restBuffer", "byte[]" },
+        { "nbt", "NbtTag" },
+        { "optionalNbt", "NbtTag?" },
+        { "anonymousNbt", "NbtTag" },
+        { "anonOptionalNbt", "NbtTag?" },
     };
 
     public ProtodefProtocol Protocol;
@@ -35,7 +39,11 @@ public sealed class ProtocolSourceGenerator
         { "UUID", "ReadUUID" },
         { "restBuffer", "ReadRestBuffer" },
         { "position", "ReadPosition" },
-        { "slot", "ReadSlot" }
+        { "slot", "ReadSlot" },
+        { "nbt", "ReadNbt" },
+        { "optionalNbt", "ReadOptionalNbt" },
+        { "anonymousNbt", "ReadNbt" },
+        { "anonOptionalNbt", "ReadOptionalNbt" },
     };
 
     public string Version;
@@ -60,7 +68,11 @@ public sealed class ProtocolSourceGenerator
         { "UUID", "WriteUUID" },
         { "restBuffer", "WriteBuffer" },
         { "position", "WritePosition" },
-        { "slot", "WriteSlot" }
+        { "slot", "WriteSlot" },
+        { "nbt", "WriteNbt" },
+        { "optionalNbt", "WriteOptionalNbt" },
+        { "anonymousNbt", "WriteNbt" },
+        { "anonOptionalNbt", "WriteOptionalNbt" },
     };
 
 
@@ -72,6 +84,7 @@ public sealed class ProtocolSourceGenerator
         netNamespace.Usings.Add("McProtoNet.Serialization");
         netNamespace.Usings.Add("McProtoNet.Protocol");
         netNamespace.Usings.Add("McProtoNet.Abstractions");
+        netNamespace.Usings.Add("McProtoNet.NBT");
         netNamespace.Usings.Add("System.Reactive.Subjects");
 
         foreach (var (nsName, side) in Protocol.Namespaces)
