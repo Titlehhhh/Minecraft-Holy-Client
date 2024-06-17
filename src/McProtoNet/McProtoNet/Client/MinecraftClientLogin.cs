@@ -33,94 +33,107 @@ public sealed class MinecraftClientLogin
         CancellationToken cancellationToken = default)
     {
         var mainStream = new AesStream(source);
-
-        using var sender = new MinecraftPacketSender();
-        using var reader = new MinecraftPacketReader();
-
-        sender.BaseStream = mainStream;
-        reader.BaseStream = mainStream;
-
-        using var handshake = CreateHandshake(options.Host, options.Port, options.ProtocolVersion);
-
-        StateChanged?.Invoke(MinecraftClientState.Handshaking);
-        await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
-
-
-        using var loginStart = CreateLoginStart(options.Username, options);
-
-        StateChanged?.Invoke(MinecraftClientState.Login);
-        await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
-
-        var threshold = 0;
-
-
-        while (true)
+        try
         {
-            var inputPacket = await reader.ReadNextPacketAsync().ConfigureAwait(false);
+            using var sender = new MinecraftPacketSender();
+            using var reader = new MinecraftPacketReader();
 
-            var needBreak = false;
+            sender.BaseStream = mainStream;
+            reader.BaseStream = mainStream;
+
+            using var handshake = CreateHandshake(options.Host, options.Port, options.ProtocolVersion);
+
+            StateChanged?.Invoke(MinecraftClientState.Handshaking);
+            await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
 
 
-            switch (inputPacket.Id)
+            using var loginStart = CreateLoginStart(options.Username, options);
+
+            StateChanged?.Invoke(MinecraftClientState.Login);
+            await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
+
+            var threshold = 0;
+
+
+            while (true)
             {
-                case 0x00:
-                    inputPacket.Data.TryReadString(out var reason, out _);
-                    throw new LoginRejectedException(reason);
-                    break;
-                case 0x01:
-                    var encryptBegin = ReadEncryptionPacket(inputPacket);
-
-                    var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
-                    var secretKey = CryptoHandler.GenerateAESPrivateKey();
+                var inputPacket = await reader.ReadNextPacketAsync().ConfigureAwait(false);
+                try
+                {
+                    var needBreak = false;
 
 
-                    var sharedSecret = RSAService.Encrypt(secretKey, false);
-                    var verifyToken = RSAService.Encrypt(encryptBegin.VerifyToken, false);
-
-                    using (var response = CreateEncryptionResponse(sharedSecret, verifyToken))
+                    switch (inputPacket.Id)
                     {
-                        await sender.SendPacketAsync(response, cancellationToken);
+                        case 0x00:
+                            inputPacket.Data.TryReadString(out var reason, out _);
+                            throw new LoginRejectedException(reason);
+                            break;
+                        case 0x01:
+                            var encryptBegin = ReadEncryptionPacket(inputPacket);
+
+                            var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
+                            var secretKey = CryptoHandler.GenerateAESPrivateKey();
+
+
+                            var sharedSecret = RSAService.Encrypt(secretKey, false);
+                            var verifyToken = RSAService.Encrypt(encryptBegin.VerifyToken, false);
+
+                            using (var response = CreateEncryptionResponse(sharedSecret, verifyToken))
+                            {
+                                await sender.SendPacketAsync(response, cancellationToken);
+                            }
+
+                            mainStream.SwitchEncryption(secretKey);
+
+                            break;
+                        case 0x02:
+                            needBreak = true;
+
+                            if (options.ProtocolVersion == 765)
+                                await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
+
+                            break;
+                        case 0x03:
+                            //Compress
+
+                            if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
+                                throw new Exception("asd");
+                            reader.SwitchCompression(threshold);
+                            sender.SwitchCompression(threshold);
+
+                            break;
+                        case 0x04:
+                            //Login plugin request
+
+                            var buffer = inputPacket.Data;
+                            var offset = 0;
+                            buffer.TryReadVarInt(out var messageId, out offset);
+                            buffer = buffer.Slice(offset);
+                            buffer.TryReadString(out var channel, out offset);
+                            var data = buffer.Slice(offset);
+                            break;
+
+                        default: throw new Exception("Unknown packet: " + inputPacket.Id);
                     }
 
-                    mainStream.SwitchEncryption(secretKey);
-
-                    break;
-                case 0x02:
-                    needBreak = true;
-
-                    if (options.ProtocolVersion == 765)
-                        await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
-
-                    break;
-                case 0x03:
-                    //Compress
-
-                    if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
-                        throw new Exception("asd");
-                    reader.SwitchCompression(threshold);
-                    sender.SwitchCompression(threshold);
-
-                    break;
-                case 0x04:
-                    //Login plugin request
-
-                    var buffer = inputPacket.Data;
-                    var offset = 0;
-                    buffer.TryReadVarInt(out var messageId, out offset);
-                    buffer = buffer.Slice(offset);
-                    buffer.TryReadString(out var channel, out offset);
-                    var data = buffer.Slice(offset);
-                    break;
-
-                default: throw new Exception("Unknown packet: " + inputPacket.Id);
+                    if (needBreak)
+                        break;
+                }
+                finally
+                {
+                    inputPacket.Dispose();
+                }
             }
 
-            if (needBreak)
-                break;
+
+            return new LoginizationResult(mainStream, threshold);
         }
-
-
-        return new LoginizationResult(mainStream, threshold);
+        catch (Exception e)
+        {
+            mainStream.Dispose();
+            throw;
+        }
     }
 
 

@@ -1,35 +1,49 @@
-﻿using McProtoNet;
-using McProtoNet.Client;
-using McProtoNet.Protocol754;
+﻿using HolyClient.Abstractions.StressTest;
+using HolyClient.Core.Infrastructure;
+
+using HolyClient.StressTest;
+
+using Serilog;
+
+
 
 Console.WriteLine("Start");
 
 
-var minecraftClient = new MinecraftClient
+string host = args[0];
+
+
+StressTestProfile stressTestProfile = new StressTestProfile();
+
+stressTestProfile.Version = 754;
+stressTestProfile.BotsNickname = "_PGG";
+stressTestProfile.UseProxy = true;
+
+stressTestProfile.Server = host;
+
+stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
 {
-    Host = "127.0.0.1",
-    Port = 43195,
-    Username = "TestBot13",
-    Version = 754 // 1.16.5
+    ParallelCount = 30_000
 };
+stressTestProfile.SetBehavior(new DefaultPluginSource());
+stressTestProfile.NumberOfBots = 300;
 
-Protocol_754 protocol = new Protocol_754(minecraftClient);
+var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
-protocol.OnChatPacket.Subscribe(x => { Console.WriteLine(ChatParser.ParseText(x.Message)); });
-protocol.OnKeepAlivePacket.Subscribe(x => { protocol.SendKeepAlive(x.KeepAliveId); });
+await stressTestProfile.Start(logger);
 
+await Task.Delay(-1);
 
-
-
-await minecraftClient.Start();
-
-await Task.Delay(2000);
-
-Console.WriteLine("Start spam");
-for (int i = 1; i <= 20; i++)
+public class DefaultPluginSource : IPluginSource
 {
-    await Task.Delay(500);
-    await protocol.SendChat("asdasdasdasdasdadasdasd: " + i.ToString());
+    public PluginMetadata Metadata { get; } = new("Titlehhhh", "Spam hello bots", "HolyClient default behavior");
+
+    public PluginTypeReference Reference { get; } = new();
+
+    public T CreateInstance<T>() where T : IStressTestBehavior
+    {
+        IStressTestBehavior beh = new DefaultBehavior();
+        return (T)beh;
+    }
 }
 
-Thread.Sleep(-1);

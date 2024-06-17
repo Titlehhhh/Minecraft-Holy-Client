@@ -12,6 +12,6 @@ public abstract class BaseStressTestBehavior : IStressTestBehavior
 
     public ResourceDictionary? Resources { get; protected set; }
 
-    public abstract Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger,
+    public abstract Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, Serilog.ILogger logger,
         CancellationToken cancellationToken);
 }

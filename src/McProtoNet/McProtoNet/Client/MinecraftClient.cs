@@ -34,6 +34,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
     }
 
+    public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+    public int ReadTimeout { get; set; } = 30_000;
+    public int WriteTimeout { get; set; } = 30_000;
+
     public async Task SendPacket(ReadOnlyMemory<byte> data)
     {
         var holder = await sendLock.AcquireAsync(CTS.Token);
@@ -75,7 +80,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public async Task Start()
     {
-        Console.WriteLine("Start MinecraftClient");
         try
         {
             Validate();
@@ -87,8 +91,18 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
 
             StateChange(MinecraftClientState.Connect);
-            await ConnectAsync(CTS.Token);
-
+            try
+            {
+                using (var timeCts = CancellationTokenSource.CreateLinkedTokenSource(CTS.Token))
+                {
+                    timeCts.CancelAfter(ConnectTimeout);
+                    await ConnectAsync(timeCts.Token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw new ConnectTimeoutException();
+            }
 
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
@@ -140,8 +154,19 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             while (!cancellationToken.IsCancellationRequested)
             {
                 var packet = await _packetReader.ReadNextPacketAsync(cancellationToken);
-                PacketReceived?.Invoke(this, packet);
+                try
+                {
+                    PacketReceived?.Invoke(this, packet);
+                }
+                finally
+                {
+                    packet.Dispose();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            OnException(ex);
         }
         finally
         {
@@ -155,30 +180,40 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     {
         var newTcp = new TcpClient();
 
-        Interlocked.Exchange(ref tcpClient, newTcp)?.Dispose();
-
-
-        newTcp.Client.NoDelay = true;
-        newTcp.LingerState = new LingerOption(false, 0);
-
-
-        if (Proxy is not null)
+        var register = cancellationToken.Register(s => ((TcpClient)s).Dispose(), newTcp);
+        try
         {
-            await newTcp.ConnectAsync(Proxy.ProxyHost, Proxy.ProxyPort, cancellationToken);
-            mainStream = await Proxy.ConnectAsync(newTcp.GetStream(), Host, Port, cancellationToken);
+            Interlocked.Exchange(ref tcpClient, newTcp)?.Dispose();
+
+            newTcp.ReceiveTimeout = ReadTimeout;
+            newTcp.SendTimeout = WriteTimeout;
+
+            newTcp.Client.NoDelay = true;
+            newTcp.LingerState = new LingerOption(false, 0);
+
+
+            if (Proxy is not null)
+            {
+                await newTcp.ConnectAsync(Proxy.ProxyHost, Proxy.ProxyPort, cancellationToken);
+                mainStream = await Proxy.ConnectAsync(newTcp.GetStream(), Host, Port, cancellationToken);
+            }
+            else
+            {
+                try
+                {
+                    await newTcp.Client.DisconnectAsync(true, cancellationToken);
+                }
+                catch
+                {
+                }
+
+                await newTcp.ConnectAsync(Host, Port, cancellationToken);
+                mainStream = newTcp.GetStream();
+            }
         }
-        else
+        finally
         {
-            try
-            {
-                await newTcp.Client.DisconnectAsync(true, cancellationToken);
-            }
-            catch
-            {
-            }
-
-            await newTcp.ConnectAsync(Host, Port, cancellationToken);
-            mainStream = newTcp.GetStream();
+            register.Dispose();
         }
     }
 
@@ -199,6 +234,9 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public void Stop()
     {
+        if (_state == MinecraftClientState.Stopped)
+            return;
+
         CleanUp();
 
         StateChanged?.Invoke(this, new StateEventArgs(MinecraftClientState.Stopped, _state));
@@ -212,8 +250,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         CTS.Dispose();
         mainStream.Dispose();
         tcpClient.Dispose();
-        compressor.Dispose();
-        decompressor.Dispose();
 
         base.Dispose(disposing);
     }
@@ -256,8 +292,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     // private readonly PacketPipeHandler packetPipeHandler;
     //private Task mainTask;
 
-    private readonly ZlibCompressor compressor = new(4);
-    private readonly ZlibDecompressor decompressor = new();
 
 
     private readonly MinecraftClientLogin minecraftLogin = new();
@@ -270,4 +304,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     private readonly AsyncLock sendLock = new();
 
     #endregion
+}
+
+public class ConnectTimeoutException : Exception
+{
 }

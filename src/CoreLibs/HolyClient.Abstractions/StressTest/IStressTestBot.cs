@@ -1,4 +1,6 @@
-﻿namespace HolyClient.Abstractions.StressTest;
+﻿using McProtoNet.Client;
+
+namespace HolyClient.Abstractions.StressTest;
 
 public interface IStressTestBot
 {

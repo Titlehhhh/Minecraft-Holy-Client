@@ -27,9 +27,9 @@ public class PluginProvider : IPluginProvider
 
         _stressTestPlugins.AddOrUpdate(new DefaultPluginSource());
 
-        _stressTestPlugins.AddOrUpdate(new CustomPluginSource(() => { return new TidePVPBehaviorAttack(); },
-            new PluginMetadata("Titlehhhh", "TidePVP Loader", "TidePVP"),
-            new PluginTypeReference("HolyClient", "TidePVP")));
+        // _stressTestPlugins.AddOrUpdate(new CustomPluginSource(() => { return new TidePVPBehaviorAttack(); },
+        //     new PluginMetadata("Titlehhhh", "TidePVP Loader", "TidePVP"),
+        //     new PluginTypeReference("HolyClient", "TidePVP")));
     }
 
     public IObservableCache<IPluginSource, PluginTypeReference> AvailableStressTestPlugins => _stressTestPlugins;

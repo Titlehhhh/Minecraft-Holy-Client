@@ -1,5 +1,4 @@
 ﻿using System.Buffers;
-using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
@@ -48,10 +47,7 @@ internal sealed class MinecraftPacketPipeReader
 
             try
             {
-                while (TryReadPacket(ref buffer, out var packet))
-                {
-                    yield return Decompress(packet);
-                }
+                while (TryReadPacket(ref buffer, out var packet)) yield return Decompress(packet);
             }
             finally
             {

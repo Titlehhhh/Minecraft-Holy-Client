@@ -2,13 +2,13 @@
 
 public class SrvRecord
 {
-    public SrvRecord(string target, ushort port)
+    public SrvRecord(string host, ushort port)
     {
-        Target = target;
+        Host = host;
         Port = port;
     }
 
-    public string Target { get; }
+    public string Host { get; }
 
     public ushort Port { get; }
 }

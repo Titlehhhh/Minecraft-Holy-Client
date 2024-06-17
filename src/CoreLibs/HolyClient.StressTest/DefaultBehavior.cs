@@ -4,6 +4,9 @@ using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using HolyClient.Abstractions.StressTest;
 using McProtoNet;
+using McProtoNet.Abstractions;
+using McProtoNet.Protocol;
+using McProtoNet.Protocol754;
 using ReactiveUI;
 using Serilog;
 
@@ -28,182 +31,54 @@ public class DefaultBehavior : BaseStressTestBehavior
     public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger,
         CancellationToken cancellationToken)
     {
+        logger.Information("Start default behavior");
         StaticSpam = Observable.Interval(TimeSpan.FromMilliseconds(SpamTimeout), RxApp.TaskpoolScheduler);
-
-        var gg = 0;
 
 
         foreach (var bot in bots)
         {
-            CompositeDisposable disp = null;
+            Protocol_754 proto = new Protocol_754(bot.Client);
 
+            proto.OnKeepAlivePacket.Subscribe(x => { proto.SendKeepAlive(x.KeepAliveId); });
 
-            Action<Exception> onErr = async exc =>
+            proto.OnLoginPacket.Subscribe(async x =>
             {
                 try
                 {
-                    if (disp is null)
+                    await Task.Delay(500);
+                    await proto.SendChat("/register 21qwerty 21qwerty");
+                    while (true)
                     {
-                        disp = new CompositeDisposable();
-                    }
-                    else
-                    {
-                        disp.Dispose();
-                        disp = null;
+                        await Task.Delay(3000);
+
+                        //if (Random.Shared.NextDouble() >= 0.5)
+                        {
+                            //await proto.SendChat("Вы негры");
+                        }
+                       // else
+                        {
+                           // await proto.SendChat("https://discord.com/invite/5Huju3Ka5P");
+                        }
                     }
                 }
                 catch
                 {
                 }
+            });
 
-                if (Reconnects <= 1)
+            bot.Client.StateChanged += async (sender, args) =>
+            {
+                if (args.State == MinecraftClientState.Errored)
                 {
-                    try
-                    {
-                        await bot.Restart(true);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Information($"Ошибка переподключения: {ex.Message}");
-                    }
-                }
-                else
-                {
-                    for (var i = 0; i < Reconnects - 1; i++)
-                    {
-                        if (ReconnectTimeout <= 0)
-                            await Task.Delay(1000);
-                        else
-                            await Task.Delay(ReconnectTimeout);
-
-
-                        await bot.Restart(false);
-                    }
-
+                    logger.Error(args.Error,"Disconnect Error");
+                    await Task.Delay(3000);
                     await bot.Restart(true);
                 }
             };
-
-            bot.Client.OnErrored += onErr;
-
-            bot.Client.OnJoinGame.Subscribe(async x =>
-            {
-                return;
-                try
-                {
-                    if (disp is null)
-                        disp = new CompositeDisposable();
-                    else if (disp.IsDisposed)
-                        disp = new CompositeDisposable();
-
-                    await Task.Delay(1000);
-                    await bot.Client.SendChat("/register 21qwerty123 21qwerty123");
-
-                    SpamMessage(disp, bot);
-                }
-                catch
-                {
-                }
-            }).DisposeWith(disposables);
-
-            bot.Client.OnChatMessage.Subscribe(async x =>
-            {
-                return;
-                var ch = ChatParser.ParseText(x.Message);
-                if (ch.Contains("/register") || ch.Contains("/reg"))
-                    try
-                    {
-                        await bot.Client.SendChat("/register 21qwerty123 21qwerty123");
-                        return;
-                        IDisposable d = null;
-                        d = bot.Client.OnOpenWindow.Subscribe(async x =>
-                        {
-                            d?.Dispose();
-                            logger.Debug("menu: " + x.Id);
-
-
-                            await bot.Client.SendPacket(w =>
-                            {
-                                w.WriteUnsignedByte((byte)x.Id);
-
-                                w.WriteShort(5);
-
-                                w.WriteByte(0);
-                                w.WriteShort(0);
-
-                                w.WriteVarInt(0);
-                                w.WriteBoolean(false);
-                            }, McProtoNet.PacketOut.ClickWindow);
-
-                            await Task.Delay(1000);
-
-                            try
-                            {
-                                if (disp is null)
-                                    disp = new CompositeDisposable();
-
-                                SpamMessage(disp, bot);
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.Error(ex, "Start spam error");
-                            }
-                        }).DisposeWith(disposables);
-                        bot.Client.SendChat("/menu");
-                    }
-                    catch
-                    {
-                    }
-            }).DisposeWith(disposables);
-
-            bot.Client.OnPlayerPositionRotation.Subscribe(x => { }).DisposeWith(disposables);
-
-            bot.Client.OnMapData.Subscribe(x =>
-            {
-                //logger.Information("map");
-            }).DisposeWith(disposables);
-
-            disposables.Add(Disposable.Create(() => { bot.Client.OnErrored -= onErr; }));
-
 
             _ = bot.Restart(true);
         }
 
         return Task.CompletedTask;
-    }
-
-    private void SpamMessage(CompositeDisposable d, IStressTestBot bot)
-    {
-        StaticSpam.Subscribe(async x =>
-        {
-            try
-            {
-                var spamText = SpamText + " " + Random.Shared.NextInt64();
-
-                await bot.Client.SendChat(spamText);
-            }
-            catch
-            {
-            }
-        }).DisposeWith(d);
-    }
-
-    private async Task SpamNocomAsync(CancellationTokenSource cts, IStressTestBot bot)
-    {
-        if (!SpamNocom)
-            return;
-        var pos = new Vector3(1, 64, 2);
-        while (!cts.IsCancellationRequested)
-        {
-            await Task.Delay(100);
-
-            await bot.Client.SendAction(0, pos,
-                McProtoNet.Core.BlockFace.DOWN);
-            await bot.Client.SendAction(2, pos,
-                McProtoNet.Core.BlockFace.DOWN);
-
-            await bot.Client.SendAction(6, pos,
-                McProtoNet.Core.BlockFace.DOWN);
-        }
     }
 }

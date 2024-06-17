@@ -12,6 +12,5 @@ public sealed class ProxyCheckerOptions : ReactiveObject
     public int ConnectTimeout { get; set; } = 2500;
     public int SendTimeout { get; set; } = 10_000;
     public int ReadTimeout { get; set; } = 10_000;
-    public string TargetHost { get; set; }
-    public ushort TargetPort { get; set; }
+    
 }

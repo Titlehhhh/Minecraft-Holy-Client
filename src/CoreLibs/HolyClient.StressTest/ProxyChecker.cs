@@ -28,7 +28,7 @@ public sealed class ProxyChecker : IDisposable
     public ProxyChecker(
         ChannelWriter<IProxyClient> writer,
         IEnumerable<ProxyInfo> proxies,
-        ProxyCheckerOptions options)
+        ProxyCheckerOptions options, string targetHost,ushort targetPort)
     {
         _writer = writer;
         _proxies = proxies;
@@ -36,8 +36,8 @@ public sealed class ProxyChecker : IDisposable
         _connectTimeout = options.ConnectTimeout;
         _sendTimeout = options.SendTimeout;
         _readTimeout = options.ReadTimeout;
-        _targetHost = options.TargetHost;
-        _targetPort = options.TargetPort;
+        _targetHost = targetHost;
+        _targetPort = targetPort;
     }
 
     public void Dispose()

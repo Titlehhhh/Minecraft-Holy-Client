@@ -11,6 +11,8 @@ using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
+using McProtoNet.Client;
+using McProtoNet.Utils;
 using MessagePack;
 using QuickProxyNet;
 using ReactiveUI;
@@ -33,7 +35,7 @@ public class ExceptionCounter
 }
 
 [MessagePackObject(true)]
-public class StressTestProfile : ReactiveObject, IStressTestProfile
+public class StressTestProfile : ReactiveObject/*, IStressTestProfile*/
 {
     private readonly object _currentInfoLock = new();
 
@@ -75,7 +77,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             }).DisposeWith(disposables);
 
 
-            if (ParallelCountCheckingCalculateAuto) ProxyChecker.ParallelCount = NumberOfBots * 10;
+            if (ParallelCountCheckingCalculateAuto) ProxyCheckerOptions.ParallelCount = NumberOfBots * 10;
 
             var host = Server;
 
@@ -94,7 +96,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 {
                     IServerResolver resolver = new ServerResolver();
 
-                    var result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
+                    SrvRecord result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
                     host = result.Host;
                     port = result.Port;
                 }
@@ -124,9 +126,6 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                     logger.Error($"[STRESS TEST] Ошибка поиска DNS для {Server}");
                 }
 
-            ProxyChecker.TargetHost = srv_host;
-            ProxyChecker.TargetPort = srv_port;
-
 
             ProxyProvider? proxyProvider = null;
 
@@ -139,7 +138,8 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
                 var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity));
 
-                var proxyChecker = new ProxyChecker(channel.Writer, proxies, ProxyChecker);
+                var proxyChecker =
+                    new ProxyChecker(channel.Writer, proxies, this.ProxyCheckerOptions, srv_host, srv_port);
 
                 proxyProvider = new ProxyProvider(channel.Reader);
 
@@ -267,9 +267,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         string? srv_host,
         ushort? srv_port)
     {
-        var bots = new List<MinecraftClient>();
-
-
+        
         var stressTestBots = new List<IStressTestBot>();
 
         var nickProvider = new NickProvider(BotsNickname);
@@ -283,24 +281,10 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             MinecraftClient bot = new MinecraftClient();
 
 
-            if (OptimizeDNS)
-                bot.Config = new ClientConfig
-                {
-                    Host = srv_host,
-                    Port = (ushort)srv_port,
-                    Version = Version,
-                    Username = nickProvider.GetNextNick(),
-                    HandshakeHost = Server,
-                    HandshakePort = 25565
-                };
-            else
-                bot.Config = new ClientConfig
-                {
-                    Host = host,
-                    Port = port,
-                    Version = Version,
-                    Username = nickProvider.GetNextNick()
-                };
+            bot.Host = srv_host;
+            bot.Port = (ushort)srv_port;
+            bot.Version = Version;
+            bot.Username = nickProvider.GetNextNick();
 
 
             var b = new StressTestBot(
@@ -311,59 +295,59 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 i,
                 cancellationTokenSource.Token);
 
-            Action<ClientStateChanged> onState = state =>
-            {
-                if (state.NewValue == ClientState.Play)
-                {
-                    Interlocked.Increment(ref _cpsCounter);
-
-
-                    Interlocked.Increment(ref _botsPlayCounter);
-                }
-                else if (state.NewValue == ClientState.Connecting)
-                {
-                    Interlocked.Increment(ref _botsConnectionCounter);
-                }
-                else if (state.NewValue == ClientState.HandShake)
-                {
-                    Interlocked.Increment(ref _botsHandshakeCounter);
-                }
-                else if (state.NewValue == ClientState.Login)
-                {
-                    Interlocked.Increment(ref _botsLoginCounter);
-                }
-            };
-
-            Action<Exception> onError = exc =>
-            {
-                var state = b.Client.CurrentState;
-
-                if (state == ClientState.Play)
-                    Interlocked.Decrement(ref _botsPlayCounter);
-                else if (state == ClientState.Connecting)
-                    Interlocked.Decrement(ref _botsConnectionCounter);
-                else if (state == ClientState.HandShake)
-                    Interlocked.Decrement(ref _botsHandshakeCounter);
-                else if (state == ClientState.Login) Interlocked.Decrement(ref _botsLoginCounter);
-
-                if (exc is NullReferenceException) logger.Information(exc.StackTrace);
-
-                var key = Tuple.Create(exc.GetType().FullName, exc.Message);
-
-                if (ExceptionCounter.TryGetValue(key, out var counter))
-                    counter.Increment();
-                else
-                    ExceptionCounter[key] = new ExceptionCounter();
-            };
-
-            b.Client.OnStateChanged += onState;
-            b.Client.OnErrored += onError;
-
-            disposables.Add(Disposable.Create(() =>
-            {
-                b.Client.OnStateChanged -= onState;
-                b.Client.OnErrored -= onError;
-            }));
+            // Action<ClientStateChanged> onState = state =>
+            // {
+            //     if (state.NewValue == ClientState.Play)
+            //     {
+            //         Interlocked.Increment(ref _cpsCounter);
+            //
+            //
+            //         Interlocked.Increment(ref _botsPlayCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.Connecting)
+            //     {
+            //         Interlocked.Increment(ref _botsConnectionCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.HandShake)
+            //     {
+            //         Interlocked.Increment(ref _botsHandshakeCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.Login)
+            //     {
+            //         Interlocked.Increment(ref _botsLoginCounter);
+            //     }
+            // };
+            //
+            // Action<Exception> onError = exc =>
+            // {
+            //     var state = b.Client.CurrentState;
+            //
+            //     if (state == ClientState.Play)
+            //         Interlocked.Decrement(ref _botsPlayCounter);
+            //     else if (state == ClientState.Connecting)
+            //         Interlocked.Decrement(ref _botsConnectionCounter);
+            //     else if (state == ClientState.HandShake)
+            //         Interlocked.Decrement(ref _botsHandshakeCounter);
+            //     else if (state == ClientState.Login) Interlocked.Decrement(ref _botsLoginCounter);
+            //
+            //     if (exc is NullReferenceException) logger.Information(exc.StackTrace);
+            //
+            //     var key = Tuple.Create(exc.GetType().FullName, exc.Message);
+            //
+            //     if (ExceptionCounter.TryGetValue(key, out var counter))
+            //         counter.Increment();
+            //     else
+            //         ExceptionCounter[key] = new ExceptionCounter();
+            // };
+            //
+            // b.Client.OnStateChanged += onState;
+            // b.Client.OnErrored += onError;
+            //
+            // disposables.Add(Disposable.Create(() =>
+            // {
+            //     b.Client.OnStateChanged -= onState;
+            //     b.Client.OnErrored -= onError;
+            // }));
 
 
             stressTestBots.Add(b);
@@ -427,7 +411,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
     [Reactive] public int NumberOfBots { get; set; }
 
-    [Reactive] public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
+    [Reactive] public int Version { get; set; } = 754;
 
     public IEnumerable<IProxySource> ProxiesState
     {
@@ -446,7 +430,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
     #region ProxyChecker
 
-    public ProxyCheckerOptions ProxyChecker { get; set; } = new();
+    public ProxyCheckerOptions ProxyCheckerOptions { get; set; } = new();
 
     [Reactive] public bool ParallelCountCheckingCalculateAuto { get; set; } = true;
 

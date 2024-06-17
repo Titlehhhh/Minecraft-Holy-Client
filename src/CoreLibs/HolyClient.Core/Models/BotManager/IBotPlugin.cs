@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Disposables;
+using McProtoNet.Client;
 using Serilog;
 
 namespace HolyClient.Core.Models.BotManager;

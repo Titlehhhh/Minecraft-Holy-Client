@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-using LibDeflate;
+using McProtoNet.Protocol.Zlib;
 using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol;
@@ -12,7 +12,7 @@ public sealed class MinecraftPacketReader : IDisposable
 
     //private readonly Inflater Inflater = new Inflater();
 
-    private readonly ZlibDecompressor decompressor = new();
+    //private readonly ZlibDecompressor decompressor = new();
 
     private int _compressionThreshold;
 
@@ -20,7 +20,7 @@ public sealed class MinecraftPacketReader : IDisposable
 
     public void Dispose()
     {
-        decompressor.Dispose();
+        //decompressor.Dispose();
     }
 
 
@@ -33,7 +33,6 @@ public sealed class MinecraftPacketReader : IDisposable
             var id = await BaseStream.ReadVarIntAsync(token);
             len -= id.GetVarIntLength();
 
-            
 
             var buffer = memoryAllocator.AllocateExactly(len);
 
@@ -69,11 +68,7 @@ public sealed class MinecraftPacketReader : IDisposable
                 await BaseStream.ReadExactlyAsync(buffer_compress, 0, len, token);
 
                 var uncompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-
-                var status = decompressor.Decompress(
-                    buffer_compress.AsSpan(0, len),
-                    uncompressed.AsSpan(0, sizeUncompressed), out var written);
-                if (status != OperationStatus.Done) throw new Exception("Decompress Error");
+                DecompressCore(buffer_compress.AsSpan(0, len), uncompressed.AsSpan(0, sizeUncompressed));
 
                 var id = ReadVarInt(uncompressed, out var offset);
 
@@ -117,6 +112,18 @@ public sealed class MinecraftPacketReader : IDisposable
                 buffer.Dispose();
                 throw;
             }
+        }
+    }
+
+    private static void DecompressCore(ReadOnlySpan<byte> buffer_compress, Span<byte> uncompress)
+    {
+        using (var decompressor = new ZlibDecompressor())
+        {
+            var status = decompressor.Decompress(
+                buffer_compress,
+                uncompress, out var written);
+
+            if (status != OperationStatus.Done) throw new Exception("Decompress Error");
         }
     }
 

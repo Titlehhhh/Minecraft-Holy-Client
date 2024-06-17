@@ -55,9 +55,7 @@ internal sealed class PacketPipeHandler : Disposable
         try
         {
             await foreach (var packet in reader.ReadPacketsAsync(cancellationToken))
-            {
                 PacketReceived?.Invoke(this, packet);
-            }
         }
         catch (Exception ex)
         {

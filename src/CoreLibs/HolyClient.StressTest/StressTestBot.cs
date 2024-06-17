@@ -1,8 +1,8 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
+using McProtoNet.Client;
 using QuickProxyNet;
 using Serilog;
-using Serilog.Core;
 
 namespace HolyClient.StressTest;
 
@@ -35,7 +35,7 @@ public sealed class StressTestBot : IStressTestBot
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        Client.Disconnect();
+        Client.Stop();
 
 
         try
@@ -48,19 +48,11 @@ public sealed class StressTestBot : IStressTestBot
                     proxy = await proxyProvider.GetNextProxy();
 
 
-                Client.Config = new ClientConfig
-                {
-                    Host = Client.Config.Host,
-                    Port = Client.Config.Port,
-                    Username = nickProvider.GetNextNick(),
-                    Version = Client.Config.Version,
-                    Proxy = proxy,
-                    HandshakeHost = Client.Config.HandshakeHost,
-                    HandshakePort = Client.Config.HandshakePort
-                };
+                Client.Proxy = proxy;
+                Client.Username = nickProvider.GetNextNick();
             }
 
-            Client.Start(Logger.None);
+            await Client.Start();
         }
         catch
         {

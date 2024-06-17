@@ -8,8 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />
         <ProjectReference Include="..\McProtoNet\McProtoNet.Protocol\McProtoNet.Protocol.csproj" />
         <ProjectReference Include="..\McProtoNet\McProtoNet\McProtoNet.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     </ItemGroup>
 
 </Project>

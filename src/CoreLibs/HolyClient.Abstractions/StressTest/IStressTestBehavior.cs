@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using ReactiveUI;
 
+
 namespace HolyClient.Abstractions.StressTest;
 
 public interface IStressTestBehavior
