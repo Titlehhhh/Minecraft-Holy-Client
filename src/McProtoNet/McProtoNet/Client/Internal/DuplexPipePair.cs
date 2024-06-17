@@ -9,9 +9,9 @@ internal sealed class DuplexPipePair
 
     public DuplexPipePair()
     {
-        pipe1 = new Pipe(new PipeOptions());
+        pipe1 = new Pipe(new PipeOptions(minimumSegmentSize:64));
 
-        pipe2 = new Pipe(new PipeOptions());
+        pipe2 = new Pipe(new PipeOptions(minimumSegmentSize:64));
 
         Transport = new DuplexPipe(pipe2.Reader, pipe1.Writer);
 

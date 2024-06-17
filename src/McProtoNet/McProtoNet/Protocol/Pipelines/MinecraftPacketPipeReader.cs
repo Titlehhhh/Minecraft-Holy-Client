@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
@@ -44,10 +45,13 @@ internal sealed class MinecraftPacketPipeReader
 
 
             var buffer = result.Buffer;
-            var position = buffer.Start;
+
             try
             {
-                while (TryReadPacket(ref buffer, ref position, out var packet)) yield return Decompress(packet);
+                while (TryReadPacket(ref buffer, out var packet))
+                {
+                    yield return Decompress(packet);
+                }
             }
             finally
             {
@@ -58,13 +62,12 @@ internal sealed class MinecraftPacketPipeReader
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, ref SequencePosition position,
-        out ReadOnlySequence<byte> packet)
+    private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
     {
         scoped SequenceReader<byte> reader = new(buffer);
 
         packet = ReadOnlySequence<byte>.Empty;
-        position = reader.Position;
+
         if (buffer.Length < 1) return false; // Недостаточно данных для чтения заголовка пакета
 
         int length;
@@ -78,7 +81,7 @@ internal sealed class MinecraftPacketPipeReader
         packet = reader.UnreadSequence.Slice(0, length);
 
         reader.Advance(length);
-        position = reader.Position;
+
         buffer = buffer.Slice(reader.Position);
 
         return true;

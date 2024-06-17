@@ -10,23 +10,26 @@ namespace McProtoNet.Client;
 
 public sealed class MinecraftClient : Disposable, IPacketBroker
 {
+    private MinecraftPacketReader _packetReader;
+    private MinecraftPacketSender _packetSender;
+
     public MinecraftClient()
     {
-        pipePair = new DuplexPipePair();
-
-
-        transportHandler = new TransportHandler(pipePair.Application);
-
-        //transportHandler.GG += packet => { this.PacketReceived?.Invoke(this, packet); };
-
-        packetPipeHandler = new PacketPipeHandler(
-            pipePair.Transport,
-            compressor,
-            decompressor);
-
-        packetPipeHandler.PacketReceived = PacketPipeHahdeler_PacketReceived;
-
-        mainTask = Task.CompletedTask;
+        // pipePair = new DuplexPipePair();
+        //
+        //
+        // transportHandler = new TransportHandler(pipePair.Transport);
+        //
+        //
+        //
+        // packetPipeHandler = new PacketPipeHandler(
+        //     pipePair.Application,
+        //     compressor,
+        //     decompressor);
+        //
+        // packetPipeHandler.PacketReceived = PacketPipeHahdeler_PacketReceived;
+        //
+        // mainTask = Task.CompletedTask;
 
         minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
     }
@@ -36,7 +39,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         var holder = await sendLock.AcquireAsync(CTS.Token);
         try
         {
-            await packetPipeHandler.SendPacketAsync(data, CTS.Token);
+            await _packetSender.SendPacketAsync(data, CTS.Token);
         }
         catch (Exception ex)
         {
@@ -83,9 +86,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             CTS = new CancellationTokenSource();
 
 
-            await mainTask;
-
-
             StateChange(MinecraftClientState.Connect);
             await ConnectAsync(CTS.Token);
 
@@ -95,7 +95,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
             var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
 
-            mainTask = MainLoop(result, CTS.Token);
+            _ = MainLoop(result, CTS.Token);
         }
         catch (OperationCanceledException ex)
         {
@@ -126,33 +126,27 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
     {
+        _packetSender = new MinecraftPacketSender();
+        _packetReader = new MinecraftPacketReader();
+
+        _packetReader.BaseStream = loginizationResult.Stream;
+        _packetSender.BaseStream = loginizationResult.Stream;
+
+        _packetSender.SwitchCompression(loginizationResult.CompressionThreshold);
+        _packetReader.SwitchCompression(loginizationResult.CompressionThreshold);
+
         try
         {
-            transportHandler.BaseStream = loginizationResult.Stream;
-
-            packetPipeHandler.CompressionThreshold = loginizationResult.CompressionThreshold;
-
-
-            var transport = transportHandler.StartAsync(cancellationToken);
-            var packets = packetPipeHandler.StartAsync(cancellationToken);
-
-            await Task.WhenAll(packets, transport);
-        }
-        catch (OperationCanceledException ex)
-        {
-            if (CTS is not null)
-                if (!CTS.IsCancellationRequested)
-                    OnException(ex);
-        }
-        catch (Exception ex)
-        {
-            OnException(ex);
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var packet = await _packetReader.ReadNextPacketAsync(cancellationToken);
+                PacketReceived?.Invoke(this, packet);
+            }
         }
         finally
         {
-            transportHandler.Complete();
-            packetPipeHandler.Complete();
-            pipePair.Reset();
+            _packetSender.Dispose();
+            _packetReader.Dispose();
         }
     }
 
@@ -257,20 +251,19 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     private CancellationTokenSource CTS;
 
 
-    private readonly DuplexPipePair pipePair;
+    // private readonly DuplexPipePair pipePair;
+    // private readonly TransportHandler transportHandler;
+    // private readonly PacketPipeHandler packetPipeHandler;
+    //private Task mainTask;
 
     private readonly ZlibCompressor compressor = new(4);
     private readonly ZlibDecompressor decompressor = new();
 
-    private readonly TransportHandler transportHandler;
-    private readonly PacketPipeHandler packetPipeHandler;
 
     private readonly MinecraftClientLogin minecraftLogin = new();
 
     private TcpClient tcpClient;
 
-
-    private Task mainTask;
 
     private MinecraftClientState _state;
 

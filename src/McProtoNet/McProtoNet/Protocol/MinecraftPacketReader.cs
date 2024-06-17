@@ -24,7 +24,7 @@ public sealed class MinecraftPacketReader : IDisposable
     }
 
 
-    //[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public async ValueTask<InputPacket> ReadNextPacketAsync(CancellationToken token = default)
     {
         var len = await BaseStream.ReadVarIntAsync(token);
@@ -33,7 +33,7 @@ public sealed class MinecraftPacketReader : IDisposable
             var id = await BaseStream.ReadVarIntAsync(token);
             len -= id.GetVarIntLength();
 
-            //var buffer = ArrayPool<byte>.Shared.Rent(len);
+            
 
             var buffer = memoryAllocator.AllocateExactly(len);
 

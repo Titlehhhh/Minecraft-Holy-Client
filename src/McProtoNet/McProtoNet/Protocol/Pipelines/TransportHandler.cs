@@ -1,4 +1,6 @@
-﻿using System.IO.Pipelines;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO.Pipelines;
 using DotNext;
 using DotNext.IO;
 using DotNext.IO.Pipelines;
@@ -32,6 +34,7 @@ internal sealed class TransportHandler : Disposable
         duplexPipe.Input.Complete();
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: System.Threading.Tasks.Task`1[System.Byte[]]; size: 462MB")]
     private async Task StartReceiveAsync(CancellationToken cancellationToken)
     {
         var stream = BaseStream;
@@ -39,9 +42,11 @@ internal sealed class TransportHandler : Disposable
 
 
         while (!cancellationToken.IsCancellationRequested)
+        {
             try
             {
-                var buffer = output.GetMemory();
+                var buffer = output.GetMemory(4096);
+          
                 var bytesRead = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 
                 if (bytesRead <= 0)
@@ -62,6 +67,7 @@ internal sealed class TransportHandler : Disposable
                 await output.CompleteAsync(ex);
                 break;
             }
+        }
     }
 
     private async Task StartSendingAsync(CancellationToken cancellationToken)

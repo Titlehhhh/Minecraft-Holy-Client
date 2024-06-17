@@ -8,8 +8,8 @@ Console.WriteLine("Start");
 var minecraftClient = new MinecraftClient
 {
     Host = "127.0.0.1",
-    Port = 56057,
-    Username = "TestBot3",
+    Port = 43195,
+    Username = "TestBot13",
     Version = 754 // 1.16.5
 };
 
@@ -23,7 +23,7 @@ protocol.OnKeepAlivePacket.Subscribe(x => { protocol.SendKeepAlive(x.KeepAliveId
 
 await minecraftClient.Start();
 
-await Task.Delay(1000);
+await Task.Delay(2000);
 
 Console.WriteLine("Start spam");
 for (int i = 1; i <= 20; i++)
