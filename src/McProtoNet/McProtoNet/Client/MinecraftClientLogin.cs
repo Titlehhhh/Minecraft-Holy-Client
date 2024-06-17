@@ -1,5 +1,4 @@
 ﻿using System.Buffers;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
 using McProtoNet.Abstractions;
@@ -61,7 +60,6 @@ public sealed class MinecraftClientLogin
 
             var needBreak = false;
 
-           
 
             switch (inputPacket.Id)
             {
@@ -105,7 +103,7 @@ public sealed class MinecraftClientLogin
                     break;
                 case 0x04:
                     //Login plugin request
-                   
+
                     var buffer = inputPacket.Data;
                     var offset = 0;
                     buffer.TryReadVarInt(out var messageId, out offset);

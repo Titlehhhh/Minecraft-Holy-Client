@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO.Pipelines;
+﻿using System.IO.Pipelines;
 using DotNext;
 using LibDeflate;
 using McProtoNet.Abstractions;
@@ -55,14 +54,14 @@ internal sealed class PacketPipeHandler : Disposable
     {
         try
         {
-            MinecraftPacketReader packetReader = new MinecraftPacketReader();
+            var packetReader = new MinecraftPacketReader();
             packetReader.BaseStream = duplexPipe.Input.AsStream();
-            packetReader.SwitchCompression(this.compressionThreshold);
+            packetReader.SwitchCompression(compressionThreshold);
 
             while (true)
             {
                 var p = await packetReader.ReadNextPacketAsync(cancellationToken);
-                PacketReceived?.Invoke(this,p);
+                PacketReceived?.Invoke(this, p);
             }
             // await foreach (var packet in reader.ReadPacketsAsync(cancellationToken))
             // {

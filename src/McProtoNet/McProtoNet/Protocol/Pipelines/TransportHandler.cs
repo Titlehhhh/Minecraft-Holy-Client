@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO.Pipelines;
+﻿using System.IO.Pipelines;
 using DotNext;
 using DotNext.IO;
 using DotNext.IO.Pipelines;
@@ -40,11 +39,10 @@ internal sealed class TransportHandler : Disposable
 
 
         while (!cancellationToken.IsCancellationRequested)
-        {
             try
             {
                 var buffer = output.GetMemory();
-                int bytesRead = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+                var bytesRead = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 
                 if (bytesRead <= 0)
                     throw new EndOfStreamException();
@@ -64,7 +62,6 @@ internal sealed class TransportHandler : Disposable
                 await output.CompleteAsync(ex);
                 break;
             }
-        }
     }
 
     private async Task StartSendingAsync(CancellationToken cancellationToken)

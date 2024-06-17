@@ -8,7 +8,7 @@ Console.WriteLine("Start");
 var minecraftClient = new MinecraftClient
 {
     Host = "127.0.0.1",
-    Port = 55100,
+    Port = 56057,
     Username = "TestBot3",
     Version = 754 // 1.16.5
 };

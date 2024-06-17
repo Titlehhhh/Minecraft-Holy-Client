@@ -1,9 +1,7 @@
 ﻿using System.Buffers;
-using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-using DotNext.IO.Pipelines;
 using LibDeflate;
 using McProtoNet.Abstractions;
 
@@ -25,7 +23,7 @@ internal sealed class MinecraftPacketPipeReader
     public async IAsyncEnumerable<InputPacket> ReadPacketsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        int chunkcount = 0;
+        var chunkcount = 0;
         cancellationToken.ThrowIfCancellationRequested();
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -45,14 +43,11 @@ internal sealed class MinecraftPacketPipeReader
             if (result.IsCanceled) break;
 
 
-            ReadOnlySequence<byte> buffer = result.Buffer;
-            SequencePosition position = buffer.Start;
+            var buffer = result.Buffer;
+            var position = buffer.Start;
             try
             {
-                while (TryReadPacket(ref buffer, ref position, out var packet))
-                {
-                    yield return Decompress(packet);
-                }
+                while (TryReadPacket(ref buffer, ref position, out var packet)) yield return Decompress(packet);
             }
             finally
             {
@@ -77,10 +72,7 @@ internal sealed class MinecraftPacketPipeReader
         if (!reader.TryReadVarInt(out length, out bytesRead)) return false; // Невозможно прочитать длину заголовка
 
 
-        if (length > reader.Remaining)
-        {
-            return false;
-        } // Недостаточно данных для чтения полного пакета
+        if (length > reader.Remaining) return false; // Недостаточно данных для чтения полного пакета
 
 
         packet = reader.UnreadSequence.Slice(0, length);
