@@ -50,7 +50,7 @@ public class AsyncCipherStream : Stream
             return await stream.ReadAsync(buffer, offset, count, cancellationToken);
 
         var num = 0;
-        while (num < count)
+        while (num < count && !cancellationToken.IsCancellationRequested)
         {
             if (mInBuf == null || mInPos >= mInBuf.Length)
                 if (!await FillInBufAsync(cancellationToken))
@@ -98,7 +98,7 @@ public class AsyncCipherStream : Stream
         do
         {
             mInBuf = await ReadAndProcessBlockAsync(cancellation);
-        } while (!inStreamEnded && mInBuf == null);
+        } while (!inStreamEnded && mInBuf == null && !cancellation.IsCancellationRequested);
 
         return mInBuf != null;
     }
@@ -127,16 +127,16 @@ public class AsyncCipherStream : Stream
         var numRead = 0;
         do
         {
-            var count = await stream.ReadAsync(block, numRead, block.Length - numRead);
+            var count = await stream.ReadAsync(block, numRead, block.Length - numRead, cancellation);
             if (count <= 0)
             {
-                throw new EndOfStreamException();
+                //throw new EndOfStreamException();
                 inStreamEnded = true;
                 break;
             }
 
             numRead += count;
-        } while (numRead < block.Length);
+        } while (numRead < block.Length && !cancellation.IsCancellationRequested);
 
         Debug.Assert(inStreamEnded || numRead == block.Length);
 

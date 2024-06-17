@@ -18,7 +18,7 @@
         <PackageReference Include="DotNext" Version="5.3.1"/>
         <PackageReference Include="LibDeflate.NET" Version="1.19.0"/>
         <PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
-        <PackageReference Include="System.IO.Pipelines" Version="9.0.0-preview.4.24266.19"/>
+       
         <PackageReference Include="System.Reactive" Version="6.0.0"/>
         <PackageReference Include="ZString" Version="2.6.0"/>
     </ItemGroup>

@@ -55,17 +55,26 @@ internal sealed class PacketPipeHandler : Disposable
     {
         try
         {
-            await foreach (var packet in reader.ReadPacketsAsync(cancellationToken))
-                PacketReceived?.Invoke(this, packet);
+            MinecraftPacketReader packetReader = new MinecraftPacketReader();
+            packetReader.BaseStream = duplexPipe.Input.AsStream();
+            packetReader.SwitchCompression(this.compressionThreshold);
+
+            while (true)
+            {
+                var p = await packetReader.ReadNextPacketAsync(cancellationToken);
+                PacketReceived?.Invoke(this,p);
+            }
+            // await foreach (var packet in reader.ReadPacketsAsync(cancellationToken))
+            // {
+            //     PacketReceived?.Invoke(this, packet);
+            // }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine("PacketPipeHandler Exception " + ex);
             duplexPipe.Output.CancelPendingFlush();
         }
         finally
         {
-            Debug.WriteLine("PacketPipeHandler stop");
             await duplexPipe.Output.CompleteAsync();
         }
     }

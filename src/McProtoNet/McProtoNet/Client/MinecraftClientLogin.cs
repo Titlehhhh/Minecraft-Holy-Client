@@ -61,7 +61,7 @@ public sealed class MinecraftClientLogin
 
             var needBreak = false;
 
-            Console.WriteLine("ReadLoging: " + inputPacket.Id);
+           
 
             switch (inputPacket.Id)
             {
@@ -102,11 +102,10 @@ public sealed class MinecraftClientLogin
                     reader.SwitchCompression(threshold);
                     sender.SwitchCompression(threshold);
 
-                    Debug.WriteLine("Compress: " + threshold);
                     break;
                 case 0x04:
                     //Login plugin request
-                    Debug.WriteLine("Plugin");
+                   
                     var buffer = inputPacket.Data;
                     var offset = 0;
                     buffer.TryReadVarInt(out var messageId, out offset);

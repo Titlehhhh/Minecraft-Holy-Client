@@ -9,14 +9,14 @@ internal sealed class DuplexPipePair
 
     public DuplexPipePair()
     {
-        pipe1 = new Pipe();
+        pipe1 = new Pipe(new PipeOptions());
 
-        pipe2 = new Pipe();
+        pipe2 = new Pipe(new PipeOptions());
 
-        Transport = new DuplexPipe(pipe1.Reader, pipe2.Writer);
+        Transport = new DuplexPipe(pipe2.Reader, pipe1.Writer);
 
 
-        Application = new DuplexPipe(pipe2.Reader, pipe1.Writer);
+        Application = new DuplexPipe(pipe1.Reader, pipe2.Writer);
     }
 
     public IDuplexPipe Transport { get; }

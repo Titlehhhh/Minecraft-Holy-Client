@@ -164,14 +164,16 @@ public ref struct MinecraftPrimitiveReaderSlim
     public string ReadString()
     {
         int len = ReadVarInt();
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(len);
+        //byte[] buffer = ArrayPool<byte>.Shared.Rent(len);
+        
         try
         {
-            return Encoding.UTF8.GetString(buffer);
+            return Encoding.UTF8.GetString(reader.UnreadSequence.Slice(0,len));
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(buffer);
+            reader.Advance(len);
+           // ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 

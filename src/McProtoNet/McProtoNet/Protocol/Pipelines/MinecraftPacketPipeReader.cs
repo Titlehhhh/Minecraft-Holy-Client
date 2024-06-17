@@ -1,7 +1,9 @@
 ﻿using System.Buffers;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
+using DotNext.IO.Pipelines;
 using LibDeflate;
 using McProtoNet.Abstractions;
 
@@ -23,16 +25,18 @@ internal sealed class MinecraftPacketPipeReader
     public async IAsyncEnumerable<InputPacket> ReadPacketsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        int chunkcount = 0;
         cancellationToken.ThrowIfCancellationRequested();
         while (!cancellationToken.IsCancellationRequested)
         {
             ReadResult result = default;
             try
             {
-                result = await pipeReader.ReadAsync(cancellationToken).ConfigureAwait(false);
+                result = await pipeReader.ReadAsync(cancellationToken);
             }
             catch (OperationCanceledException)
             {
+                await pipeReader.CompleteAsync();
                 break;
             }
 
@@ -41,10 +45,14 @@ internal sealed class MinecraftPacketPipeReader
             if (result.IsCanceled) break;
 
 
-            var buffer = result.Buffer;
+            ReadOnlySequence<byte> buffer = result.Buffer;
+            SequencePosition position = buffer.Start;
             try
             {
-                while (TryReadPacket(ref buffer, out var packet)) yield return Decompress(packet);
+                while (TryReadPacket(ref buffer, ref position, out var packet))
+                {
+                    yield return Decompress(packet);
+                }
             }
             finally
             {
@@ -55,12 +63,13 @@ internal sealed class MinecraftPacketPipeReader
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
+    private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, ref SequencePosition position,
+        out ReadOnlySequence<byte> packet)
     {
         scoped SequenceReader<byte> reader = new(buffer);
 
         packet = ReadOnlySequence<byte>.Empty;
-
+        position = reader.Position;
         if (buffer.Length < 1) return false; // Недостаточно данных для чтения заголовка пакета
 
         int length;
@@ -68,13 +77,17 @@ internal sealed class MinecraftPacketPipeReader
         if (!reader.TryReadVarInt(out length, out bytesRead)) return false; // Невозможно прочитать длину заголовка
 
 
-        if (length > reader.Remaining) return false; // Недостаточно данных для чтения полного пакета
+        if (length > reader.Remaining)
+        {
+            return false;
+        } // Недостаточно данных для чтения полного пакета
+
+
+        packet = reader.UnreadSequence.Slice(0, length);
 
         reader.Advance(length);
-
-        // Чтение данных пакета
-        packet = buffer.Slice(bytesRead, length);
-        buffer = reader.UnreadSequence;
+        position = reader.Position;
+        buffer = buffer.Slice(reader.Position);
 
         return true;
     }

@@ -15,10 +15,12 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         pipePair = new DuplexPipePair();
 
 
-        transportHandler = new TransportHandler(pipePair.Transport);
+        transportHandler = new TransportHandler(pipePair.Application);
+
+        //transportHandler.GG += packet => { this.PacketReceived?.Invoke(this, packet); };
 
         packetPipeHandler = new PacketPipeHandler(
-            pipePair.Application,
+            pipePair.Transport,
             compressor,
             decompressor);
 
@@ -70,6 +72,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public async Task Start()
     {
+        Console.WriteLine("Start MinecraftClient");
         try
         {
             Validate();
@@ -132,7 +135,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
             var transport = transportHandler.StartAsync(cancellationToken);
             var packets = packetPipeHandler.StartAsync(cancellationToken);
-            await Task.WhenAll(transport, packets);
+
+            await Task.WhenAll(packets, transport);
         }
         catch (OperationCanceledException ex)
         {
@@ -159,8 +163,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
         Interlocked.Exchange(ref tcpClient, newTcp)?.Dispose();
 
-        newTcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        newTcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+
         newTcp.Client.NoDelay = true;
         newTcp.LingerState = new LingerOption(false, 0);
 
