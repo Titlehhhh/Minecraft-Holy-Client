@@ -263,12 +263,12 @@ public sealed class Protocol_758 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendSetBeaconEffect(int primary_effect, int secondary_effect)
+    public ValueTask SendSetBeaconEffect(int primaryEffect, int secondaryEffect)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x24);
-        writer.WriteVarInt(primary_effect);
-        writer.WriteVarInt(secondary_effect);
+        writer.WriteVarInt(primaryEffect);
+        writer.WriteVarInt(secondaryEffect);
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
@@ -283,19 +283,19 @@ public sealed class Protocol_758 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendUpdateCommandBlockMinecart(int entityId, string command, bool track_output)
+    public ValueTask SendUpdateCommandBlockMinecart(int entityId, string command, bool trackOutput)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x27);
         writer.WriteVarInt(entityId);
         writer.WriteString(command);
-        writer.WriteBoolean(track_output);
+        writer.WriteBoolean(trackOutput);
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offset_x,
-        sbyte offset_y, sbyte offset_z, sbyte size_x, sbyte size_y, sbyte size_z, int mirror, int rotation,
-        string metadata, float integrity, long seed, byte flags)
+    public ValueTask SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offsetX,
+        sbyte offsetY, sbyte offsetZ, sbyte sizeX, sbyte sizeY, sbyte sizeZ, int mirror, int rotation, string metadata,
+        float integrity, long seed, byte flags)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2a);
@@ -303,12 +303,12 @@ public sealed class Protocol_758 : ProtocolBase
         writer.WriteVarInt(action);
         writer.WriteVarInt(mode);
         writer.WriteString(name);
-        writer.WriteSignedByte(offset_x);
-        writer.WriteSignedByte(offset_y);
-        writer.WriteSignedByte(offset_z);
-        writer.WriteSignedByte(size_x);
-        writer.WriteSignedByte(size_y);
-        writer.WriteSignedByte(size_z);
+        writer.WriteSignedByte(offsetX);
+        writer.WriteSignedByte(offsetY);
+        writer.WriteSignedByte(offsetZ);
+        writer.WriteSignedByte(sizeX);
+        writer.WriteSignedByte(sizeY);
+        writer.WriteSignedByte(sizeZ);
         writer.WriteVarInt(mirror);
         writer.WriteVarInt(rotation);
         writer.WriteString(metadata);

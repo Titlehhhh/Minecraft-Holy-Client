@@ -296,28 +296,28 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendSetBeaconEffect(int? primary_effect, int? secondary_effect)
+    public ValueTask SendSetBeaconEffect(int? primaryEffect, int? secondaryEffect)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2b);
-        if (primary_effect is null)
+        if (primaryEffect is null)
         {
             writer.WriteBoolean(false);
         }
         else
         {
             writer.WriteBoolean(true);
-            writer.WriteVarInt(primary_effect);
+            writer.WriteVarInt(primaryEffect);
         }
 
-        if (secondary_effect is null)
+        if (secondaryEffect is null)
         {
             writer.WriteBoolean(false);
         }
         else
         {
             writer.WriteBoolean(true);
-            writer.WriteVarInt(secondary_effect);
+            writer.WriteVarInt(secondaryEffect);
         }
 
         return SendPacketCore(writer.GetWrittenMemory());
@@ -334,19 +334,19 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendUpdateCommandBlockMinecart(int entityId, string command, bool track_output)
+    public ValueTask SendUpdateCommandBlockMinecart(int entityId, string command, bool trackOutput)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2e);
         writer.WriteVarInt(entityId);
         writer.WriteString(command);
-        writer.WriteBoolean(track_output);
+        writer.WriteBoolean(trackOutput);
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offset_x,
-        sbyte offset_y, sbyte offset_z, sbyte size_x, sbyte size_y, sbyte size_z, int mirror, int rotation,
-        string metadata, float integrity, int seed, byte flags)
+    public ValueTask SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offsetX,
+        sbyte offsetY, sbyte offsetZ, sbyte sizeX, sbyte sizeY, sbyte sizeZ, int mirror, int rotation, string metadata,
+        float integrity, int seed, byte flags)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x31);
@@ -354,12 +354,12 @@ public sealed class Protocol_765 : ProtocolBase
         writer.WriteVarInt(action);
         writer.WriteVarInt(mode);
         writer.WriteString(name);
-        writer.WriteSignedByte(offset_x);
-        writer.WriteSignedByte(offset_y);
-        writer.WriteSignedByte(offset_z);
-        writer.WriteSignedByte(size_x);
-        writer.WriteSignedByte(size_y);
-        writer.WriteSignedByte(size_z);
+        writer.WriteSignedByte(offsetX);
+        writer.WriteSignedByte(offsetY);
+        writer.WriteSignedByte(offsetZ);
+        writer.WriteSignedByte(sizeX);
+        writer.WriteSignedByte(sizeY);
+        writer.WriteSignedByte(sizeZ);
         writer.WriteVarInt(mirror);
         writer.WriteVarInt(rotation);
         writer.WriteString(metadata);
@@ -611,7 +611,7 @@ public sealed class Protocol_765 : ProtocolBase
     }
 
     public ValueTask SendUpdateJigsawBlock(Position location, string name, string target, string pool,
-        string finalState, string jointType, int selection_priority, int placement_priority)
+        string finalState, string jointType, int selectionPriority, int placementPriority)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x30);
@@ -621,8 +621,8 @@ public sealed class Protocol_765 : ProtocolBase
         writer.WriteString(pool);
         writer.WriteString(finalState);
         writer.WriteString(jointType);
-        writer.WriteVarInt(selection_priority);
-        writer.WriteVarInt(placement_priority);
+        writer.WriteVarInt(selectionPriority);
+        writer.WriteVarInt(placementPriority);
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
@@ -725,12 +725,12 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public ValueTask SendSetSlotState(int slot_id, int window_id, bool state)
+    public ValueTask SendSetSlotState(int slotId, int windowId, bool state)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0f);
-        writer.WriteVarInt(slot_id);
-        writer.WriteVarInt(window_id);
+        writer.WriteVarInt(slotId);
+        writer.WriteVarInt(windowId);
         writer.WriteBoolean(state);
         return SendPacketCore(writer.GetWrittenMemory());
     }

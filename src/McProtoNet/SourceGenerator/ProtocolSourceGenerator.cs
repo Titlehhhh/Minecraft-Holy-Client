@@ -390,9 +390,9 @@ public sealed class ProtocolSourceGenerator
 
             var netType = GetNetType(field.Type);
 
-            arguments.Add((netType, field.Name));
+            arguments.Add((netType, field.Name.Camelize()));
 
-            var writeMethod = GenerateWriteMethod(field.Type, field.Name);
+            var writeMethod = GenerateWriteMethod(field.Type, field.Name.Camelize());
 
             instructions.AddRange(writeMethod.Split("\n"));
         }
