@@ -40,17 +40,30 @@ public sealed class MinecraftClientLogin
 
             sender.BaseStream = mainStream;
             reader.BaseStream = mainStream;
-
-            using var handshake = CreateHandshake(options.Host, options.Port, options.ProtocolVersion);
-
             StateChanged?.Invoke(MinecraftClientState.Handshaking);
-            await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
+            var handshake = CreateHandshake(options.Host, options.Port, options.ProtocolVersion);
+            try
+            {
+                await sender.SendPacketAsync(handshake, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                handshake.Dispose();
+            }
 
-
-            using var loginStart = CreateLoginStart(options.Username, options);
 
             StateChanged?.Invoke(MinecraftClientState.Login);
-            await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
+
+            var loginStart = CreateLoginStart(options.Username, options);
+            try
+            {
+                await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                loginStart.Dispose();
+            }
+
 
             var threshold = 0;
 

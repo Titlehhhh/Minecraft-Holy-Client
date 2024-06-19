@@ -4,7 +4,7 @@ namespace McProtoNet.Protocol;
 
 public static class Extensions
 {
-    public static Position ReadPosition(this MinecraftPrimitiveReaderSlim reader)
+    public static Position ReadPosition(this ref MinecraftPrimitiveReaderSlim reader)
     {
         var locEncoded = reader.ReadSignedLong();
 
@@ -34,17 +34,20 @@ public static class Extensions
         return new Position(x, z, y);
     }
 
-    public static void WritePosition(this MinecraftPrimitiveWriterSlim writer, Position position)
+    public static void WritePosition(this ref MinecraftPrimitiveWriterSlim writer, Position position)
     {
-        var bytes = (((ulong)position.X & 0x3FFFFFF) << 38) |
-                    (((ulong)position.Z & 0x3FFFFFF) << 12) |
-                    ((ulong)position.Y & 0xFFF);
+        ulong a = ((((ulong)position.X) & 0x3FFFFFF) << 38) |
+                  ((((ulong)position.Z) & 0x3FFFFFF) << 12) |
+                  (((ulong)position.Y) & 0xFFF);
+       // var g = BitConverter.GetBytes(a);
 
-
-        writer.WriteUnsignedLong(bytes);
+       // Array.Reverse(g);
+         writer.WriteUnsignedLong(a);
+        //writer.WriteBuffer(g);
     }
 
-    public static void WriteSlot(this MinecraftPrimitiveWriterSlim writer, Slot? slot)
+
+    public static void WriteSlot(this ref MinecraftPrimitiveWriterSlim writer, Slot? slot)
     {
         if (slot is null)
         {
@@ -59,7 +62,7 @@ public static class Extensions
         }
     }
 
-    public static Slot? ReadSlot(this MinecraftPrimitiveReaderSlim reader)
+    public static Slot? ReadSlot(this ref MinecraftPrimitiveReaderSlim reader)
     {
         if (reader.ReadBoolean())
             return new Slot(reader.ReadVarInt(), reader.ReadSignedByte(), reader.ReadOptionalNbt());

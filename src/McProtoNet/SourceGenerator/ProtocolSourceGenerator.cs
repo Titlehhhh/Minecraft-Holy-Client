@@ -105,6 +105,7 @@ public sealed class ProtocolSourceGenerator
 
         coreClass.BaseClass = "ProtocolBase";
         coreClass.Name = $"Protocol_{Version}";
+
         coreClass.IsSealed = true;
         netNamespace.Classes.Add(coreClass);
 
@@ -112,7 +113,7 @@ public sealed class ProtocolSourceGenerator
 
         constructor.Arguments.Add(("IPacketBroker", "client"));
         constructor.BaseType = NetClass.NetConstructor.ConstructorBaseType.Base;
-
+        constructor.Instructions.Add($"SupportedVersion = {Version};");
         coreClass.Constructors.Add(constructor);
 
         {
@@ -400,7 +401,7 @@ public sealed class ProtocolSourceGenerator
         instructions.Add("return base.SendPacketCore(writer.GetWrittenMemory());");
 
 
-        method.ReturnType = "Task";
+        method.ReturnType = "ValueTask";
 
         method.Arguments = arguments;
         method.Instructions = instructions;

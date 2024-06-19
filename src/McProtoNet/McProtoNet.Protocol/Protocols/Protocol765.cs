@@ -89,6 +89,7 @@ public sealed class Protocol_765 : ProtocolBase
 
     public Protocol_765(IPacketBroker client) : base(client)
     {
+        SupportedVersion = 765;
     }
 
     public IObservable<PacketSpawnEntity> OnSpawnEntityPacket => _onspawn_entity;
@@ -179,7 +180,7 @@ public sealed class Protocol_765 : ProtocolBase
     public IObservable<PacketSetTickingState> OnSetTickingStatePacket => _onset_ticking_state;
     public IObservable<PacketStepTick> OnStepTickPacket => _onstep_tick;
 
-    public Task SendTeleportConfirm(int teleportId)
+    public ValueTask SendTeleportConfirm(int teleportId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x00);
@@ -187,7 +188,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendQueryBlockNbt(int transactionId, Position location)
+    public ValueTask SendQueryBlockNbt(int transactionId, Position location)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x01);
@@ -196,7 +197,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendChatMessage(string message, long timestamp, long salt, byte[]? signature, int offset,
+    public ValueTask SendChatMessage(string message, long timestamp, long salt, byte[]? signature, int offset,
         byte[] acknowledged)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -221,7 +222,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSetDifficulty(byte newDifficulty)
+    public ValueTask SendSetDifficulty(byte newDifficulty)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x02);
@@ -229,7 +230,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendMessageAcknowledgement(int count)
+    public ValueTask SendMessageAcknowledgement(int count)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x03);
@@ -237,7 +238,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendEditBook(int hand, string[] pages, string? title)
+    public ValueTask SendEditBook(int hand, string[] pages, string? title)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x11);
@@ -262,7 +263,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendQueryEntityNbt(int transactionId, int entityId)
+    public ValueTask SendQueryEntityNbt(int transactionId, int entityId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x12);
@@ -271,7 +272,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendPickItem(int slot)
+    public ValueTask SendPickItem(int slot)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1d);
@@ -279,7 +280,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendNameItem(string name)
+    public ValueTask SendNameItem(string name)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x27);
@@ -287,7 +288,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSelectTrade(int slot)
+    public ValueTask SendSelectTrade(int slot)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2a);
@@ -295,7 +296,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSetBeaconEffect(int? primary_effect, int? secondary_effect)
+    public ValueTask SendSetBeaconEffect(int? primary_effect, int? secondary_effect)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2b);
@@ -322,7 +323,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUpdateCommandBlock(Position location, string command, int mode, byte flags)
+    public ValueTask SendUpdateCommandBlock(Position location, string command, int mode, byte flags)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2d);
@@ -333,7 +334,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUpdateCommandBlockMinecart(int entityId, string command, bool track_output)
+    public ValueTask SendUpdateCommandBlockMinecart(int entityId, string command, bool track_output)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2e);
@@ -343,7 +344,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offset_x,
+    public ValueTask SendUpdateStructureBlock(Position location, int action, int mode, string name, sbyte offset_x,
         sbyte offset_y, sbyte offset_z, sbyte size_x, sbyte size_y, sbyte size_z, int mirror, int rotation,
         string metadata, float integrity, int seed, byte flags)
     {
@@ -368,7 +369,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendTabComplete(int transactionId, string text)
+    public ValueTask SendTabComplete(int transactionId, string text)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0a);
@@ -377,7 +378,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendClientCommand(int actionId)
+    public ValueTask SendClientCommand(int actionId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x08);
@@ -385,7 +386,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSettings(string locale, sbyte viewDistance, int chatFlags, bool chatColors, byte skinParts,
+    public ValueTask SendSettings(string locale, sbyte viewDistance, int chatFlags, bool chatColors, byte skinParts,
         int mainHand, bool enableTextFiltering, bool enableServerListing)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -401,7 +402,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendEnchantItem(sbyte windowId, sbyte enchantment)
+    public ValueTask SendEnchantItem(sbyte windowId, sbyte enchantment)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0c);
@@ -410,7 +411,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendCloseWindow(byte windowId)
+    public ValueTask SendCloseWindow(byte windowId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0e);
@@ -418,7 +419,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendCustomPayload(string channel, byte[] data)
+    public ValueTask SendCustomPayload(string channel, byte[] data)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x10);
@@ -427,7 +428,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendGenerateStructure(Position location, int levels, bool keepJigsaws)
+    public ValueTask SendGenerateStructure(Position location, int levels, bool keepJigsaws)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x14);
@@ -437,7 +438,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendKeepAlive(long keepAliveId)
+    public ValueTask SendKeepAlive(long keepAliveId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x15);
@@ -445,7 +446,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendLockDifficulty(bool locked)
+    public ValueTask SendLockDifficulty(bool locked)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x16);
@@ -453,7 +454,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendPosition(double x, double y, double z, bool onGround)
+    public ValueTask SendPosition(double x, double y, double z, bool onGround)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x17);
@@ -464,7 +465,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendPositionLook(double x, double y, double z, float yaw, float pitch, bool onGround)
+    public ValueTask SendPositionLook(double x, double y, double z, float yaw, float pitch, bool onGround)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x18);
@@ -477,7 +478,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendLook(float yaw, float pitch, bool onGround)
+    public ValueTask SendLook(float yaw, float pitch, bool onGround)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x19);
@@ -487,7 +488,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendFlying(bool onGround)
+    public ValueTask SendFlying(bool onGround)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1a);
@@ -495,7 +496,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendVehicleMove(double x, double y, double z, float yaw, float pitch)
+    public ValueTask SendVehicleMove(double x, double y, double z, float yaw, float pitch)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1b);
@@ -507,7 +508,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSteerBoat(bool leftPaddle, bool rightPaddle)
+    public ValueTask SendSteerBoat(bool leftPaddle, bool rightPaddle)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1c);
@@ -516,7 +517,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendCraftRecipeRequest(sbyte windowId, string recipe, bool makeAll)
+    public ValueTask SendCraftRecipeRequest(sbyte windowId, string recipe, bool makeAll)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1f);
@@ -526,7 +527,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendAbilities(sbyte flags)
+    public ValueTask SendAbilities(sbyte flags)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x20);
@@ -534,7 +535,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendBlockDig(int status, Position location, sbyte face, int sequence)
+    public ValueTask SendBlockDig(int status, Position location, sbyte face, int sequence)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x21);
@@ -545,7 +546,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendEntityAction(int entityId, int actionId, int jumpBoost)
+    public ValueTask SendEntityAction(int entityId, int actionId, int jumpBoost)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x22);
@@ -555,7 +556,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSteerVehicle(float sideways, float forward, byte jump)
+    public ValueTask SendSteerVehicle(float sideways, float forward, byte jump)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x23);
@@ -565,7 +566,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendDisplayedRecipe(string recipeId)
+    public ValueTask SendDisplayedRecipe(string recipeId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x26);
@@ -573,7 +574,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendRecipeBook(int bookId, bool bookOpen, bool filterActive)
+    public ValueTask SendRecipeBook(int bookId, bool bookOpen, bool filterActive)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x25);
@@ -583,7 +584,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendResourcePackReceive(Guid uuid, int result)
+    public ValueTask SendResourcePackReceive(Guid uuid, int result)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x28);
@@ -592,7 +593,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendHeldItemSlot(short slotId)
+    public ValueTask SendHeldItemSlot(short slotId)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2c);
@@ -600,7 +601,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSetCreativeSlot(short slot, Slot? item)
+    public ValueTask SendSetCreativeSlot(short slot, Slot? item)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x2f);
@@ -609,8 +610,8 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUpdateJigsawBlock(Position location, string name, string target, string pool, string finalState,
-        string jointType, int selection_priority, int placement_priority)
+    public ValueTask SendUpdateJigsawBlock(Position location, string name, string target, string pool,
+        string finalState, string jointType, int selection_priority, int placement_priority)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x30);
@@ -625,7 +626,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUpdateSign(Position location, bool isFrontText, string text1, string text2, string text3,
+    public ValueTask SendUpdateSign(Position location, bool isFrontText, string text1, string text2, string text3,
         string text4)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
@@ -639,7 +640,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendArmAnimation(int hand)
+    public ValueTask SendArmAnimation(int hand)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x33);
@@ -647,7 +648,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSpectate(Guid target)
+    public ValueTask SendSpectate(Guid target)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x34);
@@ -655,8 +656,8 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY, float cursorZ,
-        bool insideBlock, int sequence)
+    public ValueTask SendBlockPlace(int hand, Position location, int direction, float cursorX, float cursorY,
+        float cursorZ, bool insideBlock, int sequence)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x35);
@@ -671,7 +672,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendUseItem(int hand, int sequence)
+    public ValueTask SendUseItem(int hand, int sequence)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x36);
@@ -680,7 +681,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendPong(int id)
+    public ValueTask SendPong(int id)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x24);
@@ -688,7 +689,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendChatSessionUpdate(Guid sessionUUID, long expireTime, byte[] publicKey, byte[] signature)
+    public ValueTask SendChatSessionUpdate(Guid sessionUUID, long expireTime, byte[] publicKey, byte[] signature)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x06);
@@ -701,7 +702,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendChunkBatchReceived(float chunksPerTick)
+    public ValueTask SendChunkBatchReceived(float chunksPerTick)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x07);
@@ -709,14 +710,14 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendConfigurationAcknowledged()
+    public ValueTask SendConfigurationAcknowledged()
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0b);
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendPingRequest(long id)
+    public ValueTask SendPingRequest(long id)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x1e);
@@ -724,7 +725,7 @@ public sealed class Protocol_765 : ProtocolBase
         return SendPacketCore(writer.GetWrittenMemory());
     }
 
-    public Task SendSetSlotState(int slot_id, int window_id, bool state)
+    public ValueTask SendSetSlotState(int slot_id, int window_id, bool state)
     {
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         writer.WriteVarInt(0x0f);

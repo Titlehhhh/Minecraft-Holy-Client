@@ -1,13 +1,14 @@
 ﻿using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
-
 using HolyClient.StressTest;
-
+using McProtoNet;
+using McProtoNet.Client;
+using McProtoNet.Protocol;
+using McProtoNet.Protocol754;
 using Serilog;
 
 
 
-Console.WriteLine("Start");
 
 
 string host = args[0];
@@ -16,17 +17,17 @@ string host = args[0];
 StressTestProfile stressTestProfile = new StressTestProfile();
 
 stressTestProfile.Version = 754;
-stressTestProfile.BotsNickname = "_PGG";
+stressTestProfile.BotsNickname = "_PKSSM";
 stressTestProfile.UseProxy = true;
 
 stressTestProfile.Server = host;
 
 stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
 {
-    ParallelCount = 30_000
+    ParallelCount = 1000
 };
 stressTestProfile.SetBehavior(new DefaultPluginSource());
-stressTestProfile.NumberOfBots = 300;
+stressTestProfile.NumberOfBots = 30;
 
 var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
@@ -46,4 +47,3 @@ public class DefaultPluginSource : IPluginSource
         return (T)beh;
     }
 }
-

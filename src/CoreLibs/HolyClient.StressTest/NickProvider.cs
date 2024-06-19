@@ -16,7 +16,7 @@ internal class NickProvider : INickProvider
 
     public string GetNextNick()
     {
-        var stringChars = new char[10 - _baseNick.Length];
+        var stringChars = new char[15 - _baseNick.Length];
         var random = new Random();
 
         for (var i = 0; i < stringChars.Length; i++) stringChars[i] = chars[random.Next(chars.Length)];

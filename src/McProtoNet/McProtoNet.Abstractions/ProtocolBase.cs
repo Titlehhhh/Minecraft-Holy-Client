@@ -4,6 +4,8 @@ namespace McProtoNet.Abstractions;
 
 public abstract class ProtocolBase
 {
+    public int SupportedVersion { get; protected set; }
+    
     private readonly IPacketBroker _client;
 
     public ProtocolBase(IPacketBroker client)
@@ -30,7 +32,7 @@ public abstract class ProtocolBase
     {
     }
 
-    protected async Task SendPacketCore(MemoryOwner<byte> owner)
+    protected async ValueTask SendPacketCore(MemoryOwner<byte> owner)
     {
         try
         {

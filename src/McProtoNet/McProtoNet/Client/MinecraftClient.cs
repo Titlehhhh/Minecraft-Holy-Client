@@ -39,7 +39,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     public int ReadTimeout { get; set; } = 30_000;
     public int WriteTimeout { get; set; } = 30_000;
 
-    public async Task SendPacket(ReadOnlyMemory<byte> data)
+    public async ValueTask SendPacket(ReadOnlyMemory<byte> data)
     {
         var holder = await sendLock.AcquireAsync(CTS.Token);
         try

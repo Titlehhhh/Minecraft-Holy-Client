@@ -2,7 +2,7 @@
 
 public interface IPacketBroker
 {
-    Task SendPacket(ReadOnlyMemory<byte> data);
+    ValueTask SendPacket(ReadOnlyMemory<byte> data);
 
     event PacketHandler PacketReceived;
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
@@ -34,31 +35,31 @@ public class DefaultBehavior : BaseStressTestBehavior
         logger.Information("Start default behavior");
         StaticSpam = Observable.Interval(TimeSpan.FromMilliseconds(SpamTimeout), RxApp.TaskpoolScheduler);
 
-
+        ConcurrentBag<int> entities = new();
         foreach (var bot in bots)
         {
             Protocol_754 proto = new Protocol_754(bot.Client);
 
             proto.OnKeepAlivePacket.Subscribe(x => { proto.SendKeepAlive(x.KeepAliveId); });
-
+            proto.OnSpawnEntityPacket.Subscribe(x => { entities.Add(x.EntityId); });
             proto.OnLoginPacket.Subscribe(async x =>
             {
                 try
                 {
                     await Task.Delay(500);
                     await proto.SendChat("/register 21qwerty 21qwerty");
+
                     while (true)
                     {
-                        await Task.Delay(3000);
+                        await Task.Delay(100);
 
-                        //if (Random.Shared.NextDouble() >= 0.5)
-                        {
-                            //await proto.SendChat("Вы негры");
-                        }
-                       // else
-                        {
-                           // await proto.SendChat("https://discord.com/invite/5Huju3Ka5P");
-                        }
+                        var pos = new Position(Random.Shared.Next(-100_000, 100_000),
+                            Random.Shared.Next(-100_000, 100_000),
+                            Random.Shared.Next(0, 128));
+                        
+                        await proto.SendBlockDig(0, pos, 2);
+                        await proto.SendBlockDig(2, pos, 0);
+                        await proto.SendArmAnimation(0);
                     }
                 }
                 catch
@@ -70,7 +71,7 @@ public class DefaultBehavior : BaseStressTestBehavior
             {
                 if (args.State == MinecraftClientState.Errored)
                 {
-                    logger.Error(args.Error,"Disconnect Error");
+                    //logger.Error(args.Error,"Disconnect Error");
                     await Task.Delay(3000);
                     await bot.Restart(true);
                 }
