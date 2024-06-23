@@ -75,10 +75,12 @@ public class Program
         }
 
 
+        
+        
         var protocolDir = Path.Combine(Root, "Protocols");
 
-        if (!Directory.Exists(protocolDir))
-            Directory.CreateDirectory(protocolDir);
+
+        Directory.CreateDirectory(protocolDir);
 
 
         foreach (var item in collection.Protocols)

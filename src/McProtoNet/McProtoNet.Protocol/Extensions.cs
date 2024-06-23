@@ -39,10 +39,10 @@ public static class Extensions
         ulong a = ((((ulong)position.X) & 0x3FFFFFF) << 38) |
                   ((((ulong)position.Z) & 0x3FFFFFF) << 12) |
                   (((ulong)position.Y) & 0xFFF);
-       // var g = BitConverter.GetBytes(a);
+        // var g = BitConverter.GetBytes(a);
 
-       // Array.Reverse(g);
-         writer.WriteUnsignedLong(a);
+        // Array.Reverse(g);
+        writer.WriteUnsignedLong(a);
         //writer.WriteBuffer(g);
     }
 

@@ -14,20 +14,21 @@ using Serilog;
 string host = args[0];
 
 
+
 StressTestProfile stressTestProfile = new StressTestProfile();
 
 stressTestProfile.Version = 754;
-stressTestProfile.BotsNickname = "_PKSSM";
+stressTestProfile.BotsNickname = "_Title";
 stressTestProfile.UseProxy = true;
 
 stressTestProfile.Server = host;
 
 stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
 {
-    ParallelCount = 1000
+    ParallelCount = 30_000
 };
 stressTestProfile.SetBehavior(new DefaultPluginSource());
-stressTestProfile.NumberOfBots = 30;
+stressTestProfile.NumberOfBots = 300;
 
 var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 

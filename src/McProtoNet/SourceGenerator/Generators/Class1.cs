@@ -6,29 +6,21 @@ using SourceGenerator.ProtoDefTypes;
 namespace SourceGenerator.Generators;
 
 
-public class GeneratorBase
+public sealed class GenerationContext
 {
-    public NetClass ServerPacket { get; set; }
-    public NetMethod SendMethod { get; set; }
-    public ProtodefContainer Container { get; set; }
-
-    public void Generate(ProtodefContainerField field)
-    {
-        
-    }
-}
-
-public class CustomGenerator : GeneratorBase
-{
+    public string? FieldName { get; set; }
+    public ProtodefType FieldType { get; set; }
+    
     
 }
 
-public class VarIntGenerator : GeneratorBase
+public sealed class GenerationResult
 {
-    
+    public List<string> Instructions { get; }
 }
 
-public class VarLongGenerator : GeneratorBase
+public abstract class GeneratorBase
 {
-    
+    public abstract void Generate(ProtodefContainerField field);
 }
+
