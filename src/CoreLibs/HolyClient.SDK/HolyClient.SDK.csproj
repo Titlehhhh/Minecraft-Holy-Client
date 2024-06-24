@@ -8,9 +8,9 @@
 
     <ItemGroup>
         <PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All"/>
-        <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0"/>
-        <PackageReference Include="System.Reactive" Version="6.0.1-preview.1"/>
-        <PackageReference Include="bodong.PropertyModels" Version="11.0.6.2"/>
+        <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0-preview.5.24306.7" />
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
+        <PackageReference Include="bodong.PropertyModels" Version="11.0.10.1" />
     </ItemGroup>
 
     <ItemGroup>

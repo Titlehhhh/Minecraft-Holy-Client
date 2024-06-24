@@ -452,6 +452,14 @@ public sealed class ProtocolSourceGenerator
                    $"}}";
         }
 
+        if (type is ProtodefContainer container)
+        {
+            foreach (var field in container)
+            {
+                Console.WriteLine(field.Name);
+            }
+        }
+
         if (type is ProtodefBuffer buffer)
         {
             if (buffer.CountType is not null)
