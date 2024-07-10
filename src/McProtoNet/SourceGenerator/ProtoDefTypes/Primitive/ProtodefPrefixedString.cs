@@ -16,4 +16,19 @@ public sealed class ProtodefPrefixedString : ProtodefType
     {
         return "string";
     }
+
+    private bool Equals(ProtodefPrefixedString other)
+    {
+        return CountType.Equals(other.CountType);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is ProtodefPrefixedString other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return CountType.GetHashCode();
+    }
 }

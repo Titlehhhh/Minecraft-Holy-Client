@@ -6,7 +6,7 @@
         x:Class="HolyClient.Views.MainWindow"
 
         x:Name="RootWin"
-        TransparencyLevelHint="AcrylicBlur"
+        WindowState="Maximized"
         Title="Minecraft Holy Client">
 
 

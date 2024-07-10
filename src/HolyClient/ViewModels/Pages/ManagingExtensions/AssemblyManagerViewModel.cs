@@ -50,7 +50,7 @@ public sealed class AssemblyManagerViewModel : ReactiveObject, IActivatableViewM
     [Reactive] public string Filter { get; set; }
 
 
-    [Reactive] public ReadOnlyObservableCollection<IAssemblyViewModel> Assemblies { get; }
+    public ReadOnlyObservableCollection<IAssemblyViewModel> Assemblies { get; }
 
 
     [Reactive] public IAssemblyViewModel? SelectedItem { get; set; }
@@ -58,9 +58,9 @@ public sealed class AssemblyManagerViewModel : ReactiveObject, IActivatableViewM
     [Reactive] public IEnumerable<object> SelectedItems { get; set; }
 
 
-    [Reactive] public ICommand AddAssemblyCommand { get; private set; }
+    public ICommand AddAssemblyCommand { get; private set; }
 
-    [Reactive] public ICommand RemoveAssemblyCommand { get; }
+   public ICommand RemoveAssemblyCommand { get; }
 
 
     public Interaction<Unit, bool> ConfirmDeleteDialog { get; } = new();

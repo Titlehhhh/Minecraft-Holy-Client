@@ -4,7 +4,7 @@ using static McProtoNet.Protocol.Zlib.Compression;
 
 namespace McProtoNet.Protocol.Zlib;
 
-public ref struct ZlibCompressor
+public  ref struct ZlibCompressor
 {
     private readonly IntPtr compressor;
 

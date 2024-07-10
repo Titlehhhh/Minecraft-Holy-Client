@@ -28,7 +28,7 @@ stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
     ParallelCount = 30_000
 };
 stressTestProfile.SetBehavior(new DefaultPluginSource());
-stressTestProfile.NumberOfBots = 300;
+stressTestProfile.NumberOfBots = 1000;
 
 var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 

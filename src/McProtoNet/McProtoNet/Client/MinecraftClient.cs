@@ -8,6 +8,8 @@ using QuickProxyNet;
 
 namespace McProtoNet.Client;
 
+
+
 public sealed class MinecraftClient : Disposable, IPacketBroker
 {
     private MinecraftPacketReader _packetReader;

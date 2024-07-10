@@ -15,7 +15,7 @@
         <StyleInclude Source="/Styles/LoadNugetAnimationControlStyles.axaml" />
 
         <sty:FluentAvaloniaTheme PreferUserAccentColor="False" PreferSystemTheme="False" UseSystemFontOnWindows="False" />
-        <StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml" />
+       
 
     </Application.Styles>
 

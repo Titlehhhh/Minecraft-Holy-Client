@@ -42,7 +42,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
     {
         Logs = wrapper.Events;
         Host = stressTest.Server;
-        Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
+       // Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
+        Version = stressTest.Version.ToString();
         ParallelCount = stressTest.NumberOfBots.ToString();
 
 
@@ -181,7 +182,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     public SolidColorPaint LegendBackgroundPaint { get; set; } = new(new SKColor(240, 240, 240));
 
-    [Reactive] public ICommand CancelCommand { get; }
+     public ICommand CancelCommand { get; }
 
 
     private double[] GetSeparators()
@@ -210,11 +211,11 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     #region Info Panel
 
-    [Reactive] public string Host { get; }
+    [Reactive] public string Host { get; set; }
 
-    [Reactive] public string Version { get; }
+    [Reactive] public string Version { get;set; }
 
-    [Reactive] public string ParallelCount { get; }
+    [Reactive] public string ParallelCount { get;set; }
 
     #endregion
 
@@ -226,10 +227,10 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     [Reactive] public int PeakCPS { get; private set; }
 
-    [Reactive] public string ProxyQuality { get; }
+    [Reactive] public string ProxyQuality { get; set; }
 
 
-    [Reactive] public IEnumerable<ISeries> Proxy_Series { get; } = Enumerable.Empty<ISeries>();
+    [Reactive] public IEnumerable<ISeries> Proxy_Series { get; set; } = Enumerable.Empty<ISeries>();
 
 
     public ObservableCollection<LogEventViewModel> Logs { get; }

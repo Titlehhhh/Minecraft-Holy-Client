@@ -16,7 +16,7 @@ public partial class MainWindow : AppWindow
         this.AttachDevTools(new DevToolsOptions());
 #endif
 
-        WindowState = WindowState.Maximized;
+        
         SplashScreen = new ApplicationSplashScreen(this);
     }
 }

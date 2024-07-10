@@ -83,24 +83,6 @@ public class Program
         Directory.CreateDirectory(protocolDir);
 
 
-        foreach (var item in collection.Protocols)
-        {
-            ProtocolSourceGenerator generator = new()
-            {
-                Protocol = item.Value.JsonPackets,
-                Version = item.Key.ToString()
-            };
-
-            var ns = generator.Generate();
-
-
-            var fileName = $"Protocol{item.Key}.cs";
-
-            fileName = Path.Combine(protocolDir, fileName);
-
-            var s = ns.ToString().Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
-
-            await File.WriteAllTextAsync(fileName, s);
-        }
+       
     }
 }

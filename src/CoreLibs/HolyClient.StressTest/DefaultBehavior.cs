@@ -68,7 +68,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                     await Task.Delay(1000);
 
                     _ = Exploit(proto);
-                    _ = Spam(proto);
+                   // _ = Spam(proto);
                 }
                 catch
                 {
@@ -127,7 +127,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                 while (true)
                 {
                     await Task.Delay(1000);
-                    await proto.SendChat(lagMessage);
+                    await proto.SendChat(SpamText);
                 }
             }
             catch (Exception e)

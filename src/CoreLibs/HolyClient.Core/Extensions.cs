@@ -2,6 +2,7 @@
 
 public static class Extensions
 {
+    
     public static int ProtocolVersion(this string MCVersion)
     {
         switch (MCVersion.Split(' ')[0].Trim())

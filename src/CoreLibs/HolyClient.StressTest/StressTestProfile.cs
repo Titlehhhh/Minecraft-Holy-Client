@@ -35,7 +35,7 @@ public class ExceptionCounter
 }
 
 [MessagePackObject(true)]
-public class StressTestProfile : ReactiveObject/*, IStressTestProfile*/
+public class StressTestProfile : ReactiveObject, IStressTestProfile
 {
     private readonly object _currentInfoLock = new();
 
@@ -445,7 +445,7 @@ public class StressTestProfile : ReactiveObject/*, IStressTestProfile*/
 
 
     [IgnoreMember] public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
-
+    
 
     [IgnoreMember] [Reactive] public IStressTestBehavior Behavior { get; private set; }
 

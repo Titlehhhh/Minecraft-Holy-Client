@@ -21,4 +21,21 @@ public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
         if (netType is not null) return netType + "?";
         return null;
     }
+
+    private bool Equals(ProtodefOption other)
+    {
+        return Type.Equals(other.Type);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is ProtodefOption other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Type.GetHashCode();
+    }
+
+    
 }

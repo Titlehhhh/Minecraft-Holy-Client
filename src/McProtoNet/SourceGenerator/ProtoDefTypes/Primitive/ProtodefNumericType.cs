@@ -27,4 +27,19 @@ public sealed class ProtodefNumericType : ProtodefType
     {
         return NetName;
     }
+
+    private bool Equals(ProtodefNumericType other)
+    {
+        return NetName == other.NetName && OriginalName == other.OriginalName && Signed == other.Signed && Order == other.Order;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is ProtodefNumericType other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(NetName, OriginalName, Signed, (int)Order);
+    }
 }

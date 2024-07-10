@@ -1,6 +1,8 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Unicode;
 using McProtoNet.NBT;
 using DotNext.IO;
 
@@ -176,6 +178,74 @@ public ref struct MinecraftPrimitiveReaderSlim
            // ArrayPool<byte>.Shared.Return(buffer);
         }
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte GetSpanReference(int sizeHint)
+    {
+
+        return ref MemoryMarshal.GetReference(reader.UnreadSpan);
+        
+      
+    }
+    
+    [MethodImpl(MethodImplOptions.NoInlining)] // non default, no inline
+    string ReadUtf8(int utf8Length)
+    {
+        // (int ~utf8-byte-count, int utf16-length, utf8-bytes)
+        // already read utf8 length, but it is complement.
+
+        utf8Length = ~utf8Length;
+
+        ref var spanRef = ref GetSpanReference(utf8Length + 4); // + read utf16 length
+
+        string str;
+        var utf16Length = Unsafe.ReadUnaligned<int>(ref spanRef);
+
+        if (utf16Length <= 0)
+        {
+            var src = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref spanRef, 4), utf8Length);
+            str = Encoding.UTF8.GetString(src);
+        }
+        else
+        {
+            // check malformed utf16Length
+            var max = unchecked((reader.Remaining + 1) * 3);
+            if (max < 0) max = int.MaxValue;
+            if (max < utf16Length)
+            {
+                throw new Exception("ReadUTF");
+            }
+
+
+#if NET7_0_OR_GREATER
+            // regular path, know decoded UTF16 length will gets faster decode result
+            unsafe
+            {
+                fixed (byte* p = &Unsafe.Add(ref spanRef, 4))
+                {
+                    str = string.Create(utf16Length, ((IntPtr)p, utf8Length), static (dest, state) =>
+                    {
+                        var src = MemoryMarshal.CreateSpan(ref Unsafe.AsRef<byte>((byte*)state.Item1), state.Item2);
+                        var status = Utf8.ToUtf16(src, dest, out var bytesRead, out var charsWritten, replaceInvalidSequences: false);
+                        if (status != OperationStatus.Done)
+                        {
+                            throw new Exception("ReadUTF");
+                            //MemoryPackSerializationException.ThrowFailedEncoding(status);
+                        }
+                    });
+                }
+            }
+#else
+            var src = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref spanRef, 4), utf8Length);
+            str = Encoding.UTF8.GetString(src);
+#endif
+        }
+        
+
+      reader.Advance(utf8Length + 4);
+
+        return str;
+    }
 
     public unsafe Guid ReadUUID()
     {
@@ -216,18 +286,20 @@ public ref struct MinecraftPrimitiveReaderSlim
 
     }
 
+  
     public NbtTag ReadNbt()
     {
-        using (MemoryStream ms = new MemoryStream())
+      var stream =  reader.UnreadSequence.AsStream();
+       // using (MemoryStream ms = new MemoryStream())
         {
-            ms.Write(reader.UnreadSequence.ToArray());
-            ms.Position = 0;
+           // ms.Write(reader.UnreadSequence.ToArray());
+           // ms.Position = 0;
 
-            NbtReader nbtReader = new NbtReader(ms);
+            NbtReader nbtReader = new NbtReader(stream);
 
             NbtTag result = nbtReader.ReadAsTag();
 
-            reader.Advance(ms.Position);
+            reader.Advance(stream.Position);
             return result;
         }
     }

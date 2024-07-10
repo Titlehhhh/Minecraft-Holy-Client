@@ -67,16 +67,15 @@ public sealed class MinecraftPacketReader : IDisposable
             {
                 await BaseStream.ReadExactlyAsync(buffer_compress, 0, len, token);
 
-                var uncompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
-                DecompressCore(buffer_compress.AsSpan(0, len), uncompressed.AsSpan(0, sizeUncompressed));
 
-                var id = ReadVarInt(uncompressed, out var offset);
-
-
-                var memoryOwner = new MemoryOwner<byte>(uncompressed, sizeUncompressed);
-
+                var memoryOwner = new MemoryOwner<byte>(ArrayPool<byte>.Shared, sizeUncompressed);
                 try
                 {
+                    DecompressCore(buffer_compress.AsSpan(0, len), memoryOwner.Span);
+
+                    var id = ReadVarInt(memoryOwner.Span, out var offset);
+
+
                     return new InputPacket(id, memoryOwner, offset);
                 }
                 catch
@@ -114,6 +113,8 @@ public sealed class MinecraftPacketReader : IDisposable
             }
         }
     }
+
+    //private static readonly ZlibDecompressor s_decompressor = new ZlibDecompressor();
 
     private static void DecompressCore(ReadOnlySpan<byte> buffer_compress, Span<byte> uncompress)
     {

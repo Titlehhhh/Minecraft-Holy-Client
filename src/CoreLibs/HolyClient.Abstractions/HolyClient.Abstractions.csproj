@@ -9,8 +9,8 @@
 
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.1.0-rc1" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.0-rc1" />
+        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
         <PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All"/>
         <PackageReference Include="Serilog" Version="4.0.0" />
         <PackageReference Include="System.Reactive" Version="6.0.1" />

@@ -36,7 +36,9 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
         Id = state.Id;
         Name = state.Name;
         Server = state.Server;
-        Version = state.Version;
+        Version = SupportedVersions.FirstOrDefault(x => x.ProtocolVersion == state.Version) ??
+                  SupportedVersions.First();
+
         BotsNickname = state.BotsNickname;
         NumberOfBots = state.NumberOfBots;
         UseProxy = state.UseProxy;
@@ -53,7 +55,8 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
 
         this.WhenAnyValue(x => x.Version)
-            .BindTo(state, x => x.Version);
+            .Subscribe(x => { state.Version = x.ProtocolVersion; });
+
 
         this.WhenAnyValue(x => x.BotsNickname)
             .BindTo(state, x => x.BotsNickname);
@@ -208,9 +211,9 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
     [Reactive] public string Name { get; set; }
 
-    [Reactive] public IStressTestBehavior? CurrentBehavior { get; }
+    [Reactive] public IStressTestBehavior? CurrentBehavior { get; set; }
 
-    [Reactive] public IPluginSource? InstalledBehavior { get; }
+    [Reactive] public IPluginSource? InstalledBehavior { get; set; }
 
     public ViewModelActivator Activator { get; } = new();
 
@@ -272,9 +275,9 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
     [Reactive] public bool CheckDNS { get; set; }
 
-    public MinecraftVersion[] SupportedVersions { get; } = Enum.GetValues<MinecraftVersion>();
+    public MinecraftVersionVM[] SupportedVersions { get; } = MinecraftVersionVM.GetAll();
 
-    [Reactive] public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
+    [Reactive] public MinecraftVersionVM Version { get; set; }
 
     #endregion
 
@@ -295,7 +298,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
     [Reactive] public ICommand AddSourceProxyCommand { get; private set; }
 
-    [Reactive] public ICommand ExportProxyCommand { get; }
+    [Reactive] public ICommand ExportProxyCommand { get; set; }
 
     [Reactive] public ICommand DeleteProxyCommand { get; private set; }
 
@@ -310,4 +313,45 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
     public ReadOnlyObservableCollection<ProxySourceViewModel> Proxies => _proxies;
 
     #endregion
+}
+
+public sealed class MinecraftVersionVM
+{
+    public override string ToString()
+    {
+        return this.Version;
+    }
+
+    public static implicit operator int(MinecraftVersionVM vm)
+    {
+        return vm.ProtocolVersion;
+    }
+
+    public string Version { get; set; }
+    public int ProtocolVersion { get; set; }
+
+    public MinecraftVersionVM(string version, int protocolVersion)
+    {
+        Version = version;
+        ProtocolVersion = protocolVersion;
+    }
+
+    public static MinecraftVersionVM[] GetAll()
+    {
+        return new MinecraftVersionVM[]
+        {
+            new MinecraftVersionVM("1.16.5", 754),
+            new MinecraftVersionVM("1.17", 755),
+            new MinecraftVersionVM("1.18", 756),
+            new MinecraftVersionVM("1.18.1", 757),
+            new MinecraftVersionVM("1.18.2", 758),
+            new MinecraftVersionVM("1.19", 759),
+            new MinecraftVersionVM("1.19.2", 760),
+            new MinecraftVersionVM("1.19.3", 761),
+            new MinecraftVersionVM("1.19.4", 762),
+            new MinecraftVersionVM("1.20", 763),
+            new MinecraftVersionVM("1.20.2", 764),
+            new MinecraftVersionVM("1.20.3", 765),
+        };
+    }
 }

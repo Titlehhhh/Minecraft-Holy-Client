@@ -17,7 +17,7 @@ public class ExceptionThrowCount
     public Dictionary<string, int> Messages { get; set; }
 }
 
-//[Union(0, typeof(StressTestProfile))]
+[Union(0, typeof(StressTestProfile))]
 public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
 {
     Guid Id { get; set; }
@@ -33,7 +33,7 @@ public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyCha
     int NumberOfBots { get; set; }
 
     bool UseProxy { get; set; }
-    //MinecraftVersion Version { get; set; }
+    int Version { get; set; }
 
 
     ISourceCache<IProxySource, Guid> Proxies { get; }
@@ -41,7 +41,7 @@ public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyCha
 
     IObservable<StressTestMetrik> Metrics { get; }
 
-    ProxyCheckerOptions ProxyChecker { get; set; }
+    ProxyCheckerOptions ProxyCheckerOptions { get; set; }
 
     bool ParallelCountCheckingCalculateAuto { get; set; }
     ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; }

@@ -11,7 +11,7 @@ public sealed class MinecraftPacketSender : IDisposable
     private static readonly byte[] ZERO_VARINT = { 0 };
 
 
-    //private readonly ZlibCompressor compressor = new(6);
+    // private static readonly ZlibCompressor s_compressor = new(6);
 
     private int _compressionThreshold;
     public Stream BaseStream { get; set; }
@@ -29,31 +29,24 @@ public sealed class MinecraftPacketSender : IDisposable
 
             if (uncompressedSize >= _compressionThreshold)
             {
-                var compressor = new ZlibCompressor(4);
+                using var compressor = new ZlibCompressor(4);
 
+                var length = compressor.GetBound(uncompressedSize);
+                var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
                 try
                 {
-                    var length = compressor.GetBound(uncompressedSize);
-                    var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
-                    try
-                    {
-                        var bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
-                        var compressedLength = bytesCompress;
+                    var bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
+                    var compressedLength = bytesCompress;
 
-                        var fullsize = compressedLength + uncompressedSize.GetVarIntLength();
+                    var fullsize = compressedLength + uncompressedSize.GetVarIntLength();
 
 
-                        return SendCompress(fullsize, uncompressedSize, compressedBuffer, bytesCompress, token);
-                    }
-                    catch
-                    {
-                        ArrayPool<byte>.Shared.Return(compressedBuffer);
-                        throw;
-                    }
+                    return SendCompress(fullsize, uncompressedSize, compressedBuffer, bytesCompress, token);
                 }
-                finally
+                catch
                 {
-                    compressor.Dispose();
+                    ArrayPool<byte>.Shared.Return(compressedBuffer);
+                    throw;
                 }
             }
             else

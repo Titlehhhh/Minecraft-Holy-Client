@@ -5,6 +5,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:views="using:HolyClient.Views"
+             xmlns:vm="using:HolyClient.ViewModels"
+             x:DataType="vm:StressTestViewModel"
              x:Class="HolyClient.Views.StressTestView">
     <Grid>
         <StackPanel IsVisible="{Binding !Profiles.Count}" Spacing="5" HorizontalAlignment="Center"

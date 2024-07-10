@@ -11,4 +11,17 @@ public sealed class ProtodefVarInt : ProtodefType
     {
         return "int";
     }
+    
+    private static readonly int hash = "varint".GetHashCode();
+
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is ProtodefString;
+    }
+
+    public override int GetHashCode()
+    {
+        return hash;
+    }
 }

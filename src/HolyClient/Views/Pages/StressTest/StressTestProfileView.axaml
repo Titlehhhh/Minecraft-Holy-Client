@@ -123,9 +123,20 @@
                                 <TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.Version}" FontSize="15" />
                                 <ComboBox SelectedItem="{Binding Version}" ItemsSource="{Binding SupportedVersions}">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate DataType="minecraft:MinecraftVersion">
-                                            <TextBlock
-                                                Text="{Binding Converter={StaticResource VersionToStringConverter}}" />
+                                        <DataTemplate x:DataType="vm:MinecraftVersionVM">
+                                            <Grid >
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="54"  />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Version}" />
+                                                <TextBlock Margin="5,0,0,0"
+                                                           Grid.Column="1"
+                                                           FontStyle="Italic"
+                                                           FontWeight="Light"
+                                                           Foreground="Gray" Text="{Binding ProtocolVersion}" />
+                                            </Grid>
+
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
@@ -136,7 +147,8 @@
                             <StackPanel Spacing="10">
                                 <TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.BehaviorSettings}"
                                            FontSize="15" />
-                                <pgc:PropertyGrid SelectedObject="{Binding CurrentBehavior}" />
+                                <!--
+                                <pgc:PropertyGrid ="{Binding CurrentBehavior}" />-->
                             </StackPanel>
                         </Border>
 
@@ -146,10 +158,10 @@
             </TabItem>
 
             <TabItem Header="{Tr StressTest.Configuration.Proxy}" FontSize="15">
-                <ui:FABorder BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                             BorderThickness="1"
-                             CornerRadius="{DynamicResource ControlCornerRadius}"
-                             Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+                <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                     <Grid ColumnDefinitions="*, Auto">
 
 
@@ -180,7 +192,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <ui:FABorder
+                        <Border
                             Margin="12"
                             Padding="8"
                             CornerRadius="{DynamicResource OverlayCornerRadius}"
@@ -189,11 +201,11 @@
                             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
                             Opacity="1">
-                            <ui:FABorder.Transitions>
-                                <Transitions>
-                                    <DoubleTransition Property="Opacity" Duration="00:00:00.167" />
-                                </Transitions>
-                            </ui:FABorder.Transitions>
+                            <!-- <ui:FABorder.Transitions> -->
+                            <!--     <Transitions> -->
+                            <!--         <DoubleTransition Property="Opacity" Duration="00:00:00.167" /> -->
+                            <!--     </Transitions> -->
+                            <!-- </ui:FABorder.Transitions> -->
                             <StackPanel>
                                 <TextBlock FontWeight="SemiBold" Text="{Tr StressTest.Configuration.Proxy.Options}" />
                                 <StackPanel Margin="0,5,0,0" Spacing="10">
@@ -222,9 +234,9 @@
                                         HorizontalAlignment="Stretch" />
                                 </StackPanel>
                             </StackPanel>
-                        </ui:FABorder>
+                        </Border>
                     </Grid>
-                </ui:FABorder>
+                </Border>
             </TabItem>
             <TabItem Header="{Tr StressTest.Configuration.Behaviors}" FontSize="15">
                 <sg:SpacedGrid

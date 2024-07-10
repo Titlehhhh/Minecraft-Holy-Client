@@ -16,8 +16,6 @@
             <GradientStop Color="#8f8f8f00" Offset="0.76" />
             <GradientStop Color="#82828200" Offset="0.80" />
             <GradientStop Color="#5e5e5e00" Offset="0.85" />
-
-
             <GradientStop Color="#05050500" Offset="0.96" />
             <GradientStop Color="#00000000" Offset="1" />
         </LinearGradientBrush>
@@ -26,7 +24,7 @@
                     AlignmentY="Top"
                     Stretch="UniformToFill" />
 
-        <ControlTheme x:Key="TestTheme" TargetType="HyperlinkButton">
+        <ControlTheme x:Key="TestTheme" TargetType="ui:HyperlinkButton">
             <Setter Property="Width" Value="196" />
             <Setter Property="Height" Value="220" />
             <Setter Property="Template">
@@ -82,6 +80,8 @@
     </UserControl.Resources>
 
     <Grid RowDefinitions="396, *">
+        <TextBlock Text="Home"/>
+
 
         <Border Margin="-24,0,0,-24"
                 OpacityMask="{DynamicResource HeaderOpacityMaskBrush}"
@@ -100,8 +100,7 @@
 
         <WrapPanel Margin="30,350,0,0" Orientation="Horizontal">
 
-
-            <HyperlinkButton NavigateUri="https://github.com/Titlehhhh/Minecraft-Holy-Client"
+            <ui:HyperlinkButton NavigateUri="https://github.com/Titlehhhh/Minecraft-Holy-Client"
                              Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
@@ -113,8 +112,8 @@
                                Text="{Tr Home.Tiles.GitHub.Description}" TextWrapping="Wrap" />
                 </StackPanel>
 
-            </HyperlinkButton>
-            <HyperlinkButton NavigateUri="https://discord.gg/HVDzx4rCgg" Margin="20,0,0,0"
+            </ui:HyperlinkButton>
+            <ui:HyperlinkButton NavigateUri="https://discord.gg/HVDzx4rCgg" Margin="20,0,0,0"
                              Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
@@ -126,8 +125,8 @@
                     <TextBlock Margin="0,5,0,0" Foreground="LightGray" FontSize="12"
                                Text="{Tr Home.Tiles.Discord.Description}" TextWrapping="Wrap" />
                 </StackPanel>
-            </HyperlinkButton>
-            <HyperlinkButton Margin="20,0,0,0" Theme="{StaticResource TestTheme}">
+            </ui:HyperlinkButton>
+            <ui:HyperlinkButton Margin="20,0,0,0" Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
                         Height="48"
@@ -137,11 +136,10 @@
                     <TextBlock Margin="0,5,0,0" Foreground="LightGray" FontSize="12"
                                Text="{Tr Home.Tiles.Documentation.Description}" TextWrapping="Wrap" />
                 </StackPanel>
-            </HyperlinkButton>
+            </ui:HyperlinkButton>
 
 
         </WrapPanel>
-
 
     </Grid>
 

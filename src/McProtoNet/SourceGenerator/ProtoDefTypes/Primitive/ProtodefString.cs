@@ -11,4 +11,17 @@ public sealed class ProtodefString : ProtodefType
     {
         return "string";
     }
+
+    private static readonly int hash = "string".GetHashCode();
+
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is ProtodefString;
+    }
+
+    public override int GetHashCode()
+    {
+        return hash;
+    }
 }

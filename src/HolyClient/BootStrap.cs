@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -18,6 +19,7 @@ using HolyClient.ViewModels;
 using HolyClient.Views;
 using ReactiveUI;
 using Splat;
+using INotifyPropertyChanged = PropertyModels.ComponentModel.INotifyPropertyChanged;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace HolyClient;

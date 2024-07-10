@@ -14,4 +14,6 @@ public sealed class ProtodefBuffer : ProtodefType
     {
         return "byte[]";
     }
+    
+    
 }
