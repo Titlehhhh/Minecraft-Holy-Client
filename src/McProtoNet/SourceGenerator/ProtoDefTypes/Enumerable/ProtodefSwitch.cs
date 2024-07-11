@@ -27,7 +27,7 @@ public class ProtodefSwitch : ProtodefType, IPathTypeEnumerable
             CompareToValue = CompareToValue,
             Fields = Fields.Select(x => new KeyValuePair<string, ProtodefType>(x.Key, (ProtodefType)x.Value.Clone()))
                 .ToDictionary(),
-            Default = Default!.Clone() as ProtodefType
+            Default = Default?.Clone() as ProtodefType
         };
 
         foreach (var keyValuePair in owner.Fields) keyValuePair.Value.Parent = owner;

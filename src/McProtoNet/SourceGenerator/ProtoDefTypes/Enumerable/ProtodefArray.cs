@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace SourceGenerator.ProtoDefTypes;
 
@@ -6,7 +7,7 @@ public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
 {
     [JsonPropertyName("type")] public ProtodefType Type { get; set; }
 
-    [JsonPropertyName("countType")] public ProtodefType CountType { get; set; }
+    [JsonPropertyName("countType")] public ProtodefType? CountType { get; set; }
 
 
     [JsonPropertyName("count")] public object? Count { get; set; }
@@ -29,10 +30,11 @@ public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
         var owner = new ProtodefArray
         {
             Type = (ProtodefType)Type.Clone(),
-            CountType = (ProtodefType)CountType.Clone(),
+            CountType = CountType?.Clone() as ProtodefType,
             Count = Count
         };
-        owner.CountType.Parent = owner;
+
+        if (owner.CountType is not null) owner.CountType.Parent = owner;
         owner.Type.Parent = owner;
         return owner;
     }

@@ -13,7 +13,7 @@ public sealed class ProtodefCustomSwitch : ProtodefSwitch
             CompareToValue = CompareToValue,
             Fields = Fields.Select(x => new KeyValuePair<string, ProtodefType>(x.Key, (ProtodefType)x.Value.Clone()))
                 .ToDictionary(),
-            Default = Default!.Clone() as ProtodefType,
+            Default = Default?.Clone() as ProtodefType,
             Owner = Owner
         };
         foreach (var keyValuePair in owner.Fields) keyValuePair.Value.Parent = owner;
