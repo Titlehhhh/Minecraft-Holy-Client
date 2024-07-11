@@ -9,6 +9,7 @@ public sealed class ProtodefContainerField : ProtodefType
     {
         Anon = anon;
         Name = name;
+        ArgumentNullException.ThrowIfNull(type);
         Type = type;
     }
 
@@ -23,5 +24,10 @@ public sealed class ProtodefContainerField : ProtodefType
     public override void OnDeserialized()
     {
         Type.Parent = this;
+    }
+
+    public override object Clone()
+    {
+        return new ProtodefContainerField(Anon, Name, (ProtodefType)Type.Clone());
     }
 }

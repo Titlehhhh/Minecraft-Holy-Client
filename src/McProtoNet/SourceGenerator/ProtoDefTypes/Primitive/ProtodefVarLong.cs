@@ -2,6 +2,8 @@
 
 public sealed class ProtodefVarLong : ProtodefType
 {
+    private static readonly int hash = "varlong".GetHashCode();
+
     public override string ToString()
     {
         return "varlong";
@@ -11,8 +13,11 @@ public sealed class ProtodefVarLong : ProtodefType
     {
         return "long";
     }
-    private static readonly int hash = "varlong".GetHashCode();
 
+    public override object Clone()
+    {
+        return new ProtodefVarLong();
+    }
 
     public override bool Equals(object? obj)
     {

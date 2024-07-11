@@ -2,12 +2,6 @@
 using SourceGenerator.MCDataModels;
 using SourceGenerator.ProtoDefTypes;
 
-public sealed class Protocol
-{
-    public VersionInfo Version { get; set; }
-    public ProtodefProtocol JsonPackets { get; set; }
-}
-
 public class Program
 {
     public static Dictionary<string, string> MapWriteMethods = new()
@@ -75,14 +69,13 @@ public class Program
         }
 
 
-        
-        
+        var clone1 = (ProtodefProtocol)collection.Protocols[754].JsonPackets.Clone();
+
+        Console.WriteLine(clone1);
+
         var protocolDir = Path.Combine(Root, "Protocols");
 
 
         Directory.CreateDirectory(protocolDir);
-
-
-       
     }
 }

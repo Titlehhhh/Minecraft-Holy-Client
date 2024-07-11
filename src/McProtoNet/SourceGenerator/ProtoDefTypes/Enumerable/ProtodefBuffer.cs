@@ -14,6 +14,14 @@ public sealed class ProtodefBuffer : ProtodefType
     {
         return "byte[]";
     }
-    
-    
+
+    public override object Clone()
+    {
+        return new ProtodefBuffer
+        {
+            CountType = CountType!.Clone() as ProtodefType,
+            Count = Count,
+            Rest = Rest
+        };
+    }
 }

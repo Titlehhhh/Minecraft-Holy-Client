@@ -11,7 +11,18 @@ public sealed class ProtodefMapper : ProtodefType
         Mappings = mappings;
     }
 
-    [JsonPropertyName("type")] public string Type { get; private set; }
+    private ProtodefMapper(ProtodefMapper other)
+    {
+        Type = other.Type;
+        Mappings = new Dictionary<string, string>(other.Mappings);
+    }
 
-    [JsonPropertyName("mappings")] public Dictionary<string, string> Mappings { get; private set; } = new();
+    [JsonPropertyName("type")] public string Type { get; }
+
+    [JsonPropertyName("mappings")] public Dictionary<string, string> Mappings { get; } = new();
+
+    public override object Clone()
+    {
+        return new ProtodefMapper(this);
+    }
 }

@@ -21,18 +21,18 @@ public sealed class ProtocolCollection
 
 public static class Helper
 {
-    public static NamespacesIntersection Intersection(Namespace ns)
+    public static NamespacesIntersection Intersection(ProtodefNamespace ns)
     {
         return new NamespacesIntersection(ns);
     }
 
-    public static NamespacesIntersection Intersection(params Namespace[] namespaces)
+    public static NamespacesIntersection Intersection(params ProtodefNamespace[] namespaces)
     {
-        NamespacesIntersection first = Intersection(namespaces[0]);
+        var first = Intersection(namespaces[0]);
 
-        for (int i = 1; i < namespaces.Length; i++)
+        for (var i = 1; i < namespaces.Length; i++)
         {
-            Namespace second = namespaces[i];
+            var second = namespaces[i];
             first = Intersection(first, second);
         }
 
@@ -40,7 +40,7 @@ public static class Helper
     }
 
 
-    private static NamespacesIntersection Intersection(NamespacesIntersection ns1, Namespace ns)
+    private static NamespacesIntersection Intersection(NamespacesIntersection ns1, ProtodefNamespace ns)
     {
         throw null;
     }
@@ -48,13 +48,11 @@ public static class Helper
 
 public sealed class NamespacesIntersection
 {
-    
-    
     /// <summary>
-    /// One namespace
+    ///     One namespace
     /// </summary>
     /// <param name="ns"></param>
-    internal NamespacesIntersection(Namespace ns)
+    internal NamespacesIntersection(ProtodefNamespace ns)
     {
         foreach (var item in ns)
         {
@@ -65,5 +63,4 @@ public sealed class NamespacesIntersection
 
 public sealed class PacketIntersection
 {
-    
 }

@@ -14,6 +14,10 @@ public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContai
         this.fields = fields;
     }
 
+    private ProtodefContainer(ProtodefContainer other)
+    {
+        fields = other.fields.Select(x => x.Clone()).Cast<ProtodefContainerField>().ToList();
+    }
 
     public IEnumerator<ProtodefContainerField> GetEnumerator()
     {
@@ -48,5 +52,10 @@ public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContai
 
             yield return new KeyValuePair<string, ProtodefType>(name, item.Type);
         }
+    }
+
+    public override object Clone()
+    {
+        return new ProtodefContainer(this);
     }
 }

@@ -9,7 +9,7 @@
         { "nbt", "NbtTag" },
         { "optionalNbt", "NbtTag?" },
         { "anonymousNbt", "NbtTag" },
-        { "anonOptionalNbt", "NbtTag?" },
+        { "anonOptionalNbt", "NbtTag?" }
     };
 
     private static readonly Dictionary<string, string> readDict = new()
@@ -35,7 +35,7 @@
         { "nbt", "ReadNbt" },
         { "optionalNbt", "ReadOptionalNbt" },
         { "anonymousNbt", "ReadNbt" },
-        { "anonOptionalNbt", "ReadOptionalNbt" },
+        { "anonOptionalNbt", "ReadOptionalNbt" }
     };
 
     private static readonly Dictionary<string, string> writeDict = new()
@@ -61,6 +61,6 @@
         { "nbt", "WriteNbt" },
         { "optionalNbt", "WriteOptionalNbt" },
         { "anonymousNbt", "WriteNbt" },
-        { "anonOptionalNbt", "WriteOptionalNbt" },
+        { "anonOptionalNbt", "WriteOptionalNbt" }
     };
 }

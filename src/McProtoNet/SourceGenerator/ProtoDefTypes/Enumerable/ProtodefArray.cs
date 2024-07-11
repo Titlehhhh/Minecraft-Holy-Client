@@ -24,6 +24,16 @@ public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
         return null;
     }
 
+    public override object Clone()
+    {
+        return new ProtodefArray
+        {
+            Type = (ProtodefType)Type.Clone(),
+            CountType = (ProtodefType)CountType.Clone(),
+            Count = Count
+        };
+    }
+
     private bool Equals(ProtodefArray other)
     {
         return Type.Equals(other.Type) && CountType.Equals(other.CountType) && Equals(Count, other.Count);
@@ -31,7 +41,7 @@ public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || obj is ProtodefArray other && Equals(other);
+        return ReferenceEquals(this, obj) || (obj is ProtodefArray other && Equals(other));
     }
 
     public override int GetHashCode()

@@ -1,85 +1,61 @@
 ﻿using SourceGenerator.NetTypes;
 using SourceGenerator.ProtoDefTypes;
 
-public enum Side
-{
-    Client,
-    Server
-}
-
-public interface IFieldGenerator
-{
-}
-
-public class TypesComparer : IEqualityComparer<KeyValuePair<string, ProtodefType>>
-{
-    public bool Equals(KeyValuePair<string, ProtodefType> x, KeyValuePair<string, ProtodefType> y)
-    {
-        if (x.Key == y.Key)
-        {
-            if (x.Value.Equals(y.Value))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public int GetHashCode(KeyValuePair<string, ProtodefType> obj)
-    {
-        return HashCode.Combine(obj.Key, obj.Value);
-    }
-}
-
 public sealed class ProtocolSourceGenerator
 {
-    private Side _side;
-    private List<Protocol> _protocols;
+    private readonly List<Protocol> _protocols;
+    private readonly Side _side;
 
     public ProtocolSourceGenerator(List<Protocol> protocols, Side side)
     {
         _protocols = protocols;
+        MinVersion = _protocols.First().Version.Version.ToString();
+        MaxVersion = _protocols.Last().Version.Version.ToString();
         _side = side;
+        MainNamespace = new NetNamespace();
+        MainNamespace.Name = "McProtoNet.Protocol" + _side + "_" + GetVersionForName();
+
+        MainNamespace.Usings.Add("McProtoNet.Serialization");
+        MainNamespace.Usings.Add("McProtoNet.Protocol");
+        MainNamespace.Usings.Add("McProtoNet.Abstractions");
+        MainNamespace.Usings.Add("McProtoNet.NBT");
+        MainNamespace.Usings.Add("System.Reactive.Subjects");
     }
 
-    private string GetVersion()
+    private string MinVersion { get; }
+
+    private string MaxVersion { get; }
+
+    public NetNamespace MainNamespace { get; }
+
+    private string GetVersionForName()
     {
         if (_protocols.Count == 1)
-            return _protocols.First().Version.Version.ToString();
-        else
-        {
-            return $"{_protocols.First().Version.Version}_{_protocols.Last().Version.Version}";
-        }
+            return MinVersion;
+        return MinVersion + "_" + MaxVersion;
     }
 
-    public NetNamespace Generate()
+
+    public void Generate()
     {
-        var netNamespace = new NetNamespace();
-        netNamespace.Name = "McProtoNet.Protocol" + _side + "_" + GetVersion();
+    }
+}
 
-        netNamespace.Usings.Add("McProtoNet.Serialization");
-        netNamespace.Usings.Add("McProtoNet.Protocol");
-        netNamespace.Usings.Add("McProtoNet.Abstractions");
-        netNamespace.Usings.Add("McProtoNet.NBT");
-        netNamespace.Usings.Add("System.Reactive.Subjects");
-
-        var comparer = new TypesComparer();
-
-        var typesIntersect = IntersectAll(_protocols.Select(x => x.JsonPackets.Types), comparer).ToDictionary();
+public class SerializeGenerator
+{
+    private const string readerName = "reader";
+    private const string writername = "writer";
 
 
-        return netNamespace;
+    public string SerializeInstructions { get; }
+    public string DeserializeInstructions { get; }
+
+
+    public void GenerateSerialize(NetClass packet, (ProtodefContainer packetContainer, string version)[] packets)
+    {
     }
 
-    private List<T> IntersectAll<T>(IEnumerable<IEnumerable<T>> lists, IEqualityComparer<T> comparer)
+    public void GenerateDeserialize(NetClass packet, (ProtodefContainer packetContainer, string version)[] packets)
     {
-        HashSet<T> hashSet = new HashSet<T>(lists.First(), comparer);
-        foreach (var list in lists.Skip(1))
-        {
-            hashSet.IntersectWith(list);
-        }
-
-        return hashSet.ToList();
     }
 }

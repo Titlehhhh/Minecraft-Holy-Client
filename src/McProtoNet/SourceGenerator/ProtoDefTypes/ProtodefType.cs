@@ -4,9 +4,12 @@ using SourceGenerator.ProtoDefTypes.Converters;
 namespace SourceGenerator.ProtoDefTypes;
 
 [JsonConverter(typeof(DataTypeConverter))]
-public abstract class ProtodefType : IJsonOnDeserialized
+public abstract class ProtodefType : IJsonOnDeserialized, ICloneable
 {
     public ProtodefType? Parent { get; set; }
+
+
+    public abstract object Clone();
 
     public virtual void OnDeserialized()
     {

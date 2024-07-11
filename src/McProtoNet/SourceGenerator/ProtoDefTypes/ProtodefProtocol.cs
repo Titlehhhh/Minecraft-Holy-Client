@@ -4,25 +4,23 @@ using System.Text.Json.Serialization;
 
 namespace SourceGenerator.ProtoDefTypes;
 
-public class ProtocolConverter : JsonConverter<ProtodefProtocol>
-{
-    public override ProtodefProtocol? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void Write(Utf8JsonWriter writer, ProtodefProtocol value, JsonSerializerOptions options)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class ProtodefProtocol : IJsonOnDeserialized
+public class ProtodefProtocol : IJsonOnDeserialized, ICloneable
 {
     [JsonConstructor]
     public ProtodefProtocol()
     {
-        Namespaces = new Dictionary<string, Namespace>();
+        Namespaces = new Dictionary<string, ProtodefNamespace>();
+    }
+
+    private ProtodefProtocol(ProtodefProtocol other)
+    {
+        Namespaces = other.Namespaces
+            .Select(x => new KeyValuePair<string, ProtodefNamespace>(x.Key, (ProtodefNamespace)x.Value.Clone()))
+            .ToDictionary();
+
+        Types = other.Types
+            .Select(x => new KeyValuePair<string, ProtodefType>(x.Key, (ProtodefType)x.Value.Clone()))
+            .ToDictionary();
     }
 
     [JsonPropertyName("types")] public Dictionary<string, ProtodefType> Types { get; set; }
@@ -30,7 +28,12 @@ public class ProtodefProtocol : IJsonOnDeserialized
     [JsonExtensionData]
     public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 
-    [JsonIgnore] public Dictionary<string, Namespace> Namespaces { get; }
+    [JsonIgnore] public Dictionary<string, ProtodefNamespace> Namespaces { get; }
+
+    public object Clone()
+    {
+        return new ProtodefProtocol(this);
+    }
 
 
     public void OnDeserialized()
@@ -47,7 +50,7 @@ public class ProtodefProtocol : IJsonOnDeserialized
         Console.WriteLine("GetObjectData");
     }
 
-    private Namespace ParseNamespace(JsonElement element)
+    private ProtodefNamespace ParseNamespace(JsonElement element)
     {
         if (element.ValueKind == JsonValueKind.Object)
         {
@@ -64,7 +67,7 @@ public class ProtodefProtocol : IJsonOnDeserialized
                 types[item.Name] = namespaceObj;
             }
 
-            return new Namespace { Types = types };
+            return new ProtodefNamespace { Types = types };
         }
 
         throw new JsonException("Invalid namespace format.");

@@ -2,6 +2,8 @@
 
 public sealed class ProtodefBool : ProtodefType
 {
+    private static readonly int boolHash = "bool".GetHashCode();
+
     public override string ToString()
     {
         return "bool";
@@ -12,14 +14,17 @@ public sealed class ProtodefBool : ProtodefType
         return "bool";
     }
 
-    
+    public override object Clone()
+    {
+        return new ProtodefBool();
+    }
+
 
     public override bool Equals(object? obj)
     {
         return ReferenceEquals(this, obj) || obj is ProtodefBool other;
     }
 
-    private static readonly int boolHash = "bool".GetHashCode();
     public override int GetHashCode()
     {
         return boolHash;

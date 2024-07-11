@@ -22,5 +22,10 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="A.cs" />
+      <None Include="A.cs" />
+    </ItemGroup>
+
 
 </Project>

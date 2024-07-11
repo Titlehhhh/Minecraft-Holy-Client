@@ -16,5 +16,8 @@
     <ItemGroup>
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MemoryPack" Version="1.21.1" />
+    </ItemGroup>
 
 </Project>

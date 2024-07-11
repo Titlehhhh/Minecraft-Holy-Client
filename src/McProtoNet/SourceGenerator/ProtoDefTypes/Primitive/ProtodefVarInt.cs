@@ -2,6 +2,8 @@
 
 public sealed class ProtodefVarInt : ProtodefType
 {
+    private static readonly int hash = "varint".GetHashCode();
+
     public override string ToString()
     {
         return "varint";
@@ -11,9 +13,11 @@ public sealed class ProtodefVarInt : ProtodefType
     {
         return "int";
     }
-    
-    private static readonly int hash = "varint".GetHashCode();
 
+    public override object Clone()
+    {
+        return new ProtodefVarInt();
+    }
 
     public override bool Equals(object? obj)
     {

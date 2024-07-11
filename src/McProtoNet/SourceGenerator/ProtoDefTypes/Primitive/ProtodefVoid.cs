@@ -2,6 +2,8 @@
 
 public sealed class ProtodefVoid : ProtodefType
 {
+    private static readonly int hash = "void".GetHashCode();
+
     public override string ToString()
     {
         return "void";
@@ -12,8 +14,10 @@ public sealed class ProtodefVoid : ProtodefType
         return "void";
     }
 
-    private static readonly int hash = "void".GetHashCode();
-
+    public override object Clone()
+    {
+        return new ProtodefVoid();
+    }
 
     public override bool Equals(object? obj)
     {

@@ -2,6 +2,8 @@
 
 public sealed class ProtodefString : ProtodefType
 {
+    private static readonly int hash = "string".GetHashCode();
+
     public override string ToString()
     {
         return "string";
@@ -12,7 +14,10 @@ public sealed class ProtodefString : ProtodefType
         return "string";
     }
 
-    private static readonly int hash = "string".GetHashCode();
+    public override object Clone()
+    {
+        return new ProtodefString();
+    }
 
 
     public override bool Equals(object? obj)

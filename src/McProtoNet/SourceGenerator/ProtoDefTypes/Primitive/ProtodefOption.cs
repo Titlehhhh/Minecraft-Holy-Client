@@ -4,6 +4,7 @@ public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
 {
     public ProtodefOption(ProtodefType type)
     {
+        ArgumentNullException.ThrowIfNull(type);
         Type = type;
     }
 
@@ -13,6 +14,11 @@ public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
     {
         if (Type is IPathTypeEnumerable)
             yield return new KeyValuePair<string, ProtodefType>("type", Type);
+    }
+
+    public override object Clone()
+    {
+        return new ProtodefOption((ProtodefType)Type.Clone());
     }
 
     public override string? GetNetType()
@@ -29,13 +35,11 @@ public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || obj is ProtodefOption other && Equals(other);
+        return ReferenceEquals(this, obj) || (obj is ProtodefOption other && Equals(other));
     }
 
     public override int GetHashCode()
     {
         return Type.GetHashCode();
     }
-
-    
 }

@@ -13,4 +13,9 @@ public sealed class ProtodefCustomType : ProtodefType
     {
         return Name;
     }
+
+    public override object Clone()
+    {
+        return new ProtodefCustomType(Name);
+    }
 }

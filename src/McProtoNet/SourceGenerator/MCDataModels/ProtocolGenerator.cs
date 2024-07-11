@@ -3,13 +3,13 @@ using SourceGenerator.ProtoDefTypes;
 
 public class ProtocolGenerator
 {
-    private readonly Namespace _namespace;
+    private readonly ProtodefNamespace _protodefNamespace;
     private readonly int _numberVersion;
     private readonly string _version;
 
-    public ProtocolGenerator(Namespace ns, string version, int numberVersion)
+    public ProtocolGenerator(ProtodefNamespace ns, string version, int numberVersion)
     {
-        _namespace = ns;
+        _protodefNamespace = ns;
         _numberVersion = numberVersion;
         _version = version;
     }
