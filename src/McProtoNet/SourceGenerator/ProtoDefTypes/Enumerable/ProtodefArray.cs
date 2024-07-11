@@ -26,12 +26,15 @@ public sealed class ProtodefArray : ProtodefType, IPathTypeEnumerable
 
     public override object Clone()
     {
-        return new ProtodefArray
+        var owner = new ProtodefArray
         {
             Type = (ProtodefType)Type.Clone(),
             CountType = (ProtodefType)CountType.Clone(),
             Count = Count
         };
+        owner.CountType.Parent = owner;
+        owner.Type.Parent = owner;
+        return owner;
     }
 
     private bool Equals(ProtodefArray other)

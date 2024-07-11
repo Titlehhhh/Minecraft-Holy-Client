@@ -17,6 +17,7 @@ public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContai
     private ProtodefContainer(ProtodefContainer other)
     {
         fields = other.fields.Select(x => x.Clone()).Cast<ProtodefContainerField>().ToList();
+        foreach (var item in fields) item.Parent = this;
     }
 
     public IEnumerator<ProtodefContainerField> GetEnumerator()

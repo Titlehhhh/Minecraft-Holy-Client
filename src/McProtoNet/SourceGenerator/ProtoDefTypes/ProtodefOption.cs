@@ -18,7 +18,9 @@ public sealed class ProtodefOption : ProtodefType, IPathTypeEnumerable
 
     public override object Clone()
     {
-        return new ProtodefOption((ProtodefType)Type.Clone());
+        var owner = new ProtodefOption((ProtodefType)Type.Clone());
+        owner.Type.Parent = owner;
+        return owner;
     }
 
     public override string? GetNetType()

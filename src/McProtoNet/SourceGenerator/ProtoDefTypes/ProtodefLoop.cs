@@ -22,10 +22,12 @@ public sealed class ProtodefLoop : ProtodefType, IPathTypeEnumerable
 
     public override object Clone()
     {
-        return new ProtodefLoop
+        var owner = new ProtodefLoop
         {
             EndValue = EndValue,
             Type = (ProtodefType)Type.Clone()
         };
+        owner.Type.Parent = owner;
+        return owner;
     }
 }

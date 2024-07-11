@@ -20,7 +20,9 @@ public sealed class ProtodefPrefixedString : ProtodefType
 
     public override object Clone()
     {
-        return new ProtodefPrefixedString((ProtodefType)CountType.Clone());
+        var owner = new ProtodefPrefixedString((ProtodefType)CountType.Clone());
+        owner.CountType.Parent = owner;
+        return owner;
     }
 
     private bool Equals(ProtodefPrefixedString other)

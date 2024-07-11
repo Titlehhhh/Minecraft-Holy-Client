@@ -12,6 +12,14 @@ public sealed class ProtodefBitField : ProtodefType, IEnumerable<ProtodefBitFiel
         this.nodes = nodes;
     }
 
+    private ProtodefBitField(ProtodefBitField other)
+    {
+        nodes = other.nodes
+            .Select(x => x.Clone())
+            .Cast<ProtodefBitFieldNode>()
+            .ToList();
+    }
+
     public IEnumerator<ProtodefBitFieldNode> GetEnumerator()
     {
         return nodes.GetEnumerator();
@@ -24,9 +32,6 @@ public sealed class ProtodefBitField : ProtodefType, IEnumerable<ProtodefBitFiel
 
     public override object Clone()
     {
-        return new ProtodefBitField(nodes
-            .Select(x => x.Clone())
-            .Cast<ProtodefBitFieldNode>()
-            .ToList());
+        return new ProtodefBitField(this);
     }
 }

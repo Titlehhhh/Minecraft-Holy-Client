@@ -22,12 +22,16 @@ public class ProtodefSwitch : ProtodefType, IPathTypeEnumerable
 
     public override object Clone()
     {
-        return new ProtodefSwitch
+        var owner = new ProtodefSwitch
         {
             CompareToValue = CompareToValue,
             Fields = Fields.Select(x => new KeyValuePair<string, ProtodefType>(x.Key, (ProtodefType)x.Value.Clone()))
                 .ToDictionary(),
             Default = Default!.Clone() as ProtodefType
         };
+
+        foreach (var keyValuePair in owner.Fields) keyValuePair.Value.Parent = owner;
+
+        return owner;
     }
 }

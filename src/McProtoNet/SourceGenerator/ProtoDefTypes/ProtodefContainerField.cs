@@ -28,6 +28,8 @@ public sealed class ProtodefContainerField : ProtodefType
 
     public override object Clone()
     {
-        return new ProtodefContainerField(Anon, Name, (ProtodefType)Type.Clone());
+        var owner = new ProtodefContainerField(Anon, Name, (ProtodefType)Type.Clone());
+        owner.Type.Parent = owner;
+        return owner;
     }
 }

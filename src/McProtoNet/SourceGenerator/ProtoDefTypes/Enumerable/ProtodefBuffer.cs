@@ -17,11 +17,13 @@ public sealed class ProtodefBuffer : ProtodefType
 
     public override object Clone()
     {
-        return new ProtodefBuffer
+        var owner = new ProtodefBuffer
         {
             CountType = CountType!.Clone() as ProtodefType,
             Count = Count,
             Rest = Rest
         };
+        owner.CountType!.Parent = owner;
+        return owner;
     }
 }

@@ -18,11 +18,15 @@ public sealed class ProtodefNamespace : ProtodefType, IEnumerable<KeyValuePair<s
 
     public override object Clone()
     {
-        return new ProtodefNamespace
+        var owner = new ProtodefNamespace
         {
             Types = Types
                 .Select(x => new KeyValuePair<string, ProtodefType>(x.Key, (ProtodefType)x.Value.Clone()))
                 .ToDictionary()
         };
+
+        foreach (var item in owner.Types) item.Value.Parent = owner;
+
+        return owner;
     }
 }
