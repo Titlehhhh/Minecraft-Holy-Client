@@ -3,56 +3,49 @@ using System.Text.Json.Serialization;
 
 namespace SourceGenerator.ProtoDefTypes;
 
-public sealed class ProtodefContainer : ProtodefType, IEnumerable<ProtodefContainerField>, IPathTypeEnumerable,
+public sealed class ProtodefContainer : ProtodefType, IPathTypeEnumerable,
     IJsonOnDeserialized
 {
-    private readonly List<ProtodefContainerField> fields = new();
+    public Dictionary<string, ProtodefContainerField> Fields { get; set; } = new();
 
     [JsonConstructor]
     public ProtodefContainer(List<ProtodefContainerField> fields)
     {
-        this.fields = fields;
+        this.Fields = fields.ToDictionary(x => x.Name, x => x);
     }
 
     private ProtodefContainer(ProtodefContainer other)
     {
-        fields = other.fields.Select(x => x.Clone()).Cast<ProtodefContainerField>().ToList();
-        foreach (var item in fields) item.Parent = this;
+        Fields = other.Fields.Select(x =>
+                new KeyValuePair<string, ProtodefContainerField>(x.Key, (ProtodefContainerField)x.Value.Clone()))
+            .ToDictionary();
+        foreach (var item in Fields) item.Value.Parent = this;
     }
 
-    public IEnumerator<ProtodefContainerField> GetEnumerator()
-    {
-        return fields.GetEnumerator();
-    }
-
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return fields.GetEnumerator();
-    }
 
     public override void OnDeserialized()
     {
-        foreach (var field in fields)
+        foreach (var field in Fields)
         {
-            field.Parent = this;
-            field.Type.Parent = field;
+            field.Value.Parent = this;
+            field.Value.Type.Parent = field.Value;
         }
     }
 
     IEnumerator<KeyValuePair<string, ProtodefType>> IPathTypeEnumerable.GetEnumerator()
     {
-        var id = 0;
-
-
-        foreach (var item in fields)
-        {
-            id++;
-
-            var name = string.IsNullOrEmpty(item.Name) ? $"anon_{id}" : item.Name;
-
-            yield return new KeyValuePair<string, ProtodefType>(name, item.Type);
-        }
+        throw new NotImplementedException();
+        // var id = 0;
+        //
+        //
+        // foreach (var item in fields)
+        // {
+        //     id++;
+        //
+        //     var name = string.IsNullOrEmpty(item.Name) ? $"anon_{id}" : item.Name;
+        //
+        //     yield return new KeyValuePair<string, ProtodefType>(name, item.Type);
+        // }
     }
 
     public override object Clone()

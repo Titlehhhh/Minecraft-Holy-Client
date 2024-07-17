@@ -92,7 +92,7 @@ public static class Extensions
 
     public static bool IsAllFieldsPrimitive(this ProtodefContainer container)
     {
-        return container.All(x =>
+        return container.Fields.Select(x=>x.Value).All(x =>
         {
             var result = x.Type.IsPrimitive()
                          || x.Type.IsPrimitiveArray()
