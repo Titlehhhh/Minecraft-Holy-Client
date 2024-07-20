@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="ProtodefModels.fs" />
         <Compile Include="Program.fs" />
+        <Compile Include="JsonParser.fs" />
     </ItemGroup>
 
 </Project>

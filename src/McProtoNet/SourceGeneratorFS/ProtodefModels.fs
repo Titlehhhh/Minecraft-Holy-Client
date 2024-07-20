@@ -1,109 +1,108 @@
-﻿namespace SourceGenerator
+﻿module ProtodefModels
 
-open System.Collections.Generic
+type ByteOrder =
+    | BigEndian
+    | LittleEndian
 
-module ProtodefModels =
+type Primitive =
+    | Boolean
+    | String
+    | Void
 
-    type ByteOrder =
-        | BigEndian
-        | LittleEndian
 
-    and Numeric =
-        | Byte of signed: bool
-        | Short of signed: bool * byteOrder: ByteOrder
-        | Int of signed: bool * byteOrder: ByteOrder
-        | Long of signed: bool * byteOrder: ByteOrder
-        | Float of byteOrder: ByteOrder
-        | Double of byteOrder: ByteOrder
-        | VarInt
-        | VarLong
+type ArrayCount =
+    | FieldReference of string
+    | FixedLength of uint32
 
-    and Primitive =
-        | Boolean
-        | String
-        | Void
+type Numeric =
+    | Byte of signed: bool
+    | Short of signed: bool * byteOrder: ByteOrder
+    | Int of signed: bool * byteOrder: ByteOrder
+    | Long of signed: bool * byteOrder: ByteOrder
+    | Float of byteOrder: ByteOrder
+    | Double of byteOrder: ByteOrder
+    | VarInt of int32
+    | VarLong of int64
 
-    and ArrayCount =
-        | FieldReference of string
-        | FixedLength of uint32
+type BitField =
+    { name: string
+      size: int
+      signed: bool }
 
-    and Array = {
-        countType: DataType option
-        count: ArrayCount option
-        elementsType: DataType
-    }
 
-    and Field = {
-        name: string option
-        fieldType: DataType
-        anonymous: bool option
-    }
+type DataType =
+    | Conditional of Conditional
+    | Numeric of Numeric
+    | Primitive of Primitive
+    | Structure of Structure
+    | Util of Util
+    | Custom of string
 
-    and Count = {
-        countType: DataType
-        countFor: string
-    }
+and Structure =
+    | Array of Array
+    | Container of Field list
+    | Count of Count
 
-    and Structure =
-        | Array of Array
-        | Container of Field list
-        | Count of Count
+and Conditional =
+    | Switch of Switch
+    | Option of DataType
 
-    and Buffer = {
-        countType: DataType option
-        count: ArrayCount option
-        rest: bool option
-    }
+and Util =
+    | Buffer of Buffer
+    | Mapper of Mapper
+    | Bitfield of BitField list
+    | PrefixedString of countType: DataType
+    | Loop of Loop
+    | TopBitSetTerminatedArray of Structure
 
-    and Mapper = {
-        mappingsType: string
-        mappings: Dictionary<string, string>
-    }
+and Loop = { endVal: uint32; dataType: DataType }
 
-    and BitField = {
-        name: string
-        size: int
-        signed: bool
-    }
+and Array =
+    { countType: DataType option
+      count: ArrayCount option
+      elementsType: DataType }
 
-    and Loop = {
-        endVal: uint32
-        dataType: DataType
-    }
+and Field =
+    { name: string option
+      fieldType: DataType
+      anonymous: bool option }
 
-    and Util =
-        | Buffer of Buffer
-        | Mapper of Mapper
-        | Bitfield of BitField list
-        | PrefixedString of countType: DataType
-        | Loop of Loop
-        | TopBitSetTerminatedArray of Structure
-    and DataType =
-        | Conditional of Conditional
-        | Numeric of Numeric
-        | Primitive of Primitive
-        | Structure of Structure
-        | Util of Util
-        | Custom of string
-
-    and Conditional =
-        | Switch of Switch
-        | Option of DataType
-
-    and Switch = {
-        name: string option
-        compareTo: string
-        fields: Dictionary<string, DataType>
-        default_val: DataType option
-    }
+and Count =
+    { countType: DataType
+      countFor: string }
 
 
 
-    and Namespace =
-        | Map of Dictionary<string, Namespace>
-        | DataType of DataType
+and Buffer =
+    { countType: DataType option
+      count: ArrayCount option
+      rest: bool option }
 
-    type Protocol = {
-        types: Dictionary<string, DataType>
-        namespaces: Dictionary<string, Namespace>
-    }
+and Mapper =
+    { mappingsType: string
+      mappings: Map<string, string> }
+
+
+
+
+
+
+
+
+
+
+and Switch =
+    { name: string option
+      compareTo: string
+      fields: Map<string, DataType>
+      default_val: DataType option }
+
+
+
+type Namespace =
+    | Map of Map<string, Namespace>
+    | DataType of DataType
+
+type Protocol =
+    { types: Map<string, DataType>
+      namespaces: Map<string, Namespace> }
