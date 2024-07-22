@@ -48,7 +48,14 @@ let filterCustom (field: ProtodefContainerField) : bool =
     else
         false
 
+let skippedPackets = HashSet<string>()
+
 let processPass (first: ProtodefNamespace, second: ProtodefNamespace) =
+    let KeysBefore = first.Types.Keys
+                          |> Seq.append second.Types.Keys
+                          |> Seq.filter (fun x-> x <> "packet")
+                          |> Set.ofSeq
+    
     first.FilterSimple filterCustom
     second.FilterSimple filterCustom
 
@@ -59,24 +66,39 @@ let processPass (first: ProtodefNamespace, second: ProtodefNamespace) =
 
     let keys = keys1 |> Seq.append keys2 |> Seq.toArray
 
-    for key in keys do
-        first.Types.Remove key
-        second.Types.Remove key
+    for key in keys do        
+        first.Types.Remove key |> ignore
+        second.Types.Remove key |> ignore
 
     
     if first.Types.Count <> second.Types.Count then
         raise (Exception("count not equal"))
-
+    
+    let keysAfter = first.Types.Keys
+                          |> Seq.append second.Types.Keys
+                          |> Seq.filter (fun x-> x <> "packet")
+                          |> Set.ofSeq
+    let deleted = KeysBefore |> Seq.except keysAfter
+    
+    for s in deleted do
+        skippedPackets.Add(s)
+    ()
+    
+    (*
     let a =
         first
         |> Seq.zip second
         |> Seq.map (fun x -> KeyValuePair((fst x).Key, ((fst x).Value, (snd x).Value)))
 
     for KeyValue(name, typesTuple) in a do
-        processPassContainers (fst typesTuple :?> ProtodefContainer, snd typesTuple :?> ProtodefContainer)
+        processPassContainers (fst typesTuple :?> ProtodefContainer, snd typesTuple :?> ProtodefContainer) *)
 
 
 
 
 for play2S in protocols |> Seq.skip 1 do
+    
     processPass (firstPlayClientPackets, play2S["play.toServer"])
+
+for p in skippedPackets do
+    p |> printfn "%s"

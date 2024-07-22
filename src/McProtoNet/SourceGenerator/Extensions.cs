@@ -1,4 +1,6 @@
-﻿using SourceGenerator.ProtoDefTypes;
+﻿using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
+using SourceGenerator.ProtoDefTypes;
 
 public static class Extensions
 {
@@ -70,6 +72,7 @@ public static class Extensions
     {
         return type.IsPrimitive() ||
                type.IsNumber() ||
+               type is ProtodefPrefixedString ||
                type.IsSimpleOption() ||
                type.IsSimpleArray() ||
                type.IsSimpleSwitch();
