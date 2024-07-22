@@ -1,16 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
     </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Remove="PacketTemplate.cs"/>
-    </ItemGroup>
+    
 
     <ItemGroup>
         <PackageReference Include="Humanizer" Version="3.0.0-beta.54"/>
@@ -22,10 +19,6 @@
         </None>
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="A.cs" />
-      <None Include="A.cs" />
-    </ItemGroup>
 
 
 </Project>

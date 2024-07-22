@@ -35,6 +35,31 @@ public class ProtodefProtocol : IJsonOnDeserialized, ICloneable
         return new ProtodefProtocol(this);
     }
 
+    public ProtodefNamespace this[string path]
+    {
+        get
+        {
+            var paths = path.Split(".");
+
+            if (paths.Length == 1)
+            {
+                return Namespaces[path];
+            }
+
+            var f = paths.First();
+
+
+            ProtodefNamespace ns = Namespaces[f];
+
+            for (int i = 1; i < paths.Length; i++)
+            {
+                string item = paths[i];
+                ns = (ProtodefNamespace)ns.Types[item];
+            }
+
+            return ns;
+        }
+    }
 
     public void OnDeserialized()
     {

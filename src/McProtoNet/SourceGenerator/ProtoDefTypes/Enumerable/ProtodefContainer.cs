@@ -6,20 +6,22 @@ namespace SourceGenerator.ProtoDefTypes;
 public sealed class ProtodefContainer : ProtodefType, IPathTypeEnumerable,
     IJsonOnDeserialized
 {
-    public Dictionary<string, ProtodefContainerField> Fields { get; set; } = new();
+    public List<ProtodefContainerField> Fields { get; set; } = new();
 
     [JsonConstructor]
     public ProtodefContainer(List<ProtodefContainerField> fields)
     {
-        this.Fields = fields.ToDictionary(x => x.Name, x => x);
+        Fields = fields;
     }
 
     private ProtodefContainer(ProtodefContainer other)
     {
-        Fields = other.Fields.Select(x =>
-                new KeyValuePair<string, ProtodefContainerField>(x.Key, (ProtodefContainerField)x.Value.Clone()))
-            .ToDictionary();
-        foreach (var item in Fields) item.Value.Parent = this;
+        foreach (var field in other.Fields)
+        {
+            var fieldClone = (ProtodefContainerField)field.Clone();
+            fieldClone.Parent = this;
+            Fields.Add(fieldClone);
+        }
     }
 
 
@@ -27,8 +29,8 @@ public sealed class ProtodefContainer : ProtodefType, IPathTypeEnumerable,
     {
         foreach (var field in Fields)
         {
-            field.Value.Parent = this;
-            field.Value.Type.Parent = field.Value;
+            field.Parent = this;
+            field.Type.Parent = field;
         }
     }
 
@@ -46,6 +48,24 @@ public sealed class ProtodefContainer : ProtodefType, IPathTypeEnumerable,
         //
         //     yield return new KeyValuePair<string, ProtodefType>(name, item.Type);
         // }
+    }
+
+    public void SetPassable(string name)
+    {
+        
+    }
+    public ProtodefType this[string name]
+    {
+        get
+        {
+            foreach (var item in Fields)
+            {
+                if (item.Name == name)
+                    return item.Type;
+            }
+
+            throw new KeyNotFoundException();
+        }
     }
 
     public override object Clone()

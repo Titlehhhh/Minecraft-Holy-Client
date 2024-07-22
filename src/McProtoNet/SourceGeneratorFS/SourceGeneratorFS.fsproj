@@ -4,11 +4,19 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
-
-    <ItemGroup>
+   
+    <ItemGroup>       
         <Compile Include="ProtodefModels.fs" />
+        <Compile Include="JsonParser.fs" />        
         <Compile Include="Program.fs" />
-        <Compile Include="JsonParser.fs" />
+        <None Include="data\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+       
     </ItemGroup>
-
+   
+    <ItemGroup>
+      <ProjectReference Include="..\SourceGenerator\SourceGenerator.csproj" />
+    </ItemGroup>
+    
 </Project>

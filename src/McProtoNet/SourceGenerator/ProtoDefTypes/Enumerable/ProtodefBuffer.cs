@@ -19,11 +19,11 @@ public sealed class ProtodefBuffer : ProtodefType
     {
         var owner = new ProtodefBuffer
         {
-            CountType = CountType!.Clone() as ProtodefType,
+            CountType = (ProtodefType?)CountType?.Clone() ,
             Count = Count,
             Rest = Rest
         };
-        owner.CountType!.Parent = owner;
+        if (owner.CountType is not null) owner.CountType.Parent = owner;
         return owner;
     }
 }

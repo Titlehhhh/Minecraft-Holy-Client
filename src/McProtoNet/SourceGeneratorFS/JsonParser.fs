@@ -1,5 +1,7 @@
 ﻿module JsonParser
 
-type ByteOrder1 =
-    | BigEndian1
-    | LittleEndian1
+open System.Text.Json.Nodes
+open ProtodefModels
+open System.Text.Json
+
+

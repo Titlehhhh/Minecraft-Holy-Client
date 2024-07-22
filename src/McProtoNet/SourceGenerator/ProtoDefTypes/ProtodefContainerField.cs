@@ -13,13 +13,17 @@ public sealed class ProtodefContainerField : ProtodefType
         Type = type;
     }
 
-    //public bool IsAnon => Anon;
 
     [JsonPropertyName("anon")] public bool? Anon { get; }
 
     [JsonPropertyName("name")] public string? Name { get; }
 
     [JsonPropertyName("type")] public ProtodefType Type { get; }
+
+    [JsonIgnore] public bool IsPass { get; set; }
+    [JsonIgnore] public bool IsAnon => Anon == true;
+    
+    
 
     public override void OnDeserialized()
     {

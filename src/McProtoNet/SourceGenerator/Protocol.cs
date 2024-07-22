@@ -8,6 +8,16 @@ public sealed class Protocol : ICloneable
 
     public object Clone()
     {
-        return (Protocol)MemberwiseClone();
+        return new Protocol()
+        {
+            Version = new VersionInfo()
+            {
+                MajorVersion = this.Version.MajorVersion,
+                MinecraftVersion = this.Version.MinecraftVersion,
+                Version = this.Version.Version
+            },
+            JsonPackets = (ProtodefProtocol)this.JsonPackets.Clone()
+        };
     }
 }
+

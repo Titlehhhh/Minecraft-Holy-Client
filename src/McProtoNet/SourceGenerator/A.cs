@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿/*
+using System.Diagnostics;
 using Humanizer;
 using SourceGenerator.NetTypes;
 using SourceGenerator.ProtoDefTypes;
@@ -405,4 +406,4 @@ public class A
     }
 
     #endregion
-}
+}*/

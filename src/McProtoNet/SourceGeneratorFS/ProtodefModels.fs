@@ -1,5 +1,7 @@
 ﻿module ProtodefModels
 
+open System.Text.Json.Serialization
+
 type ByteOrder =
     | BigEndian
     | LittleEndian
@@ -15,19 +17,19 @@ type ArrayCount =
     | FixedLength of uint32
 
 type Numeric =
-    | Byte of signed: bool
-    | Short of signed: bool * byteOrder: ByteOrder
-    | Int of signed: bool * byteOrder: ByteOrder
-    | Long of signed: bool * byteOrder: ByteOrder
-    | Float of byteOrder: ByteOrder
-    | Double of byteOrder: ByteOrder
+    | Byte of Signed: bool
+    | Short of Signed: bool * ByteOrder: ByteOrder
+    | Int of Signed: bool * ByteOrder: ByteOrder
+    | Long of Signed: bool * ByteOrder: ByteOrder
+    | Float of ByteOrder: ByteOrder
+    | Double of ByteOrder: ByteOrder
     | VarInt of int32
     | VarLong of int64
 
 type BitField =
-    { name: string
-      size: int
-      signed: bool }
+    { Name: string
+      Size: int
+      Signed: bool }
 
 
 type DataType =
@@ -51,36 +53,41 @@ and Util =
     | Buffer of Buffer
     | Mapper of Mapper
     | Bitfield of BitField list
-    | PrefixedString of countType: DataType
+    | PrefixedString of CountType: DataType
     | Loop of Loop
     | TopBitSetTerminatedArray of Structure
 
-and Loop = { endVal: uint32; dataType: DataType }
+and Loop = { EndVal: uint32; DataType: DataType }
 
 and Array =
-    { countType: DataType option
-      count: ArrayCount option
-      elementsType: DataType }
+    { CountType: DataType option
+      Count: ArrayCount option
+      ElementsType: DataType }
 
 and Field =
-    { name: string option
-      fieldType: DataType
-      anonymous: bool option }
+    {
+      [<JsonPropertyName("name")>]
+      Name: string option
+      [<JsonPropertyName("fieldType")>]
+      FieldType: DataType
+      [<JsonPropertyName("anonymous")>]      
+      Anonymous: bool option }
 
 and Count =
-    { countType: DataType
-      countFor: string }
+    {      
+      CountType: DataType
+      CountFor: string }
 
 
 
 and Buffer =
-    { countType: DataType option
-      count: ArrayCount option
-      rest: bool option }
+    { CountType: DataType option
+      Count: ArrayCount option
+      Rest: bool option }
 
 and Mapper =
-    { mappingsType: string
-      mappings: Map<string, string> }
+    { MappingsType: string
+      Mappings: Map<string, string> }
 
 
 
@@ -92,10 +99,10 @@ and Mapper =
 
 
 and Switch =
-    { name: string option
-      compareTo: string
-      fields: Map<string, DataType>
-      default_val: DataType option }
+    { Name: string option
+      CompareTo: string
+      Fields: Map<string, DataType>
+      Default: DataType option }
 
 
 

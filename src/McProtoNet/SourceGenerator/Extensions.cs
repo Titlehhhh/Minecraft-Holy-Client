@@ -19,13 +19,9 @@ public static class Extensions
 
     public static bool IsNumber(this ProtodefType type)
     {
-        return type is ProtodefNumericType;
+        return type is ProtodefNumericType || type.IsVariableNumber();
     }
 
-    public static bool IsNumberOrVar(this ProtodefType type)
-    {
-        return type.IsNumber() || type.IsVariableNumber();
-    }
 
     private static bool IsBool(this ProtodefType type)
     {
@@ -52,68 +48,90 @@ public static class Extensions
         return type is ProtodefCustomSwitch;
     }
 
-    private static bool IsPrimitive(this ProtodefSwitch @switch)
+    public static bool IsConditional(this ProtodefType type)
     {
-        var fields = @switch.Fields.All(x => x.Value.IsPrimitive() || x.Value.IsPrimitiveArray());
-        var @default = true;
-        if (@switch.Default is not null)
-        {
-            var a = @switch.Default.IsPrimitive();
-            var b = @switch.Default.IsPrimitiveArray();
-            @default = a || b;
-        }
-
-        return fields && @default;
+        return type is ProtodefSwitch or ProtodefOption;
     }
 
-    public static bool IsPrimitiveSwitch(this ProtodefType type)
+    public static bool IsStructure(this ProtodefType type)
     {
-        if (type is ProtodefSwitch @switch) return IsPrimitive(@switch);
-        return false;
+        return type is ProtodefArray or ProtodefContainer;
     }
+
 
     public static bool IsPrimitive(this ProtodefType type)
     {
-        return type.IsNumberOrVar()
-               || type.IsCustom()
-               || IsBool(type)
+        return IsBool(type)
                || IsString(type)
-               || IsVoid(type)
-               || IsBuffer(type)
-               || IsPrimitiveOption(type);
+               || IsVoid(type);
     }
 
-    public static bool IsPrimitiveArray(this ProtodefType type)
+    public static bool IsSimple(this ProtodefType type)
     {
-        if (type is ProtodefArray arr) return arr.Type.IsPrimitive();
+        return type.IsPrimitive() ||
+               type.IsNumber() ||
+               type.IsSimpleOption() ||
+               type.IsSimpleArray() ||
+               type.IsSimpleSwitch();
+    }
+
+    public static bool IsSimpleOption(this ProtodefType type)
+    {
+        if (type is ProtodefOption option) return option.Type.IsSimple();
+
+        return false;
+    }
+
+    public static bool IsSimpleArray(this ProtodefType type)
+    {
+        if (type is ProtodefArray arr) return arr.Type.IsSimple();
+        return false;
+    }
+
+    public static bool IsSimpleSwitch(this ProtodefType type)
+    {
+        if (type is ProtodefSwitch sSwitch)
+            if (type is not ProtodefCustomSwitch)
+            {
+                foreach (var (k, v) in sSwitch.Fields)
+                    if (!v.IsSimple())
+                        return false;
+
+                if (sSwitch.Default is { } d) return d.IsSimple();
+
+                return true;
+            }
+
         return false;
     }
 
 
-    public static bool IsAllFieldsPrimitive(this ProtodefContainer container)
+    public static bool IsAllFieldsSimple(this ProtodefContainer container, Predicate<ProtodefContainerField> custom)
     {
-        return container.Fields.Select(x=>x.Value).All(x =>
+        return container.Fields.All(x =>
         {
-            var result = x.Type.IsPrimitive()
-                         || x.Type.IsPrimitiveArray()
-                //|| x.Type.IsPrimitiveSwitch()
-                //|| x.Type.IsTopBitSetArray()
-                //|| x.Type.IsMapper()
-                //|| x.Type.IsPrimitiveLoop()				
-                //|| x.Type.IsBitField()
-                ;
+            var result = x.Type.IsSimple()
+                         || custom(x);
 
             return result;
         });
     }
 
-    public static bool IsPrimitiveOption(this ProtodefType type)
+    public static void FilterSimple(this ProtodefNamespace ns, Predicate<ProtodefContainerField> custom)
     {
-        if (type is ProtodefOption option)
-            if (option.Type.IsPrimitive())
-                return true;
-        return false;
+        List<string> keys = new();
+        foreach (var (name, type) in ns.Types)
+        {
+            if (type is ProtodefContainer container)
+            {
+                if (!container.IsAllFieldsSimple(custom))
+                    keys.Add(name);
+            }
+        }
+
+        keys.ForEach(x => ns.Types.Remove(x));
     }
+
 
     public static bool IsBitField(this ProtodefType type)
     {
@@ -149,14 +167,6 @@ public static class Extensions
     {
         if (type is ProtodefTopBitSetTerminatedArray arr)
             if (arr.Type.IsCustom())
-                return true;
-        return false;
-    }
-
-    public static bool IsPrimitiveLoop(this ProtodefType type)
-    {
-        if (type is ProtodefLoop loop)
-            if (loop.Type.IsPrimitive())
                 return true;
         return false;
     }

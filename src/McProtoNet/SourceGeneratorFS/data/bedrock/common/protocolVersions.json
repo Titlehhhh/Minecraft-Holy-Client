@@ -1,0 +1,215 @@
+[
+  {
+    "version": 686,
+    "minecraftVersion": "1.21.2",
+    "majorVersion": "1.21",
+    "releaseType": "release"
+  },
+  {
+    "version": 685,
+    "minecraftVersion": "1.21.0",
+    "majorVersion": "1.21",
+    "releaseType": "release"
+  },
+  {
+    "version": 671,
+    "minecraftVersion": "1.20.80",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 662,
+    "minecraftVersion": "1.20.71",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 649,
+    "minecraftVersion": "1.20.61",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 630,
+    "minecraftVersion": "1.20.50",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 622,
+    "minecraftVersion": "1.20.40",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 618,
+    "minecraftVersion": "1.20.30",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 594,
+    "minecraftVersion": "1.20.15",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 594,
+    "minecraftVersion": "1.20.10",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 589,
+    "minecraftVersion": "1.20.0",
+    "majorVersion": "1.20",
+    "releaseType": "release"
+  },
+  {
+    "version": 582,
+    "minecraftVersion": "1.19.80",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 575,
+    "minecraftVersion": "1.19.70",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 568,
+    "minecraftVersion": "1.19.63",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 567,
+    "minecraftVersion": "1.19.62",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 567,
+    "minecraftVersion": "1.19.60",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 560,
+    "minecraftVersion": "1.19.50",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 557,
+    "minecraftVersion": "1.19.40",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 554,
+    "minecraftVersion": "1.19.30",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 545,
+    "minecraftVersion": "1.19.21",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 544,
+    "minecraftVersion": "1.19.20",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 534,
+    "minecraftVersion": "1.19.10",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 527,
+    "minecraftVersion": "1.19.1",
+    "majorVersion": "1.19",
+    "releaseType": "release"
+  },
+  {
+    "version": 503,
+    "minecraftVersion": "1.18.30",
+    "majorVersion": "1.18",
+    "releaseType": "release"
+  },
+  {
+    "version": 486,
+    "minecraftVersion": "1.18.11",
+    "majorVersion": "1.18",
+    "releaseType": "release"
+  },
+  {
+    "version": 475,
+    "minecraftVersion": "1.18.0",
+    "majorVersion": "1.18",
+    "releaseType": "release"
+  },
+  {
+    "version": 471,
+    "minecraftVersion": "1.17.40",
+    "majorVersion": "1.17",
+    "releaseType": "release"
+  },
+  {
+    "version": 465,
+    "minecraftVersion": "1.17.30",
+    "majorVersion": "1.17",
+    "releaseType": "release"
+  },
+  {
+    "version": 448,
+    "minecraftVersion": "1.17.10",
+    "majorVersion": "1.17",
+    "releaseType": "release"
+  },
+  {
+    "version": 440,
+    "minecraftVersion": "1.17.0",
+    "majorVersion": "1.17",
+    "releaseType": "release"
+  },
+  {
+    "version": 431,
+    "minecraftVersion": "1.16.220",
+    "majorVersion": "1.16",
+    "releaseType": "release"
+  },
+  {
+    "version": 428,
+    "minecraftVersion": "1.16.210",
+    "majorVersion": "1.16",
+    "releaseType": "release"
+  },
+  {
+    "version": 422,
+    "minecraftVersion": "1.16.201",
+    "majorVersion": "1.16",
+    "releaseType": "release"
+  },
+  {
+    "version": 100,
+    "minecraftVersion": "1.0.0",
+    "majorVersion": "1.0"
+  },
+  {
+    "version": 82,
+    "minecraftVersion": "0.15.6",
+    "majorVersion": "0.15"
+  },
+  {
+    "version": 70,
+    "minecraftVersion": "0.14.3",
+    "majorVersion": "0.14"
+  }
+]
