@@ -17,10 +17,10 @@
          alt="GitHub pull requests">    
     <a href="https://github.com/Titlehhhh/Minecraft-Holy-Client/releases">
     <img src="https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg"
-         alt="Download">      
+         alt="Download"> 
+     <a href="https://discord.gg/AFrC4Bjq">
     <img src="https://img.shields.io/badge/Discord-blue?style=for-the-badg"
-         alt="Discord">
-    <a href="https://discord.gg/AFrC4Bjq">
+         alt="Discord">  
 
       
 </p>
