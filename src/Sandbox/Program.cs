@@ -1,4 +1,5 @@
-﻿using HolyClient.StressTest;
+﻿using System.Runtime.Intrinsics.X86;
+using HolyClient.StressTest;
 using McProtoNet;
 using McProtoNet.Client;
 using McProtoNet.Protocol;
@@ -11,6 +12,7 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
+        
         string host = args[0];
 
 

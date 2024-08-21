@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Unicode;
 using McProtoNet.NBT;
@@ -215,7 +216,6 @@ public ref struct MinecraftPrimitiveReaderSlim
             {
                 throw new Exception("ReadUTF");
             }
-
 
 #if NET7_0_OR_GREATER
             // regular path, know decoded UTF16 length will gets faster decode result

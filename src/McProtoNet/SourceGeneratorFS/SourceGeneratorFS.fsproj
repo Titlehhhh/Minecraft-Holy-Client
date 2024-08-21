@@ -18,5 +18,9 @@
     <ItemGroup>
       <ProjectReference Include="..\SourceGenerator\SourceGenerator.csproj" />
     </ItemGroup>
+   
+    <ItemGroup>
+      <Content Include="hh.json" />
+    </ItemGroup>
     
 </Project>

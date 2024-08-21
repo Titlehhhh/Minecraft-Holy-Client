@@ -128,7 +128,11 @@ public static class Extensions
             if (type is ProtodefContainer container)
             {
                 if (!container.IsAllFieldsSimple(custom))
+                {
+                    
+
                     keys.Add(name);
+                }
             }
         }
 

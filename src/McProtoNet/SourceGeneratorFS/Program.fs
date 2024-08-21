@@ -28,9 +28,9 @@ let protocols =
 
 let first = Array.head protocols
 
-let firstPlayClientPackets = first["play.toServer"]
+let firstPlayClientPackets = first["play.toClient"]
 
-let supportedTypes = [| "position"; "slot" |]
+let supportedTypes = [| "position"; "slot";"nbt";"optionalNbt" ;"anonymousNbt";"anonOptionalNbt";"optvarint";"restBuffer";"UUID"|]
 
 
 
@@ -80,6 +80,10 @@ let processPass (first: ProtodefNamespace, second: ProtodefNamespace) =
                           |> Set.ofSeq
     let deleted = KeysBefore |> Seq.except keysAfter
     
+    if deleted|> Seq.contains "packet_entity_destroy" then
+        Debugger.Break()
+    
+    
     for s in deleted do
         skippedPackets.Add(s)
     ()
@@ -94,11 +98,20 @@ let processPass (first: ProtodefNamespace, second: ProtodefNamespace) =
         processPassContainers (fst typesTuple :?> ProtodefContainer, snd typesTuple :?> ProtodefContainer) *)
 
 
-
-
+let i:int32 = 1;
+let arr = cloneCollection.Protocols.Keys |> Seq.toArray
 for play2S in protocols |> Seq.skip 1 do
+    let deb: Protocol = cloneCollection.Protocols.[arr[i]]
+    if deb.JsonPackets["play.toClient"].Types.ContainsKey("tags") then
+        Debugger.Break()
     
-    processPass (firstPlayClientPackets, play2S["play.toServer"])
+    processPass (firstPlayClientPackets, play2S["play.toClient"])
 
+printfn "skipped: %d" skippedPackets.Count
 for p in skippedPackets do
+    p |> printfn "%s"
+    
+printfn "no skip: %d" firstPlayClientPackets.Types.Count
+
+for p in firstPlayClientPackets.Types.Keys do
     p |> printfn "%s"
