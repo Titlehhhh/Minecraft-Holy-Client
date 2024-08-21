@@ -18,7 +18,7 @@
     <a href="https://github.com/Titlehhhh/Minecraft-Holy-Client/releases">
     <img src="https://img.shields.io/github/downloads/Titlehhhh/Minecraft-Holy-Client/total.svg"
          alt="Download"> 
-     <a href="https://discord.gg/AFrC4Bjq">
+     <a href="https://discord.gg/PWfYWRDJme">
     <img src="https://img.shields.io/badge/Discord-blue?style=for-the-badg"
          alt="Discord">  
 
