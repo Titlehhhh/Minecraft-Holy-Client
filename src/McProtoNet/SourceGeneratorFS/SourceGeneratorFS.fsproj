@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+   
+    <ItemGroup>       
+        <Compile Include="ProtodefModels.fs" />
+        <Compile Include="JsonParser.fs" />        
+        <Compile Include="Program.fs" />
+        <None Include="data\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+       
+    </ItemGroup>
+   
+    <ItemGroup>
+      <ProjectReference Include="..\SourceGenerator\SourceGenerator.csproj" />
+    </ItemGroup>
+   
+    <ItemGroup>
+      <Content Include="hh.json" />
+    </ItemGroup>
+    
+</Project>

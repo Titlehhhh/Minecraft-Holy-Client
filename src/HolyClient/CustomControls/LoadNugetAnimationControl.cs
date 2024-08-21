@@ -1,36 +1,21 @@
 ﻿using Avalonia.Controls.Primitives;
 
-namespace HolyClient.CustomControls
+namespace HolyClient.CustomControls;
+
+public class LoadNugetAnimationControl : TemplatedControl
 {
-	public class LoadNugetAnimationControl : TemplatedControl
-	{
-		static LoadNugetAnimationControl()
-		{
-			//TextBox
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        //double maxSideLength = Math.Min(this.Width, this.Height);
+        //double ellipseDiameter = 0.1 * maxSideLength;
+        //if (maxSideLength <= 40)
+        //{
+        //	ellipseDiameter += 1;
+        //}
 
-			//DefaultStyleKeyProperty.OverrideMetadata(typeof(ProgressRing),
-			//    new FrameworkPropertyMetadata(typeof(ProgressRing)));
-		}
-
-		public LoadNugetAnimationControl()
-		{
-		}
-
-		protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-		{
-			base.OnApplyTemplate(e);
-			//double maxSideLength = Math.Min(this.Width, this.Height);
-			//double ellipseDiameter = 0.1 * maxSideLength;
-			//if (maxSideLength <= 40)
-			//{
-			//	ellipseDiameter += 1;
-			//}
-
-			//EllipseDiameter = ellipseDiameter;
-			//MaxSideLength = maxSideLength;
-			//EllipseOffset = new Thickness(0, maxSideLength / 2 - ellipseDiameter, 0, 0);
-
-		}
-	}
-
+        //EllipseDiameter = ellipseDiameter;
+        //MaxSideLength = maxSideLength;
+        //EllipseOffset = new Thickness(0, maxSideLength / 2 - ellipseDiameter, 0, 0);
+    }
 }

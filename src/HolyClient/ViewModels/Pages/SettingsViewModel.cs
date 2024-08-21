@@ -1,47 +1,40 @@
-﻿using HolyClient.Localization;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Reactive.Disposables;
+using HolyClient.Localization;
 using HolyClient.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
-using System;
-using System.Collections.ObjectModel;
-using System.Reactive.Disposables;
 
-namespace HolyClient.ViewModels
+namespace HolyClient.ViewModels;
+
+public class SettingsViewModel : ReactiveObject, ISettingsViewModel, IRoutableViewModel, IActivatableViewModel
 {
-	public class SettingsViewModel : ReactiveObject, ISettingsViewModel, IRoutableViewModel, IActivatableViewModel
-	{
+    public SettingsViewModel()
+    {
+        var state = Locator.Current.GetService<SettingsState>();
 
-		[Reactive]
-		public string Language { get; set; }
-		public ObservableCollection<string> AvailableLanguages => Loc.Instance.AvailableLanguages;
+        Language = state.Language;
+        this.WhenActivated(d =>
+        {
+            this.WhenAnyValue(x => x.Language)
+                .BindTo(state, x => x.Language)
+                .DisposeWith(d);
 
-		public string? UrlPathSegment => "/settings";
+            this.WhenAnyValue(x => x.Language)
+                .Subscribe(x => Loc.Instance.CurrentLanguage = x)
+                .DisposeWith(d);
+        });
+    }
 
-		public IScreen HostScreen { get; }
+    [Reactive] public string Language { get; set; }
 
-		public ViewModelActivator Activator { get; } = new();
+    public ObservableCollection<string> AvailableLanguages => Loc.Instance.AvailableLanguages;
 
-		public SettingsViewModel()
-		{
-			var state = Locator.Current.GetService<SettingsState>();
+    public ViewModelActivator Activator { get; } = new();
 
-			Language = state.Language;
-			this.WhenActivated(d =>
-			{
-				this.WhenAnyValue(x => x.Language)
-				.BindTo(state, x => x.Language)
-				.DisposeWith(d);
+    public string? UrlPathSegment => "/settings";
 
-				this.WhenAnyValue(x => x.Language)
-				.Subscribe(x => Loc.Instance.CurrentLanguage = x)
-				.DisposeWith(d);
-			});
-
-
-		}
-
-
-
-	}
+    public IScreen HostScreen { get; }
 }

@@ -1,9 +1,8 @@
-﻿namespace HolyClient.LoadPlugins.Models
-{
-	internal class RuntimeOptions
-	{
-		public string? Tfm { get; set; }
+﻿namespace HolyClient.LoadPlugins.Models;
 
-		public string[]? AdditionalProbingPaths { get; set; }
-	}
+internal class RuntimeOptions
+{
+    public string? Tfm { get; set; }
+
+    public string[]? AdditionalProbingPaths { get; set; }
 }

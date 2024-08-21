@@ -1,64 +1,62 @@
-﻿using DynamicData;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
+using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
-using McProtoNet;
-using System.Collections.Concurrent;
-using System.ComponentModel;
+using MessagePack;
+using Serilog;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+public class ExceptionThrowCount
 {
-	public class ExceptionThrowCount
-	{
-		public Type TypeException { get; set; }
+    public Type TypeException { get; set; }
 
-		public int Count { get; set; }
+    public int Count { get; set; }
 
-		public Dictionary<string, int> Messages { get; set; }
-	}
-	
+    public Dictionary<string, int> Messages { get; set; }
+}
 
-	[MessagePack.Union(0, typeof(StressTestProfile))]
-	public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
-	{
-		Guid Id { get; set; }
-		string Name { get; set; }
-
-		
-
-		string Server { get; set; }
+[Union(0, typeof(StressTestProfile))]
+public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyChanging
+{
+    Guid Id { get; set; }
+    string Name { get; set; }
 
 
-		string BotsNickname { get; set; }
+    string Server { get; set; }
 
 
-		int NumberOfBots { get; set; }
-
-		bool UseProxy { get; set; }
-		MinecraftVersion Version { get; set; }
-
-		
-		ISourceCache<IProxySource, Guid> Proxies { get; }
+    string BotsNickname { get; set; }
 
 
-		IObservable<StressTestMetrik> Metrics { get; }
+    int NumberOfBots { get; set; }
+
+    bool UseProxy { get; set; }
+    int Version { get; set; }
 
 
-		ConcurrentDictionary<Tuple<string,string>, ExceptionCounter> ExceptionCounter { get; }
+    ISourceCache<IProxySource, Guid> Proxies { get; }
 
-		IStressTestBehavior Behavior { get; }
-		StressTestServiceState CurrentState { get; }
 
-		PluginTypeReference BehaviorRef { get; }
-		bool CheckDNS { get; set; }
+    IObservable<StressTestMetrik> Metrics { get; }
 
-		void SetBehavior(IPluginSource pluginSource);
-		void DeleteBehavior();
+    ProxyCheckerOptions ProxyCheckerOptions { get; set; }
 
-		Task Start(Serilog.ILogger logger);
-		Task Stop();
+    bool ParallelCountCheckingCalculateAuto { get; set; }
+    ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; }
 
-		Task Initialization(IPluginProvider pluginProvider);
+    IStressTestBehavior Behavior { get; }
+    StressTestServiceState CurrentState { get; }
 
-	}
+    PluginTypeReference BehaviorRef { get; }
+    bool OptimizeDNS { get; set; }
 
+    void SetBehavior(IPluginSource pluginSource);
+    void DeleteBehavior();
+
+    Task Start(ILogger logger);
+    Task Stop();
+
+    Task Initialization(IPluginProvider pluginProvider);
 }

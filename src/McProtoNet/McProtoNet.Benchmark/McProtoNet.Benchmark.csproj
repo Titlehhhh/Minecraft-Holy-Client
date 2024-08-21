@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Optimize>true</Optimize>
+        <Configuration>Release</Configuration>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.12"/>
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12"/>
+        <PackageReference Include="LibDeflate.NET" Version="1.19.0"/>
+        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\QuickProxyNet\QuickProxyNet.csproj"/>
+        <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj"/>
+        <ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj"/>
+        <ProjectReference Include="..\McProtoNet\McProtoNet.csproj"/>
+    </ItemGroup>
+</Project>

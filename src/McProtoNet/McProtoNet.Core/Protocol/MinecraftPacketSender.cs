@@ -1,39 +1,46 @@
-﻿using Microsoft.IO;
-using System.Buffers;
-using System.IO.Compression;
+﻿using System.Buffers;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.IO.Compression;
 
 namespace McProtoNet.Core.Protocol
 {
-	public class MinecraftPacketSender : IMinecraftPacketSender
+	public class MinecraftPacketSender : IMinecraftPacketSender, IDisposable
 	{
+
 		public Stream BaseStream { get; set; }
 
-		public MinecraftPacketSender(Stream baseStream)
+		public MinecraftPacketSender(Stream baseStream) : base()
 		{
 			BaseStream = baseStream;
+
 		}
+
+		private static ArrayPool<byte> VarIntPool = ArrayPool<byte>.Create(10, 20);
+
+
+
+
+
 		public MinecraftPacketSender()
 		{
 
 		}
 
 
-		private const int ZERO_VARLENGTH = 1;//default(int).GetVarIntLength();
-		private readonly byte[] ZERO_VARINT = { 0 };
-		private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+		private const int ZERO_VARLENGTH = 1;
+		private static readonly byte[] ZERO_VARINT = { 0 };
+		//private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
 
 		public void SendPacket(Packet packet)
 		{
-			semaphore.Wait();
+
+
 			int id = packet.Id;
 			var data = packet.Data;
 			try
 			{
-				//ThrowIfDisposed();
-
-
 
 
 				if (_compressionThreshold > 0)
@@ -50,6 +57,10 @@ namespace McProtoNet.Core.Protocol
 
 						using (var compressedPacket = StaticResources.MSmanager.GetStream())
 						{
+							//compressedPacket.GetBuffer()
+
+
+
 							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
 							{
 								zlibStream.WriteVarInt(id);
@@ -92,7 +103,7 @@ namespace McProtoNet.Core.Protocol
 			}
 			finally
 			{
-				semaphore.Release();
+
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -124,6 +135,7 @@ namespace McProtoNet.Core.Protocol
 			//ThrowIfDisposed();
 			int id = packet.Id;
 			var data = packet.Data;
+			data.Position = 0;
 			//await semaphore.WaitAsync(token);
 			try
 			{
@@ -133,47 +145,58 @@ namespace McProtoNet.Core.Protocol
 				{
 
 
-					byte[] idData = new byte[5];
 
-					int idLen = id.GetVarIntLength(idData);
-
-
-					int uncompressedSize = idLen + (int)data.Length;
-					if (uncompressedSize >= _compressionThreshold)
+					try
 					{
 
-						using (var compressedPacket = StaticResources.MSmanager.GetStream())
+
+						byte idLen = id.GetVarIntLength();
+
+
+
+						int uncompressedSize = idLen + (int)data.Length;
+						if (uncompressedSize >= _compressionThreshold)
 						{
-							using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
+
+							using (var compressedPacket = StaticResources.MSmanager.GetStream())
 							{
-								await zlibStream.WriteVarIntAsync(id, token);
-								await data.CopyToFromMemoryStreamAsync(zlibStream, token);
+								using (var zlibStream = new ZLibStream(compressedPacket, CompressionMode.Compress, true))
+								{
+									zlibStream.WriteVarInt(id);
+									data.CopyTo(zlibStream);
+									//await zlibStream.WriteAsync(memory.Slice(0, idLen), token);
+									//await data.CopyToAsync(zlibStream, token);
+								}
+
+								int compressedPacketLength = (int)compressedPacket.Length;
+
+
+
+								byte uncompressedSizeLength = uncompressedSize.GetVarIntLength();
+
+								int fullSize = uncompressedSizeLength + compressedPacketLength;
+
+								await BaseStream.WriteVarIntAsync(fullSize, token);
+
+								await BaseStream.WriteVarIntAsync(uncompressedSize, token);
+
+
+								compressedPacket.Position = 0;
+								await compressedPacket.CopyToAsync(BaseStream, token);
+
 							}
-							int uncompressedSizeLength = uncompressedSize.GetVarIntLength();
-
-							int fullSize = uncompressedSizeLength + (int)compressedPacket.Length;
-
-
-
-							await BaseStream.WriteVarIntAsync(fullSize, token);
-
+						}
+						else
+						{
+							uncompressedSize++;
 							await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-
-							compressedPacket.Position = 0;
-							await compressedPacket.CopyToFromMemoryStreamAsync(BaseStream, token);
-
+							await BaseStream.WriteAsync(ZERO_VARINT, token);
+							await BaseStream.WriteVarIntAsync(id, token);
+							await data.CopyToAsync(BaseStream, token);
 						}
 					}
-					else
+					finally
 					{
-						uncompressedSize++;
-
-						await BaseStream.WriteVarIntAsync(uncompressedSize, token);
-						await BaseStream.WriteAsync(ZERO_VARINT, token);
-						await BaseStream.WriteAsync(idData.AsMemory(0, idLen), token);
-
-						await data.CopyToAsync(BaseStream, token);
-
 
 					}
 				}
@@ -188,25 +211,38 @@ namespace McProtoNet.Core.Protocol
 				//semaphore.Release();
 			}
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		private async ValueTask SendPacketWithoutCompressionAsync(MemoryStream packet, int id, CancellationToken token)
 		{
 			//ThrowIfDisposed();
 			// packet.Write(writer);
 			int Packetlength = (int)packet.Length;
 
-			using var idDataMemory = MemoryPool<byte>.Shared.Rent(5);
+			var buffer = VarIntPool.Rent(10);
+
+			try
+			{
+
+				byte id_len = id.GetVarIntLength(buffer);
+
+				byte fullsize_len = (id_len + Packetlength).GetVarIntLength(buffer, id_len);
 
 
-			int len = id.GetVarIntLength(idDataMemory.Memory.Span);
-			//Записываем длину всего пакета
-			await BaseStream.WriteVarIntAsync(Packetlength + len, token);
-			//Записываем ID пакета
-			await BaseStream.WriteAsync(idDataMemory.Memory.Slice(0, len), token);
+				await BaseStream.WriteAsync(buffer, id_len, fullsize_len, token);
+				await BaseStream.WriteAsync(buffer, 0, id_len, token);
+
+				//await BaseStream.WriteVarIntAsync(Packetlength + len, token);
+
+				//await BaseStream.WriteAsync(idDataMemory, 0, len, token);
 
 
-			//Все данные пакета перекидываем в интернет
-			await packet.CopyToFromMemoryStreamAsync(BaseStream, token);
+
+				await packet.CopyToAsync(BaseStream, token);
+			}
+			finally
+			{
+				VarIntPool.Return(buffer);
+			}
 
 
 		}
@@ -219,6 +255,18 @@ namespace McProtoNet.Core.Protocol
 		public void SwitchCompression(int threshold)
 		{
 			_compressionThreshold = threshold;
+		}
+		bool disposed;
+		public void Dispose()
+		{
+			if (disposed)
+				return;
+			disposed = true;
+			//compressedPacket.Dispose();
+			//zLib.Dispose();
+			//compressedPacket = null;
+			//zLib = null;
+			GC.SuppressFinalize(this);
 		}
 
 		//private bool _disposed;

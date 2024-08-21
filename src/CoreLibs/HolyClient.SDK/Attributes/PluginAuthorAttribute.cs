@@ -1,12 +1,11 @@
-﻿namespace HolyClient.SDK.Attributes
-{
-	public sealed class PluginAuthorAttribute : Attribute
-	{
-		public string Author { get; }
+﻿namespace HolyClient.SDK.Attributes;
 
-		public PluginAuthorAttribute(string author)
-		{
-			Author = author;
-		}
-	}
+public sealed class PluginAuthorAttribute : Attribute
+{
+    public PluginAuthorAttribute(string author)
+    {
+        Author = author;
+    }
+
+    public string Author { get; }
 }

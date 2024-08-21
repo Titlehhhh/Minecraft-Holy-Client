@@ -1,21 +1,17 @@
 ﻿using ReactiveUI;
 
-namespace HolyClient.ViewModels
+namespace HolyClient.ViewModels;
+
+public class LoadingViewModel : ReactiveObject, IRoutableViewModel
 {
-	public class LoadingViewModel : ReactiveObject, IRoutableViewModel
-	{
-		public string? UrlPathSegment => "/loading";
+    public LoadingViewModel(IScreen screen, string text)
+    {
+        HostScreen = screen;
+        Text = text;
+    }
 
-		public IScreen HostScreen { get; }
+    public string Text { get; }
+    public string? UrlPathSegment => "/loading";
 
-		public string Text { get; }
-
-
-		public LoadingViewModel(IScreen screen, string text)
-		{
-			HostScreen = screen;
-			Text = text;
-		}
-
-	}
+    public IScreen HostScreen { get; }
 }

@@ -19,7 +19,7 @@ namespace McProtoNet.Core.Protocol
 		public MinecraftProtocol(Stream baseStream, bool disposeStream)
 		{
 			_baseStream = baseStream;
-			Reader = new MinecraftPacketReader(_baseStream );
+			Reader = new MinecraftPacketReader(_baseStream);
 			Sender = new MinecraftPacketSender(_baseStream);
 		}
 

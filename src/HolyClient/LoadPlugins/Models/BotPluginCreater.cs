@@ -1,34 +1,31 @@
-﻿using HolyClient.AppState;
-using HolyClient.Models;
-using System;
+﻿using System;
+using HolyClient.AppState;
 
-namespace HolyClient.LoadPlugins.Models
+namespace HolyClient.LoadPlugins.Models;
+
+public class BotPluginCreater : IBotPluginCreater
 {
-	public class BotPluginCreater : IBotPluginCreater
-	{
+    private readonly Type _type;
 
-		private Type _type;
-		public BotPluginCreater(Type type, string assembly, string assemblyFile)
-		{
-			_type = type;
-			Name = _type.FullName;
-			Assembly = assembly;
-			AssemblyFile = assemblyFile;
-		}
+    public BotPluginCreater(Type type, string assembly, string assemblyFile)
+    {
+        _type = type;
+        Name = _type.FullName;
+        Assembly = assembly;
+        AssemblyFile = assemblyFile;
+    }
 
-		public string Name { get; private set; }
+    public string Name { get; }
 
-		public string Assembly { get; private set; }
+    public string Assembly { get; }
 
-		public string AssemblyFile { get; private set; }
+    public string AssemblyFile { get; }
 
 
+    public BehaviorKey Token => new(Name, Assembly);
 
-		public BehaviorKey Token => new BehaviorKey(this.Name, this.Assembly);
-
-		//public BotPlugin Create()
-		//{
-		//	//return (BotPlugin)Activator.CreateInstance(_type);
-		//}
-	}
+    //public BotPlugin Create()
+    //{
+    //	//return (BotPlugin)Activator.CreateInstance(_type);
+    //}
 }

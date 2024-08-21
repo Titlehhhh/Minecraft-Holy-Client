@@ -1,14 +1,12 @@
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
 
-namespace HolyClient.Views
-{
-	public partial class SettingsView : ReactiveUserControl<SettingsViewModel>
-	{
-		public SettingsView()
-		{
+namespace HolyClient.Views;
 
-			InitializeComponent();
-		}
-	}
+public partial class SettingsView : ReactiveUserControl<SettingsViewModel>
+{
+    public SettingsView()
+    {
+        InitializeComponent();
+    }
 }

@@ -2,8 +2,7 @@
 
 public enum StressTestServiceState
 {
-	None,
-	Init,
-	Running
+    None,
+    Init,
+    Running
 }
-

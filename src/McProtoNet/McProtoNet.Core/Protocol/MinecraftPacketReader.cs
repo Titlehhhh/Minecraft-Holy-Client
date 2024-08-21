@@ -1,7 +1,5 @@
-﻿using Microsoft.IO;
-using System.Buffers;
+﻿using System.Buffers;
 using System.IO.Compression;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace McProtoNet.Core.Protocol
@@ -89,7 +87,7 @@ namespace McProtoNet.Core.Protocol
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token)
+		public async ValueTask<Packet> ReadNextPacketAsync(CancellationToken token = default)
 		{
 			//ThrowIfDisposed();
 
@@ -100,81 +98,109 @@ namespace McProtoNet.Core.Protocol
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength();
 
-				var memory = MemoryPool<byte>.Shared.Rent(len);
+				var stream = StaticResources.MSmanager.GetStream(null, len);
 				try
 				{
-					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
 
-					return new(
-						id,
-						StaticResources.MSmanager.GetStream(memory.Memory.Span.Slice(0, len)),
-						memory);
+					stream.Advance(len);
+
+					stream.Position = 0;
+
+					return new Packet(id, stream);
 				}
 				catch
 				{
-					memory.Dispose();
+					stream.Dispose();
 					throw;
 				}
+
+
 
 			}
 
 			int sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
+
+
 			if (sizeUncompressed > 0)
 			{
+				if (sizeUncompressed < _compressionThreshold)
+					throw new Exception($"Длина sizeUncompressed меньше порога сжатия. sizeUncompressed: {sizeUncompressed} Порог: {_compressionThreshold}");
+
+
 				len -= sizeUncompressed.GetVarIntLength();
 
-				var memory = MemoryPool<byte>.Shared.Rent(sizeUncompressed);
+				using var buffer = StaticResources.MSmanager.GetStream(null, len);
 
-				try
+
+
+				await BaseStream.ReadExactlyAsync(buffer.GetMemory(len).Slice(0, len), token);
+
+				buffer.Advance(len);
+
+				buffer.Position = 0;
+
+
+				using (var ReadZlib = new ZLibStream(buffer, CompressionMode.Decompress, true))
 				{
-					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-
-					Memory<byte> compressedData = memory.Memory.Slice(0, len);
-
-					using (var fastStream = StaticResources.MSmanager.GetStream(compressedData.Span))
-					using (var ReadZlib = new ZLibStream(fastStream, CompressionMode.Decompress, true))
+					int id = await ReadZlib.ReadVarIntAsync(token);
+					sizeUncompressed -= id.GetVarIntLength();
+					var stream = StaticResources.MSmanager.GetStream(null, sizeUncompressed);
+					try
 					{
-						int id = await ReadZlib.ReadVarIntAsync(token);
 
-						sizeUncompressed -= id.GetVarIntLength();
 
-						await ReadZlib.ReadExactlyAsync(memory.Memory.Slice(0, sizeUncompressed), token);
+						await ReadZlib.ReadExactlyAsync(stream.GetMemory(sizeUncompressed).Slice(0, sizeUncompressed), token);
 
-						return new Packet(
-							id,
-							StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, sizeUncompressed).Span),
-							memory);
+						stream.Advance(sizeUncompressed);
+
+						stream.Position = 0;
+						return new Packet(id, stream);
+					}
+					catch
+					{
+						stream.Dispose();
+						throw;
 					}
 				}
-				catch
-				{
-					memory.Dispose();
-					throw;
-				}
+
+
+
 
 
 
 			}
+			else
 			{
+
+				if (sizeUncompressed != 0)
+					throw new Exception("size incorrect");
 
 				int id = await BaseStream.ReadVarIntAsync(token);
 				len -= id.GetVarIntLength() + 1;
 
-				var memory = MemoryPool<byte>.Shared.Rent(len);
+
+				var stream = StaticResources.MSmanager.GetStream();
 				try
 				{
-					await BaseStream.ReadExactlyAsync(memory.Memory.Slice(0, len), token);
-					return new(
-						id,
-						StaticResources.MSmanager.GetStream(memory.Memory.Slice(0, len).Span),
-						memory);
+					await BaseStream.ReadExactlyAsync(stream.GetMemory(len).Slice(0, len), token);
+
+					stream.Advance(len);
+
+					stream.Position = 0;
+
+
+					return new Packet(id, stream);
 				}
 				catch
 				{
-					memory.Dispose();
+					stream.Dispose();
 					throw;
 				}
+
+
 			}
+
 
 		}
 		private int _compressionThreshold;
@@ -182,31 +208,6 @@ namespace McProtoNet.Core.Protocol
 		{
 			_compressionThreshold = threshold;
 		}
-		private bool _disposed = false;
-
-		//private void ThrowIfDisposed()
-		//{
-		//	if (_disposed)
-		//		throw new ObjectDisposedException(nameof(MinecraftPacketReader));
-		//}
-		//~MinecraftPacketReader()
-		//{
-		//	Dispose();
-		//}
-		//public void Dispose()
-		//{
-		//	if (_disposed)
-		//		return;
-
-		//	//fastStream?.Dispose();
-		//	//fastStream = null;
-
-		//	_disposed = true;
-		//	GC.SuppressFinalize(this);
-		//}
-
-
-
 
 	}
 }

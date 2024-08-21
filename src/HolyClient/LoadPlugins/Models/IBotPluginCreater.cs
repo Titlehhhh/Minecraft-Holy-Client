@@ -1,18 +1,14 @@
 ﻿using HolyClient.AppState;
-using HolyClient.Models;
 
-namespace HolyClient.LoadPlugins.Models
+namespace HolyClient.LoadPlugins.Models;
+
+public interface IBotPluginCreater
 {
-	public interface IBotPluginCreater
-	{
-		BehaviorKey Token { get; }
+    BehaviorKey Token { get; }
 
-		string Name { get; }
-		string Assembly { get; }
-		string AssemblyFile { get; }
+    string Name { get; }
+    string Assembly { get; }
+    string AssemblyFile { get; }
 
-		//BotPlugin Create();
-
-
-	}
+    //BotPlugin Create();
 }

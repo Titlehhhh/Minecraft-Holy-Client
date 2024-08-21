@@ -4,8 +4,8 @@ namespace HolyClient.CustomControls;
 
 public partial class Shimmer : UserControl
 {
-	public Shimmer()
-	{
-		InitializeComponent();
-	}
+    public Shimmer()
+    {
+        InitializeComponent();
+    }
 }

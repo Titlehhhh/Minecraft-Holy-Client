@@ -8,35 +8,26 @@ namespace HolyClient.Views;
 
 public partial class StressTestView : ReactiveUserControl<StressTestViewModel>
 {
-	public StressTestView()
-	{
-		InitializeComponent();
+    public StressTestView()
+    {
+        InitializeComponent();
 
-		this.WhenActivated(d =>
-		{
+        this.WhenActivated(d =>
+        {
+            ViewModel.ConfirmRemoveDialog.RegisterHandler(async x =>
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Вы точно хотите удалить?",
+                    PrimaryButtonText = Loc.Tr("Yes"),
+                    IsSecondaryButtonEnabled = false,
+                    CloseButtonText = Loc.Tr("No")
+                };
 
+                var result = await dialog.ShowAsync();
 
-
-
-
-			this.ViewModel.ConfirmRemoveDialog.RegisterHandler(async x =>
-			{
-				ContentDialog dialog = new ContentDialog()
-				{
-					Title = "Вы точно хотите удалить?",
-					PrimaryButtonText = Loc.Tr("Yes"),
-					IsSecondaryButtonEnabled = false,
-					CloseButtonText = Loc.Tr("No")
-
-				};
-
-				var result = await dialog.ShowAsync();
-
-				x.SetOutput(result == ContentDialogResult.Primary);
-			});
-
-
-
-		});
-	}
+                x.SetOutput(result == ContentDialogResult.Primary);
+            });
+        });
+    }
 }

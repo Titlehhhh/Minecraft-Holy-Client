@@ -3,91 +3,89 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sg="using:SpacedGridControl.Avalonia"
-			 xmlns:vm="using:HolyClient.ViewModels"
-			 x:CompileBindings="True"
-			 xmlns:views="using:HolyClient.Views"
-			 xmlns:ui="using:FluentAvalonia.UI.Controls"
-			 x:DataType="vm:AssemblyManagerViewModel"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:HolyClient.ViewModels"
+             x:CompileBindings="True"
+             xmlns:views="using:HolyClient.Views"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             x:DataType="vm:AssemblyManagerViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HolyClient.Views.AssemblyManagerView">
-	<UserControl.Resources>
+    <UserControl.Resources>
 
-	</UserControl.Resources>
-	<Panel>
-		<StackPanel
-			Spacing="5"
-			IsVisible="{Binding !Assemblies.Count}"
-			Grid.Row="1" Grid.ColumnSpan="2"
-			HorizontalAlignment="Center"
-			VerticalAlignment="Center">
+    </UserControl.Resources>
+    <Panel>
+        <StackPanel
+            Spacing="5"
+            IsVisible="{Binding !Assemblies.Count}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
 
-			<TextBlock
-				HorizontalAlignment="Center"
-				Text="{Tr ManagingExtension.Assemblies.NoAssembliesText}"
-				FontWeight="Thin"
-				Foreground="LightGray"
-				FontSize="16"
-				FontStyle="Italic"/>
-			<Button
-				HorizontalAlignment="Center"
-				Foreground="LightGray"
-				Command="{Binding AddAssemblyCommand}"
-				Content="{Tr Add}"/>
-		</StackPanel>
+            <TextBlock
+                HorizontalAlignment="Center"
+                Text="{Tr ManagingExtension.Assemblies.NoAssembliesText}"
+                FontWeight="Thin"
+                Foreground="LightGray"
+                FontSize="16"
+                FontStyle="Italic" />
+            <Button
+                HorizontalAlignment="Center"
+                Foreground="LightGray"
+                Command="{Binding AddAssemblyCommand}"
+                Content="{Tr Add}" />
+        </StackPanel>
 
-		<sg:SpacedGrid
-			IsVisible="{Binding Assemblies.Count}"
-			RowDefinitions="Auto, *"
-			ColumnDefinitions="*,Auto">
+        <sg:SpacedGrid
+            IsVisible="{Binding Assemblies.Count}"
+            RowDefinitions="Auto, *"
+            ColumnDefinitions="*,Auto">
 
-			<TextBox
-				HorizontalAlignment="Left"
-				Width="250"
-				Text="{Binding Filter}"
-				Watermark="{Tr Search}"/>
+            <TextBox
+                HorizontalAlignment="Left"
+                Width="250"
+                Text="{Binding Filter}"
+                Watermark="{Tr Search}" />
 
-			<Button
-				Grid.Column="1"
-				Content="{Tr ManagingExtension.Assemblies.LoadAssembly}"
-				Command="{Binding AddAssemblyCommand}"/>
-
+            <Button
+                Grid.Column="1"
+                Content="{Tr ManagingExtension.Assemblies.LoadAssembly}"
+                Command="{Binding AddAssemblyCommand}" />
 
 
-			<Grid
-				Margin="0,10,0,0"
-				ColumnDefinitions="*,3,350"
-				Grid.Row="1"
-				Grid.ColumnSpan="2">
+            <Grid
+                Margin="0,10,0,0"
+                ColumnDefinitions="*,3,350"
+                Grid.Row="1"
+                Grid.ColumnSpan="2">
 
-				<ListBox
-					Margin="0,0,7,0"
-					SelectedItem="{Binding SelectedItem}"
-					ItemsSource="{Binding Assemblies}">
+                <ListBox
+                    Margin="0,0,7,0"
+                    SelectedItem="{Binding SelectedItem}"
+                    ItemsSource="{Binding Assemblies}">
 
-					<ListBox.DataTemplates>
-						<DataTemplate DataType="vm:AssemblyViewModel">
-							<DockPanel LastChildFill="False">
-								<ui:FontIcon
-									DockPanel.Dock="Left"
-									Glyph="&#xF808B;"
-									FontFamily="{StaticResource SymbolThemeFontFamily}"
-									FontSize="28"/>
+                    <ListBox.DataTemplates>
+                        <DataTemplate DataType="vm:AssemblyViewModel">
+                            <DockPanel LastChildFill="False">
+                                <ui:FontIcon
+                                    DockPanel.Dock="Left"
+                                    Glyph="&#xF808B;"
+                                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                    FontSize="28" />
 
-								<TextBlock
-									VerticalAlignment="Center"
-									Margin="7,0,0,0"
-									DockPanel.Dock="Left"
-									FontSize="16"
-									Text="{Binding Name}"/>
-								<TextBlock
-									VerticalAlignment="Center"
-									Margin="0,0,10,0"
-									DockPanel.Dock="Right"
-									FontSize="15"
-									Text="{Binding Version}"/>
-							</DockPanel>
-						</DataTemplate>
-						<!--
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Margin="7,0,0,0"
+                                    DockPanel.Dock="Left"
+                                    FontSize="16"
+                                    Text="{Binding Name}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"
+                                    DockPanel.Dock="Right"
+                                    FontSize="15"
+                                    Text="{Binding Version}" />
+                            </DockPanel>
+                        </DataTemplate>
+                        <!--
 						
 						<DataTemplate DataType="vm:BotPluginVM">
 							<DockPanel>
@@ -114,46 +112,45 @@
 							</DockPanel>
 						</DataTemplate>
 						-->
-					</ListBox.DataTemplates>
+                    </ListBox.DataTemplates>
 
-				</ListBox>
+                </ListBox>
 
-				<GridSplitter Grid.Column="1" Background="Transparent"/>
+                <GridSplitter Grid.Column="1" Background="Transparent" />
 
-				<Border
-					Margin="0,0,10,10"
-					Padding="20,20,20,20"
-					CornerRadius="{DynamicResource OverlayCornerRadius}"
-					Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-					BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-					Grid.Column="2">
-					<Panel>
-						<TextBlock
-							IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNull}}"
-							FontStyle="Italic"
-							Foreground="Gray"
-							HorizontalAlignment="Center"
-							VerticalAlignment="Center"
-							Text="Нет выбранной сборки"/>
-						<ContentControl
-							IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}"
-							Content="{Binding SelectedItem}">
-							<ContentControl.DataTemplates>
-								<DataTemplate DataType="vm:AssemblyViewModel">
-									<views:AssemblyView/>
-								</DataTemplate>
-							</ContentControl.DataTemplates>
+                <Border
+                    Margin="0,0,10,10"
+                    Padding="20,20,20,20"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}"
+                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    Grid.Column="2">
+                    <Panel>
+                        <TextBlock
+                            IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNull}}"
+                            FontStyle="Italic"
+                            Foreground="Gray"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Text="Нет выбранной сборки" />
+                        <ContentControl
+                            IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Content="{Binding SelectedItem}">
+                            <ContentControl.DataTemplates>
+                                <DataTemplate DataType="vm:AssemblyViewModel">
+                                    <views:AssemblyView />
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
 
 
-						</ContentControl>
-					</Panel>
-				</Border>
+                        </ContentControl>
+                    </Panel>
+                </Border>
 
-			</Grid>
+            </Grid>
 
-		</sg:SpacedGrid>
-	</Panel>
-
+        </sg:SpacedGrid>
+    </Panel>
 
 
 </UserControl>

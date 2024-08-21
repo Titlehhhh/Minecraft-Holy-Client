@@ -1,496 +1,462 @@
-﻿using DynamicData;
-using DynamicData.Kernel;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+using System.Reactive.Disposables;
+using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
+using DynamicData;
 using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
-using McProtoNet;
+using McProtoNet.Client;
 using McProtoNet.Utils;
 using MessagePack;
+using QuickProxyNet;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Stateless.Graph;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Net.Sockets;
-using System.Net;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
-using System.Threading;
+using Serilog;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+public class ExceptionCounter
 {
-	public class ExceptionCounter
-	{
-		private volatile int _x = 1;
+    private volatile int _x = 1;
+
+    public int Count => Volatile.Read(ref _x);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Increment()
+    {
+        Interlocked.Increment(ref _x);
+    }
+}
+
+[MessagePackObject(true)]
+public class StressTestProfile : ReactiveObject, IStressTestProfile
+{
+    private readonly object _currentInfoLock = new();
 
-		public int Count => Volatile.Read(ref this._x);
+    private volatile int _botsConnectionCounter;
+    private volatile int _botsHandshakeCounter;
+    private volatile int _botsLoginCounter;
+    private volatile int _botsPlayCounter;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Increment()
-		{
-			Interlocked.Increment(ref _x);
-		}
 
-	}
+    private IDisposable? _cleanUp;
 
-	[MessagePackObject(keyAsPropertyName: true)]
-	public class StressTestProfile : ReactiveObject, IStressTestProfile
-	{
-		#region Properties
-		#region Serializable
+    private volatile int _cpsCounter;
 
-		public Guid Id { get; set; } = Guid.NewGuid();
 
-		[Reactive]
-		public string Name { get; set; }
+    private readonly Subject<StressTestMetrik> _dataPerSecond = new();
+    private StressTestMetrik currentInfo;
 
 
-		[Reactive]
-		public string Server { get; set; }
-		[Reactive]
-		public string BotsNickname { get; set; }
-		[Reactive]
-		public int NumberOfBots { get; set; }
+    [ConfigureAwait(false)]
+    public async Task Start(ILogger logger)
+    {
+        ExceptionCounter.Clear();
+        CurrentState = StressTestServiceState.Init;
+        _botsConnectionCounter = 0;
+        _botsHandshakeCounter = 0;
+        _botsLoginCounter = 0;
+        _botsPlayCounter = 0;
+        _cpsCounter = 0;
+        try
+        {
+            CompositeDisposable disposables = new();
 
-		[Reactive]
-		public MinecraftVersion Version { get; set; } = MinecraftVersion.MC_1_16_5_Version;
-		public IEnumerable<IProxySource> ProxiesState
-		{
-			get => Proxies.Items.ToArray();
-			set => Proxies.AddOrUpdate(value);
-		}
-		[Reactive]
-		[MessagePack.MessagePackFormatter(typeof(PluginTypeRefFormatter))]
-		public PluginTypeReference BehaviorRef { get; set; }
-		[Reactive]
-		public bool UseProxy { get; set; } = true;
+            CancellationTokenSource cancellationTokenSource = new();
 
-		[Reactive]
-		public bool CheckDNS { get; set; } = false;
-		#endregion
+            Disposable.Create(() =>
+            {
+                if (!cancellationTokenSource.IsCancellationRequested) cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+            }).DisposeWith(disposables);
 
-		#region NonSerializable
 
+            if (ParallelCountCheckingCalculateAuto) ProxyCheckerOptions.ParallelCount = NumberOfBots * 10;
 
+            var host = Server;
 
+            var hostPort = host.Split(':');
+            ushort port = 25565;
+            if (hostPort.Length == 2)
+            {
+                host = hostPort[0];
+                port = ushort.Parse(hostPort[1]);
+            }
 
-		[IgnoreMember]
-		public ISourceCache<IProxySource, Guid> Proxies { get; } = new SourceCache<IProxySource, Guid>(x => x.Id);
+            if (port == 25565)
+            {
+                logger.Information($"[STRESS TEST] Поиск srv для {Server}");
+                try
+                {
+                    IServerResolver resolver = new ServerResolver();
 
+                    SrvRecord result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
+                    host = result.Host;
+                    port = result.Port;
+                }
+                catch
+                {
+                    logger.Error($"[STRESS TEST] Ошибка поиска srv для {Server}");
+                }
+            }
 
+            logger.Information($"[STRESS TEST] Поиск DNS для {Server}");
 
-		[IgnoreMember]
-		public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
+            var srv_host = host;
+            var srv_port = port;
 
+            if (OptimizeDNS)
+                try
+                {
+                    var result = await Dns
+                        .GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationTokenSource.Token)
+                        .ConfigureAwait(false);
 
-		[IgnoreMember]
-		[Reactive]
-		public IStressTestBehavior Behavior
-		{
-			get;
-			private set;
-		}
+                    host = result[0].ToString();
+                    logger.Information($"[STRESS TEST] DNS IP for {Server} - {host}");
+                }
+                catch
+                {
+                    logger.Error($"[STRESS TEST] Ошибка поиска DNS для {Server}");
+                }
 
 
+            ProxyProvider? proxyProvider = null;
 
-		[Reactive]
-		[IgnoreMember]
-		public StressTestServiceState CurrentState { get; private set; }
+            if (UseProxy)
+            {
+                var proxies = await LoadProxy(logger);
 
 
-		[IgnoreMember]
-		public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; private set; } = new();
+                var capacity = Math.Min(proxies.Count(), NumberOfBots);
 
+                var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity));
 
-		#endregion
+                var proxyChecker =
+                    new ProxyChecker(channel.Writer, proxies, this.ProxyCheckerOptions, srv_host, srv_port);
 
+                proxyProvider = new ProxyProvider(channel.Reader);
 
-		#endregion
+                _ = proxyChecker.Run(logger);
 
+                logger.Information("Запущен прокси-чекер");
 
-		private Subject<StressTestMetrik> _dataPerSecond = new();
-		private readonly object _currentInfoLock = new();
-		private StressTestMetrik currentInfo;
 
-		private volatile int _botsConnectionCounter = 0;
-		private volatile int _botsHandshakeCounter = 0;
-		private volatile int _botsLoginCounter = 0;
-		private volatile int _botsPlayCounter = 0;
+                proxyChecker.DisposeWith(disposables);
+                proxyProvider.DisposeWith(disposables);
+            }
 
-		private volatile int _cpsCounter = 0;
 
+            var bots = await RunBots(
+                logger,
+                cancellationTokenSource,
+                proxyProvider,
+                disposables,
+                host,
+                port,
+                srv_host,
+                srv_port);
 
-		private IDisposable? _cleanUp;
+            _cleanUp = disposables;
 
-		public StressTestProfile()
-		{
+            logger.Information("Запуск поведения");
+            if (Behavior is not null) await Behavior.Activate(disposables, bots, logger, cancellationTokenSource.Token);
+            logger.Information("Поведение запущено");
 
-		}
 
+            var t = Task.Run(async () =>
+            {
+                try
+                {
+                    Stopwatch stopwatch = new();
 
+                    while (!cancellationTokenSource.IsCancellationRequested)
+                    {
+                        stopwatch.Start();
+                        var cps = Interlocked.Exchange(ref _cpsCounter, 0);
 
+                        var botsOnline = Volatile.Read(ref _botsPlayCounter);
 
-		[ConfigureAwait(false)]
-		public async Task Start(Serilog.ILogger logger)
-		{
-			ExceptionCounter.Clear();
-			CurrentState = StressTestServiceState.Init;
-			_botsConnectionCounter = 0;
-			_botsHandshakeCounter = 0;
-			_botsLoginCounter = 0;
-			_botsPlayCounter = 0;
-			_cpsCounter = 0;
-			try
-			{
-				CompositeDisposable _disposables = new();
+                        _dataPerSecond.OnNext(new StressTestMetrik(cps, botsOnline));
 
-				CancellationTokenSource cancellationTokenSource = new();
 
-				Disposable.Create(() =>
-				{
-					if (!cancellationTokenSource.IsCancellationRequested)
-					{
-						cancellationTokenSource.Cancel();
-					}
-					cancellationTokenSource.Dispose();
-				}).DisposeWith(_disposables);
+                        stopwatch.Stop();
 
+                        if (stopwatch.Elapsed.Microseconds < 1000)
+                            await Task.Delay(1000 - stopwatch.Elapsed.Microseconds);
+                        stopwatch.Reset();
+                    }
+                }
+                catch
+                {
+                }
+            });
+            logger.Information("Запущены потоки чтения метрик");
 
-				var proxyProvider = await LoadProxy(logger);
 
-				if (proxyProvider is not null)
-				{
-					_disposables.Add(proxyProvider);
-				}
+            CurrentState = StressTestServiceState.Running;
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Не удалось запустить стресс тест");
 
-				var bots = new List<MinecraftClient>();
+            CurrentState = StressTestServiceState.None;
+        }
+    }
 
-				string host = this.Server;
 
-				string[] hostPort = host.Split(':');
-				ushort port = 25565;
-				if (hostPort.Length == 2)
-				{
-					host = hostPort[0];
-					port = ushort.Parse(hostPort[1]);
-				}
+    public Task Stop()
+    {
+        Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
 
-				if (port == 25565)
-				{
+        CurrentState = StressTestServiceState.None;
+        return Task.CompletedTask;
+    }
 
-					logger.Information($"[STRESS TEST] Поиск srv для {this.Server}");
-					try
-					{
-						IServerResolver resolver = new ServerResolver();
+    public Task Initialization(IPluginProvider pluginProvider)
+    {
+        var plugin =
+            pluginProvider
+                .AvailableStressTestPlugins
+                .Lookup(BehaviorRef);
+
+        if (plugin.HasValue) SetBehavior(plugin.Value);
+
+        return Task.CompletedTask;
+    }
+
+    public void SetBehavior(IPluginSource pluginSource)
+    {
+        if (CurrentState != StressTestServiceState.None)
+            throw new InvalidOperationException("you cannot change the plugin while running or loading a stress test");
+
+        if (pluginSource is null)
+            throw new ArgumentException("parameter is null", nameof(pluginSource));
+
+        if (Behavior is not null)
+            if (pluginSource.Reference.Equals(BehaviorRef))
+                return;
+
+        var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
+        Behavior = behavior;
+        BehaviorRef = pluginSource.Reference;
+    }
+
+    public void DeleteBehavior()
+    {
+        if (CurrentState != StressTestServiceState.None)
+            throw new InvalidOperationException("you cannot delete the plugin while running or loading a stress test");
+
+        Behavior = null;
+        BehaviorRef = default;
+    }
+
+    private async Task<List<IStressTestBot>> RunBots(
+        ILogger logger,
+        CancellationTokenSource cancellationTokenSource,
+        IProxyProvider? proxyProvider,
+        CompositeDisposable disposables,
+        string host,
+        ushort port,
+        string? srv_host,
+        ushort? srv_port)
+    {
+        
+        var stressTestBots = new List<IStressTestBot>();
+
+        var nickProvider = new NickProvider(BotsNickname);
+
+
+        for (var i = 0; i < NumberOfBots; i++)
+        {
+            if (cancellationTokenSource.IsCancellationRequested)
+                break;
+
+            MinecraftClient bot = new MinecraftClient();
+
+
+            bot.Host = srv_host;
+            bot.Port = (ushort)srv_port;
+            bot.Version = Version;
+            bot.Username = nickProvider.GetNextNick();
+
+
+            var b = new StressTestBot(
+                bot,
+                nickProvider,
+                proxyProvider,
+                logger,
+                i,
+                cancellationTokenSource.Token);
+
+            // Action<ClientStateChanged> onState = state =>
+            // {
+            //     if (state.NewValue == ClientState.Play)
+            //     {
+            //         Interlocked.Increment(ref _cpsCounter);
+            //
+            //
+            //         Interlocked.Increment(ref _botsPlayCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.Connecting)
+            //     {
+            //         Interlocked.Increment(ref _botsConnectionCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.HandShake)
+            //     {
+            //         Interlocked.Increment(ref _botsHandshakeCounter);
+            //     }
+            //     else if (state.NewValue == ClientState.Login)
+            //     {
+            //         Interlocked.Increment(ref _botsLoginCounter);
+            //     }
+            // };
+            //
+            // Action<Exception> onError = exc =>
+            // {
+            //     var state = b.Client.CurrentState;
+            //
+            //     if (state == ClientState.Play)
+            //         Interlocked.Decrement(ref _botsPlayCounter);
+            //     else if (state == ClientState.Connecting)
+            //         Interlocked.Decrement(ref _botsConnectionCounter);
+            //     else if (state == ClientState.HandShake)
+            //         Interlocked.Decrement(ref _botsHandshakeCounter);
+            //     else if (state == ClientState.Login) Interlocked.Decrement(ref _botsLoginCounter);
+            //
+            //     if (exc is NullReferenceException) logger.Information(exc.StackTrace);
+            //
+            //     var key = Tuple.Create(exc.GetType().FullName, exc.Message);
+            //
+            //     if (ExceptionCounter.TryGetValue(key, out var counter))
+            //         counter.Increment();
+            //     else
+            //         ExceptionCounter[key] = new ExceptionCounter();
+            // };
+            //
+            // b.Client.OnStateChanged += onState;
+            // b.Client.OnErrored += onError;
+            //
+            // disposables.Add(Disposable.Create(() =>
+            // {
+            //     b.Client.OnStateChanged -= onState;
+            //     b.Client.OnErrored -= onError;
+            // }));
 
-						var result = await resolver.ResolveAsync(host, cancellationTokenSource.Token);
-						host = result.Host;
-						port = result.Port;
-					}
-					catch
-					{
-						logger.Error($"[STRESS TEST] Ошибка поиска srv для {this.Server}");
-					}
-				}
-				logger.Information($"[STRESS TEST] Поиск DNS для {this.Server}");
-				if (CheckDNS)
-				{
-					try
-					{
-						var result = await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationTokenSource.Token).ConfigureAwait(false);
 
-						host = result[0].ToString();
-						logger.Information($"[STRESS TEST] DNS IP for {this.Server} - {host}");
-					}
-					catch
-					{
-						logger.Error($"[STRESS TEST] Ошибка поиска DNS для {this.Server}");
-					}
-				}
+            stressTestBots.Add(b);
+            bot.DisposeWith(disposables);
+        }
 
-				logger.Information($"[STRESS TEST] Запущен стресс тест на {this.NumberOfBots} ботов на сервер {host}:{port}");
+        logger.Information($"[STRESS TEST] Запущен стресс тест на {NumberOfBots} ботов на сервер {host}:{port}");
 
 
+        return stressTestBots;
+    }
 
-				var stressTestBots = new List<IStressTestBot>();
+    private async Task<IEnumerable<ProxyInfo>> LoadProxy(ILogger logger)
+    {
+        if (!UseProxy)
+        {
+            logger.Information("Прокси не используются в стресс-тесте");
+            return null;
+        }
 
-				var nickProvider = new NickProvider(this.BotsNickname);
 
+        var sources = Proxies.Items.ToList();
+        logger.Information("Загрузка прокси");
+        if (sources.Count() == 0)
+        {
+            //sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
+            sources.Add(new UrlProxySource(ProxyType.SOCKS4,
+                "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
+            sources.Add(new UrlProxySource(ProxyType.SOCKS5,
+                "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+        }
 
+        List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
+        foreach (var s in sources) tasks.Add(s.GetProxiesAsync());
 
+        var result = await Task.WhenAll(tasks);
 
+        var proxies = result.SelectMany(x => x).ToList();
 
 
-				for (int i = 0; i < this.NumberOfBots; i++)
-				{
-					if (cancellationTokenSource.IsCancellationRequested)
-						break;
+        var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
 
-					MinecraftClient bot = new MinecraftClient();
-					bot.Config = new ClientConfig
-					{
-						Host = host,
-						Port = port,
-						Version = this.Version,
-						Username = nickProvider.GetNextNick()
+        logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
 
-					};
+        return proxies;
+    }
 
+    #region Properties
 
+    #region Serializable
 
+    public Guid Id { get; set; } = Guid.NewGuid();
 
+    [Reactive] public string Name { get; set; }
 
 
+    [Reactive] public string Server { get; set; }
 
-					var b = new StressTestBot(
-							bot, nickProvider, proxyProvider,
-							logger,
-							i,
-							cancellationTokenSource.Token);
+    [Reactive] public string BotsNickname { get; set; }
 
-					Action<ClientStateChanged> onState = (state) =>
-					{
-						if (state.NewValue == ClientState.Play)
-						{
-							Interlocked.Increment(ref _cpsCounter);
+    [Reactive] public int NumberOfBots { get; set; }
 
+    [Reactive] public int Version { get; set; } = 754;
 
-							Interlocked.Increment(ref _botsPlayCounter);
-						}
-						else if (state.NewValue == ClientState.Connecting)
-						{
-							Interlocked.Increment(ref _botsConnectionCounter);
-						}
-						else if (state.NewValue == ClientState.HandShake)
-						{
-							Interlocked.Increment(ref _botsHandshakeCounter);
-						}
-						else if (state.NewValue == ClientState.Login)
-						{
-							Interlocked.Increment(ref _botsLoginCounter);
-						}
-					};
+    public IEnumerable<IProxySource> ProxiesState
+    {
+        get => Proxies.Items.ToArray();
+        set => Proxies.AddOrUpdate(value);
+    }
 
-					Action<Exception> onError = (exc) =>
-					{
+    [Reactive]
+    [MessagePackFormatter(typeof(PluginTypeRefFormatter))]
+    public PluginTypeReference BehaviorRef { get; set; }
 
-						var state = b.Client.CurrentState;
+    [Reactive] public bool UseProxy { get; set; } = true;
 
-						if (state == ClientState.Play)
-						{
-							Interlocked.Decrement(ref _botsPlayCounter);
-						}
-						else if (state == ClientState.Connecting)
-						{
-							Interlocked.Decrement(ref _botsConnectionCounter);
-						}
-						else if (state == ClientState.HandShake)
-						{
-							Interlocked.Decrement(ref _botsHandshakeCounter);
-						}
-						else if (state == ClientState.Login)
-						{
-							Interlocked.Decrement(ref _botsLoginCounter);
-						}
+    [Reactive] public bool OptimizeDNS { get; set; } = false;
 
-						//Console.WriteLine(ex.GetType().Name);
-						//Console.WriteLine(ex.Message);
-						//Console.WriteLine(ex.StackTrace);
 
-						var key = Tuple.Create(exc.GetType().FullName, exc.Message);
+    #region ProxyChecker
 
-						if (ExceptionCounter.TryGetValue(key, out var counter))
-						{
-							counter.Increment();
-						}
-						else
-						{
-							ExceptionCounter[key] = new ExceptionCounter();
-						}
-					};
+    public ProxyCheckerOptions ProxyCheckerOptions { get; set; } = new();
 
-					b.Client.OnStateChanged += onState;
-					b.Client.OnErrored += onError;
+    [Reactive] public bool ParallelCountCheckingCalculateAuto { get; set; } = true;
 
-					_disposables.Add(Disposable.Create(() =>
-					{
-						b.Client.OnStateChanged -= onState;
-						b.Client.OnErrored -= onError;
-					}));
+    #endregion
 
+    #endregion
 
+    #region NonSerializable
 
-					stressTestBots.Add(b);
-					bot.DisposeWith(_disposables);
+    [IgnoreMember]
+    public ISourceCache<IProxySource, Guid> Proxies { get; } = new SourceCache<IProxySource, Guid>(x => x.Id);
 
-				}
 
+    [IgnoreMember] public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
+    
 
+    [IgnoreMember] [Reactive] public IStressTestBehavior Behavior { get; private set; }
 
-				var metricsThread = new Thread(() =>
-				{
-					Stopwatch stopwatch = new();
 
-					while (!cancellationTokenSource.IsCancellationRequested)
-					{
-						stopwatch.Start();
-						var cps = Interlocked.Exchange(ref _cpsCounter, 0);
+    [Reactive] [IgnoreMember] public StressTestServiceState CurrentState { get; private set; }
 
-						var botsOnline = Volatile.Read(ref _botsPlayCounter);
 
-						_dataPerSecond.OnNext(new StressTestMetrik(cps, botsOnline));
+    [IgnoreMember]
+    public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; } = new();
 
+    #endregion
 
-						stopwatch.Stop();
-
-						if (stopwatch.Elapsed.Microseconds < 1000)
-						{
-							Thread.Sleep(1000 - stopwatch.Elapsed.Microseconds);
-						}
-						stopwatch.Reset();
-					}
-				})
-				{
-					Name = "Stress test counter",
-					IsBackground = true
-				};
-
-
-
-				CompositeDisposable disposables = new();
-				_disposables.Add(disposables);
-
-
-				_cleanUp = _disposables;
-
-				logger.Information("Запуск поведения");
-				if (Behavior is not null)
-				{
-					await Behavior.Activate(disposables, stressTestBots, logger, cancellationTokenSource.Token);
-				}
-				logger.Information("Поведение запущено");
-
-				metricsThread.Start();
-
-				logger.Information("Запущены потоки чтения метрик");
-
-				CurrentState = StressTestServiceState.Running;
-			}
-			catch (Exception ex)
-			{
-				logger.Error(ex, "Не удалось запустить стресс тест");
-
-				CurrentState = StressTestServiceState.None;
-			}
-		}
-
-
-
-		private async Task<IProxyProvider?> LoadProxy(Serilog.ILogger logger)
-		{
-			if (!UseProxy)
-			{
-				logger.Information("Прокси не используются в стресс-тесте");
-				return null;
-			}
-
-
-			var sources = this.Proxies.Items.ToList();
-			logger.Information("Загрузка прокси");
-			if (sources.Count() == 0)
-			{
-				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
-				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS4, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
-				sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.SOCKS5, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
-			}
-
-			List<Task<IEnumerable<ProxyInfo>>> tasks = new();
-
-			foreach (var s in sources)
-			{
-				tasks.Add(s.GetProxiesAsync());
-			}
-
-			var result = await Task.WhenAll(tasks);
-
-			var proxies = result.SelectMany(x => x).ToList();
-
-			var provider = new ProxyProvider(proxies);
-
-			var group = proxies.GroupBy(x => x.Type).Select(x => $"{x.Key} - {x.Count()}");
-
-			logger.Information($"Загружено {proxies.Count} прокси. {string.Join(", ", group)}");
-
-			return provider;
-
-		}
-
-
-
-		public Task Stop()
-		{
-			Interlocked.Exchange(ref _cleanUp, null)?.Dispose();
-
-			CurrentState = StressTestServiceState.None;
-			return Task.CompletedTask;
-		}
-
-		public Task Initialization(IPluginProvider pluginProvider)
-		{
-
-
-			Optional<IPluginSource> plugin =
-				pluginProvider
-				.AvailableStressTestPlugins
-				.Lookup(this.BehaviorRef);
-
-			if (plugin.HasValue)
-			{
-				this.SetBehavior(plugin.Value);
-			}
-			else
-			{
-
-			}
-			return Task.CompletedTask;
-		}
-
-		public void SetBehavior(IPluginSource pluginSource)
-		{
-			if (CurrentState != StressTestServiceState.None)
-			{
-				throw new InvalidOperationException("you cannot change the plugin while running or loading a stress test");
-			}
-
-			if (pluginSource is null)
-				throw new ArgumentException("parameter is null", nameof(pluginSource));
-
-			if (this.Behavior is not null)
-				if (pluginSource.Reference.Equals(this.BehaviorRef))
-					return;
-
-			var behavior = pluginSource.CreateInstance<IStressTestBehavior>();
-			this.Behavior = behavior;
-			this.BehaviorRef = pluginSource.Reference;
-
-		}
-
-		public void DeleteBehavior()
-		{
-			if (CurrentState != StressTestServiceState.None)
-			{
-				throw new InvalidOperationException("you cannot delete the plugin while running or loading a stress test");
-			}
-
-			this.Behavior = null;
-			this.BehaviorRef = default;
-		}
-	}
-
-
+    #endregion
 }

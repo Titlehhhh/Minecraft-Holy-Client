@@ -1,10 +1,9 @@
-﻿namespace HolyClient.Core.Models.BotManager
+﻿namespace HolyClient.Core.Models.BotManager;
+
+public enum BotState
 {
-	public enum BotState
-	{
-		None,
-		Loading,
-		Success,
-		Error
-	}
+    None,
+    Loading,
+    Success,
+    Error
 }

@@ -3,114 +3,115 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
-			 xmlns:designTime="using:HolyClient.DesignTime"
-			 x:CompileBindings="True"
-			 
-			 xmlns:sg="using:SpacedGridControl.Avalonia"
-			 xmlns:vm="using:HolyClient.ViewModels"
-			 x:DataType="vm:StressTestProcessViewModel"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:designTime="using:HolyClient.DesignTime"
+             x:CompileBindings="True"
+
+             xmlns:sg="using:SpacedGridControl.Avalonia"
+             xmlns:vm="using:HolyClient.ViewModels"
+             x:DataType="vm:StressTestProcessViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HolyClient.Views.StressTestProcessView">
-	<Design.DataContext>
-		<designTime:DesignStressTestProcessViewModel/>
-	</Design.DataContext>
+    <Design.DataContext>
+        <designTime:DesignStressTestProcessViewModel />
+    </Design.DataContext>
 
 
-	<Grid Margin="10,10,10,10" RowDefinitions="Auto,Auto, *">
+    <Grid Margin="10,10,10,10" RowDefinitions="Auto,Auto, *">
 
-		<Button Content="Cancel" Command="{Binding CancelCommand}"/>
-		<sg:SpacedGrid Margin="0,10,0,0" Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="20">
-			<Border Grid.Column="0" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
-				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
-					<TextBlock TextAlignment="Right" Text="{Binding BotsOnline}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.BotsOnline}" Foreground="Gray"/>
-				</StackPanel>
-			</Border>
-			<Border Grid.Column="1" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
-				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
-					<TextBlock TextAlignment="Right" Text="{Binding CPS}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.CPS}" Foreground="Gray"/>
-				</StackPanel>
-			</Border>
-			<Border Grid.Column="2" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
-				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
-					<TextBlock TextAlignment="Right" Text="{Binding PeakCPS}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.PeakCPS}" Foreground="Gray"/>
-				</StackPanel>
-			</Border>
-			<Border Grid.Column="3" CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
-				<StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
-					<TextBlock TextAlignment="Right" Text="{Binding ProxyQuality}" FontWeight="Bold" FontSize="36"/>
-					<TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.ProxyQuality}" Foreground="Gray"/>
-				</StackPanel>
-			</Border>
-		</sg:SpacedGrid>
+        <Button Content="Cancel" Command="{Binding CancelCommand}" />
+        <sg:SpacedGrid Margin="0,10,0,0" Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="20">
+            <Border Grid.Column="0" CornerRadius="7"
+                    Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
+                <StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Right" Text="{Binding BotsOnline}" FontWeight="Bold" FontSize="36" />
+                    <TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.BotsOnline}" Foreground="Gray" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" CornerRadius="7"
+                    Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
+                <StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Right" Text="{Binding CPS}" FontWeight="Bold" FontSize="36" />
+                    <TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.CPS}" Foreground="Gray" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" CornerRadius="7"
+                    Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
+                <StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Right" Text="{Binding PeakCPS}" FontWeight="Bold" FontSize="36" />
+                    <TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.PeakCPS}" Foreground="Gray" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" CornerRadius="7"
+                    Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}" Padding="10">
+                <StackPanel Margin="0,15,10,0" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Right" Text="{Binding ProxyQuality}" FontWeight="Bold" FontSize="36" />
+                    <TextBlock TextWrapping="Wrap" Text="{Tr StressTest.Process.ProxyQuality}" Foreground="Gray" />
+                </StackPanel>
+            </Border>
+        </sg:SpacedGrid>
 
-		<!--
+        <!--
 		<Border  CornerRadius="7" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}">
 
 		</Border>
 		-->
 
-		<TabControl Grid.Row="2">
-			<TabItem FontSize="16" Header="Metrics">
+        <TabControl Grid.Row="2">
+            <TabItem FontSize="16" Header="Metrics">
 
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="*"/>
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-					<lvc:CartesianChart
-						Grid.Row="0"
-						Series="{Binding BotsOnlineSeries}"
-						XAxes="{Binding BotsAxis}"
-						SyncContext="{Binding BotsOnline_Sync}"
-						DrawMargin="{Binding DrawMargin}"
-						ZoomMode="None">
-					</lvc:CartesianChart>
-					<lvc:CartesianChart
-						Grid.Row="1"
-						Series="{Binding CPSSeries}"
-						XAxes="{Binding CPSAxis}"
-						SyncContext="{Binding CPS_Sync}"
-						DrawMargin="{Binding DrawMargin}"
-						ZoomMode="None">
-					</lvc:CartesianChart>
-				</Grid>
+                    <lvc:CartesianChart
+                        Grid.Row="0"
+                        Series="{Binding BotsOnlineSeries}"
+                        XAxes="{Binding BotsAxis}"
+                        SyncContext="{Binding BotsOnline_Sync}"
+                        DrawMargin="{Binding DrawMargin}"
+                        ZoomMode="None" />
+                    <lvc:CartesianChart
+                        Grid.Row="1"
+                        Series="{Binding CPSSeries}"
+                        XAxes="{Binding CPSAxis}"
+                        SyncContext="{Binding CPS_Sync}"
+                        DrawMargin="{Binding DrawMargin}"
+                        ZoomMode="None" />
+                </Grid>
 
-			</TabItem>
-			<TabItem IsSelected="True"  FontSize="16" Header="Log">
-				<ScrollViewer Margin="10" x:Name="LogsScroll">
-					<ItemsControl  ItemsSource="{Binding Logs}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate DataType="vm:LogEventViewModel">
-								<TextBlock TextWrapping="Wrap" Text="{Binding Text}"/>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</ScrollViewer>
-			</TabItem>
-			<TabItem  FontSize="16" Header="Errors">
-				<DataGrid  ItemsSource="{Binding Exceptions}"
-						   IsReadOnly="True"
-						   CanUserReorderColumns="True"
-						   CanUserResizeColumns="True"
-						   CanUserSortColumns="False"
-						   
-						   GridLinesVisibility="All">
-					<DataGrid.Columns>
-						<DataGridTextColumn Width="1*" Header="Type" Binding="{Binding Type}"/>
-						<DataGridTextColumn Width="3*" Header="Message" Binding="{Binding Message}" />
-						<DataGridTextColumn Width="1" Header="Count" Binding="{Binding Count}" />
-					</DataGrid.Columns>
-				</DataGrid>
-			</TabItem>
-		</TabControl>
+            </TabItem>
+            <TabItem IsSelected="True" FontSize="16" Header="Log">
+                <ScrollViewer Margin="10" x:Name="LogsScroll">
+                    <ItemsControl ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:LogEventViewModel">
+                                <TextBlock TextWrapping="Wrap" Text="{Binding Text}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem FontSize="16" Header="Errors">
+                <DataGrid ItemsSource="{Binding Exceptions}"
+                          IsReadOnly="True"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="False"
+
+                          GridLinesVisibility="All">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="1*" Header="Type" Binding="{Binding Type}" />
+                        <DataGridTextColumn Width="3*" Header="Message" Binding="{Binding Message}" />
+                        <DataGridTextColumn Width="1" Header="Count" Binding="{Binding Count}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
 
 
-
-	</Grid>
+    </Grid>
 
 
 </UserControl>

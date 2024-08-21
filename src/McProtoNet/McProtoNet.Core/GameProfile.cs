@@ -2,7 +2,6 @@
 
 namespace McProtoNet.Core
 {
-
 	[DataContract]
 	public class GameProfile
 	{

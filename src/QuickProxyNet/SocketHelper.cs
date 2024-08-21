@@ -1,11 +1,5 @@
-﻿using System.Net.Sockets;
+﻿namespace QuickProxyNet;
 
-namespace QuickProxyNet
+public static class SocketHelper
 {
-	public static class SocketHelper
-	{
-		
-
-		
-	}
 }

@@ -1,34 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		
+    <PropertyGroup>
+        <TargetFrameworks>net8.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <Description>High-performance library for working with the minecraft protocol</Description>
+        <RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
+        <PackageTags>minecraft bot reactive performance</PackageTags>
+    </PropertyGroup>
 
-		<LangVersion>11</LangVersion>
-		
-		<Description>High-performance library for working with the minecraft protocol</Description>
-		<RepositoryUrl>https://github.com/Titlehhhh/McProtoNet</RepositoryUrl>
-		<PackageTags>minecraft bot reactive performance</PackageTags>
-		
-		
-	</PropertyGroup>
-	
+    <ItemGroup>
+        <PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
+        <PackageReference Include="DotNext.IO" Version="5.7.0" />
+        <PackageReference Include="DotNext.Threading" Version="5.7.0" />
+        <PackageReference Include="MinVer" Version="5.0.0"/>
+        <PackageReference Include="DotNext" Version="5.7.0" />
+        <PackageReference Include="LibDeflate.NET" Version="1.19.0"/>
+        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
 
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
+        <PackageReference Include="ZString" Version="2.6.0"/>
+    </ItemGroup>
 
-	<ItemGroup>		
-		<ProjectReference Include="..\McProtoNet.Core\McProtoNet.Core.csproj" />
-		<ProjectReference Include="..\McProtoNet.Utils\McProtoNet.Utils.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
-		<PackageReference Include="Serilog" Version="3.1.2-dev-02097" />
-		<PackageReference Include="Stateless" Version="5.15.0" />
-		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
-		<PackageReference Include="System.Reactive" Version="6.0.1-preview.1" />
-		
-	</ItemGroup>
-	
+    <ItemGroup>
+        <ProjectReference Include="..\..\QuickProxyNet\QuickProxyNet.csproj"/>
+        <ProjectReference Include="..\McProtoNet.Abstractions\McProtoNet.Abstractions.csproj"/>
+        <ProjectReference Include="..\McProtoNet.NBT\McProtoNet.NBT.csproj"/>
+        <ProjectReference Include="..\McProtoNet.Serialization\McProtoNet.Serialization.csproj"/>
+    </ItemGroup>
 
 </Project>

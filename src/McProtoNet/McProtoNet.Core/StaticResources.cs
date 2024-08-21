@@ -8,7 +8,7 @@ namespace McProtoNet
 	{
 		static StaticResources()
 		{
-			
+
 		}
 
 		public static readonly RecyclableMemoryStreamManager MSmanager = new RecyclableMemoryStreamManager();

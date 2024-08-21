@@ -4,142 +4,124 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
-			 xmlns:vm="using:HolyClient.ViewModels"
-			 x:DataType="vm:NugetPackageViewModel"
-			 xmlns:sg="using:SpacedGridControl.Avalonia"
-			 x:CompileBindings="True"
-			 
-			 x:Class="HolyClient.Views.SelectedNugetPackage">
-	<UserControl.Resources>
-		<ui:PathIconSource x:Key="InfoIcon" Data="M480-280q17 0 28.5-11.5T520-320v-160q0-17-11.5-28.5T480-520q-17 0-28.5 11.5T440-480v160q0 17 11.5 28.5T480-280Zm0-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
-		<ui:PathIconSource x:Key="DescriptionIcon" Data="M349-250h262q12.75 0 21.375-8.675 8.625-8.676 8.625-21.5 0-12.825-8.625-21.325T611-310H349q-12.75 0-21.375 8.675-8.625 8.676-8.625 21.5 0 12.825 8.625 21.325T349-250Zm0-170h262q12.75 0 21.375-8.675 8.625-8.676 8.625-21.5 0-12.825-8.625-21.325T611-480H349q-12.75 0-21.375 8.675-8.625 8.676-8.625 21.5 0 12.825 8.625 21.325T349-420ZM220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h336q12.444 0 23.722 5T599-862l183 183q8 8 13 19.278 5 11.278 5 23.722v496q0 24-18 42t-42 18H220Zm331-584v-156H220v680h520v-494H581q-12.75 0-21.375-8.625T551-664ZM220-820v186-186 680-680Z"/>
-	</UserControl.Resources>
-	<Panel>
-		<ScrollViewer>
-			<StackPanel>
-				<StackPanel Orientation="Horizontal">
-					<StackPanel Orientation="Horizontal" Spacing="5">
-<!--
+             xmlns:vm="using:HolyClient.ViewModels"
+             x:DataType="vm:NugetPackageViewModel"
+             xmlns:sg="using:SpacedGridControl.Avalonia"
+             x:CompileBindings="True"
+
+             x:Class="HolyClient.Views.SelectedNugetPackage">
+    <UserControl.Resources>
+        <ui:PathIconSource x:Key="InfoIcon"
+                           Data="M480-280q17 0 28.5-11.5T520-320v-160q0-17-11.5-28.5T480-520q-17 0-28.5 11.5T440-480v160q0 17 11.5 28.5T480-280Zm0-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+        <ui:PathIconSource x:Key="DescriptionIcon"
+                           Data="M349-250h262q12.75 0 21.375-8.675 8.625-8.676 8.625-21.5 0-12.825-8.625-21.325T611-310H349q-12.75 0-21.375 8.675-8.625 8.676-8.625 21.5 0 12.825 8.625 21.325T349-250Zm0-170h262q12.75 0 21.375-8.675 8.625-8.676 8.625-21.5 0-12.825-8.625-21.325T611-480H349q-12.75 0-21.375 8.675-8.625 8.676-8.625 21.5 0 12.825 8.625 21.325T349-420ZM220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h336q12.444 0 23.722 5T599-862l183 183q8 8 13 19.278 5 11.278 5 23.722v496q0 24-18 42t-42 18H220Zm331-584v-156H220v680h520v-494H581q-12.75 0-21.375-8.625T551-664ZM220-820v186-186 680-680Z" />
+    </UserControl.Resources>
+    <Panel>
+        <ScrollViewer>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <!--
 						<labs:AsyncImage
 							Height="48"
 							PlaceholderSource="/Assets/nugetIcon.png"
 							Width="48"
 							Source="{Binding Icon}"/>
 						-->
-						<TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Id}" FontWeight="Bold"/>
-					</StackPanel>
-				</StackPanel>
+                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Id}" FontWeight="Bold" />
+                    </StackPanel>
+                </StackPanel>
 
 
-				<StackPanel>
+                <StackPanel>
 
 
+                    <Grid IsVisible="{Binding !IsLoadingVersions}" Margin="0,10,0,0" ColumnDefinitions="Auto,*,Auto">
+                        <ComboBox SelectedItem="{Binding SelectedVersion}" ItemsSource="{Binding Versions}"
+                                  HorizontalAlignment="Stretch" Grid.Column="1" />
+                       
+                    </Grid>
+                    <StackPanel IsVisible="{Binding !IsLoadingMetadata}">
 
-					<Grid IsVisible="{Binding !IsLoadingVersions}" Margin="0,10,0,0" ColumnDefinitions="Auto,*,Auto">
-						<ComboBox SelectedItem="{Binding SelectedVersion}" ItemsSource="{Binding Versions}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-						<Button Margin="3,0,0,0" Grid.Column="2" Content="Установить">
-							<TextBlock Text="Установить" Margin="5,0"/>
-						</Button>
-					</Grid>
-					<StackPanel IsVisible="{Binding !IsLoadingMetadata}">
+                        
+                            <StackPanel>
+                                <StackPanel Margin="15" Orientation="Horizontal">
+                                    <ui:IconSourceElement Height="18" Width="18" IconSource="{StaticResource InfoIcon}" />
+                                    <TextBlock Margin="5,0,0,0" FontWeight="Medium" Text="Основная информация" />
+                                </StackPanel>
 
-						<ui:FABorder Margin="0,20,0,0"
-											Background="{DynamicResource ButtonBackground}"
-											BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-											BorderThickness="{DynamicResource ButtonBorderThemeThickness}"
-											CornerRadius="{DynamicResource ControlCornerRadius}">
+                                <Rectangle Classes="SplitLine" />
+                                <sg:SpacedGrid
+                                    ColumnSpacing="10"
+                                    RowSpacing="5"
+                                    RowDefinitions="*,*,*,*"
+                                    ColumnDefinitions="Auto, *"
+                                    Margin="20">
 
-							<StackPanel>
-								<StackPanel Margin="15" Orientation="Horizontal">
-									<ui:IconSourceElement Height="18" Width="18" IconSource="{StaticResource DescriptionIcon}"/>
-									<TextBlock Margin="5,0,0,0" FontWeight="Medium" Text="Описание"/>
-								</StackPanel>
+                                    <!--Аттрибуты-->
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="0"
+                                        Text="Версия:" />
 
-								<Rectangle Classes="SplitLine"/>
-								<TextBlock Margin="20" TextWrapping="Wrap"  Text="{Binding Metadata.Description}"/>
-							</StackPanel>
-						</ui:FABorder>
-						<ui:FABorder Margin="0,20,0,0"
-											Background="{DynamicResource ButtonBackground}"
-											BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-											BorderThickness="{DynamicResource ButtonBorderThemeThickness}"
-											CornerRadius="{DynamicResource ControlCornerRadius}">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="1"
+                                        Text="Авторы:" />
 
-							<StackPanel>
-								<StackPanel Margin="15" Orientation="Horizontal">
-									<ui:IconSourceElement Height="18" Width="18" IconSource="{StaticResource InfoIcon}"/>
-									<TextBlock Margin="5,0,0,0" FontWeight="Medium" Text="Основная информация"/>
-								</StackPanel>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="2"
+                                        Text="Количество скачиваний:" />
 
-								<Rectangle Classes="SplitLine"/>
-								<sg:SpacedGrid
-									ColumnSpacing="10"
-									RowSpacing="5"
-									RowDefinitions="*,*,*,*"
-									ColumnDefinitions="Auto, *"
-									Margin="20">
-									
-									<!--Аттрибуты-->
-									<TextBlock
-										Grid.Column="0"
-										Grid.Row="0"
-										Text="Версия:" />
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="3"
+                                        Text="Дата публикации:" />
 
-									<TextBlock
-										Grid.Column="0"
-										Grid.Row="1"
-										Text="Авторы:" />
-									
-									<TextBlock
-										Grid.Column="0"
-										Grid.Row="2"
-										Text="Количество скачиваний:" />
-									
-									<TextBlock
-										Grid.Column="0"
-										Grid.Row="3"
-										Text="Дата публикации:" />
+                                    <!--Привязанные свойства-->
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        Text="{Binding Metadata.Version}" />
 
-									<!--Привязанные свойства-->
-									<TextBlock
-										Grid.Column="1" 
-										Grid.Row="0"										
-										Text="{Binding Metadata.Version}" />
-									
-									<TextBlock
-										Grid.Column="1" 
-										Grid.Row="1"										
-										Text="{Binding Metadata.Authors}" />
-									
-									<TextBlock
-										Grid.Column="1" 
-										Grid.Row="2"										
-										Text="{Binding Metadata.DownloadCount}" />
-									
-									<TextBlock
-										Grid.Column="1"
-										Grid.Row="3"										
-										Text="{Binding Metadata.Published}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="1"
+                                        Text="{Binding Metadata.Authors}" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="2"
+                                        Text="{Binding Metadata.DownloadCount}" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="3"
+                                        Text="{Binding Metadata.Published}" />
 
 
-								</sg:SpacedGrid>
-							</StackPanel>
-						</ui:FABorder>
+                                </sg:SpacedGrid>
+                            </StackPanel>
+                       
 
-					</StackPanel>
-				</StackPanel>
+                    </StackPanel>
+                </StackPanel>
 
 
-			</StackPanel>
-		</ScrollViewer>
-		<Grid Margin="0,58,0,0" RowDefinitions="32, *">
-			<Shimmer IsVisible="{Binding IsLoadingVersions}" CornerRadius="7" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
-			<Grid IsVisible="{Binding IsLoadingMetadata}" RowDefinitions="2*, 3*" Grid.Row="1">
+            </StackPanel>
+        </ScrollViewer>
+        <Grid Margin="0,58,0,0" RowDefinitions="32, *">
+            <Shimmer IsVisible="{Binding IsLoadingVersions}" CornerRadius="7"
+                     Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+            <Grid IsVisible="{Binding IsLoadingMetadata}" RowDefinitions="2*, 3*" Grid.Row="1">
 
-				<Shimmer Margin="0,20,0,0" CornerRadius="7"  Grid.Row="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
-				<Shimmer Margin="0,20,0,0"  CornerRadius="7"  Grid.Row="1"  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
+                <Shimmer Margin="0,20,0,0" CornerRadius="7" Grid.Row="0"
+                         Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                <Shimmer Margin="0,20,0,0" CornerRadius="7" Grid.Row="1"
+                         Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
 
-			</Grid>
-		</Grid>
-	</Panel>
+            </Grid>
+        </Grid>
+    </Panel>
 </UserControl>

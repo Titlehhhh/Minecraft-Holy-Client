@@ -1,22 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>11</LangVersion>
-		<MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net8.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+        <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    </PropertyGroup>
 
 
-	<ItemGroup>
-		<PackageReference Include="MinVer" Version="5.0.0-beta.1" PrivateAssets="All" />
+    <ItemGroup>
+        <PackageReference Include="DotNext" Version="5.7.0" />
+        <PackageReference Include="MinVer" Version="$(MinVerVersion)" PrivateAssets="All"/>
 
-		<PackageReference Include="ConfigureAwait.Fody" Version="3.3.2" />
-	</ItemGroup>
+        <PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
 
+        <PackageReference Include="ZString" Version="2.6.0"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Folder Include="Security\"/>
+    </ItemGroup>
 
 
 </Project>

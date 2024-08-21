@@ -1,12 +1,11 @@
-﻿namespace HolyClient.SDK.Attributes
-{
-	public sealed class PluginDescriptionAttribute : Attribute
-	{
-		public string Description { get; }
+﻿namespace HolyClient.SDK.Attributes;
 
-		public PluginDescriptionAttribute(string description)
-		{
-			Description = description;
-		}
-	}
+public sealed class PluginDescriptionAttribute : Attribute
+{
+    public PluginDescriptionAttribute(string description)
+    {
+        Description = description;
+    }
+
+    public string Description { get; }
 }

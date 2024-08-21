@@ -1,58 +1,48 @@
-﻿using Avalonia;
+﻿using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
 using DynamicData;
 using HolyClient.Common;
-using System.Linq;
 
-namespace HolyClient.Behaviors
+namespace HolyClient.Behaviors;
+
+public class DataGridSelectedItemsBehavior : Behavior<DataGrid>
 {
-	public class DataGridSelectedItemsBehavior : Behavior<DataGrid>
-	{
-		public DataGridSelectedItemsBehavior()
-		{
+    public static readonly DirectProperty<DataGridSelectedItemsBehavior, ISourceList<ProxyInfo>> SelectedItemsProperty =
+        AvaloniaProperty.RegisterDirect<DataGridSelectedItemsBehavior, ISourceList<ProxyInfo>>(
+            nameof(SelectedItems),
+            o => o.SelectedItems,
+            (o, v) => o.SelectedItems = v);
 
-		}
+    private ISourceList<ProxyInfo> _items;
 
-		public static readonly DirectProperty<DataGridSelectedItemsBehavior, ISourceList<ProxyInfo>> SelectedItemsProperty =
-				AvaloniaProperty.RegisterDirect<DataGridSelectedItemsBehavior, ISourceList<ProxyInfo>>(
-		nameof(SelectedItems),
-		o => o.SelectedItems,
-		(o, v) => o.SelectedItems = v);
+    public ISourceList<ProxyInfo> SelectedItems
+    {
+        get => _items;
+        set => SetAndRaise(SelectedItemsProperty, ref _items, value);
+    }
 
-		private ISourceList<ProxyInfo> _items;
+    protected override void OnAttached()
+    {
+        AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
+        base.OnAttached();
+    }
 
-		public ISourceList<ProxyInfo> SelectedItems
-		{
-			get { return _items; }
-			set { SetAndRaise(SelectedItemsProperty, ref _items, value); }
-		}
+    protected override void OnDetaching()
+    {
+        AssociatedObject.SelectionChanged -= AssociatedObject_SelectionChanged;
 
-		protected override void OnAttached()
-		{
-			this.AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
-			base.OnAttached();
+        base.OnDetaching();
+    }
 
-		}
-		protected override void OnDetaching()
-		{
-			this.AssociatedObject.SelectionChanged -= AssociatedObject_SelectionChanged;
-
-			base.OnDetaching();
-		}
-
-		private void AssociatedObject_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-		{
-			if (SelectedItems is not null)
-			{
-				SelectedItems.Edit(list =>
-				{
-					list.RemoveMany(e.RemovedItems.Cast<ProxyInfo>());
-					list.AddRange(e.AddedItems.Cast<ProxyInfo>());
-				});
-			}
-		}
-
-
-	}
+    private void AssociatedObject_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (SelectedItems is not null)
+            SelectedItems.Edit(list =>
+            {
+                list.RemoveMany(e.RemovedItems.Cast<ProxyInfo>());
+                list.AddRange(e.AddedItems.Cast<ProxyInfo>());
+            });
+    }
 }

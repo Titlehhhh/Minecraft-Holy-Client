@@ -1,26 +1,22 @@
-﻿using FluentAvalonia.UI.Controls;
+﻿using System.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Linq;
 
-namespace HolyClient.ViewModels.Pages.StressTest.Dialogs
+namespace HolyClient.ViewModels.Pages.StressTest.Dialogs;
+
+public sealed class SelectImportSourceProxyViewModel : ReactiveObject
 {
-	public sealed class SelectImportSourceProxyViewModel : ReactiveObject
-	{
+    public SelectImportSourceProxyViewModel()
+    {
+        SelectedSource = Sources.FirstOrDefault();
+    }
 
-		public ImportSourceViewModel[] Sources { get; } = new ImportSourceViewModel[]
-		{
-			new ImportSourceViewModel("ManualEntry", ImportSource.InMemory),
-			new ImportSourceViewModel("File", ImportSource.File),
-			new ImportSourceViewModel("Url", ImportSource.Url)
-		};
-		[Reactive]
-		public ImportSourceViewModel? SelectedSource { get; set; }
+    public ImportSourceViewModel[] Sources { get; } =
+    {
+        new("ManualEntry", ImportSource.InMemory),
+        new("File", ImportSource.File),
+        new("Url", ImportSource.Url)
+    };
 
-		public SelectImportSourceProxyViewModel()
-		{
-			SelectedSource = Sources.FirstOrDefault();
-		}
-
-	}
+    [Reactive] public ImportSourceViewModel? SelectedSource { get; set; }
 }

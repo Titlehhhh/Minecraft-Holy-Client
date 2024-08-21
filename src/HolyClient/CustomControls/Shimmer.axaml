@@ -3,37 +3,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 ClipToBounds="True"
-			 xmlns:con="using:HolyClient.Converters"
+             ClipToBounds="True"
+             xmlns:con="using:HolyClient.Converters"
              x:Class="HolyClient.CustomControls.Shimmer">
-	<Rectangle Width="10" HorizontalAlignment="Left"  VerticalAlignment="Stretch">
-		
-		<Rectangle.Fill>
-			<SolidColorBrush Color="White" Opacity="1"/>
-		</Rectangle.Fill>
-		<Rectangle.Effect>
-			<BlurEffect Radius="100" />
-		</Rectangle.Effect>
-		<Rectangle.Styles>
-			<Style Selector="Rectangle">
-				
-				<Style.Animations>
-					<Animation Duration="0:0:1.500"  IterationCount="Infinite">
-						<KeyFrame KeyTime="0:0:0">
-							<Setter Property="TranslateTransform.X" Value="-100" />
-							
-						</KeyFrame>						
-						<KeyFrame  KeyTime="0:0:0.500">
-							<Setter Property="TranslateTransform.X" Value="{Binding $parent[UserControl].Bounds.Width, Converter={x:Static con:Plus100Converter.Instance}}" />
-							
-						</KeyFrame>
-						<KeyFrame  KeyTime="0:0:1.500">
-							<Setter Property="TranslateTransform.X" Value="{Binding $parent[UserControl].Bounds.Width, Converter={x:Static con:Plus100Converter.Instance}}" />
-							
-						</KeyFrame>
-					</Animation>
-				</Style.Animations>
-			</Style>
-		</Rectangle.Styles>
-	</Rectangle>
+    <Rectangle Width="10" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+        <Rectangle.Fill>
+            <SolidColorBrush Color="White" Opacity="1" />
+        </Rectangle.Fill>
+        <Rectangle.Effect>
+            <BlurEffect Radius="100" />
+        </Rectangle.Effect>
+        <Rectangle.Styles>
+            <Style Selector="Rectangle">
+
+                <Style.Animations>
+                    <Animation Duration="0:0:1.500" IterationCount="Infinite">
+                        <KeyFrame KeyTime="0:0:0">
+                            <Setter Property="TranslateTransform.X" Value="-100" />
+
+                        </KeyFrame>
+                        <KeyFrame KeyTime="0:0:0.500">
+                            <Setter Property="TranslateTransform.X"
+                                    Value="{Binding $parent[UserControl].Bounds.Width, Converter={x:Static con:Plus100Converter.Instance}}" />
+
+                        </KeyFrame>
+                        <KeyFrame KeyTime="0:0:1.500">
+                            <Setter Property="TranslateTransform.X"
+                                    Value="{Binding $parent[UserControl].Bounds.Width, Converter={x:Static con:Plus100Converter.Instance}}" />
+
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>
+        </Rectangle.Styles>
+    </Rectangle>
 </UserControl>

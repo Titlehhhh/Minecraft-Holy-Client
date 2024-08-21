@@ -1,7 +1,5 @@
-﻿namespace HolyClient.ViewModels
-{
-	public interface ISettingsViewModel
-	{
+﻿namespace HolyClient.ViewModels;
 
-	}
+public interface ISettingsViewModel
+{
 }

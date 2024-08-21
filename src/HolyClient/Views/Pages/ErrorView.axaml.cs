@@ -1,13 +1,12 @@
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
 
-namespace HolyClient.Views
+namespace HolyClient.Views;
+
+public partial class ErrorView : ReactiveUserControl<ErrorViewModel>
 {
-	public partial class ErrorView : ReactiveUserControl<ErrorViewModel>
-	{
-		public ErrorView()
-		{
-			InitializeComponent();
-		}
-	}
+    public ErrorView()
+    {
+        InitializeComponent();
+    }
 }

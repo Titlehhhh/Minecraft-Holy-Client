@@ -1,12 +1,12 @@
-﻿using McProtoNet;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
+using McProtoNet.Client;
+using Serilog;
 
-namespace HolyClient.Core.Models.BotManager
+namespace HolyClient.Core.Models.BotManager;
+
+public interface IBotPlugin
 {
-	public interface IBotPlugin
-	{
-		Serilog.ILogger Logger { get; set; }
-		MinecraftClient Client { get; set; }
-		void Activate(CompositeDisposable d);
-	}
+    ILogger Logger { get; set; }
+    MinecraftClient Client { get; set; }
+    void Activate(CompositeDisposable d);
 }

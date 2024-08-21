@@ -3,32 +3,27 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 
+
              x:Class="HolyClient.SplashContent">
-	<StackPanel Spacing="10"
-					   VerticalAlignment="Center">
-
-		
-		
-		<Image Source="/Assets/SplashIcon.png"
-		  
-			x:Name="IconControl"
-		   Height="144"
-		   Width="144"/>
-
-		
+    <StackPanel Spacing="10"
+                VerticalAlignment="Center">
 
 
+        <Image Source="/Assets/SplashIcon.png"
+
+               x:Name="IconControl"
+               Height="144"
+               Width="144" />
 
 
-		<ProgressBar
-			Value="{Binding Progress}"
-					 MaxWidth="200"
-					 Margin="0 20"/>
+        <ProgressBar
+            Value="{Binding Progress}"
+            MaxWidth="200"
+            Margin="0 20" />
 
-		<TextBlock
-			Text="{Tr {Binding State}}"
-				   HorizontalAlignment="Center"
-				   FontSize="20"/>
-	</StackPanel>
+        <TextBlock
+            Text="{Tr {Binding State}}"
+            HorizontalAlignment="Center"
+            FontSize="20" />
+    </StackPanel>
 </UserControl>

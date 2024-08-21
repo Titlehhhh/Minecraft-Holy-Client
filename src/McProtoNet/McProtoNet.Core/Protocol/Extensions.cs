@@ -1,30 +1,198 @@
-﻿using McProtoNet.Core.IO;
+﻿using DotNext.Buffers;
+using McProtoNet.Core.IO;
 using McProtoNet.Core.Protocol;
-using Microsoft.IO;
 using System.Buffers;
-using System.Threading;
+using System.IO;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace McProtoNet.Core
 {
 	public static class Extensions
 	{
-
-		public static int GetVarIntLength(this int val)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteVarInt(this IBufferWriter<byte> writer, int value)
 		{
-			int amount = 0;
+			if (value == 0)
+			{
+				writer.GetSpan(1)[0] = 0;
+				writer.Advance(1);
+				return;
+			}
+
+
+
+			uint unsigned = (uint)value;
+
+			int required = 0;
+			int bytesWritten = 0;
+			for (var destination = writer.GetSpan(); unsigned != 0; destination = writer.GetSpan(required))
+			{
+				int offset = 0;
+				do
+				{
+
+					byte temp = (byte)(unsigned & 127);
+					unsigned >>= 7;
+
+					if (unsigned != 0)
+						temp |= 128;
+
+					bytesWritten++;
+
+
+					if (bytesWritten > destination.Length)
+					{
+						writer.Advance(offset + 1);
+						required = 5 - bytesWritten;
+						break;
+					}
+
+					destination[offset++] = temp;
+				} while (unsigned != 0);
+			}
+
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool TryReadVarInt(this ref SequenceReader<byte> reader, out int res, out int length)
+		{
+
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do
+			{
+
+				if (reader.TryRead(out read))
+				{
+
+					int value = read & 127;
+					result |= value << 7 * numRead;
+
+					numRead++;
+					if (numRead > 5)
+					{
+						throw new ArithmeticException("VarInt too long");
+					}
+				}
+				else
+				{
+					res = 0;
+					length = -1;
+					return false;
+				}
+
+			} while ((read & 0b10000000) != 0);
+
+
+
+			res = result;
+			length = numRead;
+			return true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool TryReadVarInt(this ReadOnlySequence<byte> data, out int value, out int bytesRead)
+		{
+
+			scoped SequenceReader<byte> reader = new SequenceReader<byte>(data);
+
+			return reader.TryReadVarInt(out value, out bytesRead);
+
+
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int ReadVarInt(this Span<byte> data, out int len)
+		{
+
+
+
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do
+			{
+
+				read = data[numRead];
+
+
+				int value = read & 0b01111111;
+				result |= value << 7 * numRead;
+
+				numRead++;
+				if (numRead > 5)
+				{
+					throw new ArithmeticException("VarInt too long");
+				}
+
+
+			} while ((read & 0b10000000) != 0);
+
+			//data = data.Slice(numRead);
+
+
+			len = numRead;
+			return result;
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static byte GetVarIntLength(this int val)
+		{
+
+			byte amount = 0;
 			do
 			{
 				val >>= 7;
 				amount++;
+
 			} while (val != 0);
 
 			return amount;
 		}
-		public static int GetVarIntLength(this int value, byte[] data)
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static byte GetVarIntLength(this int value, byte[] data)
+		{
+			return GetVarIntLength(value, data, 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static byte GetVarIntLength(this int value, byte[] data, int offset)
 		{
 			var unsigned = (uint)value;
 
-			int len = 0;
+			byte len = 0;
+			do
+			{
+				var temp = (byte)(unsigned & 127);
+				unsigned >>= 7;
+
+				if (unsigned != 0)
+					temp |= 128;
+
+				data[offset + len++] = temp;
+			}
+			while (unsigned != 0);
+			if (len > 5)
+				throw new ArithmeticException("Var int is too big");
+			return len;
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static byte GetVarIntLength(this int value, Span<byte> data)
+		{
+			var unsigned = (uint)value;
+
+			byte len = 0;
+
+
+
 			do
 			{
 				var temp = (byte)(unsigned & 127);
@@ -38,34 +206,19 @@ namespace McProtoNet.Core
 			while (unsigned != 0);
 			return len;
 		}
-
-		
-
-		public static int GetVarIntLength(this int value, Span<byte> data)
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public static byte GetVarIntLength(this int value, Memory<byte> data)
 		{
-			var unsigned = (uint)value;
-
-			int len = 0;
-			do
-			{
-				var temp = (byte)(unsigned & 127);
-				unsigned >>= 7;
-
-				if (unsigned != 0)
-					temp |= 128;
-
-				data[len++] = temp;
-			}
-			while (unsigned != 0);
-			return len;
+			return GetVarIntLength(value, data.Span);
 		}
+
+
+
 		private static int SEGMENT_BITS = 0x7F;
 		private static int CONTINUE_BIT = 0x80;
 		public static int ReadVarInt(this Stream stream)
 		{
-			using var memory = MemoryPool<byte>.Shared.Rent(1);
-
-			var buff = memory.Memory.Slice(0, 1).Span;
+			Span<byte> buff = stackalloc byte[1];
 
 			int numRead = 0;
 			int result = 0;
@@ -95,31 +248,38 @@ namespace McProtoNet.Core
 
 		public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
 		{
-			using var memory = MemoryPool<byte>.Shared.Rent(1);
-			var buff = memory.Memory.Slice(0, 1);
-			int numRead = 0;
-			int result = 0;
-			byte read;
-			do
+
+			byte[] buff = ArrayPool<byte>.Shared.Rent(1);
+			try
 			{
-				if (await stream.ReadAsync(buff, token) <= 0)
+				int numRead = 0;
+				int result = 0;
+				byte read;
+				do
 				{
-					throw new EndOfStreamException();
-				}
-				read = buff.Span[0];
+					if (await stream.ReadAsync(buff, 0, 1, token) <= 0)
+					{
+						throw new EndOfStreamException();
+					}
+					read = buff[0];
 
 
-				int value = read & 0b01111111;
-				result |= value << 7 * numRead;
+					int value = read & 0b01111111;
+					result |= value << 7 * numRead;
 
-				numRead++;
-				if (numRead > 5)
-				{
-					throw new InvalidOperationException("VarInt is too big");
-				}
-			} while ((read & 0b10000000) != 0);
+					numRead++;
+					if (numRead > 5)
+					{
+						throw new InvalidOperationException("VarInt is too big");
+					}
+				} while ((read & 0b10000000) != 0);
 
-			return result;
+				return result;
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buff);
+			}
 		}
 
 
@@ -154,8 +314,7 @@ namespace McProtoNet.Core
 		public static void WriteVarInt(this Stream stream, int value)
 		{
 			var unsigned = (uint)value;
-			Span<byte> data = stackalloc byte[5];
-			int len = 0;
+
 			do
 			{
 				var temp = (byte)(unsigned & 127);
@@ -164,29 +323,40 @@ namespace McProtoNet.Core
 				if (unsigned != 0)
 					temp |= 128;
 
-				//stream.WriteByte(temp);
-				data[len++] = temp;
+				stream.WriteByte(temp);
+
 			}
 			while (unsigned != 0);
-			stream.Write(data.Slice(0, len));
 		}
-		public static async ValueTask WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
+		public static unsafe ValueTask WriteVarIntAsync(this Stream stream, int value, CancellationToken token = default)
 		{
 			var unsigned = (uint)value;
-			byte[] data = new byte[5];
-			int len = 0;
-			do
-			{
-				token.ThrowIfCancellationRequested();
-				var temp = (byte)(unsigned & 127);
-				unsigned >>= 7;
 
-				if (unsigned != 0)
-					temp |= 128;
-				data[len++] = temp;
+
+
+
+			var data = ArrayPool<byte>.Shared.Rent(5);
+			try
+			{
+				int len = 0;
+				do
+				{
+					token.ThrowIfCancellationRequested();
+					var temp = (byte)(unsigned & 127);
+					unsigned >>= 7;
+
+					if (unsigned != 0)
+						temp |= 128;
+					data[len++] = temp;
+				}
+				while (unsigned != 0);
+
+				return stream.WriteAsync(data.AsMemory(0, len), token);
 			}
-			while (unsigned != 0);
-			await stream.WriteAsync(data, 0, len, token);
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(data);
+			}
 		}
 
 
@@ -250,9 +420,9 @@ namespace McProtoNet.Core
 			try
 			{
 				int bytesRead;
-				while ((bytesRead = await source.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false)) != 0)
+				while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
 				{
-					await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+					await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
 				}
 			}
 			finally

@@ -1,21 +1,19 @@
 ﻿using HolyClient.Common;
+using MessagePack;
 using QuickProxyNet;
 
-namespace HolyClient.StressTest
+namespace HolyClient.StressTest;
+
+[Union(0, typeof(InMemoryProxySource))]
+[Union(1, typeof(FileProxySource))]
+[Union(2, typeof(UrlProxySource))]
+public interface IProxySource
 {
-	[MessagePack.Union(0, typeof(InMemoryProxySource))]
-	[MessagePack.Union(1, typeof(FileProxySource))]
-	[MessagePack.Union(2, typeof(UrlProxySource))]
-	public interface IProxySource
-	{
-		Guid Id { get; }
-		string Name { get;}
+    Guid Id { get; }
+    string Name { get; }
 
-		ProxyType Type { get; set; }
+    ProxyType Type { get; set; }
 
 
-
-		Task<IEnumerable<ProxyInfo>> GetProxiesAsync();
-	}
-
+    Task<IEnumerable<ProxyInfo>> GetProxiesAsync();
 }

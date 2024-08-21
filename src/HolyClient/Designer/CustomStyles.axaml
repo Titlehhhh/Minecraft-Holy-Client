@@ -1,33 +1,29 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:sys="using:System"
-					xmlns:custom="using:HolyClient.CustomControls"
-					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-	<Design.PreviewWith>
-		<Border Padding="24">
-			<Border Height="100" Width="100" CornerRadius="25"/>
-		</Border>
-	</Design.PreviewWith>
+    <Design.PreviewWith>
+        <Border Padding="24">
+            <Border Height="100" Width="100" CornerRadius="25" />
+        </Border>
+    </Design.PreviewWith>
 
 
-	<ControlTheme x:Key="{x:Type Border}" TargetType="Border">
-		<Style Selector="^.SettingItem">
-			<Setter Property="Margin" Value="5,5,20,0"/>			
-			<Setter Property="BorderThickness" Value="0.7"/>
-			<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
-			<Setter Property="Padding" Value="10"/>
-			<Setter Property="CornerRadius" Value="7"/>
-			<Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorQuarternary}"/>
+    <ControlTheme x:Key="{x:Type Border}" TargetType="Border">
+        <Style Selector="^.SettingItem">
+            <Setter Property="Margin" Value="5,5,20,0" />
+            <Setter Property="BorderThickness" Value="0.7" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorQuarternary}" />
 
-		</Style>
-	</ControlTheme>
-	<ControlTheme x:Key="Shimmer" TargetType="Border">
-		
-	</ControlTheme>
-	<ControlTheme x:Key="{x:Type AcrylicContentControl}" TargetType="AcrylicContentControl">
-		<Setter Property="Template">
-			<ControlTemplate>
-				<ContentPresenter Name="PART_ContentPresenter"
+        </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="Shimmer" TargetType="Border" />
+    <ControlTheme x:Key="{x:Type AcrylicContentControl}" TargetType="AcrylicContentControl">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
                                   Background="{TemplateBinding Background}"
                                   BorderBrush="{TemplateBinding BorderBrush}"
                                   BorderThickness="{TemplateBinding BorderThickness}"
@@ -36,59 +32,59 @@
                                   Content="{TemplateBinding Content}"
                                   Padding="{TemplateBinding Padding}"
                                   VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-			</ControlTemplate>
-		</Setter>
-	</ControlTheme>
-	<ControlTheme x:Key="Test" TargetType="Window">
-		<Setter Property="Background" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}"/>
-		<Setter Property="TransparencyBackgroundFallback" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
-		<Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
-		<Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
-		<Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
-		<Setter Property="Template">
-			<ControlTemplate>
-				<Panel>
-					<Border Name="PART_TransparencyFallback" IsHitTestVisible="False" />
-					<Border Background="{TemplateBinding Background}" IsHitTestVisible="False" />
-					<Panel Background="Transparent" Margin="{TemplateBinding WindowDecorationMargin}" />
-					<VisualLayerManager>
-						<VisualLayerManager.ChromeOverlayLayer>
-							<TitleBar />
-						</VisualLayerManager.ChromeOverlayLayer>
-						<ContentPresenter Name="PART_ContentPresenter"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+    <ControlTheme x:Key="Test" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+        <Setter Property="TransparencyBackgroundFallback" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_TransparencyFallback" IsHitTestVisible="False" />
+                    <Border Background="{TemplateBinding Background}" IsHitTestVisible="False" />
+                    <Panel Background="Transparent" Margin="{TemplateBinding WindowDecorationMargin}" />
+                    <VisualLayerManager>
+                        <VisualLayerManager.ChromeOverlayLayer>
+                            <TitleBar />
+                        </VisualLayerManager.ChromeOverlayLayer>
+                        <ContentPresenter Name="PART_ContentPresenter"
                                           ContentTemplate="{TemplateBinding ContentTemplate}"
                                           Content="{TemplateBinding Content}"
                                           Margin="{TemplateBinding Padding}"
                                           HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-					</VisualLayerManager>
-				</Panel>
-			</ControlTemplate>
-		</Setter>
-	</ControlTheme>
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </VisualLayerManager>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
 
 
-	<ControlTheme x:Key="{x:Type FillStackPanel}" TargetType="FillStackPanel">
-		<Setter Property="Template">
-			<ControlTemplate>
-				<StackPanel Spacing="10" Name="PART_StackPanel"/>
-			</ControlTemplate>
-		</Setter>
-	</ControlTheme>
+    <ControlTheme x:Key="{x:Type FillStackPanel}" TargetType="FillStackPanel">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Spacing="10" Name="PART_StackPanel" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
 
 
-	<ControlTheme x:Key="TooltipDataValidationErrors"
-					 TargetType="DataValidationErrors">
-		<Setter Property="Template">
-			<ControlTemplate TargetType="DataValidationErrors">
-				<DockPanel LastChildFill="True">
-					<ContentControl Content="{Binding (DataValidationErrors.Errors)}"
+    <ControlTheme x:Key="TooltipDataValidationErrors"
+                  TargetType="DataValidationErrors">
+        <Setter Property="Template">
+            <ControlTemplate TargetType="DataValidationErrors">
+                <DockPanel LastChildFill="True">
+                    <ContentControl Content="{Binding (DataValidationErrors.Errors)}"
                                     ContentTemplate="{TemplateBinding ErrorTemplate}"
                                     DataContext="{TemplateBinding Owner}"
                                     DockPanel.Dock="Right"
                                     IsVisible="{Binding (DataValidationErrors.HasErrors)}" />
-					<ContentPresenter Name="PART_ContentPresenter"
+                    <ContentPresenter Name="PART_ContentPresenter"
                                       Padding="{TemplateBinding Padding}"
                                       Background="{TemplateBinding Background}"
                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -96,44 +92,44 @@
                                       Content="{TemplateBinding Content}"
                                       ContentTemplate="{TemplateBinding ContentTemplate}"
                                       CornerRadius="{TemplateBinding CornerRadius}" />
-				</DockPanel>
-			</ControlTemplate>
-		</Setter>
-		<Setter Property="ErrorTemplate">
-			<DataTemplate>
-				<Panel Name="PART_InlineErrorTemplatePanel"
+                </DockPanel>
+            </ControlTemplate>
+        </Setter>
+        <Setter Property="ErrorTemplate">
+            <DataTemplate>
+                <Panel Name="PART_InlineErrorTemplatePanel"
                        Background="Transparent">
-					<Panel.Styles>
-						<Style Selector="Panel#PART_InlineErrorTemplatePanel">
-							<Setter Property="Margin" Value="8,0" />
-						</Style>
-						<Style Selector="Panel#PART_InlineErrorTemplatePanel ToolTip">
-							<Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
-						</Style>
-						<Style Selector="Panel#PART_InlineErrorTemplatePanel ToolTip TextBlock">
-							<Setter Property="TextWrapping" Value="WrapWithOverflow" />
-						</Style>
-					</Panel.Styles>
-					<ToolTip.Tip>
-						<ItemsControl ItemsSource="{ReflectionBinding}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<TextBlock Text="{Tr {Binding}}"/>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-					</ToolTip.Tip>
-					<Path Width="14"
+                    <Panel.Styles>
+                        <Style Selector="Panel#PART_InlineErrorTemplatePanel">
+                            <Setter Property="Margin" Value="8,0" />
+                        </Style>
+                        <Style Selector="Panel#PART_InlineErrorTemplatePanel ToolTip">
+                            <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+                        </Style>
+                        <Style Selector="Panel#PART_InlineErrorTemplatePanel ToolTip TextBlock">
+                            <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                        </Style>
+                    </Panel.Styles>
+                    <ToolTip.Tip>
+                        <ItemsControl ItemsSource="{ReflectionBinding}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Tr {Binding}}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ToolTip.Tip>
+                    <Path Width="14"
                           Height="14"
                           Data="M14,7 A7,7 0 0,0 0,7 M0,7 A7,7 0 1,0 14,7 M7,3l0,5 M7,9l0,2"
                           Stroke="{DynamicResource SystemFillColorCriticalBrush}"
                           StrokeThickness="2" />
-				</Panel>
-			</DataTemplate>
-		</Setter>
-	</ControlTheme>
-	
-<!--
+                </Panel>
+            </DataTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!--
 
 	<ControlTheme x:Key="{x:Type SplitView}" TargetType="SplitView">
 		<Setter Property="OpenPaneLength" Value="{DynamicResource SplitViewOpenPaneThemeLength}" />

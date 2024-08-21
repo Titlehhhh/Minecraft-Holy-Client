@@ -1,0 +1,22 @@
+﻿{
+  "slot": [
+    "optional",
+    [
+      "container",
+      [
+        {
+          "name": "itemId",
+          "type": "varint"
+        },
+        {
+          "name": "itemCount",
+          "type": "i8"
+        },
+        {
+          "name": "nbtData",
+          "type": "optionalNbt"
+        }
+      ]
+    ]
+  ]
+}
