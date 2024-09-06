@@ -95,7 +95,9 @@ public ref struct MinecraftPrimitiveWriterSlim
     public void WriteUUID(Guid value)
     {
         var span = writerSlim.GetSpan(16);
+        
         if (!value.TryWriteBytes(span)) throw new InvalidOperationException("Guid no write");
+        writerSlim.Advance(16);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

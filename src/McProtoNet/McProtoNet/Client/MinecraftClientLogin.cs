@@ -4,6 +4,7 @@ using DotNext.Buffers;
 using McProtoNet.Abstractions;
 using McProtoNet.Cryptography;
 using McProtoNet.Protocol;
+using McProtoNet.Serialization;
 
 namespace McProtoNet.Client;
 
@@ -11,6 +12,7 @@ public sealed class MinecraftClientLogin
 {
     private static readonly byte[] VarIntLoginIntent;
     private static readonly byte[] LoginAcknowledged;
+    private static readonly byte[] KnownPacksZero;
 
     private static readonly MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator();
 
@@ -24,6 +26,13 @@ public sealed class MinecraftClientLogin
 
         ms.WriteVarInt(0x03);
         LoginAcknowledged = ms.ToArray();
+
+        ms.Position = 0;
+        ms.SetLength(0);
+
+        ms.WriteVarInt(0x07);//Packet id
+        ms.WriteVarInt(0x00);
+        KnownPacksZero = ms.ToArray();
     }
 
     public event Action<MinecraftClientState> StateChanged;
@@ -54,7 +63,7 @@ public sealed class MinecraftClientLogin
 
             StateChanged?.Invoke(MinecraftClientState.Login);
 
-            var loginStart = CreateLoginStart(options.Username, options);
+            var loginStart = CreateLoginStart(options);
             try
             {
                 await sender.SendPacketAsync(loginStart, cancellationToken).ConfigureAwait(false);
@@ -67,10 +76,11 @@ public sealed class MinecraftClientLogin
 
             var threshold = 0;
 
+            bool configState = false;
 
             while (true)
             {
-                var inputPacket = await reader.ReadNextPacketAsync().ConfigureAwait(false);
+                var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     var needBreak = false;
@@ -78,11 +88,11 @@ public sealed class MinecraftClientLogin
 
                     switch (inputPacket.Id)
                     {
-                        case 0x00:
+                        case 0x00: // Login Disconnect
                             inputPacket.Data.TryReadString(out var reason, out _);
                             throw new LoginRejectedException(reason);
                             break;
-                        case 0x01:
+                        case 0x01: // Encryption Request
                             var encryptBegin = ReadEncryptionPacket(inputPacket);
 
                             var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
@@ -103,12 +113,14 @@ public sealed class MinecraftClientLogin
                         case 0x02:
                             needBreak = true;
 
-                            if (options.ProtocolVersion == 765)
+                            if (options.ProtocolVersion >= 764)
+                            {
                                 await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
+                                configState = true;
+                            }
 
                             break;
-                        case 0x03:
-                            //Compress
+                        case 0x03: //Compress
 
                             if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
                                 throw new Exception("asd");
@@ -116,12 +128,10 @@ public sealed class MinecraftClientLogin
                             sender.SwitchCompression(threshold);
 
                             break;
-                        case 0x04:
-                            //Login plugin request
+                        case 0x04: //Login Plugin Request
 
                             var buffer = inputPacket.Data;
-                            var offset = 0;
-                            buffer.TryReadVarInt(out var messageId, out offset);
+                            buffer.TryReadVarInt(out var messageId, out var offset);
                             buffer = buffer.Slice(offset);
                             buffer.TryReadString(out var channel, out offset);
                             var data = buffer.Slice(offset);
@@ -139,6 +149,96 @@ public sealed class MinecraftClientLogin
                 }
             }
 
+            if (configState)
+            {
+                while (true)
+                {
+                    var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        var needBreak = false;
+
+                        
+                        switch (inputPacket.Id)
+                        {
+                            case 0x00: // Cookie Request
+                                if (!inputPacket.Data.TryReadString(out string key, out _))
+                                {
+                                    throw new Exception("Failed Read");
+                                }
+
+
+                                break;
+                            case 0x01: // Plugin Message
+                                //var pluginPacket = ReadConfigPluginMessagePacket(inputPacket);
+
+                                break;
+                            case 0x02: // Disconnect (configuration)
+                                inputPacket.Data.TryReadString(out var reason, out _);
+                                throw new LoginRejectedException(reason);
+                                break;
+                            case 0x03:
+                                await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
+                                needBreak = true;
+                                break; // Finish
+                            case 0x04: // KeepAlive
+
+                                long id = ReadKeepAlive(inputPacket);
+
+                                var outP = CreateKeepAlive(id);
+                                try
+                                {
+                                    await sender.SendPacketAsync(outP, cancellationToken);
+                                }
+                                finally
+                                {
+                                    outP.Dispose();
+                                }
+
+                                break;
+                            case 0x05: // Ping
+                                break;
+                            case 0x06: // Reset Chat
+                                break;
+                            case 0x07: // Registry Data
+                                break;
+                            case 0x08: // Remove Resource Pack
+                                break;
+                            case 0x09: // Add Resource Pack
+                                break;
+                            case 0x0A: // Store Cookie
+                                break;
+                            case 0x0B: // Transfer
+                                break;
+                            case 0x0C: // Feature Flags
+                                break;
+                            case 0x0D: // Update Tags
+                                break;
+
+                            case 0x0E: // Clientbound Known Packs
+                                await sender.SendPacketAsync(KnownPacksZero, cancellationToken);
+                                break;
+
+                            case 0x0F: // Custom Report Details
+                                break;
+
+                            case 0x10: // Server Links
+                                break;
+
+
+                            default: throw new Exception("Unknown packet: " + inputPacket.Id);
+                        }
+
+                        if (needBreak)
+                            break;
+                    }
+                    finally
+                    {
+                        inputPacket.Dispose();
+                    }
+                }
+            }
+
 
             return new LoginizationResult(mainStream, threshold);
         }
@@ -149,23 +249,33 @@ public sealed class MinecraftClientLogin
         }
     }
 
-
-    private static OutputPacket CreateLoginAcknowledged()
+    private static OutputPacket CreateKeepAlive(long id)
     {
-        scoped var writer = new BufferWriterSlim<byte>(1);
+        scoped var writer = new MinecraftPrimitiveWriterSlim();
+        writer.WriteVarInt(0x04); // Packet id
+        writer.WriteSignedLong(id);
+        return new OutputPacket(writer.GetWrittenMemory());
+    }
 
-        try
+    private static long ReadKeepAlive(InputPacket packet)
+    {
+        var reader = new SequenceReader<byte>(packet.Data);
+        if (!reader.TryReadBigEndian(out long id))
         {
-            writer.WriteVarInt(0x03);
-
-
-            writer.TryDetachBuffer(out var buffer);
-            return new OutputPacket(buffer);
+            throw new Exception("Fatal Read");
         }
-        finally
-        {
-            writer.Dispose();
-        }
+
+        ;
+        return id;
+    }
+
+    private static ClientboundConfigurationPluginMessagePacket ReadConfigPluginMessagePacket(InputPacket packet)
+    {
+        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+        var id = reader.ReadString();
+        var data = reader.ReadRestBuffer();
+
+        return new ClientboundConfigurationPluginMessagePacket(id, data);
     }
 
     private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket)
@@ -184,6 +294,13 @@ public sealed class MinecraftClientLogin
 
 
         return new EncryptionBeginPacket(serverId, publicKey, verifyToken);
+    }
+
+    private static OutputPacket CreatePluginResponse(string channel, byte[] data)
+    {
+        //scoped var writer = new MinecraftPrimitiveWriterSlim();
+        //writer.WriteVarInt(0); // Packet Id
+        throw new NotImplementedException();
     }
 
     private static OutputPacket CreateEncryptionResponse(byte[] sharedSecret, byte[] verifyToken)
@@ -208,32 +325,89 @@ public sealed class MinecraftClientLogin
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static OutputPacket CreateLoginStart(string name, LoginOptions options)
+    private static OutputPacket CreateLoginStart(LoginOptions options)
     {
-        if (name.Length > 16) throw new ArgumentOutOfRangeException();
+        if (options.Username.Length > 16) throw new ArgumentOutOfRangeException();
 
-        scoped var writer = new BufferWriterSlim<byte>(10, s_allocator);
+        scoped var writer = new MinecraftPrimitiveWriterSlim();
 
         try
         {
-            writer.WriteVarInt(0x00); //Packet Id
-            writer.WriteString(name);
-
-            if (options.ProtocolVersion == 765)
-            {
-                var guid = Guid.NewGuid();
-
-                var data = guid.ToByteArray();
-
-                writer.Write(data);
-            }
-
-            writer.TryDetachBuffer(out var buffer);
+            FillLoginStartPacket(ref writer, options);
+            var buffer = writer.GetWrittenMemory();
             return new OutputPacket(buffer);
         }
         finally
         {
-            writer.Dispose();
+            writer.Clear();
+        }
+    }
+
+    private static void FillLoginStartPacket(ref MinecraftPrimitiveWriterSlim writer, LoginOptions options)
+    {
+        writer.WriteVarInt(0x00); // Packet Id
+
+        writer.WriteString(options.Username);
+
+        bool authentifier = false; // TODO 
+
+        if (authentifier)
+        {
+            if (options.ProtocolVersion < 761) /* < 1.19.3 */
+            {
+                // ProfilePublicKey key;
+                // key.SetTimestamp(authentifier->GetKeyTimestamp());
+                // key.SetKey(Utilities::RSAToBytes(authentifier->GetPublicKey()));
+                // key.SetSignature(Utilities::DecodeBase64(authentifier->GetKeySignature()));
+                //
+                // loginstart_msg->SetPublicKey(key);
+            }
+            else
+            {
+                // message_sent_index = 0;
+            }
+
+
+            if (options.ProtocolVersion > 759) /* > 1.19 */
+            {
+                //loginstart_msg->SetProfileId(authentifier->GetPlayerUUID());
+            }
+        }
+        else
+        {
+            if (options.ProtocolVersion < 760) /* < 1.19.1 */
+            {
+                writer.WriteBoolean(false);
+                //     DECLARE_FIELDS(
+                //         (std::string, std::optional<ProfilePublicKey>),
+                // (Name_, PublicKey)
+                //     );
+            }
+            else if (options.ProtocolVersion < 761) /* < 1.19.3 */
+            {
+                writer.WriteBoolean(false);
+                writer.WriteBoolean(false);
+                // DECLARE_FIELDS(
+                //     (std::string, std::optional<ProfilePublicKey>, std::optional<UUID>),
+                // (Name_, PublicKey, ProfileId)
+                //     );
+            }
+            else if (options.ProtocolVersion < 764) /* < 1.20.2 */
+            {
+                writer.WriteBoolean(false);
+                // DECLARE_FIELDS(
+                //     (std::string, std::optional<UUID>),
+                // (Name_, ProfileId)
+                //     );
+            }
+            else
+            {
+                writer.WriteUUID(Guid.NewGuid());
+                // DECLARE_FIELDS(
+                //     (std::string, UUID),
+                // (Name_, ProfileId)
+                //     );
+            }
         }
     }
 
@@ -274,6 +448,19 @@ public sealed class MinecraftClientLogin
             PublicKey = publicKey;
             VerifyToken = verifyToken;
         }
+    }
+
+    internal readonly struct ClientboundConfigurationPluginMessagePacket
+    {
+        public readonly string Identifier;
+
+        public ClientboundConfigurationPluginMessagePacket(string identifier, byte[] data)
+        {
+            Identifier = identifier;
+            Data = data;
+        }
+
+        public readonly byte[] Data;
     }
 }
 

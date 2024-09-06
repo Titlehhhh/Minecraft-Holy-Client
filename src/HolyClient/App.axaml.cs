@@ -37,6 +37,9 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        
+        
+        
         ThreadPool.GetMinThreads(out var min, out var cpt);
 
         ThreadPool.SetMinThreads(1, cpt);
@@ -89,5 +92,7 @@ public class App : Application
         {
             base.OnFrameworkInitializationCompleted();
         }
+        
+        
     }
 }

@@ -3,7 +3,7 @@
         <Nullable>enable</Nullable>
 
 
-        <AvaloniaVersion>11.0.10</AvaloniaVersion>
+        <AvaloniaVersion>11.1.3</AvaloniaVersion>
         <MinVerVersion>5.0.0</MinVerVersion>
     </PropertyGroup>
 </Project>

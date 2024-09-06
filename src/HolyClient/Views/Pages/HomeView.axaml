@@ -24,7 +24,7 @@
                     AlignmentY="Top"
                     Stretch="UniformToFill" />
 
-        <ControlTheme x:Key="TestTheme" TargetType="ui:HyperlinkButton">
+        <ControlTheme x:Key="TestTheme" TargetType="HyperlinkButton">
             <Setter Property="Width" Value="196" />
             <Setter Property="Height" Value="220" />
             <Setter Property="Template">
@@ -40,7 +40,7 @@
                             <ExperimentalAcrylicMaterial
                                 TintOpacity="0.1"
                                 MaterialOpacity="0.1"
-                                TintColor="{DynamicResource ControlFillColorTertiaryBrush}" />
+                                TintColor="{DynamicResource ControlFillColorTertiary}" />
                         </AcrylicContentControl.Material>
                         <Panel>
 
@@ -64,7 +64,7 @@
                     <ExperimentalAcrylicMaterial
                         TintOpacity="0.05"
                         MaterialOpacity="0.05"
-                        TintColor="{DynamicResource ControlFillColorSecondaryBrush}" />
+                        TintColor="{DynamicResource ControlFillColorSecondary}" />
                 </Setter>
             </Style>
             <Style Selector="^:pressed /template/AcrylicContentControl#AcrylControl">
@@ -72,7 +72,7 @@
                     <ExperimentalAcrylicMaterial
                         TintOpacity="0.08"
                         MaterialOpacity="0.08"
-                        TintColor="{DynamicResource ControlFillColorInputActiveBrush}" />
+                        TintColor="{DynamicResource ControlFillColorInputActive}" />
                 </Setter>
             </Style>
         </ControlTheme>
@@ -100,7 +100,7 @@
 
         <WrapPanel Margin="30,350,0,0" Orientation="Horizontal">
 
-            <ui:HyperlinkButton NavigateUri="https://github.com/Titlehhhh/Minecraft-Holy-Client"
+            <HyperlinkButton NavigateUri="https://github.com/Titlehhhh/Minecraft-Holy-Client"
                              Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
@@ -112,8 +112,8 @@
                                Text="{Tr Home.Tiles.GitHub.Description}" TextWrapping="Wrap" />
                 </StackPanel>
 
-            </ui:HyperlinkButton>
-            <ui:HyperlinkButton NavigateUri="https://discord.gg/HVDzx4rCgg" Margin="20,0,0,0"
+            </HyperlinkButton>
+            <HyperlinkButton NavigateUri="https://discord.gg/HVDzx4rCgg" Margin="20,0,0,0"
                              Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
@@ -125,8 +125,8 @@
                     <TextBlock Margin="0,5,0,0" Foreground="LightGray" FontSize="12"
                                Text="{Tr Home.Tiles.Discord.Description}" TextWrapping="Wrap" />
                 </StackPanel>
-            </ui:HyperlinkButton>
-            <ui:HyperlinkButton Margin="20,0,0,0" Theme="{StaticResource TestTheme}">
+            </HyperlinkButton>
+            <HyperlinkButton Margin="20,0,0,0" Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
                         Height="48"
@@ -136,7 +136,7 @@
                     <TextBlock Margin="0,5,0,0" Foreground="LightGray" FontSize="12"
                                Text="{Tr Home.Tiles.Documentation.Description}" TextWrapping="Wrap" />
                 </StackPanel>
-            </ui:HyperlinkButton>
+            </HyperlinkButton>
 
 
         </WrapPanel>

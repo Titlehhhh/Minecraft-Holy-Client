@@ -9,6 +9,16 @@ using QuickProxyNet;
 namespace McProtoNet.Client;
 
 
+public struct MinecraftVersion
+{
+    public readonly static int Latest = 767;
+    
+    public int ProtocolVersion { get; }
+    public string MajorVersion { get; }
+    public string MinorVersion { get; }
+    
+    
+}
 
 public sealed class MinecraftClient : Disposable, IPacketBroker
 {
@@ -278,8 +288,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     #region Constans
 
-    public const int MinVersionSupport = 754;
-    public const int MaxVersionSupport = 765;
+    public const int MinVersionSupport = 340;
+    public static readonly int MaxVersionSupport = MinecraftVersion.Latest;
 
     #endregion
 
