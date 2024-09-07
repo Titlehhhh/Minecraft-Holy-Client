@@ -8,14 +8,6 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        // for (int proto = 340; proto <= 767; proto++)
-        // {
-        //     var packets = MultiProtocol.ServerboundPlayPackets(proto);
-        //     int index = packets.IndexOf("ServerboundChatPacket");
-        //     Console.WriteLine($"{proto}: {index}");
-        // }
-        //
-        // return;
         Console.WriteLine("Start");
         try
         {
