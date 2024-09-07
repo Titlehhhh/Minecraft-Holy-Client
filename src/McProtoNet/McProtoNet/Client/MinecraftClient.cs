@@ -8,16 +8,13 @@ using QuickProxyNet;
 
 namespace McProtoNet.Client;
 
-
 public struct MinecraftVersion
 {
     public readonly static int Latest = 767;
-    
+
     public int ProtocolVersion { get; }
     public string MajorVersion { get; }
     public string MinorVersion { get; }
-    
-    
 }
 
 public sealed class MinecraftClient : Disposable, IPacketBroker
@@ -276,6 +273,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     #region Properties
 
+    int IPacketBroker.ProtocolVersion => this.Version;
     public string Host { get; set; }
     public ushort Port { get; set; } = 25565;
 
@@ -303,7 +301,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     // private readonly TransportHandler transportHandler;
     // private readonly PacketPipeHandler packetPipeHandler;
     //private Task mainTask;
-
 
 
     private readonly MinecraftClientLogin minecraftLogin = new();

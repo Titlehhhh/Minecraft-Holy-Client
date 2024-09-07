@@ -7,7 +7,7 @@ public abstract class ProtocolBase
     public int SupportedVersion { get; protected set; }
     
     private readonly IPacketBroker _client;
-
+    protected int ProtocolVersion => _client.ProtocolVersion;
     public ProtocolBase(IPacketBroker client)
     {
         _client = client;

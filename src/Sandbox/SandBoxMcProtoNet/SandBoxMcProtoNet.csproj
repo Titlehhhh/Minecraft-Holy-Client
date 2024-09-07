@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\McProtoNet\McProtoNet.Protocol\McProtoNet.Protocol.csproj" />
       <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj" />
     </ItemGroup>
 

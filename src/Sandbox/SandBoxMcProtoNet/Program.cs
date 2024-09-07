@@ -1,15 +1,24 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using McProtoNet.Client;
+using McProtoNet.MultiVersionProtocol;
+using McProtoNet.Serialization;
 
 internal class Program
 {
     public static async Task Main(string[] args)
     {
+        // for (int proto = 340; proto <= 767; proto++)
+        // {
+        //     var packets = MultiProtocol.ServerboundPlayPackets(proto);
+        //     int index = packets.IndexOf("ServerboundChatPacket");
+        //     Console.WriteLine($"{proto}: {index}");
+        // }
+        //
+        // return;
         Console.WriteLine("Start");
         try
         {
-
             MinecraftClient client = new MinecraftClient()
             {
                 ConnectTimeout = TimeSpan.FromSeconds(30),
@@ -21,11 +30,18 @@ internal class Program
 
             client.PacketReceived += (sender, packet) =>
             {
-                
-               // Console.WriteLine("Recv: "+packet.Id);
+                if (packet.Id == 0x1D)
+                {
+                    //scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                    //var reason = reader.ReadNbt();
+                    //Console.WriteLine();
+                }
             };
             await client.Start();
-            
+            await Task.Delay(5000);
+            var protoTest = new MultiProtocol(client);
+            Console.WriteLine("Hi Send");
+            await protoTest.SendChatPacket("Hi");
         }
         catch (Exception e)
         {
