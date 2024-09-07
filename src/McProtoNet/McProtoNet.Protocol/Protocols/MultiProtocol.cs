@@ -53,11 +53,8 @@ public sealed class MultiProtocol : ProtocolBase
                     writer.WriteBuffer(bitset);
                     break;
                 case 760:
-                    // Message Acknowledgment
                     writer.WriteVarInt(0);
                     writer.WriteBoolean(false);
-                    //fields.AddRange(dataTypes.GetAcknowledgment(acknowledgment1192!,
-                    //    isOnlineMode && Config.Signature.LoginWithSecureProfile));
                     break;
             }
         }
