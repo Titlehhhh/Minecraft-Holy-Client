@@ -95,8 +95,10 @@
                             <StackPanel Spacing="10">
                                 <TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.NumberOfBots}"
                                            FontSize="15" />
-                                <ui:NumberBox Minimum="1" Value="{Binding NumberOfBots}" SmallChange="10"
-                                              SpinButtonPlacementMode="Inline" Width="200" HorizontalAlignment="Left" />
+                                <NumericUpDown Minimum="1" FormatString="N0"
+                                               ParsingNumberStyle="Integer" Value="{Binding NumberOfBots}"
+                                               Increment="10"
+                                               Width="200" HorizontalAlignment="Left" />
                             </StackPanel>
 
                         </Border>
@@ -124,9 +126,9 @@
                                 <ComboBox SelectedItem="{Binding Version}" ItemsSource="{Binding SupportedVersions}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="vm:MinecraftVersionVM">
-                                            <Grid >
+                                            <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="54"  />
+                                                    <ColumnDefinition Width="54" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Version}" />

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using HolyClient.Abstractions.StressTest;
 using McProtoNet;
 using McProtoNet.Abstractions;
+using McProtoNet.MultiVersionProtocol;
 using McProtoNet.Protocol;
 using McProtoNet.Protocol754;
 using ReactiveUI;
@@ -42,9 +43,9 @@ public class DefaultBehavior : BaseStressTestBehavior
 
         foreach (var bot in bots)
         {
-            Protocol_754 proto = new Protocol_754(bot.Client);
+            MultiProtocol proto = new MultiProtocol(bot.Client);
 
-
+/*
             proto.OnKeepAlivePacket.Subscribe(x => { proto.SendKeepAlive(x.KeepAliveId); });
             proto.OnSpawnEntityPacket.Subscribe(x => { entities.Add(x.EntityId); });
             proto.OnChatPacket.Subscribe(async captch =>
@@ -79,13 +80,14 @@ public class DefaultBehavior : BaseStressTestBehavior
             {
                 if (args.State == MinecraftClientState.Errored)
                 {
-                    //logger.Error(args.Error,"Disconnect Error");
+                    logger.Error(args.Error,"Disconnect Error");
                     await Task.Delay(3000);
                     await bot.Restart(true);
                 }
             };
 
             _ = bot.Restart(true);
+            */
         }
 
         return Task.CompletedTask;

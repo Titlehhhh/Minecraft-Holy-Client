@@ -19,13 +19,14 @@ public sealed class MultiProtocol : ProtocolBase
         scoped var writer = new MinecraftPrimitiveWriterSlim();
         int id = ProtocolVersion switch
         {
-            340 => 0x02,
-            >= 341 and <= 392 => 0x03,
-            >= 393 and <= 404 => 0x02,
-            >= 405 and <= 758 => 0x03,
-            759 => 0x05,
-            >= 760 and <= 765 => 0x05,
-            >= 766 => 0x06
+            340 => 0x02, 
+            >= 341 and <= 392 => 0x03, 
+            >= 393 and <= 404 => 0x02, 
+            >= 405 and <= 758 => 0x03, 
+            759 => 0x04, 
+            >= 760 and <= 765 => 0x05, 
+            >= 766 and <= 767 => 0x06, 
+            _ => throw new Exception("Unknown protocol version")
         };
         writer.WriteVarInt(id); // Packet Id
         writer.WriteString(message);
@@ -62,6 +63,32 @@ public sealed class MultiProtocol : ProtocolBase
         return base.SendPacketCore(writer.GetWrittenMemory());
     }
 
+
+    public ValueTask SendKeepAlive(long id)
+    {
+        scoped var writer = new MinecraftPrimitiveWriterSlim();
+        int packetId = ProtocolVersion switch
+        {
+            340 => 0x0B, 
+            >= 341 and <= 392 => 0x0F, 
+            >= 393 and <= 404 => 0x0E, 
+            >= 405 and <= 476 => 0x10, 
+            >= 477 and <= 578 => 0x0F, 
+            >= 579 and <= 754 => 0x10, 
+            >= 755 and <= 758 => 0x0F, 
+            759 => 0x11, 
+            760 => 0x12, 
+            761 => 0x11, 
+            >= 762 and <= 763 => 0x12, 
+            764 => 0x14,
+            765 => 0x15,
+            >= 766 and <= 767 => 0x18,
+            _ => throw new Exception("Unknown protocol version")
+        };
+        writer.WriteVarInt(packetId); // Packet Id
+        throw null;
+    }
+    
     public static List<string> ServerboundPlayPackets(int protocolVersion)
     {
         List<string> result = new();
