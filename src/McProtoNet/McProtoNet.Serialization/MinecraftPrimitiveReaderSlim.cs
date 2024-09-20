@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Unicode;
+using DotNext;
+using DotNext.Buffers;
 using McProtoNet.NBT;
 using DotNext.IO;
 
@@ -12,25 +14,48 @@ namespace McProtoNet.Serialization;
 /// <summary>
 ///     Represents stack-allocated reader for primitive types of Minecraft
 /// </summary>
-public ref struct MinecraftPrimitiveReaderSlim
+public ref partial struct MinecraftPrimitiveReaderSlim
 {
-    private SequenceReader<byte> reader;
+    private SpanReader<byte> _reader;
+
+    public ReadOnlySpan<byte> Span => _reader.Span;
+
+    public ref byte Current => ref Unsafe.AsRef(in _reader.Current);
+
+
+    public int ConsumedCount => _reader.ConsumedCount;
+
+    public readonly int RemainingCount => _reader.RemainingCount;
+    public readonly ReadOnlySpan<byte> ConsumedSpan => _reader.ConsumedSpan;
+    public readonly ReadOnlySpan<byte> RemainingSpan => _reader.RemainingSpan;
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public MinecraftPrimitiveReaderSlim(SequenceReader<byte> reader)
+    public MinecraftPrimitiveReaderSlim(ReadOnlySpan<byte> data)
     {
-        this.reader = reader;
+        _reader = new SpanReader<byte>(data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public MinecraftPrimitiveReaderSlim(ReadOnlySequence<byte> data)
+    public MinecraftPrimitiveReaderSlim(ReadOnlyMemory<byte> data) : this(data.Span)
     {
-        reader = new SequenceReader<byte>(data);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ReadOnlySpan<byte> Read(int count) => _reader.Read(count);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Read(Span<byte> output) => _reader.Read(output);
 
     private void ThrowEndOfData()
     {
+        
         throw new InvalidOperationException("End of data");
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Advance(int count)
+    {
+        //_bufferReference = ref Unsafe.Add(ref _bufferReference, count);
+        //consumed += count;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -41,10 +66,7 @@ public ref struct MinecraftPrimitiveReaderSlim
         byte read;
         do
         {
-            if (!reader.TryRead(out read))
-                ThrowEndOfData();
-
-
+            read = _reader.Read();
             var value = read & 127;
             result |= value << (7 * numRead);
 
@@ -64,8 +86,7 @@ public ref struct MinecraftPrimitiveReaderSlim
         byte read;
         do
         {
-            if (!reader.TryRead(out read))
-                ThrowEndOfData();
+            read = _reader.Read();
 
 
             var value = read & 127;
@@ -82,20 +103,14 @@ public ref struct MinecraftPrimitiveReaderSlim
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ReadBoolean()
     {
-        if (!reader.TryRead(out var result))
-            ThrowEndOfData();
-
-        return result == 1;
+        return _reader.Read() == 1;
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public byte ReadUnsignedByte()
     {
-        if (!reader.TryRead(out var result))
-            ThrowEndOfData();
-
-        return result;
+        return _reader.Read();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,11 +122,7 @@ public ref struct MinecraftPrimitiveReaderSlim
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ushort ReadUnsignedShort()
     {
-        if (!reader.TryReadBigEndian(out short value))
-            ThrowEndOfData();
-
-
-        return (ushort)value;
+        return _reader.ReadBigEndian<ushort>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,9 +134,7 @@ public ref struct MinecraftPrimitiveReaderSlim
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int ReadSignedInt()
     {
-        if (!reader.TryReadBigEndian(out int value))
-            ThrowEndOfData();
-        return value;
+        return _reader.ReadBigEndian<int>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,9 +146,7 @@ public ref struct MinecraftPrimitiveReaderSlim
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public long ReadSignedLong()
     {
-        if (!reader.TryReadBigEndian(out long value))
-            ThrowEndOfData();
-        return value;
+        return _reader.ReadBigEndian<long>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -167,85 +174,15 @@ public ref struct MinecraftPrimitiveReaderSlim
     public string ReadString()
     {
         int len = ReadVarInt();
-        //byte[] buffer = ArrayPool<byte>.Shared.Rent(len);
-        
-        try
+
+        if (len > 0)
         {
-            return Encoding.UTF8.GetString(reader.UnreadSequence.Slice(0,len));
+            return Encoding.UTF8.GetString(_reader.Read(len));
         }
-        finally
-        {
-            reader.Advance(len);
-           // ArrayPool<byte>.Shared.Return(buffer);
-        }
+
+        return "";
     }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref byte GetSpanReference(int sizeHint)
-    {
 
-        return ref MemoryMarshal.GetReference(reader.UnreadSpan);
-        
-      
-    }
-    
-    [MethodImpl(MethodImplOptions.NoInlining)] // non default, no inline
-    string ReadUtf8(int utf8Length)
-    {
-        // (int ~utf8-byte-count, int utf16-length, utf8-bytes)
-        // already read utf8 length, but it is complement.
-
-        utf8Length = ~utf8Length;
-
-        ref var spanRef = ref GetSpanReference(utf8Length + 4); // + read utf16 length
-
-        string str;
-        var utf16Length = Unsafe.ReadUnaligned<int>(ref spanRef);
-
-        if (utf16Length <= 0)
-        {
-            var src = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref spanRef, 4), utf8Length);
-            str = Encoding.UTF8.GetString(src);
-        }
-        else
-        {
-            // check malformed utf16Length
-            var max = unchecked((reader.Remaining + 1) * 3);
-            if (max < 0) max = int.MaxValue;
-            if (max < utf16Length)
-            {
-                throw new Exception("ReadUTF");
-            }
-
-#if NET7_0_OR_GREATER
-            // regular path, know decoded UTF16 length will gets faster decode result
-            unsafe
-            {
-                fixed (byte* p = &Unsafe.Add(ref spanRef, 4))
-                {
-                    str = string.Create(utf16Length, ((IntPtr)p, utf8Length), static (dest, state) =>
-                    {
-                        var src = MemoryMarshal.CreateSpan(ref Unsafe.AsRef<byte>((byte*)state.Item1), state.Item2);
-                        var status = Utf8.ToUtf16(src, dest, out var bytesRead, out var charsWritten, replaceInvalidSequences: false);
-                        if (status != OperationStatus.Done)
-                        {
-                            throw new Exception("ReadUTF");
-                            //MemoryPackSerializationException.ThrowFailedEncoding(status);
-                        }
-                    });
-                }
-            }
-#else
-            var src = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref spanRef, 4), utf8Length);
-            str = Encoding.UTF8.GetString(src);
-#endif
-        }
-        
-
-      reader.Advance(utf8Length + 4);
-
-        return str;
-    }
 
     public unsafe Guid ReadUUID()
     {
@@ -260,19 +197,12 @@ public ref struct MinecraftPrimitiveReaderSlim
 
     public byte[] ReadRestBuffer()
     {
-        return this.reader.UnreadSequence.ToArray();
+        return _reader.ReadToEnd().ToArray();
     }
 
     public byte[] ReadBuffer(int length)
     {
-        if (length > reader.Remaining)
-        {
-            throw new ArgumentOutOfRangeException(nameof(length), "the buffer is less than the requested length");
-        }
-
-        this.reader.TryReadExact(length, out var result);
-
-        return result.ToArray();
+        return _reader.Read(length).ToArray();
     }
 
     public NbtTag? ReadOptionalNbt()
@@ -283,24 +213,11 @@ public ref struct MinecraftPrimitiveReaderSlim
         }
 
         return null;
-
     }
 
-  
+
     public NbtTag ReadNbt()
     {
-      var stream =  reader.UnreadSequence.AsStream();
-       // using (MemoryStream ms = new MemoryStream())
-        {
-           // ms.Write(reader.UnreadSequence.ToArray());
-           // ms.Position = 0;
-
-            NbtReader nbtReader = new NbtReader(stream);
-
-            NbtTag result = nbtReader.ReadAsTag();
-
-            reader.Advance(stream.Position);
-            return result;
-        }
+        throw new NotImplementedException();
     }
 }

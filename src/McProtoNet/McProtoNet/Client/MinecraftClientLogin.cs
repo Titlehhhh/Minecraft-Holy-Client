@@ -30,7 +30,7 @@ public sealed class MinecraftClientLogin
         ms.Position = 0;
         ms.SetLength(0);
 
-        ms.WriteVarInt(0x07);//Packet id
+        ms.WriteVarInt(0x07); //Packet id
         ms.WriteVarInt(0x00);
         KnownPacksZero = ms.ToArray();
     }
@@ -81,6 +81,8 @@ public sealed class MinecraftClientLogin
             while (true)
             {
                 var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
+                scoped MinecraftPrimitiveReaderSlim p_reader =
+                    new MinecraftPrimitiveReaderSlim(inputPacket.Data);
                 try
                 {
                     var needBreak = false;
@@ -89,8 +91,8 @@ public sealed class MinecraftClientLogin
                     switch (inputPacket.Id)
                     {
                         case 0x00: // Login Disconnect
-                            inputPacket.Data.TryReadString(out var reason, out _);
-                            throw new LoginRejectedException(reason);
+                            //inputPacket.Data.TryReadString(out var reason, out _);
+                            throw new LoginRejectedException("Login Disconnect");
                             break;
                         case 0x01: // Encryption Request
                             var encryptBegin = ReadEncryptionPacket(inputPacket);
@@ -122,8 +124,10 @@ public sealed class MinecraftClientLogin
                             break;
                         case 0x03: //Compress
 
-                            if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
-                                throw new Exception("asd");
+                            //if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
+
+
+                            threshold = p_reader.ReadVarInt();
                             reader.SwitchCompression(threshold);
                             sender.SwitchCompression(threshold);
 
@@ -131,10 +135,10 @@ public sealed class MinecraftClientLogin
                         case 0x04: //Login Plugin Request
 
                             var buffer = inputPacket.Data;
-                            buffer.TryReadVarInt(out var messageId, out var offset);
-                            buffer = buffer.Slice(offset);
-                            buffer.TryReadString(out var channel, out offset);
-                            var data = buffer.Slice(offset);
+                            //buffer.TryReadVarInt(out var messageId, out var offset);
+                            // buffer = buffer.Slice(offset);
+                            // buffer.TryReadString(out var channel, out offset);
+                            //var data = buffer.Slice(offset);
                             break;
 
                         default: throw new Exception("Unknown packet: " + inputPacket.Id);
@@ -154,18 +158,19 @@ public sealed class MinecraftClientLogin
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
+                    scoped var p_reader = new MinecraftPrimitiveReaderSlim(inputPacket.Data);
                     try
                     {
                         var needBreak = false;
 
-                        
+
                         switch (inputPacket.Id)
                         {
                             case 0x00: // Cookie Request
-                                if (!inputPacket.Data.TryReadString(out string key, out _))
-                                {
-                                    throw new Exception("Failed Read");
-                                }
+                                //if (!inputPacket.Data.TryReadString(out string key, out _))
+                            {
+                                //   throw new Exception("Failed Read");
+                            }
 
 
                                 break;
@@ -174,8 +179,9 @@ public sealed class MinecraftClientLogin
 
                                 break;
                             case 0x02: // Disconnect (configuration)
-                                inputPacket.Data.TryReadString(out var reason, out _);
-                                throw new LoginRejectedException(reason);
+                                // inputPacket.Data.TryReadString(out var reason, out _);
+                                throw new LoginRejectedException("Login Disconnect");
+                                // throw new LoginRejectedException(reason);
                                 break;
                             case 0x03:
                                 await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
@@ -183,7 +189,7 @@ public sealed class MinecraftClientLogin
                                 break; // Finish
                             case 0x04: // KeepAlive
 
-                                long id = ReadKeepAlive(inputPacket);
+                                long id = p_reader.ReadSignedLong();
 
                                 var outP = CreateKeepAlive(id);
                                 try
@@ -257,17 +263,6 @@ public sealed class MinecraftClientLogin
         return new OutputPacket(writer.GetWrittenMemory());
     }
 
-    private static long ReadKeepAlive(InputPacket packet)
-    {
-        var reader = new SequenceReader<byte>(packet.Data);
-        if (!reader.TryReadBigEndian(out long id))
-        {
-            throw new Exception("Fatal Read");
-        }
-
-        ;
-        return id;
-    }
 
     private static ClientboundConfigurationPluginMessagePacket ReadConfigPluginMessagePacket(InputPacket packet)
     {
@@ -280,19 +275,11 @@ public sealed class MinecraftClientLogin
 
     private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket)
     {
-        scoped var reader = new SequenceReader<byte>(inputPacket.Data);
-
-        reader.TryReadString(out var serverId);
-
-        reader.TryReadVarInt(out var len, out _);
-
-        var publicKey = reader.UnreadSequence.Slice(0, len).ToArray();
-        reader.Advance(len);
-
-        reader.TryReadVarInt(out len, out _);
-        var verifyToken = reader.UnreadSequence.Slice(0, len).ToArray();
-
-
+        scoped var reader = new MinecraftPrimitiveReaderSlim(inputPacket.Data);
+        var serverId = reader.ReadString();
+        var len = reader.ReadVarInt();
+        var publicKey = reader.ReadBuffer(len);
+        var verifyToken = reader.ReadBuffer(len);
         return new EncryptionBeginPacket(serverId, publicKey, verifyToken);
     }
 

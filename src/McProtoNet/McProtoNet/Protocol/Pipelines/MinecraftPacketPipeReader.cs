@@ -144,7 +144,8 @@ internal sealed class MinecraftPacketPipeReader
                 mainData = data.Slice(len);
             }
 
-            return new InputPacket(id, mainData);
+            throw new NotImplementedException();
+            //return new InputPacket( mainData);
         }
         finally
         {

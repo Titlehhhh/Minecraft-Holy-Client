@@ -10,9 +10,6 @@ public sealed class MinecraftPacketReader : IDisposable
 {
     private static readonly MemoryAllocator<byte> memoryAllocator = ArrayPool<byte>.Shared.ToAllocator();
 
-    //private readonly Inflater Inflater = new Inflater();
-
-    //private readonly ZlibDecompressor decompressor = new();
 
     private int _compressionThreshold;
 
@@ -40,7 +37,7 @@ public sealed class MinecraftPacketReader : IDisposable
             {
                 await BaseStream.ReadExactlyAsync(buffer.Memory, token);
 
-                return new InputPacket(id, buffer);
+                return new InputPacket(buffer);
             }
             catch
             {
@@ -73,10 +70,8 @@ public sealed class MinecraftPacketReader : IDisposable
                 {
                     DecompressCore(buffer_compress.AsSpan(0, len), memoryOwner.Span);
 
-                    var id = ReadVarInt(memoryOwner.Span, out var offset);
 
-
-                    return new InputPacket(id, memoryOwner, offset);
+                    return new InputPacket(memoryOwner);
                 }
                 catch
                 {
@@ -104,7 +99,7 @@ public sealed class MinecraftPacketReader : IDisposable
             {
                 await BaseStream.ReadExactlyAsync(buffer.Memory, token);
 
-                return new InputPacket(id, buffer);
+                return new InputPacket(buffer);
             }
             catch
             {
@@ -114,7 +109,7 @@ public sealed class MinecraftPacketReader : IDisposable
         }
     }
 
-    //private static readonly ZlibDecompressor s_decompressor = new ZlibDecompressor();
+ 
 
     private static void DecompressCore(ReadOnlySpan<byte> buffer_compress, Span<byte> uncompress)
     {
@@ -128,29 +123,6 @@ public sealed class MinecraftPacketReader : IDisposable
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int ReadVarInt(Span<byte> data, out int len)
-    {
-        var numRead = 0;
-        var result = 0;
-        byte read;
-        do
-        {
-            read = data[numRead];
-
-            var value = read & 0b01111111;
-            result |= value << (7 * numRead);
-
-            numRead++;
-            if (numRead > 5) throw new ArithmeticException("VarInt too long");
-        } while ((read & 0b10000000) != 0);
-
-        //data = data.Slice(numRead);
-
-
-        len = numRead;
-        return result;
-    }
 
     public void SwitchCompression(int threshold)
     {

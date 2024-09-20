@@ -2,6 +2,7 @@
 using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text.Unicode;
 using Cysharp.Text;
 using DotNext.Buffers;
 using McProtoNet.NBT;
