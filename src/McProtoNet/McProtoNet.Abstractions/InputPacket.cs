@@ -14,8 +14,8 @@ public readonly struct InputPacket : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public InputPacket(MemoryOwner<byte> owner)
     {
-        Id = ReadVarInt(this.owner.Span, out int offset);
         this.owner = owner;
+        Id = ReadVarInt(owner.Span, out int offset);
         Data = this.owner.Memory.Slice(offset);
     }
 

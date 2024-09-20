@@ -81,13 +81,10 @@ public sealed class MinecraftClientLogin
             while (true)
             {
                 var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-                scoped MinecraftPrimitiveReaderSlim p_reader =
-                    new MinecraftPrimitiveReaderSlim(inputPacket.Data);
+                
                 try
                 {
                     var needBreak = false;
-
-
                     switch (inputPacket.Id)
                     {
                         case 0x00: // Login Disconnect
@@ -127,7 +124,7 @@ public sealed class MinecraftClientLogin
                             //if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
 
 
-                            threshold = p_reader.ReadVarInt();
+                            threshold = ReadTreshold(inputPacket);
                             reader.SwitchCompression(threshold);
                             sender.SwitchCompression(threshold);
 
@@ -158,12 +155,12 @@ public sealed class MinecraftClientLogin
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-                    scoped var p_reader = new MinecraftPrimitiveReaderSlim(inputPacket.Data);
+                   
                     try
                     {
                         var needBreak = false;
 
-
+                        
                         switch (inputPacket.Id)
                         {
                             case 0x00: // Cookie Request
@@ -189,7 +186,7 @@ public sealed class MinecraftClientLogin
                                 break; // Finish
                             case 0x04: // KeepAlive
 
-                                long id = p_reader.ReadSignedLong();
+                                long id = ReadKeepAlive(inputPacket);
 
                                 var outP = CreateKeepAlive(id);
                                 try
@@ -263,7 +260,16 @@ public sealed class MinecraftClientLogin
         return new OutputPacket(writer.GetWrittenMemory());
     }
 
-
+    private static int ReadTreshold(InputPacket p)
+    {
+        scoped MinecraftPrimitiveReaderSlim r = new MinecraftPrimitiveReaderSlim(p.Data);
+        return r.ReadVarInt();
+    }
+    private static long ReadKeepAlive(InputPacket p)
+    {
+        scoped MinecraftPrimitiveReaderSlim r = new MinecraftPrimitiveReaderSlim(p.Data);
+        return r.ReadSignedLong();
+    }
     private static ClientboundConfigurationPluginMessagePacket ReadConfigPluginMessagePacket(InputPacket packet)
     {
         scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);

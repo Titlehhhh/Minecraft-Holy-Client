@@ -27,16 +27,10 @@ public sealed class MinecraftPacketReader : IDisposable
         var len = await BaseStream.ReadVarIntAsync(token);
         if (_compressionThreshold <= 0)
         {
-            var id = await BaseStream.ReadVarIntAsync(token);
-            len -= id.GetVarIntLength();
-
-
             var buffer = memoryAllocator.AllocateExactly(len);
-
             try
             {
                 await BaseStream.ReadExactlyAsync(buffer.Memory, token);
-
                 return new InputPacket(buffer);
             }
             catch
@@ -89,16 +83,10 @@ public sealed class MinecraftPacketReader : IDisposable
             if (sizeUncompressed != 0)
                 throw new Exception("size incorrect");
 
-            var id = await BaseStream.ReadVarIntAsync(token);
-            len -= id.GetVarIntLength() + 1;
-
-
-            var buffer = memoryAllocator.AllocateExactly(len);
-
+            var buffer = memoryAllocator.AllocateExactly(len - 1); // -1 is sizeUncompressed length !!!
             try
             {
                 await BaseStream.ReadExactlyAsync(buffer.Memory, token);
-
                 return new InputPacket(buffer);
             }
             catch
@@ -109,7 +97,6 @@ public sealed class MinecraftPacketReader : IDisposable
         }
     }
 
- 
 
     private static void DecompressCore(ReadOnlySpan<byte> buffer_compress, Span<byte> uncompress)
     {

@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Subjects;
 using McProtoNet.Abstractions;
+using McProtoNet.NBT;
 using McProtoNet.Serialization;
 
 namespace McProtoNet.MultiVersionProtocol;
@@ -74,7 +75,12 @@ public sealed class MultiProtocol : ProtocolBase
             scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
             if (ProtocolVersion >= 765)
             {
-                var reason = reader.ReadNbt();
+               // var reason = reader.ReadNbt();
+               byte[] data = packet.Data.ToArray();
+               MemoryStream ms = new MemoryStream(data);
+               ms.Position = 0;
+               NbtReader nbtReader = new NbtReader(ms);
+               var nbt = nbtReader.ReadAsTag();
             }
             else
             {
