@@ -207,7 +207,8 @@ public class NbtReader
                 // set state to error in case reader.ReadTagType throws.
                 _state = NbtParseState.Error;
                 // read first tag, make sure it's a compound
-                if (_reader.ReadTagType() != NbtTagType.Compound)
+                var deb = _reader.ReadTagType();
+                if (deb != NbtTagType.Compound)
                     throw new NbtFormatException("Given NBT stream does not start with a TAG_Compound");
                 Depth = 1;
                 TagType = NbtTagType.Compound;

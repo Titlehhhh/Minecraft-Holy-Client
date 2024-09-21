@@ -37,7 +37,7 @@ public sealed class NbtLong : NbtTag
 	/// </summary>
 	/// <param name="tagName"> Name to assign to this tag. May be <c>null</c>. </param>
 	/// <param name="value"> Value to assign to this tag. </param>
-	public NbtLong(string tagName, long value)
+	public NbtLong(string? tagName, long value)
     {
         Name = tagName;
         Value = value;

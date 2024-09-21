@@ -208,13 +208,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             }
             else
             {
-                try
-                {
-                    await newTcp.Client.DisconnectAsync(true, cancellationToken);
-                }
-                catch
-                {
-                }
+               
 
                 await newTcp.ConnectAsync(Host, Port, cancellationToken);
                 mainStream = newTcp.GetStream();
