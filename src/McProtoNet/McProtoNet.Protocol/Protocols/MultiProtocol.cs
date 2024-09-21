@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Subjects;
+using Cysharp.Text;
 using McProtoNet.Abstractions;
 using McProtoNet.NBT;
 using McProtoNet.Serialization;
@@ -76,11 +77,9 @@ public sealed class MultiProtocol : ProtocolBase
             if (ProtocolVersion >= 765)
             {
                // var reason = reader.ReadNbt();
-               byte[] data = packet.Data.ToArray();
-               MemoryStream ms = new MemoryStream(data);
-               ms.Position = 0;
-               NbtReader nbtReader = new NbtReader(ms);
-               var nbt = nbtReader.ReadAsTag();
+               NbtSpanReader nbtReader = new NbtSpanReader(packet.Data.Span);
+              
+               var nbt = nbtReader.ReadAsTag<NbtTag>();
             }
             else
             {
