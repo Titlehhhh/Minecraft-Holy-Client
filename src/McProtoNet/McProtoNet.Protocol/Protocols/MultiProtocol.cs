@@ -22,7 +22,7 @@ public sealed class MultiProtocol : ProtocolBase
 {
     private Subject<KeepAlivePacket> _onKeepAlive = new Subject<KeepAlivePacket>();
     private static readonly byte[] bitset = new byte[3];
-
+    public Subject<Unit> OnJoinGame { get; } = new();
     public MultiProtocol(IPacketBroker client) : base(client)
     {
         //SupportedVersion = 755;
@@ -65,11 +65,16 @@ public sealed class MultiProtocol : ProtocolBase
             >= 764 and <= 765 => 0x1B,
             >= 766 and <= 767 => 0x1D,
         };
-
+        if (packet.Id == 0x2B)
+        {
+            OnJoinGame.OnNext(Unit.Default);
+            return;
+        }
         if (keepAlive == packet.Id)
         {
             scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-            _onKeepAlive.OnNext(new KeepAlivePacket(reader.ReadSignedLong()));
+            //_onKeepAlive.OnNext(new KeepAlivePacket(reader.ReadSignedLong()));
+            _ = SendKeepAlive(reader.ReadSignedLong());
         }
         else if (disconnect == packet.Id)
         {
@@ -79,7 +84,8 @@ public sealed class MultiProtocol : ProtocolBase
                // var reason = reader.ReadNbt();
                NbtSpanReader nbtReader = new NbtSpanReader(packet.Data.Span);
               
-               var nbt = nbtReader.ReadAsTag<NbtTag>();
+               var nbt = nbtReader.ReadAsTag<NbtTag>(false);
+               Console.WriteLine($"{nbt} ThreadName: {Thread.CurrentThread.Name}");
             }
             else
             {

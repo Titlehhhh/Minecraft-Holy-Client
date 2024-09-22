@@ -21,11 +21,11 @@ public ref struct NbtSpanReader
     }
 
 
-    public T ReadAsTag<T>(bool readRootName = true) where T : NbtTag
+    public T ReadAsTag<T>(bool readRootName) where T : NbtTag
     {
         NbtTagType type = ReadTagType();
         string? rootName = readRootName ? ReadString() : null;
-        if (_reader.RemainingCount >= 512) // Recursive
+        if (_reader.RemainingCount <= 512) // Recursive
         {
             return ReadRecursive(type, rootName) as T ?? throw new InvalidOperationException($"Error cast to {typeof(T)}");
         }

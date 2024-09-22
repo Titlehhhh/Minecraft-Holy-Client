@@ -1,6 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Reactive.Linq;
 using System.Text;
 using DotNext.Collections.Generic;
 using McProtoNet.Client;
@@ -14,22 +16,70 @@ internal class Program
         Console.WriteLine("Start");
         try
         {
-            MinecraftClient client = new MinecraftClient()
+            var list = new List<MinecraftClient>();
+            var listProtocols = new List<MultiProtocol>();
+            for (int i = 0; i < 300; i++)
             {
-                ConnectTimeout = TimeSpan.FromSeconds(30),
-                Host = "192.168.0.7",
-                Port = 25565,
-                Username = "TestBot",
-                Version = MinecraftVersion.Latest
-            };
+                MinecraftClient client = new MinecraftClient()
+                {
+                    ConnectTimeout = TimeSpan.FromSeconds(30),
+                    Host = "192.168.0.7",
+                    Port = 25565,
+                    Username = $"TitleBot_{i + 1:D3}",
+                    Version = MinecraftVersion.Latest
+                };
 
-            var protoTest = new MultiProtocol(client);
-            await client.Start();
+                var protoTest = new MultiProtocol(client);
+                listProtocols.Add(protoTest);
+                list.Add(client);
+            }
+
+            List<Task> tasks = new List<Task>();
+            int index = 0;
+            await foreach (var minecraftClient in list)
+            {
+                static async Task RunBot(MinecraftClient client, MultiProtocol proto)
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        try
+                        {
+                            await client.Start();
+                            await proto.OnJoinGame.FirstOrDefaultAsync();
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            // Console.WriteLine(e);
+                        }
+                    }
+                }
+
+                tasks.Add(RunBot(minecraftClient, listProtocols[index++]));
+            }
+
+            await Task.WhenAll(tasks);
+            //while (true)
+            {
+                await Task.Delay(5000);
+                var sends = listProtocols.Select(async b =>
+                {
+                    try
+                    {
+                        await b.SendChatPacket("Hello from Minecraft Holy Client");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                });
+                await Task.WhenAll(sends);
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            // throw;
         }
 
         await Task.Delay(-1);

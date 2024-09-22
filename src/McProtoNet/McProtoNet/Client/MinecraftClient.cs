@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using DotNext;
 using DotNext.Threading;
+using Fody;
 using LibDeflate;
 using McProtoNet.Abstractions;
 using McProtoNet.Protocol;
@@ -117,8 +118,10 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
 
             var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
-
-            _ = MainLoop(result, CTS.Token);
+           
+                _ = MainLoop(result, CTS.Token);
+            
+           
         }
         catch (OperationCanceledException ex)
         {
@@ -147,6 +150,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         StateChanged?.Invoke(this, new StateEventArgs(ex, _state));
     }
 
+    [ConfigureAwait(true)]
     private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
     {
         _packetSender = new MinecraftPacketSender();
@@ -162,7 +166,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var packet = await _packetReader.ReadNextPacketAsync(cancellationToken);
+                var packet = await _packetReader
+                    .ReadNextPacketAsync(cancellationToken);
                 try
                 {
                     PacketReceived?.Invoke(this, packet);
@@ -208,8 +213,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             }
             else
             {
-               
-
                 await newTcp.ConnectAsync(Host, Port, cancellationToken);
                 mainStream = newTcp.GetStream();
             }

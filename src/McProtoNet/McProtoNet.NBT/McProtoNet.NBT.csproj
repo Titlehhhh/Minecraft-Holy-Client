@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
@@ -12,7 +12,10 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="ConfigureAwait.Fody" Version="3.3.2"/>
-        <PackageReference Include="DotNext" Version="5.7.0" />
-        <PackageReference Include="MinVer" Version="5.0.0"/>
+        <PackageReference Include="DotNext" Version="5.13.0" />
+        <PackageReference Include="MinVer" Version="6.0.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 </Project>
