@@ -13,12 +13,13 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
+       
         Console.WriteLine("Start");
         try
         {
             var list = new List<MinecraftClient>();
             var listProtocols = new List<MultiProtocol>();
-            for (int i = 0; i < 300; i++)
+            for (int i = 0; i < 200; i++)
             {
                 MinecraftClient client = new MinecraftClient()
                 {
@@ -28,7 +29,13 @@ internal class Program
                     Username = $"TitleBot_{i + 1:D3}",
                     Version = MinecraftVersion.Latest
                 };
-
+                client.StateChanged += (sender, eventArgs) =>
+                {
+                    if (eventArgs.Error is not null)
+                    {
+                        Console.WriteLine(eventArgs.Error);
+                    }
+                };
                 var protoTest = new MultiProtocol(client);
                 listProtocols.Add(protoTest);
                 list.Add(client);
