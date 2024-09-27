@@ -2,7 +2,6 @@
 using DotNext;
 using DotNext.Threading;
 using Fody;
-using LibDeflate;
 using McProtoNet.Abstractions;
 using McProtoNet.Protocol;
 using QuickProxyNet;
