@@ -1,19 +1,19 @@
 ﻿using System.Buffers;
 using System.IO.Pipelines;
-using LibDeflate;
+using McProtoNet.Protocol.Zlib;
 
 namespace McProtoNet.Protocol;
 
 internal sealed class MinecraftPacketPipeWriter
 {
     private static readonly byte[] ZeroVarInt = { 0 };
-    private readonly ZlibCompressor compressor;
+  
     private readonly PipeWriter pipeWriter;
 
-    public MinecraftPacketPipeWriter(PipeWriter pipeWriter, ZlibCompressor compressor)
+    public MinecraftPacketPipeWriter(PipeWriter pipeWriter)
     {
         this.pipeWriter = pipeWriter;
-        this.compressor = compressor;
+      
     }
 
     public int CompressionThreshold { get; set; }
@@ -39,6 +39,7 @@ internal sealed class MinecraftPacketPipeWriter
         }
 
         var uncompressedSize = data.Length;
+        using scoped var compressor = new ZlibCompressor(); 
         var length = compressor.GetBound(uncompressedSize);
 
         var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);

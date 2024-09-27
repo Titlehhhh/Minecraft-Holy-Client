@@ -29,24 +29,30 @@ public sealed class MinecraftPacketSender : IDisposable
 
             if (uncompressedSize >= _compressionThreshold)
             {
-                using var compressor = new ZlibCompressor(4);
-
-                var length = compressor.GetBound(uncompressedSize);
-                var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
+                var compressor = new ZlibCompressor(4);
                 try
                 {
-                    var bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
-                    var compressedLength = bytesCompress;
+                    var length = compressor.GetBound(uncompressedSize);
+                    var compressedBuffer = ArrayPool<byte>.Shared.Rent(length);
+                    try
+                    {
+                        var bytesCompress = compressor.Compress(data.Span, compressedBuffer.AsSpan(0, length));
+                        var compressedLength = bytesCompress;
 
-                    var fullsize = compressedLength + uncompressedSize.GetVarIntLength();
+                        var fullSize = compressedLength + uncompressedSize.GetVarIntLength();
 
 
-                    return SendCompress(fullsize, uncompressedSize, compressedBuffer, bytesCompress, token);
+                        return SendCompress(fullSize, uncompressedSize, compressedBuffer, bytesCompress, token);
+                    }
+                    catch
+                    {
+                        ArrayPool<byte>.Shared.Return(compressedBuffer);
+                        throw;
+                    }
                 }
-                catch
+                finally
                 {
-                    ArrayPool<byte>.Shared.Return(compressedBuffer);
-                    throw;
+                    compressor.Dispose();
                 }
             }
             else
@@ -75,12 +81,12 @@ public sealed class MinecraftPacketSender : IDisposable
         }
     }
 
-    private async ValueTask SendCompress(int fullsize, int uncompressedSize, byte[] compressedBuffer, int bytesCompress,
+    private async ValueTask SendCompress(int fullSize, int uncompressedSize, byte[] compressedBuffer, int bytesCompress,
         CancellationToken token)
     {
         try
         {
-            await BaseStream.WriteVarIntAsync(fullsize, token).ConfigureAwait(false);
+            await BaseStream.WriteVarIntAsync(fullSize, token).ConfigureAwait(false);
             await BaseStream.WriteVarIntAsync(uncompressedSize, token).ConfigureAwait(false);
             //await BaseStream.WriteAsync(compressed.Memory, token);
 

@@ -98,15 +98,20 @@ public sealed class MinecraftPacketReader : IDisposable
     }
 
 
-    private static void DecompressCore(ReadOnlySpan<byte> buffer_compress, Span<byte> uncompress)
+    private static void DecompressCore(ReadOnlySpan<byte> bufferCompress, Span<byte> uncompress)
     {
-        using (var decompressor = new ZlibDecompressor())
+        var decompressor = new ZlibDecompressor();
+        try
         {
             var status = decompressor.Decompress(
-                buffer_compress,
+                bufferCompress,
                 uncompress, out var written);
 
             if (status != OperationStatus.Done) throw new Exception("Decompress Error");
+        }
+        finally
+        {
+            decompressor.Dispose();
         }
     }
 

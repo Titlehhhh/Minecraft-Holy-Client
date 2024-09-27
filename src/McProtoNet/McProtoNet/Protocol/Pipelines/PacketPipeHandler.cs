@@ -1,6 +1,5 @@
 ﻿using System.IO.Pipelines;
 using DotNext;
-using LibDeflate;
 using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol;
@@ -14,12 +13,12 @@ internal sealed class PacketPipeHandler : Disposable
     public PacketHandler PacketReceived;
 
 
-    public PacketPipeHandler(IDuplexPipe duplexPipe, ZlibCompressor compressor, ZlibDecompressor decompressor)
+    public PacketPipeHandler(IDuplexPipe duplexPipe)
     {
         this.duplexPipe = duplexPipe;
 
-        reader = new MinecraftPacketPipeReader(duplexPipe.Input, decompressor);
-        writer = new MinecraftPacketPipeWriter(duplexPipe.Output, compressor);
+        reader = new MinecraftPacketPipeReader(duplexPipe.Input);
+        writer = new MinecraftPacketPipeWriter(duplexPipe.Output);
     }
 
 

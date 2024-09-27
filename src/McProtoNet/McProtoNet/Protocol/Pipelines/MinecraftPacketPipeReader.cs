@@ -2,20 +2,21 @@
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-using LibDeflate;
+
 using McProtoNet.Abstractions;
+using McProtoNet.Protocol.Zlib;
 
 namespace McProtoNet.Protocol;
 
 internal sealed class MinecraftPacketPipeReader
 {
-    private readonly ZlibDecompressor decompressor;
+   
     private readonly PipeReader pipeReader;
 
-    public MinecraftPacketPipeReader(PipeReader pipeReader, ZlibDecompressor decompressor)
+    public MinecraftPacketPipeReader(PipeReader pipeReader)
     {
         this.pipeReader = pipeReader;
-        this.decompressor = decompressor;
+        //this.decompressor = decompressor;
     }
 
     public int CompressionThreshold { get; set; }
@@ -105,6 +106,9 @@ internal sealed class MinecraftPacketPipeReader
 
                     var decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
                     rented = decompressed;
+                   
+
+                  using scoped  var decompressor = new ZlibDecompressor();
                     if (compressed.IsSingleSegment)
                     {
                         var result = decompressor.Decompress(
@@ -155,7 +159,7 @@ internal sealed class MinecraftPacketPipeReader
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed,
-        ZlibDecompressor decompressor, int sizeUncompressed, out int id)
+      scoped  ZlibDecompressor decompressor, int sizeUncompressed, out int id)
     {
         var compressedLength = (int)compressed.Length;
 
