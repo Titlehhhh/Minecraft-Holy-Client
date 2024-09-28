@@ -16,10 +16,6 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        
-        await Task.Delay(-1);
-
-
         Console.WriteLine("Start");
         try
         {

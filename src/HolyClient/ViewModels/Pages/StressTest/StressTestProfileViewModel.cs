@@ -6,6 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using DynamicData;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Core.Infrastructure;
@@ -238,6 +239,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
     private async Task StartStressTest()
     {
+        await App.SaveState();
         var rootScreen = Locator.Current.GetService<IScreen>("Root");
 
         var loggerWrapper = new LoggerWrapper();

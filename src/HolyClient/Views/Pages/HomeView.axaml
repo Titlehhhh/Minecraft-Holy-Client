@@ -40,7 +40,7 @@
                             <ExperimentalAcrylicMaterial
                                 TintOpacity="0.1"
                                 MaterialOpacity="0.1"
-                                TintColor="{DynamicResource ControlFillColorTertiary}" />
+                                TintColor="Black" />
                         </AcrylicContentControl.Material>
                         <Panel>
 

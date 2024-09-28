@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -9,6 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Metadata;
 using Avalonia.Styling;
+using HolyClient.AppState;
 using HolyClient.DiscordRpc;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
@@ -27,6 +30,12 @@ public class App : Application
     public static string AppName = "HolyClient";
 
     public static Window MainWindow { get; }
+
+    public static async Task SaveState()
+    {
+        var driver = Locator.Current.GetService<ISuspensionDriver>();
+        await driver.SaveState(Locator.Current.GetService<MainState>());
+    }
 
     public override void Initialize()
     {
