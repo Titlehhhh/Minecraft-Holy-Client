@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using DotNext.Collections.Generic;
 using McProtoNet.Client;
@@ -17,6 +18,7 @@ internal class Program
         Console.WriteLine("Start");
         try
         {
+            
             var list = new List<MinecraftClient>();
             var listProtocols = new List<MultiProtocol>();
             for (int i = 0; i < 200; i++)
