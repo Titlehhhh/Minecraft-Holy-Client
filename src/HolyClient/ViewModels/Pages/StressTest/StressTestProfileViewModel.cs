@@ -34,6 +34,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
         #region Bind to state
 
+        state.PropertyChanged += (s, e) => { _ = App.SaveState(); };
         Id = state.Id;
         Name = state.Name;
         Server = state.Server;
@@ -69,7 +70,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
                 {
                     state.NumberOfBots = Convert.ToInt32(x);
                 }
-                catch 
+                catch
                 {
                 }
             });

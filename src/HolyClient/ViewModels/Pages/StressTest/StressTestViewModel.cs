@@ -50,12 +50,7 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
             })
             .Subscribe();
 
-        //outputCollectionChanges
-        //	//.OnItemRemoved(provider => SelectedProfile = null)			
-        //	.Subscribe();
-
-        this.WhenAnyValue(x => x.SelectedProfile)
-            .Subscribe(x => { });
+        
 
         this.WhenAnyValue(x => x.SelectedProfile)
             .Skip(1)

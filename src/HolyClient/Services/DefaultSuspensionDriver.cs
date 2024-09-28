@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using HolyClient.StressTest;
 using MessagePack;
@@ -18,6 +19,7 @@ public class DefaultSuspensionDriver<TAppState> : ISuspensionDriver
     private readonly string dataFileName = "appstate.dat";
     private MessagePackSerializerOptions options;
     private readonly IFormatterResolver resolver;
+    private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
     public DefaultSuspensionDriver()
     {
@@ -48,29 +50,34 @@ public class DefaultSuspensionDriver<TAppState> : ISuspensionDriver
     {
         return Observable.FromAsync(async () =>
         {
-
-            var path = Path.Combine(appData, App.AppName);
-            if (Directory.Exists(path))
+            await _lock.WaitAsync().ConfigureAwait(false);
+            try
             {
-                path = Path.Combine(path, dataFileName);
-
-                if (File.Exists(path))
+                var path = Path.Combine(appData, App.AppName);
+                if (Directory.Exists(path))
                 {
-                    var fs = File.OpenRead(path);
-                    await using (fs.ConfigureAwait(false))
-                    {
-                        TAppState state = await MessagePackSerializer.DeserializeAsync<TAppState>(fs)
-                            .ConfigureAwait(false);
-                        return state;
+                    path = Path.Combine(path, dataFileName);
 
+                    if (File.Exists(path))
+                    {
+                        var fs = File.OpenRead(path);
+                        await using (fs.ConfigureAwait(false))
+                        {
+                            TAppState state = await MessagePackSerializer.DeserializeAsync<TAppState>(fs)
+                                .ConfigureAwait(false);
+                            return state;
+                        }
                     }
+
+                    throw new FileNotFoundException($"Не найден файл с состоянием на пути: {path}");
                 }
 
-                throw new FileNotFoundException($"Не найден файл с состоянием на пути: {path}");
+                throw new DirectoryNotFoundException($"Не найдена папка приложения: {path}");
             }
-
-            throw new DirectoryNotFoundException($"Не найдена папка приложения: {path}");
-
+            finally
+            {
+                _lock.Release();
+            }
         });
     }
 
@@ -78,19 +85,27 @@ public class DefaultSuspensionDriver<TAppState> : ISuspensionDriver
     {
         return Observable.FromAsync<Unit>(async () =>
         {
-            var path = Path.Combine(appData, App.AppName);
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-
-            path = Path.Combine(path, dataFileName);
-
-            var fs = File.OpenWrite(path);
-            await using (fs.ConfigureAwait(false))
+            await _lock.WaitAsync().ConfigureAwait(false);
+            try
             {
-                await MessagePackSerializer.SerializeAsync(fs, state).ConfigureAwait(false);
-            }
+                var path = Path.Combine(appData, App.AppName);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
 
-            return Unit.Default;
+                path = Path.Combine(path, dataFileName);
+
+                var fs = File.OpenWrite(path);
+                await using (fs.ConfigureAwait(false))
+                {
+                    await MessagePackSerializer.SerializeAsync(fs, state).ConfigureAwait(false);
+                }
+
+                return Unit.Default;
+            }
+            finally
+            {
+                _lock.Release();
+            }
         });
     }
 }
