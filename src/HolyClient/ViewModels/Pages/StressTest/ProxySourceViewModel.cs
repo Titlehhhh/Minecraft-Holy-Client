@@ -13,7 +13,13 @@ public class ProxySourceViewModel : ReactiveObject
 
         Name = proxySource.Name;
 
-        Type = proxySource.Type;
+        string type = "None";
+        if (proxySource.Type is not null)
+        {
+            Type = proxySource.Type.ToString();
+        }
+        Type = type;
+        
 
         Icon = proxySource switch
         {
@@ -30,5 +36,5 @@ public class ProxySourceViewModel : ReactiveObject
 
     public string Icon { get; private set; }
 
-    public ProxyType Type { get; set; }
+    public string Type { get; set; }
 }

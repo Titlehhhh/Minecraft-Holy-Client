@@ -11,14 +11,14 @@ public class FileProxySource : IProxySource
     {
     }
 
-    public FileProxySource(ProxyType type, string filePath)
+    public FileProxySource(ProxyType? type, string filePath)
     {
         Type = type;
         FilePath = filePath;
     }
 
     public string FilePath { get; set; }
-    public ProxyType Type { get; set; }
+    public ProxyType? Type { get; set; }
 
     [IgnoreMember] public string Name => FilePath;
 

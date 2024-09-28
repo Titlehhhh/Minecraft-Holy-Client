@@ -13,14 +13,14 @@ public class InMemoryProxySource : IProxySource
     {
     }
 
-    public InMemoryProxySource(ProxyType type, string lines)
+    public InMemoryProxySource(ProxyType? type, string lines)
     {
         Type = type;
         Proxies = lines;
     }
 
     public string Proxies { get; set; }
-    public ProxyType Type { get; set; }
+    public ProxyType? Type { get; set; }
 
 
     public Guid Id { get; set; } = Guid.NewGuid();

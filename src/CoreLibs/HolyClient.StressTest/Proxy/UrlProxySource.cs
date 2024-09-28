@@ -11,7 +11,7 @@ public class UrlProxySource : IProxySource
     {
     }
 
-    public UrlProxySource(ProxyType type, string url)
+    public UrlProxySource(ProxyType? type, string url)
     {
         Type = type;
         Url = url;
@@ -19,7 +19,7 @@ public class UrlProxySource : IProxySource
 
     public string Url { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
-    public ProxyType Type { get; set; }
+    public ProxyType? Type { get; set; }
 
     [IgnoreMember] public string Name => Url;
 
