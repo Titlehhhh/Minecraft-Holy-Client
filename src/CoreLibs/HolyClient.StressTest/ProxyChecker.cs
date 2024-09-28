@@ -129,6 +129,7 @@ public sealed class ProxyChecker : IDisposable
         tcpClient.SendTimeout = _sendTimeout;
         tcpClient.ReceiveTimeout = _readTimeout;
 
+        await using var cancel = cancellationToken.Register(tcp => ((TcpClient)tcp).Dispose(), tcpClient);
 
         await tcpClient.ConnectAsync(client.ProxyHost, client.ProxyPort, cancellationToken);
 
