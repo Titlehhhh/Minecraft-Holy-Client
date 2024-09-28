@@ -24,22 +24,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public MinecraftClient()
     {
-        // pipePair = new DuplexPipePair();
-        //
-        //
-        // transportHandler = new TransportHandler(pipePair.Transport);
-        //
-        //
-        //
-        // packetPipeHandler = new PacketPipeHandler(
-        //     pipePair.Application,
-        //     compressor,
-        //     decompressor);
-        //
-        // packetPipeHandler.PacketReceived = PacketPipeHahdeler_PacketReceived;
-        //
-        // mainTask = Task.CompletedTask;
-
         minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
     }
 
@@ -71,10 +55,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         StateChange(state);
     }
 
-    private void PacketPipeHahdeler_PacketReceived(object sender, InputPacket packet)
-    {
-        PacketReceived?.Invoke(this, packet);
-    }
 
     private void Validate()
     {
@@ -91,14 +71,13 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     {
         try
         {
+            
             Validate();
 
 
             if (CTS is not null) CTS.Dispose();
 
             CTS = new CancellationTokenSource();
-
-
             StateChange(MinecraftClientState.Connect);
             try
             {
@@ -115,12 +94,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
-
+            minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
             var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
-           
-                _ = MainLoop(result, CTS.Token);
             
-           
+            StateChange(MinecraftClientState.Play);
+            _ = MainLoop(result, CTS.Token);
         }
         catch (OperationCanceledException ex)
         {
@@ -145,8 +123,10 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void OnException(Exception ex)
     {
+        MinecraftClientState oldState = _state;
+        _state = MinecraftClientState.Errored;
         CleanUp();
-        StateChanged?.Invoke(this, new StateEventArgs(ex, _state));
+        StateChanged?.Invoke(this, new StateEventArgs(ex, oldState));
     }
 
     [ConfigureAwait(true)]
@@ -241,7 +221,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     {
         if (_state == MinecraftClientState.Stopped)
             return;
-
+        _state = MinecraftClientState.Stopped;
         CleanUp();
 
         StateChanged?.Invoke(this, new StateEventArgs(MinecraftClientState.Stopped, _state));
@@ -250,12 +230,9 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     protected override void Dispose(bool disposing)
     {
         GC.SuppressFinalize(this);
+        CleanUp();
         minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
         Disposed?.Invoke();
-        CTS.Dispose();
-        mainStream.Dispose();
-        tcpClient.Dispose();
-
         base.Dispose(disposing);
     }
 
@@ -268,6 +245,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     #endregion
 
     #region Properties
+
+    public void StopWithError(Exception ex)
+    {
+        OnException(ex);
+    }
 
     int IPacketBroker.ProtocolVersion => this.Version;
     public string Host { get; set; }
