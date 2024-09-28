@@ -2,13 +2,13 @@
 
 public sealed class StateEventArgs : EventArgs
 {
-    public StateEventArgs(MinecraftClientState newState, MinecraftClientState oldState)
+    public StateEventArgs(MinecraftClientState oldState, MinecraftClientState newState)
     {
         State = newState;
         OldState = oldState;
     }
 
-    public StateEventArgs(Exception ex, MinecraftClientState newState, MinecraftClientState oldState)
+    public StateEventArgs(Exception ex, MinecraftClientState oldState, MinecraftClientState newState)
     {
         Error = ex;
         State = newState;
