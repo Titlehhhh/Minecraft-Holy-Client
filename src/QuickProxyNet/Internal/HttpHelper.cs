@@ -74,7 +74,7 @@ internal static class HttpHelper
 
             if (!isValid)
             {
-                throw new ProxyProtocolException($"Failed to connect http://{host}:{port}");
+                throw new ProxyProtocolException($"Failed to connect {host}:{port}");
             }
 
             return stream;

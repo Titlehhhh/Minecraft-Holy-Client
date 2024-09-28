@@ -1,6 +1,8 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
+using McProtoNet.Abstractions;
 using McProtoNet.Client;
+using McProtoNet.MultiVersionProtocol;
 using QuickProxyNet;
 using Serilog;
 
@@ -15,23 +17,57 @@ public sealed class StressTestBot : IStressTestBot
     private readonly INickProvider nickProvider;
     private int number;
     private readonly IProxyProvider? proxyProvider;
+    private readonly MinecraftClient _client;
+    private Action<IStressTestBot>? autoRestart;
 
     public StressTestBot(MinecraftClient client, INickProvider nickProvider, IProxyProvider? proxyProvider,
         ILogger logger, int number, CancellationToken cancellationToken)
     {
-        Client = client;
+        _client = client;
+        _protocol = new MultiProtocol(_client);
+
         this.nickProvider = nickProvider;
         this.proxyProvider = proxyProvider;
         this.logger = logger;
         this.number = number;
         this.cancellationToken = cancellationToken;
+        _client.StateChanged += ClientOnStateChanged;
     }
 
-    public MinecraftClient Client { get; }
+    private void ClientOnStateChanged(object? sender, StateEventArgs e)
+    {
+        if (e.State == MinecraftClientState.Errored)
+        {
+            autoRestart?.Invoke(this);
+        }
+    }
 
+    public MinecraftClient Client
+    {
+        get
+        {
+            CheckDisposed();
+            return _client;
+        }
+    }
+
+    public ProtocolBase Protocol
+    {
+        get
+        {
+            CheckDisposed();
+            return _protocol;
+        }
+    }
+
+    public void ConfigureAutoRestart(Action<IStressTestBot> action)
+    {
+        autoRestart = action;
+    }
 
     public async Task Restart(bool changeNickAndProxy)
     {
+        CheckDisposed();
         if (cancellationToken.IsCancellationRequested)
             return;
 
@@ -52,11 +88,38 @@ public sealed class StressTestBot : IStressTestBot
                 Client.Username = nickProvider.GetNextNick();
             }
 
+
             await Client.Start();
         }
-        catch
+        catch (Exception ex)
         {
             //throw;
         }
+    }
+
+    public void Stop()
+    {
+        Client.Stop();
+    }
+
+
+    private void CheckDisposed()
+    {
+        if (disposed)
+            throw new ObjectDisposedException(nameof(StressTestBot));
+    }
+
+    private bool disposed;
+    private readonly ProtocolBase _protocol;
+
+    public void Dispose()
+    {
+        if (disposed)
+            return;
+        disposed = true;
+        _client.StateChanged -= ClientOnStateChanged;
+        proxyProvider?.Dispose();
+        _client.Dispose();
+        _protocol.Dispose();
     }
 }

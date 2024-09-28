@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using QuickProxyNet;
 
 namespace HolyClient.Common;
@@ -18,14 +19,46 @@ public struct ProxyInfo
 
     public string? Password { get; set; }
 
-    public static bool TryParse(string line, ProxyType type, out ProxyInfo proxy)
+    public static bool TryParse(string line, ProxyType? type, out ProxyInfo proxy)
     {
         return TryParse(line, "", type, out proxy);
     }
 
-    //host:port
-    public static bool TryParse(string line, string format, ProxyType type, out ProxyInfo proxy)
+    
+    public static bool TryParse(string line, string format, ProxyType? type, out ProxyInfo proxy)
     {
+        if (type is null)
+        {
+            Uri uri = new Uri(line);
+            ProxyType typeFromScheme = uri.Scheme switch
+            {
+                "http" => ProxyType.HTTP,
+                "https" => ProxyType.HTTPS,
+                "socks4" => ProxyType.SOCKS4,
+                "socks4a" => ProxyType.SOCKS4a,
+                "socks5" => ProxyType.SOCKS5,
+                _ => throw new NotSupportedException("No support proxy type: " + uri.Scheme)
+            };
+            string? login = "";
+            string? pass = "";
+            if (!string.IsNullOrEmpty(uri.UserInfo) && uri.UserInfo.Contains(':'))
+            {
+                login = uri.UserInfo.Split(':')[0];
+                pass = uri.UserInfo.Split(':')[1];
+            }
+
+            proxy = new ProxyInfo()
+            {
+                Host = uri.Host,
+                Port = (ushort)uri.Port,
+                Login = login,
+                Password = pass,
+                Type = typeFromScheme
+            };
+            return true;
+        }
+
+
         var hostPort = line.Split(':');
         if (hostPort.Length != 2)
         {
@@ -39,7 +72,7 @@ public struct ProxyInfo
             {
                 Host = hostPort[0],
                 Port = port,
-                Type = type
+                Type = (ProxyType)type
             };
 
             return true;

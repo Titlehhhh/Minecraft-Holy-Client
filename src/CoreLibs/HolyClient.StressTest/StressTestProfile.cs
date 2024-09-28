@@ -11,6 +11,7 @@ using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
+using McProtoNet.Abstractions;
 using McProtoNet.Client;
 using McProtoNet.Utils;
 using MessagePack;
@@ -132,24 +133,30 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             if (UseProxy)
             {
                 var proxies = await LoadProxy(logger);
+                if (proxies.Count() > 0)
+                {
+                    var capacity = Math.Min(proxies.Count(), NumberOfBots);
+
+                    var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity));
+
+                    var proxyChecker =
+                        new ProxyChecker(channel.Writer, proxies, this.ProxyCheckerOptions, srv_host, srv_port);
+
+                    proxyProvider = new ProxyProvider(channel.Reader);
+
+                    _ = proxyChecker.Run(logger);
+
+                    logger.Information("Запущен прокси-чекер");
 
 
-                var capacity = Math.Min(proxies.Count(), NumberOfBots);
-
-                var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity));
-
-                var proxyChecker =
-                    new ProxyChecker(channel.Writer, proxies, this.ProxyCheckerOptions, srv_host, srv_port);
-
-                proxyProvider = new ProxyProvider(channel.Reader);
-
-                _ = proxyChecker.Run(logger);
-
-                logger.Information("Запущен прокси-чекер");
-
-
-                proxyChecker.DisposeWith(disposables);
-                proxyProvider.DisposeWith(disposables);
+                    proxyChecker.DisposeWith(disposables);
+                    proxyProvider.DisposeWith(disposables);
+                    
+                }
+                else
+                {
+                    logger.Information("Не удалось загрузить прокси");
+                }
             }
 
 
@@ -267,7 +274,6 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         string? srv_host,
         ushort? srv_port)
     {
-        
         var stressTestBots = new List<IStressTestBot>();
 
         var nickProvider = new NickProvider(BotsNickname);
@@ -280,7 +286,13 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             MinecraftClient bot = new MinecraftClient();
 
-
+            bot.StateChanged += BotOnStateChanged;
+            
+            disposables.Add(Disposable.Create(() =>
+            {
+                bot.StateChanged -= BotOnStateChanged;
+            }));
+            
             bot.Host = srv_host;
             bot.Port = (ushort)srv_port;
             bot.Version = Version;
@@ -295,69 +307,40 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 i,
                 cancellationTokenSource.Token);
 
-            // Action<ClientStateChanged> onState = state =>
-            // {
-            //     if (state.NewValue == ClientState.Play)
-            //     {
-            //         Interlocked.Increment(ref _cpsCounter);
-            //
-            //
-            //         Interlocked.Increment(ref _botsPlayCounter);
-            //     }
-            //     else if (state.NewValue == ClientState.Connecting)
-            //     {
-            //         Interlocked.Increment(ref _botsConnectionCounter);
-            //     }
-            //     else if (state.NewValue == ClientState.HandShake)
-            //     {
-            //         Interlocked.Increment(ref _botsHandshakeCounter);
-            //     }
-            //     else if (state.NewValue == ClientState.Login)
-            //     {
-            //         Interlocked.Increment(ref _botsLoginCounter);
-            //     }
-            // };
-            //
-            // Action<Exception> onError = exc =>
-            // {
-            //     var state = b.Client.CurrentState;
-            //
-            //     if (state == ClientState.Play)
-            //         Interlocked.Decrement(ref _botsPlayCounter);
-            //     else if (state == ClientState.Connecting)
-            //         Interlocked.Decrement(ref _botsConnectionCounter);
-            //     else if (state == ClientState.HandShake)
-            //         Interlocked.Decrement(ref _botsHandshakeCounter);
-            //     else if (state == ClientState.Login) Interlocked.Decrement(ref _botsLoginCounter);
-            //
-            //     if (exc is NullReferenceException) logger.Information(exc.StackTrace);
-            //
-            //     var key = Tuple.Create(exc.GetType().FullName, exc.Message);
-            //
-            //     if (ExceptionCounter.TryGetValue(key, out var counter))
-            //         counter.Increment();
-            //     else
-            //         ExceptionCounter[key] = new ExceptionCounter();
-            // };
-            //
-            // b.Client.OnStateChanged += onState;
-            // b.Client.OnErrored += onError;
-            //
-            // disposables.Add(Disposable.Create(() =>
-            // {
-            //     b.Client.OnStateChanged -= onState;
-            //     b.Client.OnErrored -= onError;
-            // }));
-
 
             stressTestBots.Add(b);
-            bot.DisposeWith(disposables);
+            b.DisposeWith(disposables);
+
         }
 
         logger.Information($"[STRESS TEST] Запущен стресс тест на {NumberOfBots} ботов на сервер {host}:{port}");
 
 
         return stressTestBots;
+    }
+
+    private void BotOnStateChanged(object? sender, StateEventArgs e)
+    {
+        if (e.State == MinecraftClientState.Play)
+        {
+            Interlocked.Increment(ref _cpsCounter);
+            Interlocked.Increment(ref _botsPlayCounter);
+        }
+        else if (e.State == MinecraftClientState.Errored)
+        {
+            if (e.OldState == MinecraftClientState.Play)
+            {
+                Interlocked.Decrement(ref _botsPlayCounter);
+            }
+
+            Exception exc = e.Error;
+            var key = Tuple.Create(exc.GetType().FullName, exc.Message);
+
+            if (ExceptionCounter.TryGetValue(key, out var counter))
+                counter.Increment();
+            else
+                ExceptionCounter[key] = new ExceptionCounter();
+        }
     }
 
     private async Task<IEnumerable<ProxyInfo>> LoadProxy(ILogger logger)
@@ -373,11 +356,14 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         logger.Information("Загрузка прокси");
         if (sources.Count() == 0)
         {
-            //sources.Add(new UrlProxySource(QuickProxyNet.ProxyType.HTTP, "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
+            sources.Add(new UrlProxySource(ProxyType.HTTP,
+                "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
             sources.Add(new UrlProxySource(ProxyType.SOCKS4,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
             sources.Add(new UrlProxySource(ProxyType.SOCKS5,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+            sources.Add(new UrlProxySource(type: null,
+                "https://raw.githubusercontent.com/proxifly/free-proxy-list/refs/heads/main/proxies/protocols/http/data.txt"));
         }
 
         List<Task<IEnumerable<ProxyInfo>>> tasks = new();
@@ -445,7 +431,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
 
     [IgnoreMember] public IObservable<StressTestMetrik> Metrics => _dataPerSecond;
-    
+
 
     [IgnoreMember] [Reactive] public IStressTestBehavior Behavior { get; private set; }
 
