@@ -2,11 +2,11 @@
 
 namespace McProtoNet.Abstractions;
 
-public abstract class ProtocolBase
+public abstract class ProtocolBase : IDisposable
 {
     public int SupportedVersion { get; protected set; }
     
-    private readonly IPacketBroker _client;
+    protected readonly IPacketBroker _client;
     protected int ProtocolVersion => _client.ProtocolVersion;
     public ProtocolBase(IPacketBroker client)
     {
@@ -46,5 +46,10 @@ public abstract class ProtocolBase
 
     protected virtual void OnPacketReceived(InputPacket packet)
     {
+    }
+
+    public virtual void Dispose()
+    {
+        
     }
 }

@@ -20,6 +20,7 @@ public sealed class KeepAlivePacket
 [Experimental]
 public sealed class MultiProtocol : ProtocolBase
 {
+    
     private Subject<KeepAlivePacket> _onKeepAlive = new Subject<KeepAlivePacket>();
     private static readonly byte[] bitset = new byte[3];
     public Subject<Unit> OnJoinGame { get; } = new();
@@ -78,17 +79,21 @@ public sealed class MultiProtocol : ProtocolBase
         }
         else if (disconnect == packet.Id)
         {
-            scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
-            if (ProtocolVersion >= 765)
+            _client.StopWithError(new DisconnectException("Play disconnect"));
+            if (false)
             {
-               // var reason = reader.ReadNbt();
-               NbtSpanReader nbtReader = new NbtSpanReader(packet.Data.Span);
-              
-               var nbt = nbtReader.ReadAsTag<NbtTag>(false);
-               Console.WriteLine($"{nbt} ThreadName: {Thread.CurrentThread.Name}");
-            }
-            else
-            {
+                scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                if (ProtocolVersion >= 765)
+                {
+                    // var reason = reader.ReadNbt();
+                    NbtSpanReader nbtReader = new NbtSpanReader(packet.Data.Span);
+
+                    var nbt = nbtReader.ReadAsTag<NbtTag>(false);
+
+                }
+                else
+                {
+                }
             }
         }
 
@@ -169,5 +174,12 @@ public sealed class MultiProtocol : ProtocolBase
         writer.WriteVarInt(packetId); // Packet Id
         writer.WriteSignedLong(id);
         return base.SendPacketCore(writer.GetWrittenMemory());
+    }
+
+    public override void Dispose()
+    {
+        OnJoinGame.Dispose();
+        _onKeepAlive.Dispose();
+        base.Dispose();
     }
 }

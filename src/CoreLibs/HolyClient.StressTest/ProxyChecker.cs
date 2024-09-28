@@ -10,25 +10,22 @@ namespace HolyClient.StressTest;
 public sealed class ProxyChecker : IDisposable
 {
     private readonly int _connectTimeout;
-
-    private readonly CancellationTokenSource _cts = new();
     private readonly int _parallelCount;
-    private readonly IEnumerable<ProxyInfo> _proxies;
     private readonly int _readTimeout;
     private readonly int _sendTimeout;
     private readonly string _targetHost;
     private readonly ushort _targetPort;
-    private readonly ChannelWriter<IProxyClient> _writer;
+
+    private CancellationTokenSource _cts = new();
+    private IEnumerable<ProxyInfo> _proxies;
+    private ChannelWriter<IProxyClient> _writer;
 
     private bool disposed;
-
-    private int test = 0;
-
 
     public ProxyChecker(
         ChannelWriter<IProxyClient> writer,
         IEnumerable<ProxyInfo> proxies,
-        ProxyCheckerOptions options, string targetHost,ushort targetPort)
+        ProxyCheckerOptions options, string targetHost, ushort targetPort)
     {
         _writer = writer;
         _proxies = proxies;
@@ -45,7 +42,12 @@ public sealed class ProxyChecker : IDisposable
         if (disposed)
             return;
         disposed = true;
+        _cts.Cancel();
         _cts.Dispose();
+        _cts = null;
+        _writer.TryComplete();
+        _writer = null;
+        _proxies = null;
         GC.SuppressFinalize(this);
     }
 
@@ -109,22 +111,20 @@ public sealed class ProxyChecker : IDisposable
             }
             catch (Exception ex)
             {
+                _writer.TryComplete(ex);
                 logger.Error(ex, "ProxyChecker завершился с ошибкой");
             }
             finally
             {
-                _writer.Complete();
+                _writer.TryComplete();
             }
         });
     }
 
-    [ConfigureAwait(true)]
+    [ConfigureAwait(false)]
     private async Task CheckProxy(IProxyClient client, CancellationToken cancellationToken)
     {
         using TcpClient tcpClient = new();
-
-
-        //using var c = cancellationToken.Register(d => ((IDisposable)d!).Dispose(), tcpClient);
 
         tcpClient.SendTimeout = _sendTimeout;
         tcpClient.ReceiveTimeout = _readTimeout;
@@ -133,8 +133,8 @@ public sealed class ProxyChecker : IDisposable
         await tcpClient.ConnectAsync(client.ProxyHost, client.ProxyPort, cancellationToken);
 
 
-        using var ns = tcpClient.GetStream();
+        await using var ns = tcpClient.GetStream();
 
-        using var stream = await client.ConnectAsync(ns, _targetHost, _targetPort, cancellationToken);
+        await using var stream = await client.ConnectAsync(ns, _targetHost, _targetPort, cancellationToken);
     }
 }

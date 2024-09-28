@@ -12,7 +12,7 @@ public interface IProxySource
     Guid Id { get; }
     string Name { get; }
 
-    ProxyType Type { get; set; }
+    ProxyType? Type { get; set; }
 
 
     Task<IEnumerable<ProxyInfo>> GetProxiesAsync();

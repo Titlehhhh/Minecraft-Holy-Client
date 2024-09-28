@@ -8,14 +8,9 @@ namespace HolyClient.StressTest;
 [ConfigureAwait(false)]
 internal class ProxyProvider : IProxyProvider
 {
-    private readonly ChannelReader<IProxyClient> reader;
-
-
     private bool _disposed;
-
-
-    private readonly CancellationTokenSource cts = new();
-
+    private CancellationTokenSource cts = new();
+    private ChannelReader<IProxyClient> reader;
 
     public ProxyProvider(ChannelReader<IProxyClient> reader)
     {
@@ -33,7 +28,10 @@ internal class ProxyProvider : IProxyProvider
         if (_disposed)
             return;
         _disposed = true;
+        cts.Cancel();
         cts.Dispose();
+        cts = null;
+        reader = null;
 
         GC.SuppressFinalize(this);
     }

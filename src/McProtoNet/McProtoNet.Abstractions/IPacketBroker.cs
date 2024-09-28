@@ -9,6 +9,8 @@ public interface IPacketBroker
     event EventHandler<StateEventArgs> StateChanged;
 
     event Action Disposed;
+
+    void StopWithError(Exception ex);
     
     int ProtocolVersion { get; }
 }
