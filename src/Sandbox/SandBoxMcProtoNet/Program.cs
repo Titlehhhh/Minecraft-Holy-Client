@@ -9,16 +9,27 @@ using DotNext.Collections.Generic;
 using McProtoNet.Client;
 using McProtoNet.MultiVersionProtocol;
 using McProtoNet.Serialization;
+using QuickProxyNet;
 
 internal class Program
 {
     public static async Task Main(string[] args)
     {
-       
+        byte[] bytes = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+        Console.WriteLine(bytes.AsSpan().IndexOf(new byte[]{3,4,5,6}));
+        //return;
+        
+        
+        HttpProxyClient proxyClient = new HttpProxyClient("84.252.75.136", 4444);
+
+        await proxyClient.ConnectAsync("google.com", 443);
+
+        return;
+
         Console.WriteLine("Start");
         try
         {
-            
             var list = new List<MinecraftClient>();
             var listProtocols = new List<MultiProtocol>();
             for (int i = 0; i < 200; i++)

@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Buffers;
+using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Cysharp.Text;
+using DotNext;
 using DotNext.Buffers;
 
 namespace QuickProxyNet;
@@ -22,43 +24,31 @@ internal static class HttpHelper
     private static async ValueTask WriteConnectionCommand(Stream stream, string host, int port,
         NetworkCredential proxyCredentials, CancellationToken cancellationToken)
     {
-        using var builder = ZString.CreateUtf8StringBuilder();
-
-
-        builder.AppendFormat("CONNECT {0}:{1} HTTP/1.1\r\n", host, port);
-        builder.AppendFormat("Host: {0}:{1}\r\n", host, port);
-        if (proxyCredentials != null)
+        var builder = ZString.CreateUtf8StringBuilder();
+        try
         {
-            var token = Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0}:{1}",
-                proxyCredentials.UserName, proxyCredentials.Password));
-            var base64 = Convert.ToBase64String(token);
-            builder.AppendFormat("Proxy-Authorization: Basic {0}\r\n", base64);
+            builder.AppendFormat("CONNECT {0}:{1} HTTP/1.1\r\n", host, port);
+            builder.AppendFormat("Host: {0}:{1}\r\n", host, port);
+            if (proxyCredentials != null)
+            {
+                var token = Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0}:{1}",
+                    proxyCredentials.UserName, proxyCredentials.Password));
+                var base64 = Convert.ToBase64String(token);
+                builder.AppendFormat("Proxy-Authorization: Basic {0}\r\n", base64);
+            }
+
+            builder.Append("\r\n");
+
+
+            await stream.WriteAsync(builder.AsMemory(), cancellationToken);
         }
-
-        builder.Append("\r\n");
-
-
-        await stream.WriteAsync(builder.AsMemory(), cancellationToken);
+        finally
+        {
+            builder.Dispose();
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static bool TryConsumeHeaders(ref Utf16ValueStringBuilder builder)
-    {
-        return false;
-    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    internal static void ValidateHttpResponse(string response, string host, int port)
-    {
-        if (response.Length >= 15 && response.StartsWith("HTTP/1.", StringComparison.OrdinalIgnoreCase) &&
-            (response[7] == '1' || response[7] == '0') && response[8] == ' ' &&
-            response[9] == '2' && response[10] == '0' && response[11] == '0' &&
-            response[12] == ' ')
-            return;
-
-        throw new ProxyProtocolException(string.Format(CultureInfo.InvariantCulture,
-            "Failed to connect to {0}:{1}: {2}", host, port, response));
-    }
 
     internal static async ValueTask<Stream> EstablishHttpTunnelAsync(Stream stream, Uri proxyUri, string host, int port,
         NetworkCredential? credentials, CancellationToken cancellationToken)
@@ -66,51 +56,124 @@ internal static class HttpHelper
         await WriteConnectionCommand(stream, host, port, credentials, cancellationToken);
 
 
-        using var builder = ZString.CreateUtf8StringBuilder();
-        //builder.ToString
-        do
+        var parser = new HttpResponseParser();
+        try
         {
-            var memory = builder.GetMemory(BufferSize);
-            var nread = await stream.ReadAsync(memory, cancellationToken);
+            bool find;
+            do
+            {
+                var memory = parser.GetMemory();
+                var nread = await stream.ReadAsync(memory, cancellationToken);
+                if (nread <= 0)
+                    throw new EndOfStreamException();
+                find = parser.Parse(nread);
+            } while (find == false);
 
-            if (nread <= 0)
-                break;
+            bool isValid= parser.Validate();
+            //string response = parser.ToString();
 
-            builder.Advance(nread);
+            if (!isValid)
+            {
+                throw new ProxyProtocolException($"Failed to connect http://{host}:{port}");
+            }
 
-
-            return null;
-        } while (true);
-
-        return null;
+            return stream;
+        }
+        finally
+        {
+            parser.Dispose();
+        }
     }
 }
 
-public static class StringEscape
+public struct HttpResponseParser
 {
-    private static readonly char[] toEscape =
-        "\0\x1\x2\x3\x4\x5\x6\a\b\t\n\v\f\r\xe\xf\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\"\\"
-            .ToCharArray();
+    private static int BufferSize = 1024;
+    private MemoryOwner<byte> _memory;
+    private static readonly MemoryAllocator<byte> _allocator = ArrayPool<byte>.Shared.ToAllocator();
+    private static readonly byte[] http200 = "HTTP/1.1 200".Select(x => (byte)x).ToArray();
+    private int _writtenCount = 0;
+    private int _indexEnd=-1;
+    public ReadOnlySpan<byte> Span => _memory.Span.Slice(0, _writtenCount);
 
-    private static readonly string[] literals =
-        @"\0,\x0001,\x0002,\x0003,\x0004,\x0005,\x0006,\a,\b,\t,\n,\v,\f,\r,\x000e,\x000f,\x0010,\x0011,\x0012,\x0013,\x0014,\x0015,\x0016,\x0017,\x0018,\x0019,\x001a,\x001b,\x001c,\x001d,\x001e,\x001f"
-            .Split(new[] { ',' });
-
-    public static string Escape(this string input)
+    public HttpResponseParser()
     {
-        var i = input.IndexOfAny(toEscape);
-        if (i < 0) return input;
+        _memory = _allocator.AllocateExactly(BufferSize);
+    }
 
-        var sb = new StringBuilder(input.Length + 5);
-        var j = 0;
-        do
+    public Memory<byte> GetMemory()
+    {
+        if (_writtenCount < _memory.Length)
         {
-            sb.Append(input, j, i - j);
-            var c = input[i];
-            if (c < 0x20) sb.Append(literals[c]);
-            else sb.Append(@"\").Append(c);
-        } while ((i = input.IndexOfAny(toEscape, j = ++i)) > 0);
+            return _memory.Memory.Slice(_writtenCount);
+        }
 
-        return sb.Append(input, j, input.Length - j).ToString();
+        _memory.Resize(_writtenCount + BufferSize);
+        return _memory.Memory.Slice(_writtenCount);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Parse(int count)
+    {
+        _writtenCount += count;
+        return ParseHttpEnd(count);
+    }
+
+    private static readonly byte[] NewLine = "\r\n\r\n".Select(x => (byte)x).ToArray();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool ParseHttpEnd(int count)
+    {
+        int start = _writtenCount - count;
+        int length = count;
+
+        int offset = Math.Min(4, start);
+        start -= offset;
+        length += offset;
+
+        ReadOnlySpan<byte> bytes = _memory.Span.Slice(start, length);
+
+        int index = bytes.IndexOf(NewLine);
+        if (index < 0)
+        {
+            return false;
+        }
+
+        _indexEnd = index + start;
+
+        return true;
+    }
+
+    public bool Validate()
+    {
+        if (_indexEnd == -1)
+        {
+            throw new InvalidOperationException("No find http response");
+        }
+        
+        ReadOnlySpan<byte> span = Span;
+        
+        
+        if (span.Length > (uint)_indexEnd + 4)
+        {
+            return false;
+        }
+        if (span.Length >= 15 && span.StartsWith(http200))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override string ToString()
+    {
+        return Encoding.UTF8.GetString(_memory.Span.Slice(0, _indexEnd+4));
+    }
+
+    public void Dispose()
+    {
+        _memory.Dispose();
     }
 }
