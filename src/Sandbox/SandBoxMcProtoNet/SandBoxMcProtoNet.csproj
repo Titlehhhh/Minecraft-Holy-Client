@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\McProtoNet\McProtoNet.Protocol\McProtoNet.Protocol.csproj" />
       <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj" />
+        <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
     </ItemGroup>
 
 </Project>

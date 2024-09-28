@@ -9,6 +9,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Metadata;
 using Avalonia.Styling;
+using HolyClient.DiscordRpc;
 using HolyClient.Localization;
 using HolyClient.ViewModels;
 using HolyClient.Views;
@@ -37,9 +38,6 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        
-        
-        
         ThreadPool.GetMinThreads(out var min, out var cpt);
 
         ThreadPool.SetMinThreads(1, cpt);
@@ -52,7 +50,9 @@ public class App : Application
 
         RootViewModel root = new();
         Locator.CurrentMutable.RegisterConstant<IScreen>(root, "Root");
-
+        var service = new DiscordRpcService();
+        Locator.CurrentMutable.RegisterConstant<DiscordRpcService>(service);
+        service.Start();
         Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
 
 
@@ -65,6 +65,7 @@ public class App : Application
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                desktop.Exit += (sender, args) => { Locator.Current.GetService<DiscordRpcService>().Stop(); };
                 var wnd = new MainWindow
                 {
                     Content = rootView
@@ -92,7 +93,5 @@ public class App : Application
         {
             base.OnFrameworkInitializationCompleted();
         }
-        
-        
     }
 }
