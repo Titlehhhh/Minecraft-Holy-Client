@@ -113,7 +113,7 @@
                 </StackPanel>
 
             </HyperlinkButton>
-            <HyperlinkButton NavigateUri="https://discord.gg/HVDzx4rCgg" Margin="20,0,0,0"
+            <HyperlinkButton NavigateUri="https://discord.gg/PWfYWRDJme" Margin="20,0,0,0"
                              Theme="{StaticResource TestTheme}">
                 <StackPanel>
                     <ui:FAPathIcon
