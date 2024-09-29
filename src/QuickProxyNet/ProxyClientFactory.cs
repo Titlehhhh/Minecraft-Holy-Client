@@ -16,8 +16,12 @@ public sealed class ProxyClientFactory
         };
     }
 
-    public IProxyClient Create(ProxyType type, string host, int port, NetworkCredential networkCredential)
+    public IProxyClient Create(ProxyType type, string host, int port, NetworkCredential? networkCredential)
     {
+        if (networkCredential is null)
+        {
+            return Create(type, host, port);
+        }
         return type switch
         {
             ProxyType.HTTP => new HttpProxyClient(host, port, networkCredential),

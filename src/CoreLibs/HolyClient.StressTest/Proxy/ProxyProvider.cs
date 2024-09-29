@@ -3,7 +3,7 @@ using System.Threading.Channels;
 using Fody;
 using QuickProxyNet;
 
-namespace HolyClient.StressTest;
+namespace HolyClient.Proxy;
 
 [ConfigureAwait(false)]
 internal class ProxyProvider : IProxyProvider

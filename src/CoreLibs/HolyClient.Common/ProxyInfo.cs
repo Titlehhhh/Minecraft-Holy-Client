@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using QuickProxyNet;
+using QuickProxyNet.ProxyChecker;
 
 namespace HolyClient.Common;
 
@@ -92,4 +94,14 @@ public struct ProxyInfo
                    && Password == proxyInfo.Password;
         return false;
     }
+
+    public static implicit operator ProxyRecord(ProxyInfo info)
+    {
+        NetworkCredential? credential = null;
+        if (!(string.IsNullOrEmpty(info.Login) || string.IsNullOrEmpty(info.Password)))
+            credential = new NetworkCredential(info.Login, info.Password);
+        
+        return new ProxyRecord(info.Type, info.Host, info.Port, credential);
+    }
+    
 }

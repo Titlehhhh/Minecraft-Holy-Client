@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace QuickProxyNet;
@@ -26,7 +27,7 @@ internal static class SocksHelper
 
 
     internal static async ValueTask EstablishSocks5TunnelAsync(Stream stream, string host, int port,
-        NetworkCredential? credentials, bool async)
+        NetworkCredential? credentials, CancellationToken cancellationToken)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
         try
@@ -51,14 +52,14 @@ internal static class SocksHelper
                 buffer[3] = METHOD_USERNAME_PASSWORD;
             }
 
-            await WriteAsync(stream, buffer.AsMemory(0, buffer[1] + 2), async).ConfigureAwait(false);
+            await WriteAsync(stream, buffer.AsMemory(0, buffer[1] + 2), cancellationToken).ConfigureAwait(false);
 
             // +----+--------+
             // |VER | METHOD |
             // +----+--------+
             // | 1  |   1    |
             // +----+--------+
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async).ConfigureAwait(false);
+            await ReadToFillAsync(stream, buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
             VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
 
             switch (buffer[1])
@@ -88,7 +89,7 @@ internal static class SocksHelper
                     var passwordLength = EncodeString(credentials.Password, buffer.AsSpan(3 + usernameLength),
                         nameof(credentials.Password));
                     buffer[2 + usernameLength] = passwordLength;
-                    await WriteAsync(stream, buffer.AsMemory(0, 3 + usernameLength + passwordLength), async)
+                    await WriteAsync(stream, buffer.AsMemory(0, 3 + usernameLength + passwordLength), cancellationToken)
                         .ConfigureAwait(false);
 
                     // +----+--------+
@@ -96,7 +97,7 @@ internal static class SocksHelper
                     // +----+--------+
                     // | 1  |   1    |
                     // +----+--------+
-                    await ReadToFillAsync(stream, buffer.AsMemory(0, 2), async).ConfigureAwait(false);
+                    await ReadToFillAsync(stream, buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
                     if (buffer[0] != SubnegotiationVersion || buffer[1] != Socks5_Success)
                         throw new ProxyProtocolException("Failed to authenticate with the SOCKS server.");
                     break;
@@ -145,16 +146,17 @@ internal static class SocksHelper
 
             BinaryPrimitives.WriteUInt16BigEndian(buffer.AsSpan(addressLength + 4), (ushort)port);
 
-            await WriteAsync(stream, buffer.AsMemory(0, addressLength + 6), async).ConfigureAwait(false);
+            await WriteAsync(stream, buffer.AsMemory(0, addressLength + 6), cancellationToken).ConfigureAwait(false);
 
             // +----+-----+-------+------+----------+----------+
             // |VER | REP |  RSV  | ATYP | DST.ADDR | DST.PORT |
             // +----+-----+-------+------+----------+----------+
             // | 1  |  1  | X'00' |  1   | Variable |    2     |
             // +----+-----+-------+------+----------+----------+
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 5), async).ConfigureAwait(false);
+            await ReadToFillAsync(stream, buffer.AsMemory(0, 5), cancellationToken).ConfigureAwait(false);
             VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
-            if (buffer[1] != Socks5_Success) throw new ProxyProtocolException("SOCKS server failed to connect to the destination.");
+            if (buffer[1] != Socks5_Success)
+                throw new ProxyProtocolException("SOCKS server failed to connect to the destination.");
             var bytesToSkip = buffer[3] switch
             {
                 ATYP_IPV4 => 5,
@@ -162,7 +164,7 @@ internal static class SocksHelper
                 ATYP_DOMAIN_NAME => buffer[4] + 2,
                 _ => throw new ProxyProtocolException("SOCKS server returned an unknown address type.")
             };
-            await ReadToFillAsync(stream, buffer.AsMemory(0, bytesToSkip), async).ConfigureAwait(false);
+            await ReadToFillAsync(stream, buffer.AsMemory(0, bytesToSkip), cancellationToken).ConfigureAwait(false);
             // response address not used
         }
         finally
@@ -172,9 +174,10 @@ internal static class SocksHelper
     }
 
     internal static async ValueTask EstablishSocks4TunnelAsync(Stream stream, bool isVersion4a, string host, int port,
-        NetworkCredential? credentials, bool async)
+        NetworkCredential? credentials, CancellationToken cancellationToken)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+
         try
         {
             // https://www.openssh.com/txt/socks4.protocol
@@ -204,16 +207,17 @@ internal static class SocksHelper
                 IPAddress[] addresses;
                 try
                 {
-                    addresses = async
-                        ? await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork).ConfigureAwait(false)
-                        : Dns.GetHostAddresses(host, AddressFamily.InterNetwork);
+                    addresses =
+                        await Dns.GetHostAddressesAsync(host, AddressFamily.InterNetwork, cancellationToken)
+                            .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     throw new ProxyProtocolException("Failed to resolve the destination host to an IPv4 address.s", ex);
                 }
 
-                if (addresses.Length == 0) throw new ProxyProtocolException("Failed to resolve the destination host to an IPv4 address.s");
+                if (addresses.Length == 0)
+                    throw new ProxyProtocolException("Failed to resolve the destination host to an IPv4 address.s");
 
                 ipv4Address = addresses[0];
             }
@@ -244,7 +248,7 @@ internal static class SocksHelper
                 totalLength += hostLength + 1;
             }
 
-            await WriteAsync(stream, buffer.AsMemory(0, totalLength), async).ConfigureAwait(false);
+            await WriteAsync(stream, buffer.AsMemory(0, totalLength), cancellationToken).ConfigureAwait(false);
 
             // +----+----+----+----+----+----+----+----+
             // | VN | CD | DSTPORT |      DSTIP        |
@@ -252,7 +256,7 @@ internal static class SocksHelper
             //    1    1      2              4
 
 
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 8), async).ConfigureAwait(false);
+            await ReadToFillAsync(stream, buffer.AsMemory(0, 8), cancellationToken).ConfigureAwait(false);
 
             switch (buffer[1])
             {
@@ -281,7 +285,7 @@ internal static class SocksHelper
         catch
         {
             Debug.Assert(Encoding.UTF8.GetByteCount(chars) > 255);
-            throw new ProxyProtocolException($"Encoding the {parameterName} took more than the maximum of 255 bytes" );
+            throw new ProxyProtocolException($"Encoding the {parameterName} took more than the maximum of 255 bytes");
         }
     }
 
@@ -292,22 +296,19 @@ internal static class SocksHelper
                 $"Unexpected SOCKS protocol version. Required {expected}, got {version}.");
     }
 
-    private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, bool async)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, CancellationToken cancellationToken)
     {
-        if (async)
-        {
-            return stream.WriteAsync(buffer);
-        }
-
-        stream.Write(buffer.Span);
-        return default;
+        return stream.WriteAsync(buffer, cancellationToken);
     }
 
-    private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer, bool async)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer,
+        CancellationToken cancellationToken)
     {
-        var bytesRead = async
-            ? await stream.ReadAtLeastAsync(buffer, buffer.Length, false).ConfigureAwait(false)
-            : stream.ReadAtLeast(buffer.Span, buffer.Length, false);
+        var bytesRead = await stream.ReadAtLeastAsync(buffer, buffer.Length, false, cancellationToken)
+            .ConfigureAwait(false);
+
 
         if (bytesRead < buffer.Length) throw new IOException("The response ended prematurely.");
     }
