@@ -42,6 +42,9 @@ public abstract class ProxyClient : IProxyClient
     public int ProxyPort { get; }
 
     public IPEndPoint LocalEndPoint { get; set; }
+    
+    public int WriteTimeout { get; set; }
+    public int ReadTimeout { get; set; }
 
     public async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
@@ -49,23 +52,29 @@ public abstract class ProxyClient : IProxyClient
         {
             NoDelay = true,
             LingerState = new LingerOption(true, 0),
-            SendTimeout = 10000,
-            ReceiveTimeout = 10000
+            SendTimeout = this.WriteTimeout,
+            ReceiveTimeout = this.ReadTimeout
         };
-
-        await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
-
+        try
+        {
+            await socket.ConnectAsync(ProxyHost, ProxyPort, cancellationToken);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
 
         var stream = new NetworkStream(socket, true);
         try
         {
-            using var reg = cancellationToken.Register(() => stream.Dispose());
+            await using var reg = cancellationToken.Register(s => ((IDisposable)s).Dispose(), stream);
 
             return await ConnectAsync(stream, host, port, cancellationToken);
         }
         catch
         {
-            stream.Dispose();
+            await stream.DisposeAsync();
             throw;
         }
     }
@@ -78,14 +87,9 @@ public abstract class ProxyClient : IProxyClient
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        using (var ts = new CancellationTokenSource(timeout))
-        {
-            //ts.CancelAfter(TimeSpan.FromSeconds(10));
-            using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ts.Token))
-            {
-                return await ConnectAsync(host, port, linked.Token);
-            }
-        }
+        using var ts = new CancellationTokenSource(timeout);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ts.Token);
+        return await ConnectAsync(host, port, linked.Token);
     }
 
     public abstract ValueTask<Stream> ConnectAsync(Stream source, string host, int port,

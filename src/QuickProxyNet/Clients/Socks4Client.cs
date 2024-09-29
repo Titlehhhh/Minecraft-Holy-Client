@@ -13,8 +13,6 @@ public class Socks4Client : ProxyClient
     {
     }
 
-    protected bool IsSocks4a { get; set; }
-
     public override ProxyType Type => ProxyType.SOCKS4;
 
 
