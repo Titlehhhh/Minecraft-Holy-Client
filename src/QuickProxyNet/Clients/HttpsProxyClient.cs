@@ -20,6 +20,7 @@ public class HttpsProxyClient : ProxyClient
     public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port,
         CancellationToken cancellationToken = default)
     {
+        throw new NotImplementedException();
         var result =
             await ProxyConnector.ConnectToProxyAsync(stream, ProxyUri, host, port, ProxyCredentials, cancellationToken);
         return result;

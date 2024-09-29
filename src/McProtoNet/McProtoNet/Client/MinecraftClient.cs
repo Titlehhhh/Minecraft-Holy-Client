@@ -71,7 +71,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     {
         try
         {
-            
             Validate();
 
 
@@ -96,7 +95,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
             minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
             var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
-            
+
             StateChange(MinecraftClientState.Play);
             _ = MainLoop(result, CTS.Token);
         }
@@ -171,34 +170,37 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private async ValueTask ConnectAsync(CancellationToken cancellationToken)
     {
-        var newTcp = new TcpClient();
-
-        var register = cancellationToken.Register(s => ((TcpClient)s).Dispose(), newTcp);
+        IDisposable? disposable = null;
         try
         {
-            Interlocked.Exchange(ref tcpClient, newTcp)?.Dispose();
-
-            newTcp.ReceiveTimeout = ReadTimeout;
-            newTcp.SendTimeout = WriteTimeout;
-
-            newTcp.Client.NoDelay = true;
-            newTcp.LingerState = new LingerOption(false, 0);
-
-
             if (Proxy is not null)
             {
-                await newTcp.ConnectAsync(Proxy.ProxyHost, Proxy.ProxyPort, cancellationToken);
-                mainStream = await Proxy.ConnectAsync(newTcp.GetStream(), Host, Port, cancellationToken);
+                Proxy.ReadTimeout = this.ReadTimeout;
+                Proxy.WriteTimeout = this.WriteTimeout;
+                mainStream = await Proxy.ConnectAsync(Host, Port, cancellationToken);
             }
             else
             {
-                await newTcp.ConnectAsync(Host, Port, cancellationToken);
-                mainStream = newTcp.GetStream();
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+                {
+                    NoDelay = true,
+                    LingerState = new LingerOption(true, 0),
+                    SendTimeout = this.WriteTimeout,
+                    ReceiveTimeout = this.ReadTimeout
+                };
+                await using (cancellationToken.Register(d => ((IDisposable)d).Dispose(), socket))
+                {
+                    disposable = socket;
+                    await socket.ConnectAsync(Host, Port, cancellationToken);
+
+                    mainStream = new NetworkStream(socket);
+                }
             }
         }
-        finally
+        catch
         {
-            register.Dispose();
+            disposable?.Dispose();
+            throw;
         }
     }
 

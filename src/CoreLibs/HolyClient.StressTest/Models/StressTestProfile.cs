@@ -11,11 +11,13 @@ using Fody;
 using HolyClient.Abstractions.StressTest;
 using HolyClient.Common;
 using HolyClient.Core.Infrastructure;
+using HolyClient.Proxy;
 using McProtoNet.Abstractions;
 using McProtoNet.Client;
 using McProtoNet.Utils;
 using MessagePack;
 using QuickProxyNet;
+using QuickProxyNet.ProxyChecker;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -132,26 +134,22 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             if (UseProxy)
             {
-                var proxies = await LoadProxy(logger);
+                var proxies = (await LoadProxy(logger)).Cast<ProxyRecord>();
                 if (proxies.Count() > 0)
                 {
-                    var capacity = Math.Min(proxies.Count(), NumberOfBots);
-
-                    var channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(capacity));
-
-                    var proxyChecker =
-                        new ProxyChecker(channel.Writer, proxies, this.ProxyCheckerOptions, srv_host, srv_port);
-
-                    proxyProvider = new ProxyProvider(channel.Reader);
-
-                    _ = proxyChecker.Run(logger);
-
-                    logger.Information("Запущен прокси-чекер");
-
-
+                    IProxyChecker proxyChecker = ProxyChecker.CreateChunked(proxies, new ProxyCheckerChunkedOptions()
+                    {
+                        ChunkSize = NumberOfBots * 10,
+                        ConnectTimeout = 10_000,
+                        IsSingleConsumer = false,
+                        SendAlive = true,
+                        TargetHost = host,
+                        TargetPort = port
+                    });
+                    proxyChecker.Start();
                     proxyChecker.DisposeWith(disposables);
-                    proxyProvider.DisposeWith(disposables);
-                    
+                    disposables.Add();
+                    logger.Information("Запущен прокси-чекер");
                 }
                 else
                 {
@@ -287,12 +285,9 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             MinecraftClient bot = new MinecraftClient();
 
             bot.StateChanged += BotOnStateChanged;
-            
-            disposables.Add(Disposable.Create(() =>
-            {
-                bot.StateChanged -= BotOnStateChanged;
-            }));
-            
+
+            disposables.Add(Disposable.Create(() => { bot.StateChanged -= BotOnStateChanged; }));
+
             bot.Host = srv_host;
             bot.Port = (ushort)srv_port;
             bot.Version = Version;
@@ -310,7 +305,6 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             stressTestBots.Add(b);
             b.DisposeWith(disposables);
-
         }
 
         logger.Information($"[STRESS TEST] Запущен стресс тест на {NumberOfBots} ботов на сервер {host}:{port}");
@@ -356,14 +350,15 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         logger.Information("Загрузка прокси");
         if (sources.Count() == 0)
         {
+            sources.Add(new UrlProxySource(type: null,
+                "https://raw.githubusercontent.com/proxifly/free-proxy-list/refs/heads/main/proxies/all/data.txt"));
+
             sources.Add(new UrlProxySource(ProxyType.HTTP,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
             sources.Add(new UrlProxySource(ProxyType.SOCKS4,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
             sources.Add(new UrlProxySource(ProxyType.SOCKS5,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
-            sources.Add(new UrlProxySource(type: null,
-                "https://raw.githubusercontent.com/proxifly/free-proxy-list/refs/heads/main/proxies/protocols/http/data.txt"));
         }
 
         List<Task<IEnumerable<ProxyInfo>>> tasks = new();

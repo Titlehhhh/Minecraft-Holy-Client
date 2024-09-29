@@ -1,6 +1,6 @@
 ﻿using QuickProxyNet;
 
-namespace HolyClient.StressTest;
+namespace HolyClient.Proxy;
 
 public interface IProxyProvider : IDisposable
 {

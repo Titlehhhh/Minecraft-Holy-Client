@@ -1,5 +1,6 @@
 ﻿using Fody;
 using HolyClient.Abstractions.StressTest;
+using HolyClient.Proxy;
 using McProtoNet.Abstractions;
 using McProtoNet.Client;
 using McProtoNet.MultiVersionProtocol;
@@ -76,8 +77,11 @@ public sealed class StressTestBot : IStressTestBot
 
         try
         {
+            
             if (changeNickAndProxy)
             {
+                var nick = nickProvider.GetNextNick();
+                
                 IProxyClient? proxy = null;
 
                 if (proxyProvider is not null)
@@ -85,7 +89,7 @@ public sealed class StressTestBot : IStressTestBot
 
 
                 Client.Proxy = proxy;
-                Client.Username = nickProvider.GetNextNick();
+                Client.Username = nick;
             }
 
 
@@ -109,7 +113,7 @@ public sealed class StressTestBot : IStressTestBot
             throw new ObjectDisposedException(nameof(StressTestBot));
     }
 
-    private bool disposed;
+    private bool disposed =false;
     private readonly ProtocolBase _protocol;
 
     public void Dispose()

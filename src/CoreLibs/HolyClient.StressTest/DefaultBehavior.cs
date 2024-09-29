@@ -24,7 +24,7 @@ public class DefaultBehavior : BaseStressTestBehavior
 
     [DisplayName("Spam timeout")] public int SpamTimeout { get; set; } = 1000;
 
-    [DisplayName("Reconnect timeout")] public int ReconnectTimeout { get; set; } = 1000;
+    [DisplayName("Reconnect timeout")] public int ReconnectTimeout { get; set; } = 5000;
 
     [DisplayName("Reconnect count")] public int Reconnects { get; set; } = 1;
 
@@ -51,8 +51,9 @@ public class DefaultBehavior : BaseStressTestBehavior
         {
             await b.Restart(true);
         }
-        catch
+        catch(Exception ex)
         {
+            
             // ignored
         }
     }

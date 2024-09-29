@@ -7,7 +7,7 @@ internal static class ProxyConnector
     public static async ValueTask<Stream> ConnectToProxyAsync(Stream stream, Uri proxyUri, string host, int port,
         NetworkCredential? proxyCredentials, CancellationToken cancellationToken)
     {
-        using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
+        await using (cancellationToken.Register(s => ((Stream)s!).Dispose(), stream))
         {
             try
             {
@@ -22,14 +22,16 @@ internal static class ProxyConnector
 
                 if (string.Equals(proxyUri.Scheme, "socks4a", StringComparison.OrdinalIgnoreCase))
                 {
-                    await SocksHelper.EstablishSocks4TunnelAsync(stream, true, host, port, credentials, cancellationToken)
+                    await SocksHelper
+                        .EstablishSocks4TunnelAsync(stream, true, host, port, credentials, cancellationToken)
                         .ConfigureAwait(false);
                     return stream;
                 }
 
                 if (string.Equals(proxyUri.Scheme, "socks4", StringComparison.OrdinalIgnoreCase))
                 {
-                    await SocksHelper.EstablishSocks4TunnelAsync(stream, false, host, port, credentials, cancellationToken)
+                    await SocksHelper
+                        .EstablishSocks4TunnelAsync(stream, false, host, port, credentials, cancellationToken)
                         .ConfigureAwait(false);
                     return stream;
                 }
@@ -44,9 +46,9 @@ internal static class ProxyConnector
 
                 throw new NotSupportedException("Bad protocol");
             }
-            catch (Exception ex)
+            catch
             {
-                stream.Dispose();
+                await stream.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
         }
