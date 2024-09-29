@@ -2,6 +2,7 @@
 using System.Threading.Channels;
 using Fody;
 using QuickProxyNet;
+using QuickProxyNet.ProxyChecker;
 
 namespace HolyClient.Proxy;
 
@@ -10,17 +11,18 @@ internal class ProxyProvider : IProxyProvider
 {
     private bool _disposed;
     private CancellationTokenSource cts = new();
-    private ChannelReader<IProxyClient> reader;
+    private IProxyChecker reader;
 
-    public ProxyProvider(ChannelReader<IProxyClient> reader)
+    public ProxyProvider(IProxyChecker reader)
     {
         this.reader = reader;
     }
 
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask<IProxyClient> GetNextProxy()
+    public  ValueTask<IProxyClient> GetNextProxy()
     {
-        return await reader.ReadAsync(cts.Token);
+        return reader.GetNextProxy(cts.Token);
     }
 
     public void Dispose()
@@ -31,7 +33,6 @@ internal class ProxyProvider : IProxyProvider
         cts.Cancel();
         cts.Dispose();
         cts = null;
-        reader = null;
 
         GC.SuppressFinalize(this);
     }

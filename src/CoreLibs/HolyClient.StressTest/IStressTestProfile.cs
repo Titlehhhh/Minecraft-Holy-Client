@@ -41,7 +41,8 @@ public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyCha
 
     IObservable<StressTestMetrik> Metrics { get; }
 
-    ProxyCheckerOptions ProxyCheckerOptions { get; set; }
+    // TODO
+    //ProxyCheckerOptions ProxyCheckerOptions { get; set; }
 
     bool ParallelCountCheckingCalculateAuto { get; set; }
     ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; }
@@ -59,4 +60,8 @@ public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyCha
     Task Stop();
 
     Task Initialization(IPluginProvider pluginProvider);
+}
+
+public class ProxyCheckerOptions
+{
 }

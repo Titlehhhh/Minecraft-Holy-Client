@@ -58,13 +58,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void Validate()
     {
-        if (string.IsNullOrWhiteSpace(Host))
-            throw new ArgumentException("Host is empty");
-        if (string.IsNullOrEmpty(Username))
-            throw new ArgumentException("Username is empty");
+        ArgumentException.ThrowIfNullOrWhiteSpace(Host, nameof(Host));
+        ArgumentException.ThrowIfNullOrWhiteSpace(Username, nameof(Username));
 
         if (!(Version >= MinVersionSupport && Version <= MaxVersionSupport))
-            throw new ArgumentException("Version not supported");
+            throw new ArgumentException($"Version {Version} not supported");
     }
 
     public async Task Start()
@@ -128,7 +126,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         StateChanged?.Invoke(this, new StateEventArgs(ex, oldState));
     }
 
-    [ConfigureAwait(true)]
+    [ConfigureAwait(false)]
     private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
     {
         _packetSender = new MinecraftPacketSender();

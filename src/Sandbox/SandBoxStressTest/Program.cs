@@ -25,10 +25,10 @@ internal class Program
 
         stressTestProfile.Server = host;
 
-        stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
-        {
-            ParallelCount = 30_000
-        };
+       // stressTestProfile.ProxyCheckerOptions = new ProxyCheckerOptions()
+       // {
+       //     //ParallelCount = 30_000
+      //  };
         stressTestProfile.SetBehavior(new DefaultPluginSource());
         stressTestProfile.NumberOfBots = 1000;
 

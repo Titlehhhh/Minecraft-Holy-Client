@@ -37,6 +37,19 @@ public class DefaultBehavior : BaseStressTestBehavior
         foreach (var bot in bots)
         {
             bot.ConfigureAutoRestart(AutoRestartAction);
+            MultiProtocol proto = bot.Protocol as MultiProtocol;
+
+            proto.OnJoinGame.Subscribe(async x =>
+            {
+                try
+                {
+                    await proto.SendChatPacket("/register 21qwerty 21qwerty");
+                }
+                catch
+                {
+                    // ignored
+                }
+            }).DisposeWith(disposables);
             bot.Restart(true);
         }
         return Task.CompletedTask;

@@ -54,17 +54,17 @@ internal class ProxyCheckerChunk : IProxyChecker
         _cts.Cancel();
         _cts.Dispose();
         _cts = null;
-        _proxies= null;
+        _proxies = null;
         _channel = null;
-        
-        
+
+
         Disposed?.Invoke();
     }
 
-    public void Start()
+    public Task Start()
     {
         CheckDisposed();
-        RunCore();
+        return RunCore();
     }
 
     public ValueTask<IProxyClient> GetNextProxy(CancellationToken cancellationToken)
@@ -80,7 +80,11 @@ internal class ProxyCheckerChunk : IProxyChecker
             try
             {
                 ProxyClientFactory proxyClientFactory = new();
-                var clients = _proxies.Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port,proxy.Credentials));
+                var clients = _proxies
+                    .Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port, proxy.Credentials));
+
+                ArgumentOutOfRangeException.ThrowIfNegative(chunkSize, nameof(chunkSize));
+
 
                 var tasks = new List<Task<CheckResult>>(chunkSize);
                 while (!_cts.IsCancellationRequested)
@@ -89,9 +93,6 @@ internal class ProxyCheckerChunk : IProxyChecker
                     {
                         try
                         {
-                           
-
-
                             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token))
                             {
                                 foreach (var client in chunk)
@@ -104,11 +105,9 @@ internal class ProxyCheckerChunk : IProxyChecker
                                 _cts.Token.ThrowIfCancellationRequested();
 
 
-                                await Task.WhenAll(tasks).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+                                await Task.WhenAll(tasks);
                             }
 
-
-                          
 
                             var count = 0;
                             for (var i = 0; i < Math.Min(chunkSize, tasks.Count); i++)
@@ -122,7 +121,7 @@ internal class ProxyCheckerChunk : IProxyChecker
                                     IProxyClient sendClient = sendAlive
                                         ? new ProxyClientCache(client, task.Result.Stream!, this.Disposed)
                                         : client;
-                                    
+
                                     await _writer.WriteAsync(sendClient, _cts.Token);
                                 }
                             }
@@ -140,6 +139,8 @@ internal class ProxyCheckerChunk : IProxyChecker
             catch (Exception ex)
             {
                 _writer.TryComplete(ex);
+                Dispose();
+                throw;
             }
             finally
             {

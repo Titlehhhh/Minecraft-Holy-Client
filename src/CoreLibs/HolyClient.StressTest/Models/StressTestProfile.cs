@@ -80,7 +80,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             }).DisposeWith(disposables);
 
 
-            if (ParallelCountCheckingCalculateAuto) ProxyCheckerOptions.ParallelCount = NumberOfBots * 10;
+            //if (ParallelCountCheckingCalculateAuto) ProxyCheckerOptions.ParallelCount = NumberOfBots * 10;
 
             var host = Server;
 
@@ -134,7 +134,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             if (UseProxy)
             {
-                var proxies = (await LoadProxy(logger)).Cast<ProxyRecord>();
+                var proxies = (await LoadProxy(logger)).Select(x=>(ProxyRecord)x);
                 if (proxies.Count() > 0)
                 {
                     IProxyChecker proxyChecker = ProxyChecker.CreateChunked(proxies, new ProxyCheckerChunkedOptions()
@@ -147,8 +147,9 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                         TargetPort = port
                     });
                     proxyChecker.Start();
+                    proxyProvider = new ProxyProvider(proxyChecker);
                     proxyChecker.DisposeWith(disposables);
-                    disposables.Add();
+                    
                     logger.Information("Запущен прокси-чекер");
                 }
                 else
@@ -411,7 +412,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
     #region ProxyChecker
 
-    public ProxyCheckerOptions ProxyCheckerOptions { get; set; } = new();
+    //public ProxyCheckerOptions ProxyCheckerOptions { get; set; } = new();
 
     [Reactive] public bool ParallelCountCheckingCalculateAuto { get; set; } = true;
 

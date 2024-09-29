@@ -5,7 +5,7 @@ namespace QuickProxyNet.ProxyChecker;
 
 public interface IProxyChecker : IDisposable
 {
-    void Start();
+    Task Start();
 
     ValueTask<IProxyClient> GetNextProxy(CancellationToken cancellationToken);
 }
