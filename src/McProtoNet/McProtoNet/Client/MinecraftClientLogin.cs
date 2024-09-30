@@ -254,7 +254,7 @@ public sealed class MinecraftClientLogin
 
     private static OutputPacket CreateKeepAlive(long id)
     {
-        scoped var writer = new MinecraftPrimitiveWriterSlim();
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
         writer.WriteVarInt(0x04); // Packet id
         writer.WriteSignedLong(id);
         return new OutputPacket(writer.GetWrittenMemory());
@@ -262,17 +262,17 @@ public sealed class MinecraftClientLogin
 
     private static int ReadTreshold(InputPacket p)
     {
-        scoped MinecraftPrimitiveReaderSlim r = new MinecraftPrimitiveReaderSlim(p.Data);
+        scoped MinecraftPrimitiveSpanReader r = new MinecraftPrimitiveSpanReader(p.Data);
         return r.ReadVarInt();
     }
     private static long ReadKeepAlive(InputPacket p)
     {
-        scoped MinecraftPrimitiveReaderSlim r = new MinecraftPrimitiveReaderSlim(p.Data);
+        scoped MinecraftPrimitiveSpanReader r = new MinecraftPrimitiveSpanReader(p.Data);
         return r.ReadSignedLong();
     }
     private static ClientboundConfigurationPluginMessagePacket ReadConfigPluginMessagePacket(InputPacket packet)
     {
-        scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+        scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
         var id = reader.ReadString();
         var data = reader.ReadRestBuffer();
 
@@ -281,7 +281,7 @@ public sealed class MinecraftClientLogin
 
     private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket)
     {
-        scoped var reader = new MinecraftPrimitiveReaderSlim(inputPacket.Data);
+        scoped var reader = new MinecraftPrimitiveSpanReader(inputPacket.Data);
         var serverId = reader.ReadString();
         var len = reader.ReadVarInt();
         var publicKey = reader.ReadBuffer(len);
@@ -322,7 +322,7 @@ public sealed class MinecraftClientLogin
     {
         if (options.Username.Length > 16) throw new ArgumentOutOfRangeException();
 
-        scoped var writer = new MinecraftPrimitiveWriterSlim();
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
 
         try
         {
@@ -332,15 +332,15 @@ public sealed class MinecraftClientLogin
         }
         finally
         {
-            writer.Clear();
+            writer.Dispose();
         }
     }
 
-    private static void FillLoginStartPacket(ref MinecraftPrimitiveWriterSlim writer, LoginOptions options)
+    private static void FillLoginStartPacket(ref MinecraftPrimitiveSpanWriter spanWriter, LoginOptions options)
     {
-        writer.WriteVarInt(0x00); // Packet Id
+        spanWriter.WriteVarInt(0x00); // Packet Id
 
-        writer.WriteString(options.Username);
+        spanWriter.WriteString(options.Username);
 
         bool authentifier = false; // TODO 
 
@@ -370,7 +370,7 @@ public sealed class MinecraftClientLogin
         {
             if (options.ProtocolVersion < 760) /* < 1.19.1 */
             {
-                writer.WriteBoolean(false);
+                spanWriter.WriteBoolean(false);
                 //     DECLARE_FIELDS(
                 //         (std::string, std::optional<ProfilePublicKey>),
                 // (Name_, PublicKey)
@@ -378,8 +378,8 @@ public sealed class MinecraftClientLogin
             }
             else if (options.ProtocolVersion < 761) /* < 1.19.3 */
             {
-                writer.WriteBoolean(false);
-                writer.WriteBoolean(false);
+                spanWriter.WriteBoolean(false);
+                spanWriter.WriteBoolean(false);
                 // DECLARE_FIELDS(
                 //     (std::string, std::optional<ProfilePublicKey>, std::optional<UUID>),
                 // (Name_, PublicKey, ProfileId)
@@ -387,7 +387,7 @@ public sealed class MinecraftClientLogin
             }
             else if (options.ProtocolVersion < 764) /* < 1.20.2 */
             {
-                writer.WriteBoolean(false);
+                spanWriter.WriteBoolean(false);
                 // DECLARE_FIELDS(
                 //     (std::string, std::optional<UUID>),
                 // (Name_, ProfileId)
@@ -395,7 +395,7 @@ public sealed class MinecraftClientLogin
             }
             else
             {
-                writer.WriteUUID(Guid.NewGuid());
+                spanWriter.WriteUUID(Guid.NewGuid());
                 // DECLARE_FIELDS(
                 //     (std::string, UUID),
                 // (Name_, ProfileId)

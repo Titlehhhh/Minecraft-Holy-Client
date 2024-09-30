@@ -1,6 +1,5 @@
 ﻿using System.Reactive;
 using System.Reactive.Subjects;
-using Cysharp.Text;
 using McProtoNet.Abstractions;
 using McProtoNet.NBT;
 using McProtoNet.Serialization;
@@ -9,29 +8,31 @@ namespace McProtoNet.MultiVersionProtocol;
 
 public sealed class KeepAlivePacket
 {
-    public long KeepAliveId { get; }
-
     public KeepAlivePacket(long keepAliveId)
     {
         KeepAliveId = keepAliveId;
     }
+
+    public long KeepAliveId { get; }
 }
 
 [Experimental]
 public sealed class MultiProtocol : ProtocolBase
 {
-    
-    private Subject<KeepAlivePacket> _onKeepAlive = new Subject<KeepAlivePacket>();
     private static readonly byte[] bitset = new byte[3];
-    public Subject<Unit> OnJoinGame { get; } = new();
+
+    private readonly Subject<KeepAlivePacket> _onKeepAlive = new();
+
     public MultiProtocol(IPacketBroker client) : base(client)
     {
         //SupportedVersion = 755;
     }
 
+    public Subject<Unit> OnJoinGame { get; } = new();
+
     protected override void OnPacketReceived(InputPacket packet)
     {
-        int keepAlive = ProtocolVersion switch
+        var keepAlive = ProtocolVersion switch
         {
             340 => 0x1F,
             >= 341 and <= 392 => 0x22,
@@ -47,9 +48,9 @@ public sealed class MultiProtocol : ProtocolBase
             761 => 0x1F,
             >= 762 and <= 763 => 0x23,
             >= 764 and <= 765 => 0x24,
-            >= 766 and <= 767 => 0x26,
+            >= 766 and <= 767 => 0x26
         };
-        int disconnect = ProtocolVersion switch
+        var disconnect = ProtocolVersion switch
         {
             340 => 0x1A,
             >= 341 and <= 392 => 0x1C,
@@ -64,16 +65,17 @@ public sealed class MultiProtocol : ProtocolBase
             761 => 0x17,
             >= 762 and <= 763 => 0x1A,
             >= 764 and <= 765 => 0x1B,
-            >= 766 and <= 767 => 0x1D,
+            >= 766 and <= 767 => 0x1D
         };
         if (packet.Id == 0x2B)
         {
             OnJoinGame.OnNext(Unit.Default);
             return;
         }
+
         if (keepAlive == packet.Id)
         {
-            scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+            scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
             //_onKeepAlive.OnNext(new KeepAlivePacket(reader.ReadSignedLong()));
             _ = SendKeepAlive(reader.ReadSignedLong());
         }
@@ -82,17 +84,13 @@ public sealed class MultiProtocol : ProtocolBase
             _client.StopWithError(new DisconnectException("Play disconnect"));
             if (false)
             {
-                scoped var reader = new MinecraftPrimitiveReaderSlim(packet.Data);
+                scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                 if (ProtocolVersion >= 765)
                 {
                     // var reason = reader.ReadNbt();
-                    NbtSpanReader nbtReader = new NbtSpanReader(packet.Data.Span);
+                    var nbtReader = new NbtSpanReader(packet.Data.Span);
 
                     var nbt = nbtReader.ReadAsTag<NbtTag>(false);
-
-                }
-                else
-                {
                 }
             }
         }
@@ -102,78 +100,90 @@ public sealed class MultiProtocol : ProtocolBase
 
     public ValueTask SendChatPacket(string message)
     {
-        scoped var writer = new MinecraftPrimitiveWriterSlim();
-        int id = ProtocolVersion switch
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
         {
-            340 => 0x02,
-            >= 341 and <= 392 => 0x03,
-            >= 393 and <= 404 => 0x02,
-            >= 405 and <= 758 => 0x03,
-            759 => 0x04,
-            >= 760 and <= 765 => 0x05,
-            >= 766 and <= 767 => 0x06,
-            _ => throw new Exception("Unknown protocol version")
-        };
-        writer.WriteVarInt(id); // Packet Id
-        writer.WriteString(message);
-        if (ProtocolVersion >= 759)
-        {
-            long timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            writer.WriteSignedLong(timeStamp);
-            writer.WriteSignedLong(0);
-            if (ProtocolVersion < 761)
+            var id = ProtocolVersion switch
             {
-                writer.WriteVarInt(0);
-            }
-            else
+                340 => 0x02,
+                >= 341 and <= 392 => 0x03,
+                >= 393 and <= 404 => 0x02,
+                >= 405 and <= 758 => 0x03,
+                759 => 0x04,
+                >= 760 and <= 765 => 0x05,
+                >= 766 and <= 767 => 0x06,
+                _ => throw new Exception("Unknown protocol version")
+            };
+            writer.WriteVarInt(id); // Packet Id
+            writer.WriteString(message);
+            if (ProtocolVersion >= 759)
             {
-                writer.WriteBoolean(false);
-            }
-
-            if (ProtocolVersion <= 760)
-                writer.WriteBoolean(false);
-
-            switch (ProtocolVersion)
-            {
-                case >= 761:
+                var timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                writer.WriteSignedLong(timeStamp);
+                writer.WriteSignedLong(0);
+                if (ProtocolVersion < 761)
                     writer.WriteVarInt(0);
-                    writer.WriteBuffer(bitset);
-                    break;
-                case 760:
-                    writer.WriteVarInt(0);
+                else
                     writer.WriteBoolean(false);
-                    break;
-            }
-        }
 
-        return base.SendPacketCore(writer.GetWrittenMemory());
+                if (ProtocolVersion <= 760)
+                    writer.WriteBoolean(false);
+
+                switch (ProtocolVersion)
+                {
+                    case >= 761:
+                        writer.WriteVarInt(0);
+                        writer.WriteBuffer(bitset);
+                        break;
+                    case 760:
+                        writer.WriteVarInt(0);
+                        writer.WriteBoolean(false);
+                        break;
+                }
+            }
+
+            return SendPacketCore(writer.GetWrittenMemory());
+        }
+        catch
+        {
+            writer.Dispose();
+            throw;
+        }
     }
 
 
     public ValueTask SendKeepAlive(long id)
     {
-        scoped var writer = new MinecraftPrimitiveWriterSlim();
-        int packetId = ProtocolVersion switch
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
         {
-            340 => 0x0B,
-            >= 341 and <= 392 => 0x0F,
-            >= 393 and <= 404 => 0x0E,
-            >= 405 and <= 476 => 0x10,
-            >= 477 and <= 578 => 0x0F,
-            >= 579 and <= 754 => 0x10,
-            >= 755 and <= 758 => 0x0F,
-            759 => 0x11,
-            760 => 0x12,
-            761 => 0x11,
-            >= 762 and <= 763 => 0x12,
-            764 => 0x14,
-            765 => 0x15,
-            >= 766 and <= 767 => 0x18,
-            _ => throw new Exception("Unknown protocol version")
-        };
-        writer.WriteVarInt(packetId); // Packet Id
-        writer.WriteSignedLong(id);
-        return base.SendPacketCore(writer.GetWrittenMemory());
+            var packetId = ProtocolVersion switch
+            {
+                340 => 0x0B,
+                >= 341 and <= 392 => 0x0F,
+                >= 393 and <= 404 => 0x0E,
+                >= 405 and <= 476 => 0x10,
+                >= 477 and <= 578 => 0x0F,
+                >= 579 and <= 754 => 0x10,
+                >= 755 and <= 758 => 0x0F,
+                759 => 0x11,
+                760 => 0x12,
+                761 => 0x11,
+                >= 762 and <= 763 => 0x12,
+                764 => 0x14,
+                765 => 0x15,
+                >= 766 and <= 767 => 0x18,
+                _ => throw new Exception("Unknown protocol version")
+            };
+            writer.WriteVarInt(packetId); // Packet Id
+            writer.WriteSignedLong(id);
+            return SendPacketCore(writer.GetWrittenMemory());
+        }
+        catch
+        {
+            writer.Dispose();
+            throw;
+        }
     }
 
     public override void Dispose()

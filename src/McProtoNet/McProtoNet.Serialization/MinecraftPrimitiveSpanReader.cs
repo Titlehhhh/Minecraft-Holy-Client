@@ -14,10 +14,11 @@ namespace McProtoNet.Serialization;
 /// <summary>
 ///     Represents stack-allocated reader for primitive types of Minecraft
 /// </summary>
-public ref partial struct MinecraftPrimitiveReaderSlim
+[StructLayout(LayoutKind.Auto)]
+public ref partial struct MinecraftPrimitiveSpanReader
 {
     private SpanReader<byte> _reader;
-
+    private bool disposed;
     public ReadOnlySpan<byte> Span => _reader.Span;
 
     public ref byte Current => ref Unsafe.AsRef(in _reader.Current);
@@ -31,12 +32,12 @@ public ref partial struct MinecraftPrimitiveReaderSlim
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public MinecraftPrimitiveReaderSlim(ReadOnlySpan<byte> data)
+    public MinecraftPrimitiveSpanReader(ReadOnlySpan<byte> data)
     {
         _reader = new SpanReader<byte>(data);
     }
 
-    public MinecraftPrimitiveReaderSlim(ReadOnlyMemory<byte> data) : this(data.Span)
+    public MinecraftPrimitiveSpanReader(ReadOnlyMemory<byte> data) : this(data.Span)
     {
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,17 +46,13 @@ public ref partial struct MinecraftPrimitiveReaderSlim
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Read(Span<byte> output) => _reader.Read(output);
 
-    private void ThrowEndOfData()
-    {
-        
-        throw new InvalidOperationException("End of data");
-    }
+    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void Advance(int count)
+    private void CheckDisposed()
     {
-        //_bufferReference = ref Unsafe.Add(ref _bufferReference, count);
-        //consumed += count;
+        if (disposed)
+            throw new ObjectDisposedException(nameof(MinecraftPrimitiveSpanWriter));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -220,4 +217,6 @@ public ref partial struct MinecraftPrimitiveReaderSlim
     {
         throw new NotImplementedException();
     }
+
+    
 }

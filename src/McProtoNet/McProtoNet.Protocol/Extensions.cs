@@ -4,9 +4,9 @@ namespace McProtoNet.Protocol;
 
 public static class Extensions
 {
-    public static Position ReadPosition(this ref MinecraftPrimitiveReaderSlim reader)
+    public static Position ReadPosition(this ref MinecraftPrimitiveSpanReader spanReader)
     {
-        var locEncoded = reader.ReadSignedLong();
+        var locEncoded = spanReader.ReadSignedLong();
 
 
         int x, y, z;
@@ -34,38 +34,38 @@ public static class Extensions
         return new Position(x, z, y);
     }
 
-    public static void WritePosition(this ref MinecraftPrimitiveWriterSlim writer, Position position)
+    public static void WritePosition(this scoped ref MinecraftPrimitiveSpanWriter spanWriter, Position position)
     {
-        ulong a = ((((ulong)position.X) & 0x3FFFFFF) << 38) |
-                  ((((ulong)position.Z) & 0x3FFFFFF) << 12) |
-                  (((ulong)position.Y) & 0xFFF);
+        var a = (((ulong)position.X & 0x3FFFFFF) << 38) |
+                (((ulong)position.Z & 0x3FFFFFF) << 12) |
+                ((ulong)position.Y & 0xFFF);
         // var g = BitConverter.GetBytes(a);
 
         // Array.Reverse(g);
-        writer.WriteUnsignedLong(a);
+        spanWriter.WriteUnsignedLong(a);
         //writer.WriteBuffer(g);
     }
 
 
-    public static void WriteSlot(this ref MinecraftPrimitiveWriterSlim writer, Slot? slot)
+    public static void WriteSlot(this ref MinecraftPrimitiveSpanWriter spanWriter, Slot? slot)
     {
         if (slot is null)
         {
-            writer.WriteBoolean(false);
+            spanWriter.WriteBoolean(false);
         }
         else
         {
-            writer.WriteBoolean(true);
-            writer.WriteVarInt(slot.ItemId);
-            writer.WriteSignedByte(slot.ItemCount);
-            writer.WriteOptionalNbt(slot.Nbt);
+            spanWriter.WriteBoolean(true);
+            spanWriter.WriteVarInt(slot.ItemId);
+            spanWriter.WriteSignedByte(slot.ItemCount);
+            spanWriter.WriteOptionalNbt(slot.Nbt);
         }
     }
 
-    public static Slot? ReadSlot(this ref MinecraftPrimitiveReaderSlim reader)
+    public static Slot? ReadSlot(this ref MinecraftPrimitiveSpanReader spanReader)
     {
-        if (reader.ReadBoolean())
-            return new Slot(reader.ReadVarInt(), reader.ReadSignedByte(), reader.ReadOptionalNbt());
+        if (spanReader.ReadBoolean())
+            return new Slot(spanReader.ReadVarInt(), spanReader.ReadSignedByte(), spanReader.ReadOptionalNbt());
 
         return null;
     }

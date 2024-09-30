@@ -7,18 +7,17 @@ namespace McProtoNet.Protocol;
 
 public sealed class MinecraftPacketSender : IDisposable
 {
-    private const int ZERO_VARLENGTH = 1;
     private static readonly byte[] ZERO_VARINT = { 0 };
 
 
-    // private static readonly ZlibCompressor s_compressor = new(6);
+   
 
     private int _compressionThreshold;
     public Stream BaseStream { get; set; }
 
     public void Dispose()
     {
-        //compressor.Dispose();
+      
     }
 
     public ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
@@ -30,6 +29,7 @@ public sealed class MinecraftPacketSender : IDisposable
             if (uncompressedSize >= _compressionThreshold)
             {
                 var compressor = new ZlibCompressor(4);
+                //var compressor = LibDeflateCache.RentCompressor();
                 try
                 {
                     var length = compressor.GetBound(uncompressedSize);
@@ -55,16 +55,12 @@ public sealed class MinecraftPacketSender : IDisposable
                     compressor.Dispose();
                 }
             }
-            else
-            {
-                uncompressedSize++;
-                return SendShort(uncompressedSize, data, token);
-            }
+
+            uncompressedSize++;
+            return SendShort(uncompressedSize, data, token);
         }
-        else
-        {
-            return SendPacketWithoutCompressionAsync(data, token);
-        }
+
+        return SendPacketWithoutCompressionAsync(data, token);
     }
 
     private async ValueTask SendShort(int unSize, ReadOnlyMemory<byte> data, CancellationToken token)

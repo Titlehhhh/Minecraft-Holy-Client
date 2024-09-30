@@ -5,14 +5,14 @@ namespace McProtoNet.Serialization;
 
 public static class ReadArraysSIMDExtensions
 {
-    public static int[] ReadArrayInt32BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static int[] ReadArrayInt32BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(int) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(int) * length);
         ReadOnlySpan<int> ints = MemoryMarshal.Cast<byte, int>(bytes);
         if (BitConverter.IsLittleEndian)
         {
@@ -22,14 +22,14 @@ public static class ReadArraysSIMDExtensions
         }
         return ints.ToArray();
     }
-    public static long[] ReadArrayInt64BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static long[] ReadArrayInt64BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(long) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(long) * length);
         ReadOnlySpan<long> ints = MemoryMarshal.Cast<byte, long>(bytes);
         if (BitConverter.IsLittleEndian)
         {
@@ -39,14 +39,14 @@ public static class ReadArraysSIMDExtensions
         }
         return ints.ToArray();
     }
-    public static short[] ReadArrayInt16BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static short[] ReadArrayInt16BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(short) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(short) * length);
         ReadOnlySpan<short> ints = MemoryMarshal.Cast<byte, short>(bytes);
         if (BitConverter.IsLittleEndian)
         {
@@ -56,14 +56,14 @@ public static class ReadArraysSIMDExtensions
         }
         return ints.ToArray();
     }
-    public static ushort[] ReadArrayUnsignedInt16BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static ushort[] ReadArrayUnsignedInt16BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(ushort) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(ushort) * length);
         ReadOnlySpan<ushort> ints = MemoryMarshal.Cast<byte, ushort>(bytes);
         if (BitConverter.IsLittleEndian)
         {
@@ -73,14 +73,14 @@ public static class ReadArraysSIMDExtensions
         }
         return ints.ToArray();
     }
-    public static uint[] ReadArrayUnsignedInt32BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static uint[] ReadArrayUnsignedInt32BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(uint) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(uint) * length);
         ReadOnlySpan<uint> ints = MemoryMarshal.Cast<byte, uint>(bytes);
         if (BitConverter.IsLittleEndian)
         {
@@ -90,14 +90,14 @@ public static class ReadArraysSIMDExtensions
         }
         return ints.ToArray();
     }
-    public static ulong[] ReadArrayUnsignedInt64BigEndian(this MinecraftPrimitiveReaderSlim reader, int length) 
+    public static ulong[] ReadArrayUnsignedInt64BigEndian(this MinecraftPrimitiveSpanReader spanReader, int length) 
     {
-        if (reader.RemainingCount < length)
+        if (spanReader.RemainingCount < length)
         {
             throw new InsufficientMemoryException();
         }
 
-        ReadOnlySpan<byte> bytes = reader.Read(sizeof(ulong) * length);
+        ReadOnlySpan<byte> bytes = spanReader.Read(sizeof(ulong) * length);
         ReadOnlySpan<ulong> ints = MemoryMarshal.Cast<byte, ulong>(bytes);
         if (BitConverter.IsLittleEndian)
         {
