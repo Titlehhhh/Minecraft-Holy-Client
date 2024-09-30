@@ -1,24 +1,24 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static McProtoNet.Protocol.Zlib.Native.Compression;
+using McProtoNet.Protocol.Zlib.Native;
 
 namespace McProtoNet.Protocol.Zlib;
 
-public  ref struct ZlibCompressor
+public class ZlibCompressorHeapAlloc
 {
     private readonly IntPtr compressor;
 
     private bool disposedValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ZlibCompressor(int compressionLevel)
+    public ZlibCompressorHeapAlloc(int compressionLevel)
     {
         if (compressionLevel < 0 || compressionLevel > 12)
         {
             ThrowHelperBadCompressionLevel();
         }
 
-        var compressor = libdeflate_alloc_compressor(compressionLevel);
+        var compressor = Compression.libdeflate_alloc_compressor(compressionLevel);
         if (compressor == IntPtr.Zero)
         {
             ThrowHelperFailedAllocCompressor();
@@ -36,14 +36,14 @@ public  ref struct ZlibCompressor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private nuint CompressCore(ReadOnlySpan<byte> input, Span<byte> output)
     {
-        return libdeflate_zlib_compress(compressor, MemoryMarshal.GetReference(input), (nuint)input.Length,
+        return Compression.libdeflate_zlib_compress(compressor, MemoryMarshal.GetReference(input), (nuint)input.Length,
             ref MemoryMarshal.GetReference(output), (nuint)output.Length);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private nuint GetBoundCore(nuint inputLength)
     {
-        return libdeflate_zlib_compress_bound(compressor, inputLength);
+        return Compression.libdeflate_zlib_compress_bound(compressor, inputLength);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,6 +74,6 @@ public  ref struct ZlibCompressor
 
     public void Dispose()
     {
-        libdeflate_free_compressor(compressor);
+        Compression.libdeflate_free_compressor(compressor);
     }
 }
