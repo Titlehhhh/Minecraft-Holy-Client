@@ -8,22 +8,16 @@ public sealed class StateEventArgs : EventArgs
         OldState = oldState;
     }
 
-    public StateEventArgs(Exception ex, MinecraftClientState oldState, MinecraftClientState newState)
-    {
-        Error = ex;
-        State = newState;
-        OldState = oldState;
-    }
-
-    public StateEventArgs(Exception ex, MinecraftClientState oldState)
-    {
-        Error = ex;
-        State = MinecraftClientState.Errored;
-        OldState = oldState;
-    }
-
     public MinecraftClientState State { get; }
     public MinecraftClientState OldState { get; }
+}
 
-    public Exception? Error { get; }
+public sealed class DisconnectedEventArgs : EventArgs
+{
+    public DisconnectedEventArgs(Exception? exception = null)
+    {
+        Exception = exception;
+    }
+
+    public Exception? Exception { get; }
 }

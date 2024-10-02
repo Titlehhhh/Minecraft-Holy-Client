@@ -81,7 +81,7 @@ public sealed class MultiProtocol : ProtocolBase
         }
         else if (disconnect == packet.Id)
         {
-            _client.StopWithError(new DisconnectException("Play disconnect"));
+            _client.Stop(new DisconnectException("Play disconnect"));
             if (false)
             {
                 scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);

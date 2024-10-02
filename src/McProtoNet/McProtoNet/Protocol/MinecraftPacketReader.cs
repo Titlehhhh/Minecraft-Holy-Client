@@ -6,7 +6,7 @@ using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol;
 
-public sealed class MinecraftPacketReader : IDisposable
+public sealed class MinecraftPacketReader
 {
     private static readonly MemoryAllocator<byte> memoryAllocator = ArrayPool<byte>.Shared.ToAllocator();
 

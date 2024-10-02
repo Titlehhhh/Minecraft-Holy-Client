@@ -5,7 +5,7 @@ using McProtoNet.Abstractions;
 
 namespace McProtoNet.Protocol;
 
-public sealed class MinecraftPacketSender : IDisposable
+public sealed class MinecraftPacketSender 
 {
     private static readonly byte[] ZERO_VARINT = { 0 };
 

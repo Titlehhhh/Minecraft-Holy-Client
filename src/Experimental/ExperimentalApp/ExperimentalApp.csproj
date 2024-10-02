@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNext.Threading" Version="5.13.0" />
         <PackageReference Include="System.IO.Pipelines" Version="9.0.0-preview.5.24306.7" />
     </ItemGroup>
 
