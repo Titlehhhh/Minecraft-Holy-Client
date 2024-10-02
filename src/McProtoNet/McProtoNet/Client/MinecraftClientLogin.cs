@@ -8,7 +8,7 @@ using McProtoNet.Serialization;
 
 namespace McProtoNet.Client;
 
-public sealed class MinecraftClientLogin
+internal sealed class MinecraftClientLogin
 {
     private static readonly byte[] VarIntLoginIntent;
     private static readonly byte[] LoginAcknowledged;
@@ -44,8 +44,8 @@ public sealed class MinecraftClientLogin
         var mainStream = new AesStream(source);
         try
         {
-            using var sender = new MinecraftPacketSender();
-            using var reader = new MinecraftPacketReader();
+             var sender = new MinecraftPacketSender();
+             var reader = new MinecraftPacketReader();
 
             sender.BaseStream = mainStream;
             reader.BaseStream = mainStream;

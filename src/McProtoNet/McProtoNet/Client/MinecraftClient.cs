@@ -1,171 +1,37 @@
 ﻿using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using DotNext;
 using DotNext.Threading;
-using Fody;
 using McProtoNet.Abstractions;
 using McProtoNet.Protocol;
 using QuickProxyNet;
 
 namespace McProtoNet.Client;
 
-public struct MinecraftVersion
-{
-    public readonly static int Latest = 767;
-
-    public int ProtocolVersion { get; }
-    public string MajorVersion { get; }
-    public string MinorVersion { get; }
-}
-// Thread safety temporary state for MinecraftClient
-internal sealed class TemporaryState
-{
-    
-
-    private Stream mainStream;
-    private TcpClient? _tcpClient;
-    private AsyncReaderWriterLock _sendLock;
-    private MinecraftPacketSender _packetSender;
-
-
-    private int _state;
-
-    private const int Reset = 0;
-    private const int Disposed = 1;
-
-    public bool IsDisposed => Volatile.Read(_state) == Disposed;
-
-    public Stream MainStream
-    {
-        get
-        {
-            CheckDispose();
-            var stream = Volatile.Read(ref mainStream);
-            if (stream is null)
-                throw new NullReferenceException($"{nameof(MainStream)} is null");
-            return stream;
-        }
-        set
-        {
-            CheckDispose();
-            ArgumentNullException.ThrowIfNull(value);
-            var old = Interlocked.CompareExchange<Stream>(ref mainStream, value, null);
-            ThrowStateNotResetIfNotNull(old is not null, nameof(MainStream));
-        }
-    }
-
-    public MinecraftPacketSender PacketSender
-    {
-        get
-        {
-            CheckDispose();
-            var old = Volatile.Read(ref _packetSender);
-            if (old is null)
-                throw new NullReferenceException($"{nameof(PacketSender)} is null");
-            return old;
-        }
-        set
-        {
-            CheckDispose();
-            ArgumentNullException.ThrowIfNull(value, nameof(PacketSender));
-            var old = Interlocked.CompareExchange<MinecraftPacketSender>(ref _packetSender, value, null);
-            ThrowStateNotResetIfNotNull(old is not null, nameof(PacketSender));
-        }
-    }
-
-
-    public TcpClient? TcpClient
-    {
-        get
-        {
-            CheckDispose();
-            return Volatile.Read(ref _tcpClient);
-        }
-        set
-        {
-            CheckDispose();
-            ArgumentNullException.ThrowIfNull(value);
-            var old = Interlocked.CompareExchange(ref _tcpClient, value, null);
-            ThrowStateNotResetIfNotNull(old is not null, nameof(TcpClient));
-        }
-    }
-
-    public AsyncReaderWriterLock SendLock
-    {
-        get
-        {
-            CheckDispose();
-            var old = Volatile.Read(ref _sendLock);
-            if (old is null)
-                throw new NullReferenceException($"{nameof(SendLock)} is null");
-            return old;
-        }
-        set
-        {
-            CheckDispose();
-            ArgumentNullException.ThrowIfNull(value);
-            var old = Interlocked.CompareExchange(ref _sendLock, value, null);
-            ThrowStateNotResetIfNotNull(old is not null, nameof(SendLock));
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void CheckDispose()
-    {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void ThrowStateNotResetIfNotNull(bool notNull, string propName)
-    {
-        if (notNull)
-            throw new InvalidOperationException($"State not reset. Property {propName}");
-    }
-
-    public void ResetState()
-    {
-        int old = Interlocked.CompareExchange(ref _state, Reset, Disposed);
-        if (old == Reset)
-        {
-            throw new InvalidOperationException("The state has already been reset.");
-        }
-    }
-
-    public void DisposeAll()
-    {
-        int old = Interlocked.CompareExchange(ref _state, Disposed, Reset);
-
-        ObjectDisposedException.ThrowIf(old == Disposed, this);
-
-        Interlocked.Exchange(ref mainStream, null)?.Dispose();
-        Interlocked.Exchange(ref _tcpClient, null)?.Dispose();
-        Interlocked.Exchange(ref _sendLock, null)?.Dispose();
-    }
-}
-
 public sealed class MinecraftClient : Disposable, IPacketBroker
 {
-    #region Thread-safety fields
+#if NET9_0_OR_GREATER
+    private readonly System.Threading.Lock _gate = new();
+#else
+    private readonly object _gate = new();
+#endif
+    private volatile int _state;
 
-    private MinecraftPacketSender _packetSender;
-    private Stream mainStream;
-    private CancellationTokenSource CTS;
-    private TcpClient tcpClient;
-    private volatile MinecraftClientState _state;
-    private readonly AsyncLock sendLock;
+    private volatile int _isActive;
 
-    private bool NeedThrowException => throw new NotImplementedException();
+    private bool IsActive => _isActive == 1;
 
-    #endregion
+    private volatile CancellationTokenSource _aliveClient;
+
+    private volatile AsyncReaderWriterLock _sendLock;
+    private volatile MinecraftPacketSender _packetSender;
+    private volatile Stream mainStream;
 
     private readonly MinecraftClientLogin minecraftLogin = new();
 
 
     public MinecraftClient()
     {
-        minecraftLogin.StateChanged += MinecraftLogin_StateChanged;
-        var rw = new AsyncReaderWriterLock();
-
-        sendLock = AsyncLock.WriteLock(rw);
+        minecraftLogin.StateChanged += this.MinecraftLogin_StateChanged;
     }
 
     public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
@@ -177,19 +43,12 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public async ValueTask SendPacket(ReadOnlyMemory<byte> data)
     {
-        CheckSend();
-        var tempLock = sendLock;
-        var tempSender = _packetSender;
-        CancellationTokenSource cts = this.CTS;
-        var holder = await tempLock.AcquireAsync(cts.Token);
+        ThrowIfDisposed();
+        ThrowIfNotPlay();
+        var holder = await _sendLock.AcquireWriteLockAsync(_aliveClient.Token);
         try
         {
-            await tempSender.SendPacketAsync(data, cts.Token);
-        }
-        catch (Exception ex)
-        {
-            OnException(ex);
-            throw;
+            await _packetSender.SendPacketAsync(data, _aliveClient.Token);
         }
         finally
         {
@@ -197,77 +56,126 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
     }
 
-
-    public async Task Start()
+    public async Task Start(bool throwErrorConnect = false)
     {
+        ThrowIfDisposed();
+        ThrowIfConnected();
+
+
         Validate();
-        if (!TrySetConnect(out var error))
+
+        if (CompareExchangeState(MinecraftClientState.Connect, MinecraftClientState.Disconnected) !=
+            MinecraftClientState.Disconnected)
         {
-            throw new InvalidOperationException(error);
+            throw new InvalidOperationException("Not allowed to connect while connect/disconnect is pending.");
         }
 
-        var newCts = new CancellationTokenSource();
-        Volatile.Write(ref CTS, newCts);
+        RaiseStateChanged(MinecraftClientState.Disconnected, MinecraftClientState.Connect);
+
         try
         {
+            CleanUp();
+            var newCts = new CancellationTokenSource();
+            Stream tcpStream = null;
             using (var timeCts = CancellationTokenSource.CreateLinkedTokenSource(newCts.Token))
             {
                 try
                 {
                     timeCts.CancelAfter(ConnectTimeout);
-                    var newStream = await ConnectAsync(timeCts.Token);
-                    Volatile.Write(ref mainStream, newStream);
+                    tcpStream = await ConnectAsync(timeCts.Token);
                 }
-                catch (OperationCanceledException) when (timeCts.IsCancellationRequested)
+                catch (OperationCanceledException)
                 {
                     throw new ConnectTimeoutException(
                         $"Failed to connect to {Host}:{Port} in the specified time: {ConnectTimeout} ms");
                 }
             }
 
+            mainStream = tcpStream;
+
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
 
-            var result = await minecraftLogin.Login(mainStream, loginOptions, CTS.Token);
+            var result = await minecraftLogin.Login(tcpStream, loginOptions, newCts.Token);
 
-            //StateChange(MinecraftClientState.Play);
 
-            Task mainLoop = MainLoop(result, CTS.Token);
-        }
-        catch (OperationCanceledException ex) when (newCts.IsCancellationRequested)
-        {
+            Task mainLoop = MainLoop(result, newCts.Token);
         }
         catch (Exception ex)
         {
-            OnException(ex);
-            throw;
+            if (DisconnectIsPendingOrFinished())
+            {
+                return;
+            }
+
+            TryInitiateDisconnect();
+            CleanUp();
+            CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
+            RaiseDisconnected(ex);
+            
         }
+    }
+
+    private bool DisconnectIsPendingOrFinished()
+    {
+        var status = (MinecraftClientState)_state;
+        do
+        {
+            switch (status)
+            {
+                case MinecraftClientState.Disconnecting:
+                case MinecraftClientState.Disconnected:
+                    return true;
+                case MinecraftClientState.Connect:
+                case MinecraftClientState.Login:
+                case MinecraftClientState.Play:
+                    var curStatus = CompareExchangeState(MinecraftClientState.Disconnecting, status);
+                    if (curStatus == status)
+                        return false;
+                    status = curStatus;
+                    break;
+            }
+        } while (true);
     }
 
     public void Stop(Exception? customException = null)
     {
-        if (customException is not null)
+        ThrowIfDisposed();
+
+        if (DisconnectIsPendingOrFinished())
         {
-            OnException(customException);
+            return;
         }
-        else
-        {
-        }
+
+        TryInitiateDisconnect();
+        CleanUp();
+        CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
+        RaiseDisconnected(customException);
     }
 
     #endregion
 
     #region ValidateState
 
-    private bool TrySetConnect(out string errorMessage)
+    private void ThrowIfConnected()
     {
-        // TODO
-        errorMessage = "client already run";
-        return false;
+        var state = (MinecraftClientState)_state;
+        switch (state)
+        {
+            case MinecraftClientState.Login:
+            case MinecraftClientState.Handshaking:
+            case MinecraftClientState.Play:
+                throw new InvalidOperationException(
+                    "It is not allowed to connect with a server after the connection is established.");
+        }
     }
 
-    private void CheckSend()
+    private void ThrowIfNotPlay()
     {
+        if (_state != (int)MinecraftClientState.Play)
+        {
+            throw new InvalidOperationException("Cannot send packages outside of Play mode");
+        }
     }
 
     #endregion
@@ -284,12 +192,49 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void MinecraftLogin_StateChanged(MinecraftClientState state)
     {
-        //StateChange(state);
+        var curState = (MinecraftClientState)_state;
+        switch (curState)
+        {
+            case MinecraftClientState.Disconnected:
+            case MinecraftClientState.Disconnecting:
+                return;
+        }
+
+        if (curState == MinecraftClientState.Play)
+        {
+            throw new InvalidOperationException("The login status changes in Play mode");
+        }
+
+        var old = ExchangeState(state);
+
+        RaiseStateChanged(old,curState);
+        
     }
 
-    private bool TrySetErroredState()
+
+    void TryInitiateDisconnect()
     {
-        throw new NotImplementedException();
+        lock (_gate)
+        {
+            try
+            {
+                _aliveClient?.Cancel(false);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+    }
+
+    private MinecraftClientState ExchangeState(MinecraftClientState newVal)
+    {
+        return (MinecraftClientState)Interlocked.Exchange(ref _state, (int)newVal);
+    }
+
+    private MinecraftClientState CompareExchangeState(MinecraftClientState val, MinecraftClientState comparand)
+    {
+        return (MinecraftClientState)Interlocked.CompareExchange(ref _state, (int)val, (int)comparand);
     }
 
     private void RaiseStateChanged(MinecraftClientState oldState, MinecraftClientState newState)
@@ -297,21 +242,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         StateChanged?.Invoke(this, new StateEventArgs(oldState, newState));
     }
 
-    private void RaiseStateChanged(Exception error, MinecraftClientState oldState)
+    private void RaiseDisconnected(Exception? ex)
     {
-        StateChanged?.Invoke(this, new StateEventArgs(error, oldState));
+        Disconnected?.Invoke(this, new DisconnectedEventArgs(ex));
     }
 
-
-    private void OnException(Exception ex)
-    {
-        if (TrySetErroredState())
-        {
-        }
-
-
-        CleanUp();
-    }
 
     private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
     {
@@ -320,16 +255,21 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
 
         packetReader.BaseStream = loginizationResult.Stream;
-        _packetSender.BaseStream = loginizationResult.Stream;
+        packetSender.BaseStream = loginizationResult.Stream;
 
-        _packetSender.SwitchCompression(loginizationResult.CompressionThreshold);
+        packetSender.SwitchCompression(loginizationResult.CompressionThreshold);
 
-        Volatile.Write(ref _packetSender, packetSender);
+        _packetSender = packetSender;
 
         packetReader.SwitchCompression(loginizationResult.CompressionThreshold);
-
         try
         {
+            MinecraftClientState old = // Enable SendPacket
+                ExchangeState(MinecraftClientState.Play);
+
+
+            RaiseStateChanged(old, MinecraftClientState.Play);
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 var packet = await packetReader
@@ -346,14 +286,26 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
-            OnException(ex);
-            throw;
+            if (DisconnectIsPendingOrFinished())
+            {
+                return;
+            }
+
+            TryInitiateDisconnect();
+            CleanUp();
+            CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
+            RaiseDisconnected(ex);
+        }
+        finally
+        {
+            packetReader.BaseStream = null;
         }
     }
 
 
     private async ValueTask<Stream> ConnectAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         IDisposable? disposable = null;
         try
         {
@@ -391,36 +343,42 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void CleanUp()
     {
-        minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
-        if (CTS is not null)
+        try
         {
-            CTS.Cancel();
-            CTS.Dispose();
-            CTS = null;
+            _aliveClient?.Cancel(false);
         }
-
-        if (tcpClient is not null)
+        finally
         {
-            tcpClient.Dispose();
-            tcpClient = null;
-        }
+            _aliveClient?.Dispose();
+            _aliveClient = null;
 
-        if (mainStream is not null)
-        {
-            mainStream.Dispose();
+            mainStream?.Dispose();
             mainStream = null;
+
+            if (_packetSender is not null)
+            {
+                _packetSender.BaseStream = null;
+                _packetSender = null;
+            }
+
+            _sendLock?.Dispose();
+            _sendLock = null;
         }
     }
 
+    private void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(IsDisposed || IsDisposing, this);
+    }
 
     protected override void Dispose(bool disposing)
     {
-        CleanUp();
-        minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
-        Disposed?.Invoke();
-
-
-        GC.SuppressFinalize(this);
+        if (disposing)
+        {
+            CleanUp();
+            minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
+            Disposed?.Invoke();
+        }
         base.Dispose(disposing);
     }
 
@@ -428,6 +386,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     public event PacketHandler? PacketReceived;
     public event EventHandler<StateEventArgs> StateChanged;
+    public event EventHandler<DisconnectedEventArgs> Disconnected;
+
     public event Action? Disposed;
 
     #endregion
@@ -451,51 +411,4 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     public static readonly int MaxVersionSupport = MinecraftVersion.Latest;
 
     #endregion
-}
-
-internal struct CompletionState
-{
-    private int startStopping;
-
-    public void SetStop()
-    {
-    }
-
-    public MinecraftClientState SetState(MinecraftClientState newState)
-    {
-        if (IsDisposed)
-            ThrowObjectDiposedException();
-        int newVal = (int)newState;
-        throw new NotImplementedException();
-    }
-
-    static void ThrowObjectDiposedException()
-    {
-        throw new ObjectDisposedException("");
-    }
-
-    public void SetException()
-    {
-    }
-
-    #region States
-
-    private static int STOPPED_STATE = 0;
-    private static int CONNECT_STATE = 1;
-    private static int HANDSHAKING_STATE = 2;
-    private static int LOGIN_STATE = 3;
-    private static int PLAY_STATE = 4;
-    private static int ERRORED_STATE = 5;
-    private static int Disposed;
-
-    #endregion
-
-    private int _disposed;
-
-    public bool IsDisposed => Volatile.Read(ref _disposed) == 1;
-
-    public bool TrySetDisposed()
-    {
-        return Interlocked.Exchange(ref _disposed, Disposed) == 0;
-    }
 }

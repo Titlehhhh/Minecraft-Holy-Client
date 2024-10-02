@@ -2,9 +2,9 @@
 
 public enum MinecraftClientState
 {
-    Stopped,
+    Disconnected = 0,
+    Disconnecting,
     Connect,
-    Errored,
     Handshaking,
     Login,
     Play
