@@ -17,11 +17,11 @@ internal class Program
     public static async Task Main(string[] args)
     {
         Console.WriteLine("Start");
+        var list = new List<MinecraftClient>();
         try
         {
-            var list = new List<MinecraftClient>();
             var listProtocols = new List<MultiProtocol>();
-            for (int i = 0; i < 200; i++)
+            for (int i = 0; i < 10; i++)
             {
                 MinecraftClient client = new MinecraftClient()
                 {
@@ -31,11 +31,24 @@ internal class Program
                     Username = $"TitleBot_{i + 1:D3}",
                     Version = MinecraftVersion.Latest
                 };
-                client.StateChanged += (sender, eventArgs) =>
+                client.Disconnected += async (sender, eventArgs) =>
                 {
-                   // if (eventArgs.Error is not null)
+                    if (eventArgs.Exception is not null)
                     {
-                       // Console.WriteLine(eventArgs.Error);
+                        Console.WriteLine("Errored: " + eventArgs.Exception.Message);
+                        Console.WriteLine("Restart");
+                        try
+                        {
+                            await client.Start();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Start: " + e);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Stopped");
                     }
                 };
                 var protoTest = new MultiProtocol(client);
@@ -59,7 +72,7 @@ internal class Program
                         }
                         catch (Exception e)
                         {
-                            // Console.WriteLine(e);
+                             Console.WriteLine(e);
                         }
                     }
                 }
@@ -70,15 +83,16 @@ internal class Program
             await Task.WhenAll(tasks);
             //while (true)
             {
-                await Task.Delay(5000);
+                await Task.Delay(1000);
                 var sends = listProtocols.Select(async b =>
                 {
                     try
                     {
                         await b.SendChatPacket("Hello from Minecraft Holy Client");
                     }
-                    catch
+                    catch(Exception exception)
                     {
+                        Console.WriteLine("SendErr: "+exception);
                         // ignored
                     }
                 });
@@ -89,6 +103,12 @@ internal class Program
         {
             Console.WriteLine(e);
             // throw;
+        }
+
+        await Task.Delay(10000);
+        await foreach (var minecraftClient in list)
+        {
+            minecraftClient.Stop();
         }
 
         await Task.Delay(-1);
