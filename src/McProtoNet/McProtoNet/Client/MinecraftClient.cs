@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Diagnostics;
+using System.Net.Sockets;
 using DotNext;
 using DotNext.Threading;
 using McProtoNet.Abstractions;
@@ -76,6 +77,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         {
             CleanUp();
             var newCts = new CancellationTokenSource();
+            _aliveClient = newCts;
+
             Stream tcpStream = null;
             using (var timeCts = CancellationTokenSource.CreateLinkedTokenSource(newCts.Token))
             {
@@ -92,12 +95,13 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             }
 
             mainStream = tcpStream;
-
+            Debug.Assert(mainStream is not null, $"mainStream is not null?");
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
 
             var result = await minecraftLogin.Login(tcpStream, loginOptions, newCts.Token);
-
+            _sendLock = new AsyncReaderWriterLock();
+            mainStream = result.Stream;
 
             Task mainLoop = MainLoop(result, newCts.Token);
         }
@@ -112,8 +116,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             TryInitiateDisconnect();
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-            
-            RaiseDisconnected(ex,previus);
+
+            RaiseDisconnected(ex, previus);
         }
     }
 
@@ -267,9 +271,10 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         {
             MinecraftClientState old = // Enable SendPacket
                 ExchangeState(MinecraftClientState.Play);
+
             RaiseStateChanged(old, MinecraftClientState.Play);
 
-            
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 var packet = await packetReader
@@ -290,7 +295,6 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             {
                 return;
             }
-
             TryInitiateDisconnect();
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
@@ -324,12 +328,12 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                     SendTimeout = this.WriteTimeout,
                     ReceiveTimeout = this.ReadTimeout
                 };
-                await using (cancellationToken.Register(d => ((IDisposable)d).Dispose(), socket))
+                using (cancellationToken.Register(d => ((IDisposable)d).Dispose(), socket))
                 {
                     disposable = socket;
-                    await socket.ConnectAsync(Host, Port, cancellationToken);
+                    await socket.ConnectAsync(Host, Port, cancellationToken).ConfigureAwait(false);
 
-                    return new NetworkStream(socket);
+                    return new NetworkStream(socket, true);
                 }
             }
         }
@@ -354,6 +358,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
             mainStream?.Dispose();
             mainStream = null;
+
 
             if (_packetSender is not null)
             {
