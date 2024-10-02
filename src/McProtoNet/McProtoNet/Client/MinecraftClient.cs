@@ -103,6 +103,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
+            var previus = (MinecraftClientState)_state;
             if (DisconnectIsPendingOrFinished())
             {
                 return;
@@ -111,8 +112,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             TryInitiateDisconnect();
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-            RaiseDisconnected(ex);
             
+            RaiseDisconnected(ex,previus);
         }
     }
 
@@ -128,6 +129,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                     return true;
                 case MinecraftClientState.Connect:
                 case MinecraftClientState.Login:
+                case MinecraftClientState.Handshaking:
                 case MinecraftClientState.Play:
                     var curStatus = CompareExchangeState(MinecraftClientState.Disconnecting, status);
                     if (curStatus == status)
@@ -150,7 +152,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         TryInitiateDisconnect();
         CleanUp();
         CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-        RaiseDisconnected(customException);
+        RaiseDisconnected(customException, MinecraftClientState.Disconnecting);
     }
 
     #endregion
@@ -207,8 +209,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
         var old = ExchangeState(state);
 
-        RaiseStateChanged(old,curState);
-        
+        RaiseStateChanged(old, curState);
     }
 
 
@@ -242,9 +243,9 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         StateChanged?.Invoke(this, new StateEventArgs(oldState, newState));
     }
 
-    private void RaiseDisconnected(Exception? ex)
+    private void RaiseDisconnected(Exception? ex, MinecraftClientState previousState)
     {
-        Disconnected?.Invoke(this, new DisconnectedEventArgs(ex));
+        Disconnected?.Invoke(this, new DisconnectedEventArgs(ex, previousState));
     }
 
 
@@ -266,10 +267,9 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         {
             MinecraftClientState old = // Enable SendPacket
                 ExchangeState(MinecraftClientState.Play);
-
-
             RaiseStateChanged(old, MinecraftClientState.Play);
 
+            
             while (!cancellationToken.IsCancellationRequested)
             {
                 var packet = await packetReader
@@ -294,7 +294,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             TryInitiateDisconnect();
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-            RaiseDisconnected(ex);
+            RaiseDisconnected(ex, MinecraftClientState.Play);
         }
         finally
         {
@@ -379,6 +379,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             minecraftLogin.StateChanged -= MinecraftLogin_StateChanged;
             Disposed?.Invoke();
         }
+
         base.Dispose(disposing);
     }
 

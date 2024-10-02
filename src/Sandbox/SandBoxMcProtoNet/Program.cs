@@ -33,9 +33,9 @@ internal class Program
                 };
                 client.StateChanged += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Error is not null)
+                   // if (eventArgs.Error is not null)
                     {
-                        Console.WriteLine(eventArgs.Error);
+                       // Console.WriteLine(eventArgs.Error);
                     }
                 };
                 var protoTest = new MultiProtocol(client);

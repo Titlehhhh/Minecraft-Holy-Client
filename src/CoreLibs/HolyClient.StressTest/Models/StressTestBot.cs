@@ -33,14 +33,19 @@ public sealed class StressTestBot : IStressTestBot
         this.number = number;
         this.cancellationToken = cancellationToken;
         _client.StateChanged += ClientOnStateChanged;
+        _client.Disconnected += ClientOnDisconnected;
+    }
+
+    private void ClientOnDisconnected(object? sender, DisconnectedEventArgs e)
+    {
+        if (e.Exception is not null)
+        {
+            autoRestart?.Invoke(this);
+        }
     }
 
     private void ClientOnStateChanged(object? sender, StateEventArgs e)
     {
-        if (e.State == MinecraftClientState.Errored)
-        {
-            autoRestart?.Invoke(this);
-        }
     }
 
     public MinecraftClient Client
@@ -77,11 +82,10 @@ public sealed class StressTestBot : IStressTestBot
 
         try
         {
-            
             if (changeNickAndProxy)
             {
                 var nick = nickProvider.GetNextNick();
-                
+
                 IProxyClient? proxy = null;
 
                 if (proxyProvider is not null)
@@ -113,7 +117,7 @@ public sealed class StressTestBot : IStressTestBot
             throw new ObjectDisposedException(nameof(StressTestBot));
     }
 
-    private bool disposed =false;
+    private bool disposed = false;
     private readonly ProtocolBase _protocol;
 
     public void Dispose()
@@ -122,6 +126,7 @@ public sealed class StressTestBot : IStressTestBot
             return;
         disposed = true;
         _client.StateChanged -= ClientOnStateChanged;
+        _client.Disconnected -= ClientOnDisconnected;
         proxyProvider?.Dispose();
         _client.Dispose();
         _protocol.Dispose();

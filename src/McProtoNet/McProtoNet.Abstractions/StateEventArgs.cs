@@ -11,13 +11,3 @@ public sealed class StateEventArgs : EventArgs
     public MinecraftClientState State { get; }
     public MinecraftClientState OldState { get; }
 }
-
-public sealed class DisconnectedEventArgs : EventArgs
-{
-    public DisconnectedEventArgs(Exception? exception = null)
-    {
-        Exception = exception;
-    }
-
-    public Exception? Exception { get; }
-}

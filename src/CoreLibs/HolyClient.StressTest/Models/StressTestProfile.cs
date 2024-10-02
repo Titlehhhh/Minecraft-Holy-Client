@@ -134,7 +134,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             if (UseProxy)
             {
-                var proxies = (await LoadProxy(logger)).Select(x=>(ProxyRecord)x);
+                var proxies = (await LoadProxy(logger)).Select(x => (ProxyRecord)x);
                 if (proxies.Count() > 0)
                 {
                     IProxyChecker proxyChecker = ProxyChecker.CreateChunked(proxies, new ProxyCheckerChunkedOptions()
@@ -149,7 +149,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                     proxyChecker.Start();
                     proxyProvider = new ProxyProvider(proxyChecker);
                     proxyChecker.DisposeWith(disposables);
-                    
+
                     logger.Information("Запущен прокси-чекер");
                 }
                 else
@@ -286,8 +286,10 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             MinecraftClient bot = new MinecraftClient();
 
             bot.StateChanged += BotOnStateChanged;
+            bot.Disconnected += BotOnDisconnected;
 
             disposables.Add(Disposable.Create(() => { bot.StateChanged -= BotOnStateChanged; }));
+            disposables.Add(Disposable.Create(() => { bot.Disconnected -= BotOnDisconnected; }));
 
             bot.Host = srv_host;
             bot.Port = (ushort)srv_port;
@@ -314,27 +316,31 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         return stressTestBots;
     }
 
-    private void BotOnStateChanged(object? sender, StateEventArgs e)
+    private void BotOnDisconnected(object? sender, DisconnectedEventArgs e)
     {
-        if (e.State == MinecraftClientState.Play)
+        if (e.PreviousState == MinecraftClientState.Play)
         {
-            Interlocked.Increment(ref _cpsCounter);
-            Interlocked.Increment(ref _botsPlayCounter);
+            Interlocked.Decrement(ref _botsPlayCounter);
         }
-        else if (e.State == MinecraftClientState.Errored)
-        {
-            if (e.OldState == MinecraftClientState.Play)
-            {
-                Interlocked.Decrement(ref _botsPlayCounter);
-            }
 
-            Exception exc = e.Error;
+        if (e.Exception is not null)
+        {
+            Exception exc = e.Exception;
             var key = Tuple.Create(exc.GetType().FullName, exc.Message);
 
             if (ExceptionCounter.TryGetValue(key, out var counter))
                 counter.Increment();
             else
                 ExceptionCounter[key] = new ExceptionCounter();
+        }
+    }
+
+    private void BotOnStateChanged(object? sender, StateEventArgs e)
+    {
+        if (e.State == MinecraftClientState.Play)
+        {
+            Interlocked.Increment(ref _cpsCounter);
+            Interlocked.Increment(ref _botsPlayCounter);
         }
     }
 
