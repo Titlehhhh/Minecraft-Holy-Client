@@ -15,10 +15,7 @@ public sealed class MinecraftPacketSender
     private int _compressionThreshold;
     public Stream BaseStream { get; set; }
 
-    public void Dispose()
-    {
-      
-    }
+    
 
     public ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
     {
