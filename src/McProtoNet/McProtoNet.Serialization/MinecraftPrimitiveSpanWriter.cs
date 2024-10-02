@@ -221,10 +221,6 @@ public ref struct MinecraftPrimitiveSpanWriter
         this.WriteBuffer(ms.ToArray());
     }
 
-    public void Clear(bool reuseBuffer = false)
-    {
-        writerSlim.Clear(reuseBuffer);
-    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CheckDisposed()
@@ -234,11 +230,11 @@ public ref struct MinecraftPrimitiveSpanWriter
     }
 
     private bool disposed;
-
     public MemoryOwner<byte> GetWrittenMemory()
     {
         if (!writerSlim.TryDetachBuffer(out var result))
             throw new InvalidOperationException("Don't detach buffer");
+        
         disposed = true;
         return result;
     }
@@ -248,8 +244,7 @@ public ref struct MinecraftPrimitiveSpanWriter
         if (disposed)
             return;
         disposed = true;
-
+       
         writerSlim.Dispose();
-        ;
     }
 }

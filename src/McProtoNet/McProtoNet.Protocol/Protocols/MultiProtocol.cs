@@ -144,10 +144,10 @@ public sealed class MultiProtocol : ProtocolBase
 
             return SendPacketCore(writer.GetWrittenMemory());
         }
-        catch
+        finally
         {
+            
             writer.Dispose();
-            throw;
         }
     }
 
@@ -179,10 +179,9 @@ public sealed class MultiProtocol : ProtocolBase
             writer.WriteSignedLong(id);
             return SendPacketCore(writer.GetWrittenMemory());
         }
-        catch
+        finally
         {
             writer.Dispose();
-            throw;
         }
     }
 
