@@ -107,8 +107,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
-            var previus = (MinecraftClientState)_state;
-            if (DisconnectIsPendingOrFinished())
+            if (DisconnectIsPendingOrFinished(out var previus))
             {
                 return;
             }
@@ -121,7 +120,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
     }
 
-    private bool DisconnectIsPendingOrFinished()
+    private bool DisconnectIsPendingOrFinished(out MinecraftClientState old)
     {
         var status = (MinecraftClientState)_state;
         do
@@ -130,6 +129,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             {
                 case MinecraftClientState.Disconnecting:
                 case MinecraftClientState.Disconnected:
+                    old = status;
                     return true;
                 case MinecraftClientState.Connect:
                 case MinecraftClientState.Login:
@@ -137,7 +137,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                 case MinecraftClientState.Play:
                     var curStatus = CompareExchangeState(MinecraftClientState.Disconnecting, status);
                     if (curStatus == status)
+                    {
+                        old = curStatus;
                         return false;
+                    }
+
                     status = curStatus;
                     break;
             }
@@ -148,7 +152,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     {
         ThrowIfDisposed();
 
-        if (DisconnectIsPendingOrFinished())
+        if (DisconnectIsPendingOrFinished(out var previus))
         {
             return;
         }
@@ -156,7 +160,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         TryInitiateDisconnect();
         CleanUp();
         CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-        RaiseDisconnected(customException, MinecraftClientState.Disconnecting);
+        RaiseDisconnected(customException, previus);
     }
 
     #endregion
@@ -211,9 +215,20 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
             throw new InvalidOperationException("The login status changes in Play mode");
         }
 
-        var old = ExchangeState(state);
-
-        RaiseStateChanged(old, curState);
+        var prev = state switch
+        {
+            MinecraftClientState.Handshaking => MinecraftClientState.Connect,
+            MinecraftClientState.Login => MinecraftClientState.Handshaking,
+        };
+        var old = CompareExchangeState(state, prev);
+        if (old == prev)
+        {
+            RaiseStateChanged(prev, state);
+        }
+        else
+        {
+            Debug.Assert(false, $"Current: {state} Prev: {prev}");
+        }
     }
 
 
@@ -291,10 +306,11 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
-            if (DisconnectIsPendingOrFinished())
+            if (DisconnectIsPendingOrFinished(out _))
             {
                 return;
             }
+
             TryInitiateDisconnect();
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);

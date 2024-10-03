@@ -80,9 +80,9 @@ internal class Program
                 tasks.Add(RunBot(minecraftClient, listProtocols[index++]));
             }
 
+            
             await Task.WhenAll(tasks);
-            //while (true)
-            {
+            
                 await Task.Delay(1000);
                 var sends = listProtocols.Select(async b =>
                 {
@@ -97,7 +97,7 @@ internal class Program
                     }
                 });
                 await Task.WhenAll(sends);
-            }
+            
         }
         catch (Exception e)
         {
