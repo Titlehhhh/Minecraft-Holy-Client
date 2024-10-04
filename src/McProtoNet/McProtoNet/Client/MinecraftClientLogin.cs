@@ -44,8 +44,8 @@ internal sealed class MinecraftClientLogin
         var mainStream = new AesStream(source);
         try
         {
-             var sender = new MinecraftPacketSender();
-             var reader = new MinecraftPacketReader();
+            var sender = new MinecraftPacketSender();
+            var reader = new MinecraftPacketReader();
 
             sender.BaseStream = mainStream;
             reader.BaseStream = mainStream;
@@ -81,7 +81,7 @@ internal sealed class MinecraftClientLogin
             while (true)
             {
                 var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-                
+
                 try
                 {
                     var needBreak = false;
@@ -89,7 +89,10 @@ internal sealed class MinecraftClientLogin
                     {
                         case 0x00: // Login Disconnect
                             //inputPacket.Data.TryReadString(out var reason, out _);
-                            throw new LoginRejectedException("Login Disconnect");
+                            string reason = ReadLoginDisconnect(inputPacket);
+
+
+                            throw new LoginRejectedException("Login Disconnect: " + reason);
                             break;
                         case 0x01: // Encryption Request
                             var encryptBegin = ReadEncryptionPacket(inputPacket);
@@ -155,12 +158,12 @@ internal sealed class MinecraftClientLogin
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-                   
+
                     try
                     {
                         var needBreak = false;
 
-                        
+
                         switch (inputPacket.Id)
                         {
                             case 0x00: // Cookie Request
@@ -252,6 +255,12 @@ internal sealed class MinecraftClientLogin
         }
     }
 
+    private static string ReadLoginDisconnect(InputPacket packet)
+    {
+        scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+        return reader.ReadString();
+    }
+
     private static OutputPacket CreateKeepAlive(long id)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
@@ -265,11 +274,13 @@ internal sealed class MinecraftClientLogin
         scoped MinecraftPrimitiveSpanReader r = new MinecraftPrimitiveSpanReader(p.Data);
         return r.ReadVarInt();
     }
+
     private static long ReadKeepAlive(InputPacket p)
     {
         scoped MinecraftPrimitiveSpanReader r = new MinecraftPrimitiveSpanReader(p.Data);
         return r.ReadSignedLong();
     }
+
     private static ClientboundConfigurationPluginMessagePacket ReadConfigPluginMessagePacket(InputPacket packet)
     {
         scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
@@ -340,67 +351,32 @@ internal sealed class MinecraftClientLogin
     {
         spanWriter.WriteVarInt(0x00); // Packet Id
 
-        spanWriter.WriteString(options.Username);
+        //spanWriter.WriteString(options.Username);
 
-        bool authentifier = false; // TODO 
-
-        if (authentifier)
+        if (options.ProtocolVersion < 759)
         {
-            if (options.ProtocolVersion < 761) /* < 1.19.3 */
-            {
-                // ProfilePublicKey key;
-                // key.SetTimestamp(authentifier->GetKeyTimestamp());
-                // key.SetKey(Utilities::RSAToBytes(authentifier->GetPublicKey()));
-                // key.SetSignature(Utilities::DecodeBase64(authentifier->GetKeySignature()));
-                //
-                // loginstart_msg->SetPublicKey(key);
-            }
-            else
-            {
-                // message_sent_index = 0;
-            }
-
-
-            if (options.ProtocolVersion > 759) /* > 1.19 */
-            {
-                //loginstart_msg->SetProfileId(authentifier->GetPlayerUUID());
-            }
+            spanWriter.WriteString(options.Username);
+        }
+        else if (options.ProtocolVersion < 760)
+        {
+            spanWriter.WriteString(options.Username);
+            spanWriter.WriteBoolean(false);
+        }
+        else if (options.ProtocolVersion < 761)
+        {
+            spanWriter.WriteString(options.Username);
+            spanWriter.WriteBoolean(false);
+            spanWriter.WriteBoolean(false);
+        }
+        else if (options.ProtocolVersion < 764)
+        {
+            spanWriter.WriteString(options.Username);
+            spanWriter.WriteBoolean(false);
         }
         else
         {
-            if (options.ProtocolVersion < 760) /* < 1.19.1 */
-            {
-                spanWriter.WriteBoolean(false);
-                //     DECLARE_FIELDS(
-                //         (std::string, std::optional<ProfilePublicKey>),
-                // (Name_, PublicKey)
-                //     );
-            }
-            else if (options.ProtocolVersion < 761) /* < 1.19.3 */
-            {
-                spanWriter.WriteBoolean(false);
-                spanWriter.WriteBoolean(false);
-                // DECLARE_FIELDS(
-                //     (std::string, std::optional<ProfilePublicKey>, std::optional<UUID>),
-                // (Name_, PublicKey, ProfileId)
-                //     );
-            }
-            else if (options.ProtocolVersion < 764) /* < 1.20.2 */
-            {
-                spanWriter.WriteBoolean(false);
-                // DECLARE_FIELDS(
-                //     (std::string, std::optional<UUID>),
-                // (Name_, ProfileId)
-                //     );
-            }
-            else
-            {
-                spanWriter.WriteUUID(Guid.NewGuid());
-                // DECLARE_FIELDS(
-                //     (std::string, UUID),
-                // (Name_, ProfileId)
-                //     );
-            }
+            spanWriter.WriteString(options.Username);
+            spanWriter.WriteUUID(Guid.NewGuid());
         }
     }
 

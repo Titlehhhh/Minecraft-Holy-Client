@@ -172,6 +172,7 @@ public static class Extensions
     public static async ValueTask<int> ReadVarIntAsync(this Stream stream, CancellationToken token = default)
     {
         var buff = ArrayPool<byte>.Shared.Rent(1);
+        Memory<byte> memory = buff.AsMemory(0,1);
         try
         {
             var numRead = 0;
@@ -179,7 +180,7 @@ public static class Extensions
             byte read;
             do
             {
-                if (await stream.ReadAsync(buff, 0, 1, token) <= 0) throw new EndOfStreamException();
+                await stream.ReadExactlyAsync(memory, token);
 
                 read = buff[0];
 

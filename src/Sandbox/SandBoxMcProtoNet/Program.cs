@@ -21,15 +21,16 @@ internal class Program
         try
         {
             var listProtocols = new List<MultiProtocol>();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 1; i++)
             {
+                
                 MinecraftClient client = new MinecraftClient()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(30),
-                    Host = "192.168.0.7",
-                    Port = 25565,
+                    Host = "185.107.192.132",
+                    Port = 62860,
                     Username = $"TitleBot_{i + 1:D3}",
-                    Version = MinecraftVersion.Latest
+                    Version = 340
                 };
                 client.Disconnected += async (sender, eventArgs) =>
                 {
@@ -67,7 +68,7 @@ internal class Program
                         try
                         {
                             await client.Start();
-                            await proto.OnJoinGame.FirstOrDefaultAsync();
+                            //await proto.OnJoinGame.FirstOrDefaultAsync();
                             break;
                         }
                         catch (Exception e)
