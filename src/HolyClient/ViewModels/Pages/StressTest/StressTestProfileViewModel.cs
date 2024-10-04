@@ -34,11 +34,6 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
         #region Bind to state
 
-        this.WhenActivated(d =>
-        {
-            Console.WriteLine($"Active StressTestProfile: {Name}");
-            Disposable.Create(() => { Console.WriteLine($"Deactive StressTestProfile: {Name}"); }).DisposeWith(d);
-        });
         state.PropertyChanged += (s, e) => { _ = App.SaveState(); };
         Id = state.Id;
         Name = state.Name;
@@ -260,7 +255,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
             {
                 var mainVM = Locator.Current.GetService<MainViewModel>();
                 await rootScreen.Router.NavigateAndReset.Execute(mainVM);
-                return;
+              
 
                 disp.Dispose();
                 await _state.Stop();
@@ -268,9 +263,9 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
 
             var process = new StressTestProcessViewModel(cancelCommand, _state, loggerWrapper);
             process.DisposeWith(disp);
-            //Task start = _state.Start(logger);
+            Task start = _state.Start(logger);
             await rootScreen.Router.NavigateAndReset.Execute(process);
-            //await start;
+            await start;
         }
         catch (TaskCanceledException)
         {
