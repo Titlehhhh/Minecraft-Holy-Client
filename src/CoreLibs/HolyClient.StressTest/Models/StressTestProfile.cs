@@ -169,7 +169,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 srv_host,
                 srv_port);
 
-            _cleanUp = disposables;
+            Interlocked.Exchange(ref _cleanUp, disposables)?.Dispose();
 
             logger.Information("Запуск поведения");
             if (Behavior is not null) await Behavior.Activate(disposables, bots, logger, cancellationTokenSource.Token);
@@ -178,9 +178,11 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             var t = Task.Run(async () =>
             {
+                Stopwatch stopwatch = new();
+                
                 try
                 {
-                    Stopwatch stopwatch = new();
+                    
 
                     while (!cancellationTokenSource.IsCancellationRequested)
                     {
@@ -288,8 +290,11 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             bot.StateChanged += BotOnStateChanged;
             bot.Disconnected += BotOnDisconnected;
 
-            disposables.Add(Disposable.Create(() => { bot.StateChanged -= BotOnStateChanged; }));
-            disposables.Add(Disposable.Create(() => { bot.Disconnected -= BotOnDisconnected; }));
+            disposables.Add(Disposable.Create(() =>
+            {
+                bot.StateChanged -= BotOnStateChanged;
+                bot.Disconnected -= BotOnDisconnected;
+            }));
 
             bot.Host = srv_host;
             bot.Port = (ushort)srv_port;

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Disposables;
+using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
@@ -16,9 +17,10 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
     public MainView()
     {
         InitializeComponent();
-
+        
         this.WhenActivated(d =>
         {
+
             ViewModel.WhenAnyValue(x => x.SelectedPage)
                 .Subscribe(page =>
                 {
@@ -51,6 +53,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
     private void NavigationView_ItemInvoked(object? sender, NavigationViewItemInvokedEventArgs e)
     {
-        if (e.InvokedItemContainer is NavigationViewItem nvi && nvi.Tag is Page typ) ViewModel.SelectedPage = typ;
+        if (e.InvokedItemContainer is NavigationViewItem nvi && nvi.Tag is Page typ) 
+            ViewModel.SelectedPage = typ;
     }
 }

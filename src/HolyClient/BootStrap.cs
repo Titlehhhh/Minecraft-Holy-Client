@@ -116,7 +116,7 @@ public static class BootStrap
 
         var root = Locator.Current.GetService<IScreen>("Root");
 
-        await root.Router.Navigate.Execute(mainViewModel);
+        await root.Router.NavigateAndReset.Execute(mainViewModel);
     }
 
     private static void RegisterViewModels()

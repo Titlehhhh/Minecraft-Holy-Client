@@ -12,13 +12,13 @@ namespace HolyClient.StressTest;
 [ConfigureAwait(false)]
 public sealed class StressTestBot : IStressTestBot
 {
-    private readonly CancellationToken cancellationToken;
+    private CancellationToken cancellationToken;
     private ILogger logger;
 
-    private readonly INickProvider nickProvider;
+    private  INickProvider nickProvider;
     private int number;
-    private readonly IProxyProvider? proxyProvider;
-    private readonly MinecraftClient _client;
+    private  IProxyProvider? proxyProvider;
+    private  MinecraftClient _client;
     private Action<IStressTestBot>? autoRestart;
 
     public StressTestBot(MinecraftClient client, INickProvider nickProvider, IProxyProvider? proxyProvider,
@@ -52,7 +52,7 @@ public sealed class StressTestBot : IStressTestBot
     {
         get
         {
-            CheckDisposed();
+            ThrowIfDisposed();
             return _client;
         }
     }
@@ -61,7 +61,7 @@ public sealed class StressTestBot : IStressTestBot
     {
         get
         {
-            CheckDisposed();
+            ThrowIfDisposed();
             return _protocol;
         }
     }
@@ -73,7 +73,7 @@ public sealed class StressTestBot : IStressTestBot
 
     public async Task Restart(bool changeNickAndProxy)
     {
-        CheckDisposed();
+        ThrowIfDisposed();
         if (cancellationToken.IsCancellationRequested)
             return;
 
@@ -107,18 +107,19 @@ public sealed class StressTestBot : IStressTestBot
 
     public void Stop()
     {
+        ThrowIfDisposed();
         Client.Stop();
     }
 
 
-    private void CheckDisposed()
+    private void ThrowIfDisposed()
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(StressTestBot));
     }
 
     private bool disposed = false;
-    private readonly ProtocolBase _protocol;
+    private ProtocolBase _protocol;
 
     public void Dispose()
     {
@@ -130,5 +131,10 @@ public sealed class StressTestBot : IStressTestBot
         proxyProvider?.Dispose();
         _client.Dispose();
         _protocol.Dispose();
+        _client = null;
+        _protocol = null;
+        this.nickProvider = null;
+        this.logger = null;
+        autoRestart = null;
     }
 }

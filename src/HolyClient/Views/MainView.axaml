@@ -67,8 +67,6 @@
         </ui:NavigationView.FooterMenuItems>
 
 
-        <reactiveUi:RoutedViewHost Router="{Binding Router}" />
+        <reactiveUi:RoutedViewHost x:Name="routedViewHost" Router="{Binding Router}" />
     </ui:NavigationView>
-
-
 </UserControl>

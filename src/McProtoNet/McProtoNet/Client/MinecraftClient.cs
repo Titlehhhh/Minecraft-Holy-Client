@@ -202,6 +202,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void MinecraftLogin_StateChanged(MinecraftClientState state)
     {
+        ThrowIfDisposed();
         var curState = (MinecraftClientState)_state;
         switch (curState)
         {

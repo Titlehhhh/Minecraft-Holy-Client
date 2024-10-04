@@ -21,7 +21,7 @@ internal class Program
         try
         {
             var listProtocols = new List<MultiProtocol>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 50; i++)
             {
                 MinecraftClient client = new MinecraftClient()
                 {
@@ -105,11 +105,7 @@ internal class Program
             // throw;
         }
 
-        await Task.Delay(10000);
-        await foreach (var minecraftClient in list)
-        {
-            minecraftClient.Stop();
-        }
+        
 
         await Task.Delay(-1);
     }

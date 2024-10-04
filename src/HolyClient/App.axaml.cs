@@ -63,7 +63,9 @@ public class App : Application
         Locator.CurrentMutable.RegisterConstant<DiscordRpcService>(service);
         service.Start();
         Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
-
+        MainView main = new MainView();
+        Locator.CurrentMutable.RegisterConstant<IViewFor<MainViewModel>>(main);
+        
 
         try
         {

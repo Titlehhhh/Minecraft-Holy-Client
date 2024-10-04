@@ -27,27 +27,26 @@ using SkiaSharp;
 
 namespace HolyClient.ViewModels;
 
-public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IActivatableViewModel
+public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessViewModel, IDisposable
 {
     private readonly DateTimeAxis _botsOnlineAxis;
 
-    private readonly List<DateTimePoint> _botsOnlineValues = new();
-    private readonly DateTimeAxis _cpsAxis;
-    private readonly List<DateTimePoint> _cpsValues = new();
-    private readonly Random _random = new();
+    private List<DateTimePoint> _botsOnlineValues = new();
+    private DateTimeAxis _cpsAxis;
+    private List<DateTimePoint> _cpsValues = new();
+    private ICommand _cancel;
 
-    private int colorId = 0;
 
     public StressTestProcessViewModel(ICommand cancel, IStressTestProfile stressTest, LoggerWrapper wrapper)
     {
         Logs = wrapper.Events;
         Host = stressTest.Server;
-       // Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
+        // Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
         Version = stressTest.Version.ToString();
         ParallelCount = stressTest.NumberOfBots.ToString();
 
 
-        CancelCommand = cancel;
+        _cancel = cancel;
 
 
         #region Confirgure charts
@@ -82,7 +81,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
             AnimationsSpeed = TimeSpan.FromMilliseconds(0),
             SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100))
         };
-
+        
         _cpsAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
         {
             CustomSeparators = GetSeparators(),
@@ -158,11 +157,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
                         new ExceptionInfoViewModel(x.Key.Item1, x.Key.Item2, x.Value.Count));
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(data =>
-                {
-                    //Console.WriteLine("Second");
-                    exceptions.AddOrUpdate(data);
-                }).DisposeWith(d);
+                .Subscribe(data => { exceptions.AddOrUpdate(data); }).DisposeWith(d);
         });
     }
 
@@ -182,7 +177,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     public SolidColorPaint LegendBackgroundPaint { get; set; } = new(new SKColor(240, 240, 240));
 
-     public ICommand CancelCommand { get; }
+    public ICommand CancelCommand => _cancel;
 
 
     private double[] GetSeparators()
@@ -213,9 +208,9 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     [Reactive] public string Host { get; set; }
 
-    [Reactive] public string Version { get;set; }
+    [Reactive] public string Version { get; set; }
 
-    [Reactive] public string ParallelCount { get;set; }
+    [Reactive] public string ParallelCount { get; set; }
 
     #endregion
 
@@ -227,13 +222,13 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     [Reactive] public int PeakCPS { get; private set; }
 
-    [Reactive] public string ProxyQuality { get; set; }
+    [Reactive] public string ProxyQuality { get; private set; }
 
 
-    [Reactive] public IEnumerable<ISeries> Proxy_Series { get; set; } = Enumerable.Empty<ISeries>();
+    [Reactive] public IEnumerable<ISeries> Proxy_Series { get; private set; } = Enumerable.Empty<ISeries>();
 
 
-    public ObservableCollection<LogEventViewModel> Logs { get; }
+    public ObservableCollection<LogEventViewModel> Logs { get; private set; }
 
     #region Metrics
 
@@ -253,92 +248,29 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     public IScreen HostScreen { get; }
 
-    public ViewModelActivator Activator { get; } = new();
+    public ViewModelActivator Activator { get; set; } = new();
 
     #endregion
-}
 
-public class CustomLegend : IChartLegend<SkiaSharpDrawingContext>
-{
-    private static readonly int s_zIndex = 10050;
-
-    private readonly SolidColorPaint _fontPaint = new(new SKColor(30, 20, 30))
+    public void Dispose()
     {
-        SKTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold),
-        ZIndex = s_zIndex + 1
-    };
-
-    private readonly StackPanel<RoundedRectangleGeometry, SkiaSharpDrawingContext> _stackPanel = new();
-
-    public void Draw(Chart<SkiaSharpDrawingContext> chart)
-    {
-        var legendPosition = chart.GetLegendPosition();
-
-        _stackPanel.X = legendPosition.X;
-        _stackPanel.Y = legendPosition.Y;
-
-        chart.AddVisual(_stackPanel);
-        if (chart.LegendPosition == LegendPosition.Hidden) chart.RemoveVisual(_stackPanel);
-    }
-
-    public LvcSize Measure(Chart<SkiaSharpDrawingContext> chart)
-    {
-        _stackPanel.Orientation = ContainerOrientation.Vertical;
-        _stackPanel.MaxWidth = double.MaxValue;
-        _stackPanel.MaxHeight = chart.ControlSize.Height;
-
-        // clear the previous elements.
-        foreach (var visual in _stackPanel.Children.ToArray())
-        {
-            _ = _stackPanel.Children.Remove(visual);
-            chart.RemoveVisual(visual);
-        }
-
-        var theme = LiveCharts.DefaultSettings.GetTheme<SkiaSharpDrawingContext>();
-
-        foreach (var series in chart.Series.Where(x => x.IsVisibleAtLegend))
-        {
-            var panel = new StackPanel<RectangleGeometry, SkiaSharpDrawingContext>
-            {
-                Padding = new Padding(12, 6),
-                VerticalAlignment = Align.Middle,
-                HorizontalAlignment = Align.Middle,
-                Children =
-                {
-                    new SVGVisual
-                    {
-                        Path = SKPath.ParseSvgPathData(SVGPoints.Star),
-                        Width = 25,
-                        Height = 25,
-                        ClippingMode = ClipMode.None, // required on legends 
-                        Fill = new SolidColorPaint(theme.GetSeriesColor(series).AsSKColor())
-                        {
-                            ZIndex = s_zIndex + 1
-                        }
-                    },
-                    new LabelVisual
-                    {
-                        Text = series.Name ?? string.Empty,
-                        Paint = _fontPaint,
-                        TextSize = 15,
-                        ClippingMode = ClipMode.None, // required on legends 
-                        Padding = new Padding(8, 0, 0, 0),
-                        VerticalAlignment = Align.Start,
-                        HorizontalAlignment = Align.Start
-                    }
-                }
-            };
-
-            panel.PointerDown += GetPointerDownHandler(series);
-            _stackPanel.Children.Add(panel);
-        }
-
-        return _stackPanel.Measure(chart);
-    }
-
-    private static VisualElementHandler<SkiaSharpDrawingContext> GetPointerDownHandler(
-        IChartSeries<SkiaSharpDrawingContext> series)
-    {
-        return (visual, args) => { series.IsVisible = !series.IsVisible; };
+        Console.WriteLine("Disp");
+        Activator.Dispose();
+        this.Activator = null;
+        _botsOnlineValues = null;
+        _cpsAxis = null;
+        _cpsValues = null;
+        _cancel = null;
+        Proxy_Series = null;
+        LegendTextPaint?.Dispose();
+        LegendTextPaint = null;
+        LegendBackgroundPaint?.Dispose();
+        LegendBackgroundPaint = null;
+        BotsOnlineSeries.Clear();
+        CPSSeries.Clear();
+        Logs = null;
+        Proxy_Series = null;
+        Exceptions = null;
+        GC.SuppressFinalize(this);
     }
 }

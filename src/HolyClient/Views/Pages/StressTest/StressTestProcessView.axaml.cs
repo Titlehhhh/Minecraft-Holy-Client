@@ -1,30 +1,30 @@
+using System;
 using System.Collections.Specialized;
+using System.Reactive.Disposables;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
 using ReactiveUI;
 
 namespace HolyClient.Views;
 
-public partial class StressTestProcessView : ReactiveUserControl<IStressTestProcessViewModel>
+public partial class StressTestProcessView : ReactiveUserControl<StressTestProcessViewModel>
 {
     public StressTestProcessView()
     {
         InitializeComponent();
+    }
 
-        this.WhenActivated(d => { ViewModel.Logs.CollectionChanged += Logs_CollectionChanged; });
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        ViewModel.Logs.CollectionChanged += Logs_CollectionChanged;
+        base.OnLoaded(e);
+    }
 
-        //ProxyPieChart.LegendPosition = LiveChartsCore.Measure.LegendPosition.Top;
-        //ProxyPieChart.LegendTextPaint = new SolidColorPaint(SKColors.White);
-        //ProxyPieChart.LegendTextSize = 16;
-
-        //ProxyPieChart.DrawMargin = new Margin(50, 50, 50, 0);
-        //ProxyPieChart.Width = 250;
-        //ProxyPieChart.Title = new LabelVisual
-        //{
-        //	Text = "������",
-        //	TextSize = 16,
-        //	Paint = new SolidColorPaint(SKColors.White)
-        //};
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        ViewModel.Logs.CollectionChanged -= Logs_CollectionChanged;
+        base.OnUnloaded(e);
     }
 
     private void Logs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

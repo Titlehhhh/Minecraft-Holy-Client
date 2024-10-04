@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using DynamicData;
@@ -17,6 +18,7 @@ public class LoggerWrapper : ILogger, IDisposable
 
     public LoggerWrapper()
     {
+        CompositeDisposable disp = new CompositeDisposable();
         _cleanUp = _logs
             .Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -26,8 +28,9 @@ public class LoggerWrapper : ILogger, IDisposable
                 if (Events.Count >= 200) Events.RemoveAt(0);
                 Events.Add(x);
             })
-            .Subscribe();
-
+            .Subscribe()
+            .DisposeWith(disp);
+        _cleanUp = disp;
         //Events = events;
     }
 
