@@ -254,7 +254,6 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
     public void Dispose()
     {
-        Console.WriteLine("Disp");
         Activator.Dispose();
         this.Activator = null;
         _botsOnlineValues = null;
