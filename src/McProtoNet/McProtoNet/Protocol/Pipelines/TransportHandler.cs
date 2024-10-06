@@ -5,7 +5,7 @@ using DotNext.IO;
 using DotNext.IO.Pipelines;
 using McProtoNet.Abstractions;
 
-namespace McProtoNet.Protocol;
+namespace McProtoNet.Net;
 
 internal sealed class TransportHandler : Disposable
 {

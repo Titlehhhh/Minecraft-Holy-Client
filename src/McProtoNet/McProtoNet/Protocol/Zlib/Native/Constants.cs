@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace McProtoNet.Protocol.Zlib.Native;
+namespace McProtoNet.Net.Zlib.Native;
 
 internal static class Constants
 {

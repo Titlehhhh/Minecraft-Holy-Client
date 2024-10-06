@@ -1,10 +1,10 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-using McProtoNet.Protocol.Zlib;
 using McProtoNet.Abstractions;
+using McProtoNet.Net.Zlib;
 
-namespace McProtoNet.Protocol;
+namespace McProtoNet.Net;
 
 public sealed class MinecraftPacketReader
 {

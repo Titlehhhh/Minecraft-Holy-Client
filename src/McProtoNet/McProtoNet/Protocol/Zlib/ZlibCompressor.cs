@@ -1,8 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static McProtoNet.Protocol.Zlib.Native.Compression;
+using static McProtoNet.Net.Zlib.Native.Compression;
 
-namespace McProtoNet.Protocol.Zlib;
+namespace McProtoNet.Net.Zlib;
 
 public  ref struct ZlibCompressor
 {

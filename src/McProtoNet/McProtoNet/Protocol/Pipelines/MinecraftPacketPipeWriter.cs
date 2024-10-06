@@ -1,8 +1,8 @@
 ﻿using System.Buffers;
 using System.IO.Pipelines;
-using McProtoNet.Protocol.Zlib;
+using McProtoNet.Net.Zlib;
 
-namespace McProtoNet.Protocol;
+namespace McProtoNet.Net;
 
 internal sealed class MinecraftPacketPipeWriter
 {

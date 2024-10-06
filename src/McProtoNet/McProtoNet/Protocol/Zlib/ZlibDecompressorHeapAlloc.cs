@@ -2,9 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using McProtoNet.Protocol.Zlib.Native;
+using McProtoNet.Net.Zlib.Native;
 
-namespace McProtoNet.Protocol.Zlib;
+namespace McProtoNet.Net.Zlib;
 
 public class ZlibDecompressorHeapAlloc
 {

@@ -2,7 +2,7 @@
 using DotNext;
 using McProtoNet.Abstractions;
 
-namespace McProtoNet.Protocol;
+namespace McProtoNet.Net;
 
 internal sealed class PacketPipeHandler : Disposable
 {

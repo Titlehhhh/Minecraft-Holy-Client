@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using DotNext.Threading;
-using McProtoNet.Protocol;
+using McProtoNet.Net;
 
 namespace McProtoNet.Client;
 

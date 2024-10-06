@@ -2,9 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static McProtoNet.Protocol.Zlib.Native.Decompression;
+using McProtoNet.Net.Zlib.Native;
+using static McProtoNet.Net.Zlib.Native.Decompression;
 
-namespace McProtoNet.Protocol.Zlib;
+namespace McProtoNet.Net.Zlib;
 
 public ref struct ZlibDecompressor
 {
@@ -28,14 +29,14 @@ public ref struct ZlibDecompressor
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static OperationStatus StatusFromResult(libdeflate_result result)
+    internal static OperationStatus StatusFromResult(Decompression.libdeflate_result result)
 #pragma warning disable CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
         => result switch
         {
-            libdeflate_result.LIBDEFLATE_SUCCESS => OperationStatus.Done,
-            libdeflate_result.LIBDEFLATE_BAD_DATA => OperationStatus.InvalidData,
-            libdeflate_result.LIBDEFLATE_SHORT_OUTPUT => OperationStatus.NeedMoreData,
-            libdeflate_result.LIBDEFLATE_INSUFFICIENT_SPACE => OperationStatus.DestinationTooSmall,
+            Decompression.libdeflate_result.LIBDEFLATE_SUCCESS => OperationStatus.Done,
+            Decompression.libdeflate_result.LIBDEFLATE_BAD_DATA => OperationStatus.InvalidData,
+            Decompression.libdeflate_result.LIBDEFLATE_SHORT_OUTPUT => OperationStatus.NeedMoreData,
+            Decompression.libdeflate_result.LIBDEFLATE_INSUFFICIENT_SPACE => OperationStatus.DestinationTooSmall,
         };
 #pragma warning restore CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

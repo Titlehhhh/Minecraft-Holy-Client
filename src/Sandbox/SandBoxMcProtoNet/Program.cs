@@ -27,16 +27,17 @@ internal class Program
                 MinecraftClient client = new MinecraftClient()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(30),
-                    Host = "185.107.192.132",
-                    Port = 62860,
+                    Host = "127.0.0.1",
+                    Port = 25565,
                     Username = $"TitleBot_{i + 1:D3}",
-                    Version = 340
+                    Version = MinecraftVersion.Latest
                 };
                 client.Disconnected += async (sender, eventArgs) =>
                 {
                     if (eventArgs.Exception is not null)
                     {
                         Console.WriteLine("Errored: " + eventArgs.Exception.Message);
+                        Console.WriteLine(eventArgs.Exception.StackTrace);
                         Console.WriteLine("Restart");
                         try
                         {

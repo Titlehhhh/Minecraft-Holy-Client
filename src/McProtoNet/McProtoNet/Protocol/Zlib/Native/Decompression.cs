@@ -3,7 +3,7 @@ using size_t = nuint;
 using libdeflate_decompressor = System.IntPtr;
 
 
-namespace McProtoNet.Protocol.Zlib.Native;
+namespace McProtoNet.Net.Zlib.Native;
 
 internal static class Decompression
 {

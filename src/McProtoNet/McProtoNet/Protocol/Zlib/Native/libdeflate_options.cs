@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace McProtoNet.Protocol.Zlib.Native;
+namespace McProtoNet.Net.Zlib.Native;
 
 internal readonly struct libdeflate_options
 {

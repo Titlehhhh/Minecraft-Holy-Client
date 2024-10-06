@@ -1,4 +1,4 @@
-﻿namespace McProtoNet.Protocol.Zlib;
+﻿namespace McProtoNet.Net.Zlib;
 
 internal static class LibDeflateCache
 {

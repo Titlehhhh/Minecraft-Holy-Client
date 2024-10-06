@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using DotNext.Buffers;
 using McProtoNet.Abstractions;
 using McProtoNet.Cryptography;
-using McProtoNet.Protocol;
+using McProtoNet.Net;
 using McProtoNet.Serialization;
 
 namespace McProtoNet.Client;
@@ -95,7 +95,7 @@ internal sealed class MinecraftClientLogin
                             throw new LoginRejectedException("Login Disconnect: " + reason);
                             break;
                         case 0x01: // Encryption Request
-                            var encryptBegin = ReadEncryptionPacket(inputPacket);
+                            var encryptBegin = ReadEncryptionPacket(inputPacket, options.ProtocolVersion);
 
                             var RSAService = CryptoHandler.DecodeRSAPublicKey(encryptBegin.PublicKey);
                             var secretKey = CryptoHandler.GenerateAESPrivateKey();
@@ -158,7 +158,7 @@ internal sealed class MinecraftClientLogin
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-
+                    Console.WriteLine(inputPacket.Id);
                     try
                     {
                         var needBreak = false;
@@ -203,6 +203,15 @@ internal sealed class MinecraftClientLogin
 
                                 break;
                             case 0x05: // Ping
+                                var pong = PingPong(inputPacket);
+                                try
+                                {
+                                    await sender.SendPacketAsync(pong, cancellationToken);
+                                }
+                                finally
+                                {
+                                    pong.Dispose();
+                                }
                                 break;
                             case 0x06: // Reset Chat
                                 break;
@@ -261,6 +270,20 @@ internal sealed class MinecraftClientLogin
         return reader.ReadString();
     }
 
+    private static OutputPacket PingPong(InputPacket packet)
+    {
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            writer.WriteVarInt(0x05);
+            writer.WriteBuffer(packet.Data.Span);
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
     private static OutputPacket CreateKeepAlive(long id)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
@@ -290,14 +313,21 @@ internal sealed class MinecraftClientLogin
         return new ClientboundConfigurationPluginMessagePacket(id, data);
     }
 
-    private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket)
+    private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket,int protocolVersion)
     {
         scoped var reader = new MinecraftPrimitiveSpanReader(inputPacket.Data);
         var serverId = reader.ReadString();
         var len = reader.ReadVarInt();
         var publicKey = reader.ReadBuffer(len);
+        len = reader.ReadVarInt();
         var verifyToken = reader.ReadBuffer(len);
-        return new EncryptionBeginPacket(serverId, publicKey, verifyToken);
+        bool? shouldAuthenticate = null;
+        if (protocolVersion > 765)
+        {
+            shouldAuthenticate=   reader.ReadBoolean();
+        }
+        
+        return new EncryptionBeginPacket(serverId, publicKey, verifyToken,shouldAuthenticate);
     }
 
     private static OutputPacket CreatePluginResponse(string channel, byte[] data)
@@ -410,12 +440,13 @@ internal sealed class MinecraftClientLogin
         public readonly string ServerId;
         public readonly byte[] PublicKey;
         public readonly byte[] VerifyToken;
-
-        public EncryptionBeginPacket(string serverId, byte[] publicKey, byte[] verifyToken)
+        public readonly bool? ShouldAuthenticate;
+        public EncryptionBeginPacket(string serverId, byte[] publicKey, byte[] verifyToken, bool? shouldAuthenticate)
         {
             ServerId = serverId;
             PublicKey = publicKey;
             VerifyToken = verifyToken;
+            ShouldAuthenticate = shouldAuthenticate;
         }
     }
 

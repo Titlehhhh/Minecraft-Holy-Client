@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using DotNext;
 using DotNext.Threading;
 using McProtoNet.Abstractions;
-using McProtoNet.Protocol;
+using McProtoNet.Net;
 using QuickProxyNet;
 
 namespace McProtoNet.Client;

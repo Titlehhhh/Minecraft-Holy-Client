@@ -7,7 +7,7 @@ using HolyClient.Abstractions.StressTest;
 using McProtoNet;
 using McProtoNet.Abstractions;
 using McProtoNet.MultiVersionProtocol;
-using McProtoNet.Protocol;
+using McProtoNet.Net;
 using McProtoNet.Protocol754;
 using ReactiveUI;
 using Serilog;

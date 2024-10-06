@@ -2,7 +2,7 @@
 using HolyClient.StressTest;
 using McProtoNet;
 using McProtoNet.Client;
-using McProtoNet.Protocol;
+using McProtoNet.Net;
 using McProtoNet.Protocol754;
 using MemoryPack;
 using Serilog;
