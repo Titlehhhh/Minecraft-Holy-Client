@@ -14,7 +14,7 @@ namespace McProtoNet.NBT;
 public ref struct NbtSpanReader
 {
     private SpanReader<byte> _reader;
-
+    public int ConsumedCount => _reader.ConsumedCount;
     public NbtSpanReader(ReadOnlySpan<byte> data)
     {
         _reader = new SpanReader<byte>(data);

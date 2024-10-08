@@ -62,10 +62,11 @@ public static class Extensions
         }
     }
 
-    public static Slot? ReadSlot(this ref MinecraftPrimitiveSpanReader spanReader)
+    public static Slot? ReadSlot(this ref MinecraftPrimitiveSpanReader spanReader, int protocolVersion)
     {
         if (spanReader.ReadBoolean())
-            return new Slot(spanReader.ReadVarInt(), spanReader.ReadSignedByte(), spanReader.ReadOptionalNbt());
+            return new Slot(spanReader.ReadVarInt(), spanReader.ReadSignedByte(),
+                spanReader.ReadOptionalNbt(protocolVersion < 764));
 
         return null;
     }

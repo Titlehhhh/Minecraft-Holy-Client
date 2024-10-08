@@ -1122,7 +1122,7 @@ public sealed class Protocol_758 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var location = reader.ReadPosition();
                     var action = reader.ReadVarInt();
-                    var nbtData = reader.ReadOptionalNbt();
+                    var nbtData = reader.ReadOptionalNbt(true);
                     _ontile_entity_data.OnNext(new PacketTileEntityData(location, action, nbtData));
                 }
 
@@ -1164,7 +1164,7 @@ public sealed class Protocol_758 : ProtocolBase
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var transactionId = reader.ReadVarInt();
-                    var nbt = reader.ReadOptionalNbt();
+                    var nbt = reader.ReadOptionalNbt(true);
                     _onnbt_query_response.OnNext(new PacketNbtQueryResponse(transactionId, nbt));
                 }
 
@@ -1218,7 +1218,7 @@ public sealed class Protocol_758 : ProtocolBase
                     var windowId = reader.ReadSignedByte();
                     var stateId = reader.ReadVarInt();
                     var slot = reader.ReadSignedShort();
-                    var item = reader.ReadSlot();
+                    var item = reader.ReadSlot(ProtocolVersion);
                     _onset_slot.OnNext(new PacketSetSlot(windowId, stateId, slot, item));
                 }
 
@@ -1347,8 +1347,8 @@ public sealed class Protocol_758 : ProtocolBase
                     }
 
                     var worldNames = tempArray_4_0;
-                    var dimensionCodec = reader.ReadNbt();
-                    var dimension = reader.ReadNbt();
+                    var dimensionCodec = reader.ReadNbt(true);
+                    var dimension = reader.ReadNbt(true);
                     var worldName = reader.ReadString();
                     var hashedSeed = reader.ReadSignedLong();
                     var maxPlayers = reader.ReadVarInt();
@@ -1547,7 +1547,7 @@ public sealed class Protocol_758 : ProtocolBase
                 if (_onrespawn.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var dimension = reader.ReadNbt();
+                    var dimension = reader.ReadNbt(true);
                     var worldName = reader.ReadString();
                     var hashedSeed = reader.ReadSignedLong();
                     var gamemode = reader.ReadUnsignedByte();

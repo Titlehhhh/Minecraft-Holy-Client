@@ -40,13 +40,13 @@ public ref partial struct MinecraftPrimitiveSpanReader
     public MinecraftPrimitiveSpanReader(ReadOnlyMemory<byte> data) : this(data.Span)
     {
     }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> Read(int count) => _reader.Read(count);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Read(Span<byte> output) => _reader.Read(output);
 
-    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CheckDisposed()
@@ -202,21 +202,23 @@ public ref partial struct MinecraftPrimitiveSpanReader
         return _reader.Read(length).ToArray();
     }
 
-    public NbtTag? ReadOptionalNbt()
+    public NbtTag? ReadOptionalNbt(bool readRootTag)
     {
         if (ReadBoolean())
         {
-            return ReadNbt();
+            return ReadNbt(readRootTag);
         }
 
         return null;
     }
 
 
-    public NbtTag ReadNbt()
+    public NbtTag ReadNbt(bool readRootTag)
     {
-        throw new NotImplementedException();
+        NbtSpanReader nbtSpanReader = new NbtSpanReader(_reader.RemainingSpan);
+        NbtTag result = nbtSpanReader.ReadAsTag<NbtTag>(readRootTag);
+        
+        _reader.Advance(nbtSpanReader.ConsumedCount);
+        return result;
     }
-
-    
 }

@@ -158,7 +158,6 @@ internal sealed class MinecraftClientLogin
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
-                    Console.WriteLine(inputPacket.Id);
                     try
                     {
                         var needBreak = false;

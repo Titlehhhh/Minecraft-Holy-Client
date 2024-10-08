@@ -39,11 +39,29 @@ public class DefaultBehavior : BaseStressTestBehavior
             bot.ConfigureAutoRestart(AutoRestartAction);
             MultiProtocol proto = bot.Protocol as MultiProtocol;
 
-            proto.OnJoinGame.Subscribe(async x =>
+            proto.OnLogin.Subscribe(async x =>
             {
                 try
                 {
                     await proto.SendChatPacket("/register 21qwerty 21qwerty");
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    Disposable.Create(() =>
+                    {
+                        try
+                        {
+                            cts.Cancel();
+                        }
+                        finally
+                        {
+                            cts.Dispose();
+                        }
+                    }).DisposeWith(disposables);
+                    
+                    while (!cts.IsCancellationRequested)
+                    {
+                        await proto.SendChatPacket(SpamText);
+                        await Task.Delay(SpamTimeout, cts.Token);
+                    }
                 }
                 catch
                 {
@@ -52,9 +70,8 @@ public class DefaultBehavior : BaseStressTestBehavior
             }).DisposeWith(disposables);
             bot.Restart(true);
         }
-        return Task.CompletedTask;
 
-        
+        return Task.CompletedTask;
     }
 
     private async void AutoRestartAction(IStressTestBot b)
@@ -64,9 +81,8 @@ public class DefaultBehavior : BaseStressTestBehavior
         {
             await b.Restart(true);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            
             // ignored
         }
     }

@@ -1217,7 +1217,7 @@ public sealed class Protocol_765 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var location = reader.ReadPosition();
                     var action = reader.ReadVarInt();
-                    var nbtData = reader.ReadOptionalNbt();
+                    var nbtData = reader.ReadOptionalNbt(false);
                     _ontile_entity_data.OnNext(new PacketTileEntityData(location, action, nbtData));
                 }
 
@@ -1276,7 +1276,7 @@ public sealed class Protocol_765 : ProtocolBase
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var transactionId = reader.ReadVarInt();
-                    var nbt = reader.ReadOptionalNbt();
+                    var nbt = reader.ReadOptionalNbt(false);
                     _onnbt_query_response.OnNext(new PacketNbtQueryResponse(transactionId, nbt));
                 }
 
@@ -1296,7 +1296,7 @@ public sealed class Protocol_765 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var windowId = reader.ReadVarInt();
                     var inventoryType = reader.ReadVarInt();
-                    var windowTitle = reader.ReadNbt();
+                    var windowTitle = reader.ReadNbt(true);
                     _onopen_window.OnNext(new PacketOpenWindow(windowId, inventoryType, windowTitle));
                 }
 
@@ -1319,7 +1319,7 @@ public sealed class Protocol_765 : ProtocolBase
                     var windowId = reader.ReadSignedByte();
                     var stateId = reader.ReadVarInt();
                     var slot = reader.ReadSignedShort();
-                    var item = reader.ReadSlot();
+                    var item = reader.ReadSlot(ProtocolVersion);
                     _onset_slot.OnNext(new PacketSetSlot(windowId, stateId, slot, item));
                 }
 
@@ -1366,7 +1366,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onkick_disconnect.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var reason = reader.ReadNbt();
+                    var reason = reader.ReadNbt(true);
                     _onkick_disconnect.OnNext(new PacketKickDisconnect(reason));
                 }
 
@@ -1549,7 +1549,7 @@ public sealed class Protocol_765 : ProtocolBase
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var playerId = reader.ReadVarInt();
-                    var message = reader.ReadNbt();
+                    var message = reader.ReadNbt(true);
                     _ondeath_combat_event.OnNext(new PacketDeathCombatEvent(playerId, message));
                 }
 
@@ -1751,7 +1751,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onsystem_chat.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var content = reader.ReadNbt();
+                    var content = reader.ReadNbt(true);
                     var isActionBar = reader.ReadBoolean();
                     _onsystem_chat.OnNext(new PacketSystemChat(content, isActionBar));
                 }
@@ -1761,8 +1761,8 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onplayerlist_header.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var header = reader.ReadNbt();
-                    var footer = reader.ReadNbt();
+                    var header = reader.ReadNbt(true);
+                    var footer = reader.ReadNbt(true);
                     _onplayerlist_header.OnNext(new PacketPlayerlistHeader(header, footer));
                 }
 
@@ -1808,7 +1808,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onserver_data.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var motd = reader.ReadNbt();
+                    var motd = reader.ReadNbt(true);
                     byte[]? iconBytes = null;
                     if (reader.ReadBoolean())
                     {
@@ -1860,7 +1860,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onaction_bar.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var text = reader.ReadNbt();
+                    var text = reader.ReadNbt(false);
                     _onaction_bar.OnNext(new PacketActionBar(text));
                 }
 
@@ -1936,7 +1936,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onset_title_subtitle.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var text = reader.ReadNbt();
+                    var text = reader.ReadNbt(false);
                     _onset_title_subtitle.OnNext(new PacketSetTitleSubtitle(text));
                 }
 
@@ -1945,7 +1945,7 @@ public sealed class Protocol_765 : ProtocolBase
                 if (_onset_title_text.HasObservers)
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    var text = reader.ReadNbt();
+                    var text = reader.ReadNbt(false);
                     _onset_title_text.OnNext(new PacketSetTitleText(text));
                 }
 

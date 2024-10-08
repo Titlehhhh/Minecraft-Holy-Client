@@ -16,6 +16,8 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
+        NewMethod();
+        return;
         Console.WriteLine("Start");
         var list = new List<MinecraftClient>();
         try
@@ -117,7 +119,7 @@ internal class Program
         List<KeyValuePair<int, int>> list = new();
         for (int i = 340; i <= 767; i++)
         {
-            var g = GetClientboundPlayPacket(i, "DisconnectPacket");
+            var g = GetClientboundPlayPacket(i, "LoginPacket");
             list.Add(new KeyValuePair<int, int>(i, g));
         }
 

@@ -86,7 +86,6 @@
 
     <ItemGroup>
         <Folder Include="Assets\Fonts\"/>
-        <Folder Include="Commands\"/>
         <Folder Include="CustomControls\Lottie\" />
     </ItemGroup>
 

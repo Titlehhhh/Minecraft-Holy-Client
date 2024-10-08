@@ -1194,7 +1194,7 @@ public sealed class Protocol_764 : ProtocolBase
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var location = reader.ReadPosition();
                     var action = reader.ReadVarInt();
-                    var nbtData = reader.ReadOptionalNbt();
+                    var nbtData = reader.ReadOptionalNbt(false);
                     _ontile_entity_data.OnNext(new PacketTileEntityData(location, action, nbtData));
                 }
 
@@ -1253,7 +1253,7 @@ public sealed class Protocol_764 : ProtocolBase
                 {
                     scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                     var transactionId = reader.ReadVarInt();
-                    var nbt = reader.ReadOptionalNbt();
+                    var nbt = reader.ReadOptionalNbt(false);
                     _onnbt_query_response.OnNext(new PacketNbtQueryResponse(transactionId, nbt));
                 }
 
@@ -1296,7 +1296,7 @@ public sealed class Protocol_764 : ProtocolBase
                     var windowId = reader.ReadSignedByte();
                     var stateId = reader.ReadVarInt();
                     var slot = reader.ReadSignedShort();
-                    var item = reader.ReadSlot();
+                    var item = reader.ReadSlot(ProtocolVersion);
                     _onset_slot.OnNext(new PacketSetSlot(windowId, stateId, slot, item));
                 }
 

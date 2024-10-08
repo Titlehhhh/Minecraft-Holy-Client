@@ -16,19 +16,30 @@ public sealed class KeepAlivePacket
     public long KeepAliveId { get; }
 }
 
+public sealed class LoginPacket
+{
+    public int Id { get; }
+
+    public LoginPacket(int id)
+    {
+        Id = id;
+    }
+}
+
 [Experimental]
 public sealed class MultiProtocol : ProtocolBase
 {
     private static readonly byte[] bitset = new byte[3];
 
     private readonly Subject<KeepAlivePacket> _onKeepAlive = new();
+    private readonly Subject<LoginPacket> _onLoginPacket = new();
 
     public MultiProtocol(IPacketBroker client) : base(client)
     {
         //SupportedVersion = 755;
     }
 
-    public Subject<Unit> OnJoinGame { get; } = new();
+    public IObservable<LoginPacket> OnLogin => _onLoginPacket;
 
     protected override void OnPacketReceived(InputPacket packet)
     {
@@ -67,11 +78,18 @@ public sealed class MultiProtocol : ProtocolBase
             >= 764 and <= 765 => 0x1B,
             >= 766 and <= 767 => 0x1D
         };
-        if (packet.Id == 0x2B)
+        int loginPlay = ProtocolVersion switch
         {
-            OnJoinGame.OnNext(Unit.Default);
-            return;
-        }
+            >= 751 and <= 754 => 0x24,
+            >= 755 and <= 758 => 0x26,
+            759 => 0x23,
+            760 => 0x25,
+            761 => 0x24,
+            >= 762 and <= 763 => 0x28,
+            >= 764 and <= 765 => 0x29,
+            >= 766 and <= 767 => 0x2B
+        };
+
 
         if (keepAlive == packet.Id)
         {
@@ -87,11 +105,47 @@ public sealed class MultiProtocol : ProtocolBase
                 scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
                 if (ProtocolVersion >= 765)
                 {
-                    // var reason = reader.ReadNbt();
+                    // var reason = reader.ReadNbt(true);
                     var nbtReader = new NbtSpanReader(packet.Data.Span);
 
                     var nbt = nbtReader.ReadAsTag<NbtTag>(false);
                 }
+            }
+        }
+        else if (packet.Id == loginPlay)
+        {
+            scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+            int id = reader.ReadSignedInt();
+            _onLoginPacket.OnNext(new LoginPacket(id));
+            if (ProtocolVersion < 477)
+            {
+            }
+            else if (ProtocolVersion < 573)
+            {
+            }
+            else if (ProtocolVersion < 735)
+            {
+            }
+            else if (ProtocolVersion < 751)
+            {
+            }
+            else if (ProtocolVersion < 757)
+            {
+            }
+            else if (ProtocolVersion < 759)
+            {
+            }
+            else if (ProtocolVersion < 763)
+            {
+            }
+            else if (ProtocolVersion < 764)
+            {
+            }
+            else if (ProtocolVersion < 766)
+            {
+            }
+            else
+            {
             }
         }
 
@@ -146,7 +200,6 @@ public sealed class MultiProtocol : ProtocolBase
         }
         finally
         {
-            
             writer.Dispose();
         }
     }
@@ -187,7 +240,7 @@ public sealed class MultiProtocol : ProtocolBase
 
     public override void Dispose()
     {
-        OnJoinGame.Dispose();
+        _onLoginPacket.Dispose();
         _onKeepAlive.Dispose();
         base.Dispose();
     }
