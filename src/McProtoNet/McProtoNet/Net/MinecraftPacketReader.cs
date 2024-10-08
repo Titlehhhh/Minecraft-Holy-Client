@@ -39,21 +39,14 @@ public sealed class MinecraftPacketReader
                 throw;
             }
         }
-
         var sizeUncompressed = await BaseStream.ReadVarIntAsync(token);
-
-
         if (sizeUncompressed > 0)
         {
             if (sizeUncompressed < _compressionThreshold)
                 throw new Exception(
                     $"Длина sizeUncompressed меньше порога сжатия. sizeUncompressed: {sizeUncompressed} Порог: {_compressionThreshold}");
-
-
             len -= sizeUncompressed.GetVarIntLength();
-
             var buffer_compress = ArrayPool<byte>.Shared.Rent(len);
-
             try
             {
                 await BaseStream.ReadExactlyAsync(buffer_compress, 0, len, token);
