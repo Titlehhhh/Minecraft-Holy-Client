@@ -144,16 +144,6 @@
                                 </ComboBox>
                             </StackPanel>
                         </Border>
-
-                        <Border IsVisible="{Binding CurrentBehavior}" Classes="SettingItem">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="{Tr StressTest.Configuration.GeneralSettings.BehaviorSettings}"
-                                           FontSize="15" />
-                                <!--
-                                <pgc:PropertyGrid ="{Binding CurrentBehavior}" />-->
-                            </StackPanel>
-                        </Border>
-
                     </StackPanel>
 
                 </ScrollViewer>
@@ -342,7 +332,12 @@
             </TabItem>
 
 
-            <TabItem FontSize="15" Header="Behavior" />
+            <TabItem FontSize="15" Header="Behavior" IsVisible="{Binding CurrentBehavior}">
+
+
+                <pgc:PropertyGrid DataContext="{Binding CurrentBehavior}" />
+
+            </TabItem>
         </TabControl>
 
 

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using DynamicData;
 using DynamicData.Binding;
 using HolyClient.AppState;
+using HolyClient.Services;
 using HolyClient.StressTest;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -39,22 +40,23 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
             .ToObservableChangeSet(x => x.Id)
             .Publish()
             .RefCount();
-
         outputCollectionChanges
             .ObserveOn(RxApp.MainThreadScheduler)
+            .Skip(1)
             .OnItemAdded(provider =>
             {
-                if (provider is null)
-                    throw new Exception("asd");
-                SelectedProfile = provider;
+                if (provider is not null)
+                    SelectedProfile = provider;
             })
             .Subscribe();
 
-        
+        SelectedProfile = _profiles.FirstOrDefault(x => x.Id == state.SelectedProfileId);
+
+
 
         this.WhenAnyValue(x => x.SelectedProfile)
-            .Skip(1)
-            .Select(profile => profile?.Id ?? Guid.Empty)
+            .Where(x => x is not null)
+            .Select(profile => profile.Id)
             .Subscribe(id => state.SelectedProfileId = id);
 
 
@@ -64,11 +66,12 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
             var basename = "New profile ";
             var name = basename + i;
             while (state.Profiles.Items.ToArray().Any(x => x.Name == name)) name = basename + i++;
-
-            state.Profiles.AddOrUpdate(new StressTestProfile
+            var newProfile = new StressTestProfile
             {
-                Name = name
-            });
+                Name = name,
+            };
+            newProfile.SetBehavior(new DefaultPluginSource());
+            state.Profiles.AddOrUpdate(newProfile);
         });
 
         Remove = ReactiveCommand.CreateFromTask(async () =>
@@ -79,8 +82,8 @@ public class StressTestViewModel : ReactiveObject, IRoutableViewModel, IActivata
                 if (SelectedProfile is not null)
                 {
                     var id = SelectedProfile.Id;
-                    SelectedProfile = Profiles.FirstOrDefault();
                     state.Profiles.Remove(id);
+                    SelectedProfile = Profiles.FirstOrDefault();
                 }
         });
     }

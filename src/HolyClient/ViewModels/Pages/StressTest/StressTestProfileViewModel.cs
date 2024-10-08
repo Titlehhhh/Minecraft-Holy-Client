@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -39,48 +40,59 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
         Name = state.Name;
         Server = state.Server;
         Version = SupportedVersions.FirstOrDefault(x => x.ProtocolVersion == state.Version) ??
-                  SupportedVersions.First();
+                  SupportedVersions.Last();
 
         BotsNickname = state.BotsNickname;
         NumberOfBots = state.NumberOfBots;
         UseProxy = state.UseProxy;
         CheckDNS = state.OptimizeDNS;
 
-        this.WhenAnyValue(x => x.Name)
-            .BindTo(state, x => x.Name);
+        this.WhenActivated(d =>
+        {
+            this.WhenAnyValue(x => x.Name)
+                .BindTo(state, x => x.Name)
+                .DisposeWith(d);
 
-        this.WhenAnyValue(x => x.CheckDNS)
-            .BindTo(state, x => x.OptimizeDNS);
+            this.WhenAnyValue(x => x.CheckDNS)
+                .BindTo(state, x => x.OptimizeDNS)
+                .DisposeWith(d);
 
-        this.WhenAnyValue(x => x.Server)
-            .BindTo(state, x => x.Server);
-
-
-        this.WhenAnyValue(x => x.Version)
-            .Subscribe(x => { state.Version = x.ProtocolVersion; });
+            this.WhenAnyValue(x => x.Server)
+                .BindTo(state, x => x.Server)
+                .DisposeWith(d);
 
 
-        this.WhenAnyValue(x => x.BotsNickname)
-            .BindTo(state, x => x.BotsNickname);
+            this.WhenAnyValue(x => x.Version)
+                .Where(x=> x is not null)
+                .Subscribe(x => { state.Version = x.ProtocolVersion; })
+                .DisposeWith(d);
 
-        this.WhenAnyValue(x => x.NumberOfBots)
-            .Subscribe(x =>
-            {
-                try
+
+            this.WhenAnyValue(x => x.BotsNickname)
+                .BindTo(state, x => x.BotsNickname)
+                .DisposeWith(d);
+
+            this.WhenAnyValue(x => x.NumberOfBots)
+                .Subscribe(x =>
                 {
-                    state.NumberOfBots = Convert.ToInt32(x);
-                }
-                catch
-                {
-                }
-            });
+                    try
+                    {
+                        state.NumberOfBots = Convert.ToInt32(x);
+                    }
+                    catch
+                    {
+                    }
+                })
+                .DisposeWith(d);
 
-        this.WhenAnyValue(x => x.UseProxy)
-            .BindTo(state, x => x.UseProxy);
+            this.WhenAnyValue(x => x.UseProxy)
+                .BindTo(state, x => x.UseProxy)
+                .DisposeWith(d);
 
-        #endregion
+            #endregion
 
-        //HostScreen = hostScreen;
+            //HostScreen = hostScreen;
+        });
 
         #region Configure validation
 
@@ -100,6 +112,16 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
                         if (name.Length >= 14) return new ValidationState(false, GetTr("BotsNickname.Long"));
                         return ValidationState.Valid;
                     });
+            this.ValidationRule(vm => vm.NumberOfBots,
+                v =>
+                {
+                    if (v is null)
+                    {
+                        return false;
+                    }
+
+                    return v > 0;
+                }, "Количество ботов должно быть положительным числом").DisposeWith(d);
 
             this.ValidationRule(vm => vm.BotsNickname, botsNicknameValid).DisposeWith(d);
 
@@ -108,7 +130,6 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
         });
 
         #endregion
-
 
         #region Configure proxies
 
@@ -255,7 +276,7 @@ public sealed class StressTestProfileViewModel : ReactiveValidationObject, IRout
             {
                 var mainVM = Locator.Current.GetService<MainViewModel>();
                 await rootScreen.Router.NavigateAndReset.Execute(mainVM);
-              
+
 
                 disp.Dispose();
                 await _state.Stop();
