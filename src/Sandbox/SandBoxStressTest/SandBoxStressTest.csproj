@@ -11,7 +11,7 @@
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MemoryPack" Version="1.21.1" />
+        <PackageReference Include="MemoryPack" Version="1.21.3" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\CoreLibs\HolyClient.StressTest\HolyClient.StressTest.csproj" />

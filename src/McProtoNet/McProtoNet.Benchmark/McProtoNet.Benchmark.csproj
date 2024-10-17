@@ -12,10 +12,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.13.12"/>
-        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12"/>
+        <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.14.0" />
         <PackageReference Include="DotNetty.Buffers" Version="0.7.6" />
-        <PackageReference Include="DotNext" Version="5.7.0" />
+        <PackageReference Include="DotNext" Version="5.14.0" />
         <PackageReference Include="LibDeflate.NET" Version="1.19.0"/>
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
 
