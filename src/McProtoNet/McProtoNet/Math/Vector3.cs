@@ -306,4 +306,18 @@ public struct Vector3 : IEquatable<Vector3>
     }
 
     #endregion
+
+    public Vector3 WithX(double x)
+    {
+        return new Vector3(x, this.Y, this.Z);
+    }
+
+    public Vector3 WithY(double y)
+    {
+        return new Vector3(this.X, y, this.Z);
+    }
+    public Vector3 WithZ(double z)
+    {
+        return new Vector3(this.X, this.Y, z);
+    }
 }

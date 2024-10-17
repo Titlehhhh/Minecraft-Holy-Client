@@ -48,6 +48,20 @@ public abstract class ProtocolBase : IDisposable
     {
     }
 
+    protected virtual void OnLoaded()
+    {
+        
+    }
+
+    protected virtual void OnStop()
+    {
+        
+    }
+
+    protected virtual void OnError(Exception exception)
+    {
+        
+    }
     public virtual void Dispose()
     {
         

@@ -3,12 +3,14 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using DiscordRPC;
 using DotNext.Collections.Generic;
 using McProtoNet.Client;
 using McProtoNet.MultiVersionProtocol;
+using McProtoNet.Protocol;
 using McProtoNet.Serialization;
 using QuickProxyNet;
 
@@ -16,16 +18,35 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        NewMethod();
-        return;
+        HttpsProxyClient proxyClient = new HttpsProxyClient("141.105.107.152", 5678);
+
+        await proxyClient.ConnectAsync("45.136.204.198", 25565);
         Console.WriteLine("Start");
+        return;
+        await BowBots();
+    }
+
+    private static async Task BowBots()
+    {
+        List<BowBot> bots = new();
+        for (int i = 0; i < 20; i++)
+        {
+            bots.Add(new BowBot($"TitleBot_{i:D3}"));
+        }
+
+        var tasks = bots.Select(x => x.Run());
+        await Task.WhenAll(tasks);
+        await Task.Delay(-1);
+    }
+
+    private static async Task MultipleConnections()
+    {
         var list = new List<MinecraftClient>();
         try
         {
             var listProtocols = new List<MultiProtocol>();
             for (int i = 0; i < 1; i++)
             {
-                
                 MinecraftClient client = new MinecraftClient()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(30),
@@ -76,7 +97,7 @@ internal class Program
                         }
                         catch (Exception e)
                         {
-                             Console.WriteLine(e);
+                            Console.WriteLine(e);
                         }
                     }
                 }
@@ -84,24 +105,23 @@ internal class Program
                 tasks.Add(RunBot(minecraftClient, listProtocols[index++]));
             }
 
-            
+
             await Task.WhenAll(tasks);
-            
-                await Task.Delay(1000);
-                var sends = listProtocols.Select(async b =>
+
+            await Task.Delay(1000);
+            var sends = listProtocols.Select(async b =>
+            {
+                try
                 {
-                    try
-                    {
-                        await b.SendChatPacket("Hello from Minecraft Holy Client");
-                    }
-                    catch(Exception exception)
-                    {
-                        Console.WriteLine("SendErr: "+exception);
-                        // ignored
-                    }
-                });
-                await Task.WhenAll(sends);
-            
+                    await b.SendChatPacket("Hello from Minecraft Holy Client");
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("SendErr: " + exception);
+                    // ignored
+                }
+            });
+            await Task.WhenAll(sends);
         }
         catch (Exception e)
         {
@@ -109,7 +129,6 @@ internal class Program
             // throw;
         }
 
-        
 
         await Task.Delay(-1);
     }
@@ -119,7 +138,7 @@ internal class Program
         List<KeyValuePair<int, int>> list = new();
         for (int i = 340; i <= 767; i++)
         {
-            var g = GetClientboundPlayPacket(i, "LoginPacket");
+            var g = GetServerboundPlayPacket(i, "MovePlayerPacketRot");
             list.Add(new KeyValuePair<int, int>(i, g));
         }
 

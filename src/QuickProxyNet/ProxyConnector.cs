@@ -36,8 +36,7 @@ internal static class ProxyConnector
                     return stream;
                 }
 
-                if (string.Equals(proxyUri.Scheme, "http", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(proxyUri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(proxyUri.Scheme, "http", StringComparison.OrdinalIgnoreCase))
                 {
                     var result = await HttpHelper.EstablishHttpTunnelAsync(stream, proxyUri, host, port, credentials,
                         cancellationToken);

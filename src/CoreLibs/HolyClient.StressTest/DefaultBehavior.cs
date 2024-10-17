@@ -43,6 +43,7 @@ public class DefaultBehavior : BaseStressTestBehavior
             {
                 try
                 {
+                    await Task.Delay(2000);
                     await proto.SendChatPacket("/register 21qwerty 21qwerty");
                     CancellationTokenSource cts = new CancellationTokenSource();
                     Disposable.Create(() =>

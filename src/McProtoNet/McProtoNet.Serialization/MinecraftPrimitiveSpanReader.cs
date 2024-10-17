@@ -40,7 +40,11 @@ public ref partial struct MinecraftPrimitiveSpanReader
     public MinecraftPrimitiveSpanReader(ReadOnlyMemory<byte> data) : this(data.Span)
     {
     }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Advance(int count)
+    {
+        _reader.Advance(count);
+    }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> Read(int count) => _reader.Read(count);
 
@@ -217,8 +221,10 @@ public ref partial struct MinecraftPrimitiveSpanReader
     {
         NbtSpanReader nbtSpanReader = new NbtSpanReader(_reader.RemainingSpan);
         NbtTag result = nbtSpanReader.ReadAsTag<NbtTag>(readRootTag);
-        
+
         _reader.Advance(nbtSpanReader.ConsumedCount);
         return result;
     }
+
+    
 }

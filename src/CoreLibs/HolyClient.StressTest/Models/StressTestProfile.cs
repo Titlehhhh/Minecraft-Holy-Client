@@ -371,6 +371,20 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt"));
             sources.Add(new UrlProxySource(ProxyType.SOCKS5,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"));
+            
+            sources.Add(new UrlProxySource(ProxyType.HTTP,
+                "https://raw.githubusercontent.com/ALIILAPRO/Proxy/refs/heads/main/http.txt"));
+            
+            sources.Add(new UrlProxySource(ProxyType.SOCKS4,
+                "https://raw.githubusercontent.com/ALIILAPRO/Proxy/refs/heads/main/socks4.txt"));
+            sources.Add(new UrlProxySource(ProxyType.SOCKS5,
+                "https://raw.githubusercontent.com/ALIILAPRO/Proxy/refs/heads/main/socks5.txt"));
+            
+            
+            sources.Add(new UrlProxySource(ProxyType.SOCKS5,
+                "https://raw.githubusercontent.com/hookzof/socks5_list/refs/heads/master/proxy.txt"));
+            
+            
         }
 
         List<Task<IEnumerable<ProxyInfo>>> tasks = new();
