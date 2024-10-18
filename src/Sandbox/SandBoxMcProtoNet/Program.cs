@@ -18,16 +18,12 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        HttpsProxyClient proxyClient = new HttpsProxyClient("141.105.107.152", 5678);
-
-        await proxyClient.ConnectAsync("45.136.204.198", 25565);
-        Console.WriteLine("Start");
-        return;
         await BowBots();
     }
 
     private static async Task BowBots()
     {
+        
         List<BowBot> bots = new();
         for (int i = 0; i < 20; i++)
         {
@@ -132,13 +128,13 @@ internal class Program
 
         await Task.Delay(-1);
     }
-
+    
     private static void NewMethod()
     {
         List<KeyValuePair<int, int>> list = new();
         for (int i = 340; i <= 767; i++)
         {
-            var g = GetServerboundPlayPacket(i, "MovePlayerPacketRot");
+            var g = GetServerboundPlayPacket(i, "CommandSuggestionPacket");
             list.Add(new KeyValuePair<int, int>(i, g));
         }
 
@@ -166,6 +162,15 @@ internal class Program
     private static int GetClientboundPlayPacket(int version, string packet)
     {
         return Ext.ClientboundPlayPackets(version).IndexOf("Clientbound" + packet);
+    }
+    
+    private static int GetClientboundConfigPacket(int version, string packet)
+    {
+        return Ext.ClientboundConfigurationPackets(version).IndexOf("Clientbound" + packet);
+    }
+    private static int GetServerboundConfigPacket(int version, string packet)
+    {
+        return Ext.ServerboundConfigurationPackets(version).IndexOf("Serverbound" + packet);
     }
 
 

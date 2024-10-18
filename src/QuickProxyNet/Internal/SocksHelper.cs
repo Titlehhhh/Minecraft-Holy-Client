@@ -59,7 +59,7 @@ internal static class SocksHelper
             // +----+--------+
             // | 1  |   1    |
             // +----+--------+
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
             VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
 
             switch (buffer[1])
@@ -97,7 +97,7 @@ internal static class SocksHelper
                     // +----+--------+
                     // | 1  |   1    |
                     // +----+--------+
-                    await ReadToFillAsync(stream, buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
+                    await stream.ReadExactlyAsync(buffer.AsMemory(0, 2), cancellationToken).ConfigureAwait(false);
                     if (buffer[0] != SubnegotiationVersion || buffer[1] != Socks5_Success)
                         throw new ProxyProtocolException("Failed to authenticate with the SOCKS server.");
                     break;
@@ -153,7 +153,7 @@ internal static class SocksHelper
             // +----+-----+-------+------+----------+----------+
             // | 1  |  1  | X'00' |  1   | Variable |    2     |
             // +----+-----+-------+------+----------+----------+
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 5), cancellationToken).ConfigureAwait(false);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, 5), cancellationToken).ConfigureAwait(false);
             VerifyProtocolVersion(ProtocolVersion5, buffer[0]);
             if (buffer[1] != Socks5_Success)
                 throw new ProxyProtocolException("SOCKS server failed to connect to the destination.");
@@ -164,7 +164,7 @@ internal static class SocksHelper
                 ATYP_DOMAIN_NAME => buffer[4] + 2,
                 _ => throw new ProxyProtocolException("SOCKS server returned an unknown address type.")
             };
-            await ReadToFillAsync(stream, buffer.AsMemory(0, bytesToSkip), cancellationToken).ConfigureAwait(false);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, bytesToSkip), cancellationToken).ConfigureAwait(false);
             // response address not used
         }
         finally
@@ -256,7 +256,7 @@ internal static class SocksHelper
             //    1    1      2              4
 
 
-            await ReadToFillAsync(stream, buffer.AsMemory(0, 8), cancellationToken).ConfigureAwait(false);
+            await stream.ReadExactlyAsync(buffer.AsMemory(0, 8), cancellationToken).ConfigureAwait(false);
 
             switch (buffer[1])
             {
@@ -300,16 +300,5 @@ internal static class SocksHelper
     private static ValueTask WriteAsync(Stream stream, Memory<byte> buffer, CancellationToken cancellationToken)
     {
         return stream.WriteAsync(buffer, cancellationToken);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static async ValueTask ReadToFillAsync(Stream stream, Memory<byte> buffer,
-        CancellationToken cancellationToken)
-    {
-        var bytesRead = await stream.ReadAtLeastAsync(buffer, buffer.Length, false, cancellationToken)
-            .ConfigureAwait(false);
-
-
-        if (bytesRead < buffer.Length) throw new IOException("The response ended prematurely.");
     }
 }

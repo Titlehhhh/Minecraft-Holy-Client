@@ -1,4 +1,6 @@
-﻿namespace HolyClient.ViewModels;
+﻿using System;
+
+namespace HolyClient.ViewModels;
 
 public sealed class MinecraftVersionVM
 {
@@ -23,7 +25,7 @@ public sealed class MinecraftVersionVM
 
     public static MinecraftVersionVM[] GetAll()
     {
-        return new MinecraftVersionVM[]
+        var versions =new MinecraftVersionVM[]
         {
             new MinecraftVersionVM("1.12.2", 340),
             new MinecraftVersionVM("1.13", 393),
@@ -56,5 +58,7 @@ public sealed class MinecraftVersionVM
             new MinecraftVersionVM("1.20.6", 766),
             new MinecraftVersionVM("1.21", 767)
         };
+        Array.Reverse(versions);
+        return versions;
     }
 }

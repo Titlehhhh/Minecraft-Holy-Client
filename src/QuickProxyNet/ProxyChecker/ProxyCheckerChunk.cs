@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿using System.Diagnostics;
+using System.Threading.Channels;
 using Fody;
 
 namespace QuickProxyNet.ProxyChecker;
@@ -87,6 +88,7 @@ internal class ProxyCheckerChunk : IProxyChecker
 
 
                 var tasks = new List<Task<CheckResult>>(chunkSize);
+                
                 while (!_cts.IsCancellationRequested)
                 {
                     foreach (var chunk in clients.Chunk(chunkSize))
@@ -102,17 +104,16 @@ internal class ProxyCheckerChunk : IProxyChecker
                                 }
 
                                 linked.CancelAfter(conntectTimeout);
-                                _cts.Token.ThrowIfCancellationRequested();
-
-
                                 await Task.WhenAll(tasks);
                             }
 
 
                             var count = 0;
+                            List<string> messages = new List<string>();
                             for (var i = 0; i < Math.Min(chunkSize, tasks.Count); i++)
                             {
                                 var task = tasks[i];
+                                await task;
                                 if (task.Result.Connected)
                                 {
                                     count++;
@@ -124,6 +125,20 @@ internal class ProxyCheckerChunk : IProxyChecker
 
                                     await _writer.WriteAsync(sendClient, _cts.Token);
                                 }
+                                else
+                                {
+                                    if (task.Result.Error is not null)
+                                        messages.Add(task.Result.Error.Message);
+                                }
+                            }
+
+                            if (false)
+                            {
+                                Console.WriteLine($"Proxy {count}/{chunkSize}");
+                                Console.WriteLine(string.Join('\n', messages
+                                    .GroupBy(x => x)
+                                    .OrderByDescending(x => x.Count())
+                                    .Select(x => $"{x.Count()} {x.Key}")));
                             }
                         }
                         finally
@@ -131,9 +146,6 @@ internal class ProxyCheckerChunk : IProxyChecker
                             tasks.Clear();
                         }
                     }
-
-
-                    await Task.Delay(1000, _cts.Token);
                 }
             }
             catch (Exception ex)

@@ -56,7 +56,7 @@
         <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc2"/>
 
 
-        <PackageReference Include="MessagePackAnalyzer" Version="3.0.134-beta">
+        <PackageReference Include="MessagePackAnalyzer" Version="3.0.208-rc-0001">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

@@ -672,6 +672,80 @@
         return result;
     }
 
+    public static List<string> ClientboundConfigurationPackets(int protocolVersion)
+    {
+        List<string> result = new();
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ClientboundCookieRequestConfigurationPacket");
+        }
+
+        result.Add("ClientboundCustomPayloadConfigurationPacket");
+        result.Add("ClientboundDisconnectConfigurationPacket");
+        result.Add("ClientboundFinishConfigurationPacket");
+        result.Add("ClientboundKeepAliveConfigurationPacket");
+        result.Add("ClientboundPingConfigurationPacket");
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ClientboundResetChatPacket");
+        }
+
+        result.Add("ClientboundRegistryDataPacket");
+        if (protocolVersion > 764 /* > 1.20.2 */)
+        {
+            result.Add("ClientboundResourcePackPopConfigurationPacket");
+            result.Add("ClientboundResourcePackPushConfigurationPacket");
+        }
+
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ClientboundStoreCookieConfigurationPacket");
+            result.Add("ClientboundTransferConfigurationPacket");
+        }
+
+        if (protocolVersion < 765 /* < 1.20.3 */)
+        {
+            result.Add("ClientboundResourcePackConfigurationPacket");
+        }
+
+        result.Add("ClientboundUpdateEnabledFeaturesPacket");
+        result.Add("ClientboundUpdateTagsConfigurationPacket");
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ClientboundSelectKnownPacksPacket");
+        }
+
+        if (protocolVersion > 766 /* > 1.20.6 */)
+        {
+            result.Add("ClientboundCustomReportDetailsConfigurationPacket");
+            result.Add("ClientboundServerLinksConfigurationPacket");
+        }
+
+        return result;
+    }
+
+    public static List<string> ServerboundConfigurationPackets(int protocolVersion)
+    {
+        List<string> result = new();
+        result.Add("ServerboundClientInformationConfigurationPacket");
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ServerboundCookieResponseConfigurationPacket");
+        }
+
+        result.Add("ServerboundCustomPayloadConfigurationPacket");
+        result.Add("ServerboundFinishConfigurationPacket");
+        result.Add("ServerboundKeepAliveConfigurationPacket");
+        result.Add("ServerboundPongConfigurationPacket");
+        result.Add("ServerboundResourcePackConfigurationPacket");
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ServerboundSelectKnownPacksPacket");
+        }
+
+        return result;
+    }
+
     public class GroupOfAdjacent<TSource, TKey> : IEnumerable<TSource>, IGrouping<TKey, TSource>
     {
         public TKey Key { get; set; }

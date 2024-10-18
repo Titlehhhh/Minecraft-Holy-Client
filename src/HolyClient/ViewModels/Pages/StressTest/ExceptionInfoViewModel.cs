@@ -1,20 +1,32 @@
 ﻿using System;
+using System.Threading;
 
 namespace HolyClient.ViewModels;
 
 public sealed class ExceptionInfoViewModel
 {
-    public ExceptionInfoViewModel(string type, string message, int count)
+    private volatile int _count;
+
+    public void Increment()
     {
-        Type = type;
-        Message = message;
+        Interlocked.Increment(ref _count);
+    }
+    public ExceptionInfoViewModel(Tuple<string,string> key, int count)
+    {
+        Type = key.Item1;
+        Message = key.Item2;
         Count = count;
-        Key = Tuple.Create(Type, Message);
+        Key = key;
     }
 
     public string Type { get; }
     public string Message { get; }
-    public int Count { get; private set; }
+
+    public int Count
+    {
+        get => _count;
+        private set => _count = value;
+    }
 
     public Tuple<string, string> Key { get; private set; }
 }

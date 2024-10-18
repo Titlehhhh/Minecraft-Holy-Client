@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -81,7 +82,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
             AnimationsSpeed = TimeSpan.FromMilliseconds(0),
             SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100))
         };
-        
+
         _cpsAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
         {
             CustomSeparators = GetSeparators(),
@@ -112,17 +113,31 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
         this.WhenActivated(async d =>
         {
-            SourceCache<ExceptionInfoViewModel, Tuple<string, string>> exceptions = new(x => x.Key);
+            ConcurrentDictionary<Tuple<string, string>, ExceptionInfoViewModel> exceptions = new();
+            //SourceCache<ExceptionInfoViewModel, Tuple<string,string>> 
+            stressTest.OnBotException.Subscribe(ex =>
+            {
+                var key = (ex.GetType().ToString(), ex.Message);
+                Tuple<string, string> keyAsTuple = key.ToTuple();
+                if (exceptions.TryGetValue(keyAsTuple, out var v))
+                {
+                    v.Increment();
+                }
+                else
+                {
+                    exceptions[keyAsTuple] = new ExceptionInfoViewModel(keyAsTuple, 1);
+                }
+            }).DisposeWith(d);
+            Observable.Interval(TimeSpan.FromSeconds(1))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x =>
+                {
+                    var ex = exceptions.Values.ToArray()
+                        .OrderByDescending(x => x.Count)
+                        .ToArray();
 
-
-            exceptions
-                .Connect()
-                .Sort(SortExpressionComparer<ExceptionInfoViewModel>.Descending(p => p.Count))
-                .Bind(out var _exceptions)
-                .Subscribe()
-                .DisposeWith(d);
-
-            Exceptions = _exceptions;
+                    Exceptions = ex;
+                }).DisposeWith(d);
 
             StressTestMetrik currentData = new();
             stressTest.Metrics
@@ -149,22 +164,13 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
                     // we need to update the separators every time we add a new point 
                     _cpsAxis.CustomSeparators = GetSeparators();
                 }).DisposeWith(d);
-
-            Observable.Interval(TimeSpan.FromMilliseconds(1000), RxApp.TaskpoolScheduler)
-                .Select(x =>
-                {
-                    return stressTest.ExceptionCounter.ToArray().Select(x =>
-                        new ExceptionInfoViewModel(x.Key.Item1, x.Key.Item2, x.Value.Count));
-                })
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(data => { exceptions.AddOrUpdate(data); }).DisposeWith(d);
         });
     }
 
 
     #region Exceptions
 
-    [Reactive] public ReadOnlyObservableCollection<ExceptionInfoViewModel> Exceptions { get; private set; }
+    [Reactive] public IEnumerable<ExceptionInfoViewModel> Exceptions { get; private set; }
 
     #endregion
 

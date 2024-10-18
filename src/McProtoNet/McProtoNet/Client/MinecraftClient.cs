@@ -182,9 +182,10 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private void ThrowIfNotPlay()
     {
-        if (_state != (int)MinecraftClientState.Play)
+        var state = _state;
+        if (state != (int)MinecraftClientState.Play)
         {
-            throw new InvalidOperationException("Cannot send packages outside of Play mode");
+            throw new InvalidOperationException($"Cannot send packages outside of Play mode (Current mode: {(MinecraftClientState)state})");
         }
     }
 

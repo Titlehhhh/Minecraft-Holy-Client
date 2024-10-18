@@ -30,7 +30,8 @@ public ref partial struct MinecraftPrimitiveSpanReader
     public readonly ReadOnlySpan<byte> ConsumedSpan => _reader.ConsumedSpan;
     public readonly ReadOnlySpan<byte> RemainingSpan => _reader.RemainingSpan;
 
-
+    
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public MinecraftPrimitiveSpanReader(ReadOnlySpan<byte> data)
     {

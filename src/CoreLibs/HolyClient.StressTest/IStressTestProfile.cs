@@ -45,7 +45,7 @@ public interface IStressTestProfile : INotifyPropertyChanged, INotifyPropertyCha
     //ProxyCheckerOptions ProxyCheckerOptions { get; set; }
 
     bool ParallelCountCheckingCalculateAuto { get; set; }
-    ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; }
+    IObservable<Exception> OnBotException { get; }
 
     IStressTestBehavior Behavior { get; }
     StressTestServiceState CurrentState { get; }

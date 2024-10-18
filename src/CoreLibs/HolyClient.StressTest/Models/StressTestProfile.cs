@@ -24,18 +24,7 @@ using Serilog;
 
 namespace HolyClient.StressTest;
 
-public class ExceptionCounter
-{
-    private volatile int _x = 1;
 
-    public int Count => Volatile.Read(ref _x);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Increment()
-    {
-        Interlocked.Increment(ref _x);
-    }
-}
 
 [MessagePackObject(true)]
 public class StressTestProfile : ReactiveObject, IStressTestProfile
@@ -60,7 +49,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
     [ConfigureAwait(false)]
     public async Task Start(ILogger logger)
     {
-        ExceptionCounter.Clear();
+       
         CurrentState = StressTestServiceState.Init;
         _botsConnectionCounter = 0;
         _botsHandshakeCounter = 0;
@@ -330,13 +319,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
         if (e.Exception is not null)
         {
-            Exception exc = e.Exception;
-            var key = Tuple.Create(exc.GetType().FullName, exc.Message);
-
-            if (ExceptionCounter.TryGetValue(key, out var counter))
-                counter.Increment();
-            else
-                ExceptionCounter[key] = new ExceptionCounter();
+            _onBotException.OnNext(e.Exception);
         }
     }
 
@@ -364,6 +347,12 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
         {
             sources.Add(new UrlProxySource(type: null,
                 "https://raw.githubusercontent.com/proxifly/free-proxy-list/refs/heads/main/proxies/all/data.txt"));
+            
+             
+            
+            
+            
+           
 
             sources.Add(new UrlProxySource(ProxyType.HTTP,
                 "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"));
@@ -384,8 +373,14 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             sources.Add(new UrlProxySource(ProxyType.SOCKS5,
                 "https://raw.githubusercontent.com/hookzof/socks5_list/refs/heads/master/proxy.txt"));
             
+            sources.Add(new UrlProxySource(type: null,
+                "https://raw.githubusercontent.com/monosans/proxy-list/refs/heads/main/proxies/all.txt"));
             
+            sources.Add(new UrlProxySource(type: null,
+                "https://github.com/monosans/proxy-list/blob/main/proxies_anonymous/all.txt"));
         }
+       
+
 
         List<Task<IEnumerable<ProxyInfo>>> tasks = new();
 
@@ -459,11 +454,13 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
     [Reactive] [IgnoreMember] public StressTestServiceState CurrentState { get; private set; }
 
-
     [IgnoreMember]
-    public ConcurrentDictionary<Tuple<string, string>, ExceptionCounter> ExceptionCounter { get; } = new();
+    private readonly Subject<Exception> _onBotException = new();
+    [IgnoreMember]
+    public IObservable<Exception> OnBotException => _onBotException;
 
     #endregion
 
     #endregion
 }
+
