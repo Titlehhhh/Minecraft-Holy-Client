@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Reactive.Disposables;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using HolyClient.ViewModels;
@@ -8,7 +9,7 @@ using ReactiveUI;
 
 namespace HolyClient.Views;
 
-public partial class StressTestProcessView : ReactiveUserControl<StressTestProcessViewModel>
+public partial class StressTestProcessView : ReactiveUserControl<IStressTestProcessViewModel>
 {
     public StressTestProcessView()
     {
@@ -17,13 +18,21 @@ public partial class StressTestProcessView : ReactiveUserControl<StressTestProce
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
-        ViewModel.Logs.CollectionChanged += Logs_CollectionChanged;
+        if (!Design.IsDesignMode)
+        {
+            ViewModel.Logs.CollectionChanged += Logs_CollectionChanged;
+        }
+
         base.OnLoaded(e);
     }
 
     protected override void OnUnloaded(RoutedEventArgs e)
     {
-        ViewModel.Logs.CollectionChanged -= Logs_CollectionChanged;
+        if (!Design.IsDesignMode)
+        {
+            ViewModel.Logs.CollectionChanged -= Logs_CollectionChanged;
+        }
+
         base.OnUnloaded(e);
     }
 

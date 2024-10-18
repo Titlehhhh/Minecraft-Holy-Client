@@ -49,12 +49,21 @@ public class LoggerWrapper : ILogger, IDisposable
 
 public class LogEventViewModel
 {
-    //public string Level { get; }
-    //public string Timestamp { get; }
+    public string Level { get; }
+    public string Timestamp { get; }
+    public Exception? Exception { get; }
+    public string Message { get; }
+    
 
     public LogEventViewModel(LogEvent logEvent)
     {
+        Level = logEvent.Level.ToString();
+        
+        
         var time = logEvent.Timestamp.ToString("HH:mm:ss");
+        Timestamp = time;
+        Message = logEvent.MessageTemplate.ToString();
+        Exception = logEvent.Exception;
 
         var ex = "";
 

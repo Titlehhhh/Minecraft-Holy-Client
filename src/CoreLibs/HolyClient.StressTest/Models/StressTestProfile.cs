@@ -83,7 +83,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
 
             if (port == 25565)
             {
-                logger.Information($"[STRESS TEST] Поиск srv для {Server}");
+                logger.Information($"Поиск srv для {Server}");
                 try
                 {
                     IServerResolver resolver = new ServerResolver();
@@ -94,11 +94,11 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 }
                 catch
                 {
-                    logger.Error($"[STRESS TEST] Ошибка поиска srv для {Server}");
+                    logger.Error($"Ошибка поиска srv для {Server}");
                 }
             }
 
-            logger.Information($"[STRESS TEST] Поиск DNS для {Server}");
+            logger.Information($"Поиск DNS для {Server}");
 
             var srv_host = host;
             var srv_port = port;
@@ -111,11 +111,11 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                         .ConfigureAwait(false);
 
                     host = result[0].ToString();
-                    logger.Information($"[STRESS TEST] DNS IP for {Server} - {host}");
+                    logger.Information($"DNS IP for {Server} - {host}");
                 }
                 catch
                 {
-                    logger.Error($"[STRESS TEST] Ошибка поиска DNS для {Server}");
+                    logger.Error($"Ошибка поиска DNS для {Server}");
                 }
 
 
@@ -161,7 +161,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             Interlocked.Exchange(ref _cleanUp, disposables)?.Dispose();
 
             logger.Information("Запуск поведения");
-            if (Behavior is not null) await Behavior.Activate(disposables, bots, logger, cancellationTokenSource.Token);
+            if (Behavior is not null) await Behavior.Start(disposables, bots, logger, cancellationTokenSource.Token);
             logger.Information("Поведение запущено");
 
 
@@ -190,8 +190,9 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                         stopwatch.Reset();
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    logger.Error(ex,"Spam error");
                 }
             });
             logger.Information("Запущены потоки чтения метрик");
@@ -304,7 +305,7 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
             b.DisposeWith(disposables);
         }
 
-        logger.Information($"[STRESS TEST] Запущен стресс тест на {NumberOfBots} ботов на сервер {host}:{port}");
+        logger.Information($"Запущен стресс тест на {NumberOfBots} ботов на сервер {host}:{port}");
 
 
         return stressTestBots;

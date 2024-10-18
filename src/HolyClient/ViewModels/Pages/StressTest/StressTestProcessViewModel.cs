@@ -107,9 +107,6 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
         #endregion
 
-        #region Configure exceptions
-
-        #endregion
 
         this.WhenActivated(async d =>
         {
@@ -128,6 +125,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
                     exceptions[keyAsTuple] = new ExceptionInfoViewModel(keyAsTuple, 1);
                 }
             }).DisposeWith(d);
+            
+            
             Observable.Interval(TimeSpan.FromSeconds(1))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>

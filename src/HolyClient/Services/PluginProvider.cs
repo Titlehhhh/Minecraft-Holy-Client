@@ -55,7 +55,9 @@ public class PluginProvider : IPluginProvider
 
 public class DefaultPluginSource : IPluginSource
 {
-    public PluginMetadata Metadata { get; } = new("Titlehhhh", "Spam hello bots", "HolyClient default behavior");
+    public PluginMetadata Metadata { get; } = new("Titlehhhh", 
+        "Simple spam bots", 
+        "SimplePlugin");
 
     public PluginTypeReference Reference { get; } = new();
 

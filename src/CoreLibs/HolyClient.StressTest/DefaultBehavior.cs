@@ -61,7 +61,7 @@ public class DefaultBehavior : BaseStressTestBehavior
     {
         
     }
-    public override Task Activate(CompositeDisposable disposables, IEnumerable<IStressTestBot> bots, ILogger logger,
+    public override Task Start(CompositeDisposable d, IEnumerable<IStressTestBot> bots, ILogger logger,
         CancellationToken cancellationToken)
     {
         var spams = SpamTexts.ToArray();
@@ -130,7 +130,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                             {
                                 cts.Dispose();
                             }
-                        }).DisposeWith(disposables);
+                        }).DisposeWith(d);
                         Random r = new();
                         
                         while (!cts.IsCancellationRequested)
@@ -142,12 +142,11 @@ public class DefaultBehavior : BaseStressTestBehavior
                     }
                     catch (Exception exception)
                     {
-                        //Console.WriteLine("Spam err: " + exception.Message);
-                        // ignored
+                        logger.Error(exception, "Spam err: ");
                     }
-                }).DisposeWith(disposables);
+                }).DisposeWith(d);
 
-                proto.OnMapItemData.Subscribe(OnMapItem).DisposeWith(disposables);
+                proto.OnMapItemData.Subscribe(OnMapItem).DisposeWith(d);
 
                 proto.OnPosition.FirstAsync().Subscribe(async p =>
                 {
@@ -159,7 +158,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                     catch
                     {
                     }
-                }).DisposeWith(disposables);
+                }).DisposeWith(d);
                 if (StartTimeout > 0)
                     await Task.Delay(StartTimeout);
                 bot.Restart(true);
@@ -225,6 +224,7 @@ public class DefaultBehavior : BaseStressTestBehavior
 
     private async void OnMapItem(MapItemDataPacket packet)
     {
+        return;
         try
         {
             if (packet.Data is not null)

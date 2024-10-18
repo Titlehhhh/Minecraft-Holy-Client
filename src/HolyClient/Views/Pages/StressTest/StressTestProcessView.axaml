@@ -5,11 +5,12 @@
              xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
              xmlns:designTime="using:HolyClient.DesignTime"
              x:CompileBindings="True"
-
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:sg="using:SpacedGridControl.Avalonia"
              xmlns:vm="using:HolyClient.ViewModels"
-             x:DataType="vm:StressTestProcessViewModel"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:views="using:HolyClient.Views"
+             x:DataType="vm:IStressTestProcessViewModel"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
              x:Class="HolyClient.Views.StressTestProcessView">
     <Design.DataContext>
         <designTime:DesignStressTestProcessViewModel />
@@ -57,6 +58,7 @@
 		-->
 
         <TabControl Grid.Row="2">
+
             <TabItem FontSize="16" Header="Metrics">
 
                 <Grid>
@@ -83,16 +85,79 @@
 
             </TabItem>
             <TabItem IsSelected="True" FontSize="16" Header="Log">
-                <ScrollViewer Margin="10" x:Name="LogsScroll">
-                    <ItemsControl ItemsSource="{Binding Logs}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="vm:LogEventViewModel">
-                                <TextBlock TextWrapping="Wrap" Text="{Binding Text}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
+                    <Border 
+                        Padding="7" 
+                        CornerRadius="7" 
+                        Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}">
+
+                        <StackPanel Orientation="Horizontal">
+                            <controls:FAPathIcon
+                                Width="18"
+                                Height="18"
+                                Foreground="{DynamicResource WarningColor}"
+                                Data="{DynamicResource WarningIconPath}" />
+                            <TextBlock FontSize="16" Foreground="LightGray" Margin="6,0,0,0" Text="3" />
+
+                            <controls:FAPathIcon
+                                Margin="10,0,0,0"
+                                Width="18"
+                                Height="18"
+                                Foreground="{DynamicResource ErrorColor}"
+                                Data="{DynamicResource ErrorIconPath}" />
+                            <TextBlock FontSize="16" Foreground="LightGray" Margin="6,0,0,0" Text="6" />
+
+
+                        </StackPanel>
+                    </Border>
+                    <Border Padding="7" CornerRadius="7" Margin="0,8,0,0" Grid.Row="1"
+                            Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}">
+
+                        <ScrollViewer
+
+                            IsScrollChainingEnabled="True"
+                            IsScrollInertiaEnabled="True"
+                            HorizontalScrollBarVisibility="Disabled"
+                            Background="Transparent"
+                            x:Name="LogsScroll">
+                            <ItemsControl ItemsSource="{Binding Logs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="vm:LogEventViewModel">
+                                        <views:LogEventView Margin="0,0,0,3" HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <StackPanel Margin="7,0,0,0" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
+
+                        <ToggleButton
+                            ToolTip.Tip="Auto scroll"
+                            ToolTip.Placement="Left"
+                            ToolTip.BetweenShowDelay="3000"
+                            ToolTip.VerticalOffset="0"
+                            ToolTip.HorizontalOffset="-7"
+                            Padding="7">
+
+                            <controls:FAPathIcon
+                                Height="18"
+                                Width="18"
+                                Foreground="LightGray"
+                                Data="M480-84q-8 0-15-3t-13-9L228-319q-11-11-11-28t11-29q12-12 28.5-12t28.5 12l155 156v-247q0-17 11.5-28.5T480-507q17 0 28.5 11.5T520-467v247l156-156q11-11 27.5-11t28.5 12q11 11 11 28t-11 28L508-96q-6 6-13 9t-15 3Zm0-503q-17 0-28.5-11.5T440-627v-40q0-17 11.5-28.5T480-707q17 0 28.5 11.5T520-667v40q0 17-11.5 28.5T480-587Zm0-200q-17 0-28.5-11.5T440-827q0-17 11.5-28.5T480-867q17 0 28.5 11.5T520-827q0 17-11.5 28.5T480-787Z" />
+
+                        </ToggleButton>
+                    </StackPanel>
+
+                    <Grid Margin="0,10,0,0" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" />
+                        <Button Margin="10,0,0,0" Grid.Column="1" Content="Send" />
+                    </Grid>
+                </Grid>
+
             </TabItem>
+
             <TabItem FontSize="16" Header="Errors">
                 <DataGrid ItemsSource="{Binding Exceptions}"
                           IsReadOnly="True"
