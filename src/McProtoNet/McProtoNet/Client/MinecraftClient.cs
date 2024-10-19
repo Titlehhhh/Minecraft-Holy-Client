@@ -28,6 +28,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
     private volatile Stream mainStream;
 
     private readonly MinecraftClientLogin minecraftLogin = new();
+    private Task? mainLoop;
+    private Task? connectTask;
 
 
     public MinecraftClient()
@@ -57,7 +59,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
     }
 
-    public async Task Start(bool throwErrorConnect = false)
+    public Task Start(bool throwErrorConnect = false)
     {
         ThrowIfDisposed();
         ThrowIfConnected();
@@ -72,7 +74,13 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
 
         RaiseStateChanged(MinecraftClientState.Disconnected, MinecraftClientState.Connect);
-        IDisposable? disposable = null;
+
+        connectTask = StartCoreAsync();
+        return connectTask;
+    }
+
+    private async Task StartCoreAsync()
+    {
         try
         {
             CleanUp();
@@ -94,28 +102,28 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                 }
             }
 
-            disposable = tcpStream;
+
             mainStream = tcpStream;
             Debug.Assert(mainStream is not null, $"mainStream is not null?");
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
 
             var result = await minecraftLogin.Login(tcpStream, loginOptions, newCts.Token);
-            disposable = result.Stream;
+
             _sendLock = new AsyncReaderWriterLock();
             mainStream = result.Stream;
 
-            Task mainLoop = MainLoop(result, newCts.Token);
+            mainLoop = MainLoop(result, newCts.Token);
         }
         catch (Exception ex)
         {
-            disposable?.Dispose();
             if (DisconnectIsPendingOrFinished(out var previus))
             {
                 return;
             }
 
             TryInitiateDisconnect();
+
             CleanUp();
             CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
 
@@ -151,7 +159,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         } while (true);
     }
 
-    public void Stop(Exception? customException = null)
+    public async Task Stop(Exception? customException = null)
     {
         ThrowIfDisposed();
 
@@ -161,9 +169,22 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
 
         TryInitiateDisconnect();
-        CleanUp();
-        CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
-        RaiseDisconnected(customException, previus);
+        try
+        {
+            var task1 = connectTask ??= Task.CompletedTask;
+            var task2 = mainLoop ??= Task.CompletedTask;
+            await Task.WhenAll(task1, task2).ConfigureAwait(false);
+        }
+        catch
+        {
+            // ignored
+        }
+        finally
+        {
+            CleanUp();
+            CompareExchangeState(MinecraftClientState.Disconnected, MinecraftClientState.Disconnecting);
+            RaiseDisconnected(customException, previus);
+        }
     }
 
     #endregion
@@ -188,7 +209,8 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         var state = _state;
         if (state != (int)MinecraftClientState.Play)
         {
-            throw new InvalidOperationException($"Cannot send packages outside of Play mode (Current mode: {(MinecraftClientState)state})");
+            throw new InvalidOperationException(
+                $"Cannot send packages outside of Play mode (Current mode: {(MinecraftClientState)state})");
         }
     }
 
@@ -275,6 +297,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
 
     private async Task MainLoop(LoginizationResult loginizationResult, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var packetSender = new MinecraftPacketSender();
         var packetReader = new MinecraftPacketReader();
 
@@ -287,7 +310,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         _packetSender = packetSender;
 
         packetReader.SwitchCompression(loginizationResult.CompressionThreshold);
-       
+
         try
         {
             MinecraftClientState old = // Enable SendPacket
@@ -312,6 +335,9 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
+            await loginizationResult.Stream.DisposeAsync()
+                .ConfigureAwait(false);
+
             if (DisconnectIsPendingOrFinished(out _))
             {
                 return;
@@ -341,22 +367,20 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                 Proxy.WriteTimeout = this.WriteTimeout;
                 return await Proxy.ConnectAsync(Host, Port, cancellationToken);
             }
-            else
-            {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                {
-                    NoDelay = true,
-                    LingerState = new LingerOption(true, 0),
-                    SendTimeout = this.WriteTimeout,
-                    ReceiveTimeout = this.ReadTimeout
-                };
-                using (cancellationToken.Register(d => ((IDisposable)d).Dispose(), socket))
-                {
-                    disposable = socket;
-                    await socket.ConnectAsync(Host, Port, cancellationToken).ConfigureAwait(false);
 
-                    return new NetworkStream(socket, true);
-                }
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            {
+                NoDelay = true,
+                LingerState = new LingerOption(true, 0),
+                SendTimeout = this.WriteTimeout,
+                ReceiveTimeout = this.ReadTimeout
+            };
+            disposable = socket;
+            await using (cancellationToken.Register(d => ((IDisposable)d).Dispose(), socket))
+            {
+                await socket.ConnectAsync(Host, Port, cancellationToken).ConfigureAwait(false);
+
+                return new NetworkStream(socket, true);
             }
         }
         catch

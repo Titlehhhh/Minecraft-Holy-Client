@@ -149,6 +149,8 @@ internal sealed class MinecraftClientLogin
             // >= 764
             if (configState)
             {
+                var info = CreateDefaultClientInformation(options.ProtocolVersion);
+                await sender.SendAndDisposeAsync(info, cancellationToken).ConfigureAwait(false);
                 while (true)
                 {
                     var inputPacket = await reader.ReadNextPacketAsync(cancellationToken).ConfigureAwait(false);
@@ -278,6 +280,33 @@ internal sealed class MinecraftClientLogin
         }
     }
 
+    private static OutputPacket CreateDefaultClientInformation(int protocolVersion)
+    {
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            int packetId = protocolVersion switch
+            {
+                >= 340 and <= 767 => 0x00,
+            };
+            writer.WriteVarInt(packetId);
+            writer.WriteString("ru_ru");
+            writer.WriteSignedByte(16);
+            writer.WriteVarInt(0);
+            writer.WriteBoolean(true);
+            writer.WriteUnsignedByte(127);
+            writer.WriteVarInt(0);
+            writer.WriteBoolean(true);
+            writer.WriteBoolean(true);
+
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
     private static OutputPacket CreateZeroKnownPacks(int protocolVersion)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
@@ -296,6 +325,7 @@ internal sealed class MinecraftClientLogin
             writer.Dispose();
         }
     }
+
     private static OutputPacket CreateFinishConfig(int id)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
@@ -362,7 +392,7 @@ internal sealed class MinecraftClientLogin
         return reader.ReadString();
     }
 
-    private static void ThrowConfigDisconnect(int protocolVersion,InputPacket packet)
+    private static void ThrowConfigDisconnect(int protocolVersion, InputPacket packet)
     {
         scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
         if (protocolVersion < 765)
@@ -371,7 +401,7 @@ internal sealed class MinecraftClientLogin
         }
         else
         {
-            throw new ConfigurationDisconnectException(reader.ReadNbt(protocolVersion<764).ToString());
+            throw new ConfigurationDisconnectException(reader.ReadNbt(protocolVersion < 764).ToString());
         }
     }
 

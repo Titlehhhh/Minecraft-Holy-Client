@@ -15,7 +15,7 @@
         List<KeyValuePair<int, int>> list = new();
         for (int i = 340; i <= 767; i++)
         {
-            var g = GetClientboundConfigPacket(i, "DisconnectConfigurationPacket");
+            var g = GetServerboundConfigPacket(i, "ClientInformationConfigurationPacket");
             list.Add(new KeyValuePair<int, int>(i, g));
         }
 

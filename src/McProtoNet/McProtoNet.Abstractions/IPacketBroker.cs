@@ -10,7 +10,7 @@ public interface IPacketBroker
 
     event Action Disposed;
 
-    void Stop(Exception? customException = null);
+    Task Stop(Exception? customException = null);
     
     int ProtocolVersion { get; }
 }
