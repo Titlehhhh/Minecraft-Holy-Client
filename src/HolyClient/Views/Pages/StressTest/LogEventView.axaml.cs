@@ -21,23 +21,26 @@ public partial class LogEventView : UserControl
         if (DataContext is LogEventViewModel vm)
         {
             InlineCollection inlines = new InlineCollection();
-            
+
             Run TimestampTextblock = new Run();
-            
+
             TimestampTextblock.Foreground = Brushes.LightGray;
 
             Run MessageText = new Run();
             MessageText.Foreground = Brushes.LightGray;
-            
-            
-            
+
 
             TimestampTextblock.Text = vm.Timestamp;
             EventIcon.Data = (Geometry)App.Current.Resources[$"{vm.Level}IconPath"];
             EventIcon.Foreground = (IBrush)App.Current.Resources[$"{vm.Level}Color"];
+            
+            ToolTip.SetTip(IconBorder, vm.Level);
+            ToolTip.SetBetweenShowDelay(IconBorder, 2500);
+
+
             MessageText.Text = vm.Message;
-            
-            
+
+
             inlines.Add(TimestampTextblock);
             inlines.Add(new Run(" "));
             inlines.Add(MessageText);
@@ -45,7 +48,7 @@ public partial class LogEventView : UserControl
             if (vm.Exception is not null)
             {
                 string errorText = $"{vm.Exception.Message}\n{vm.Exception.StackTrace}";
-                ExceptionTextBlock.Text = errorText+" ";
+                ExceptionTextBlock.Text = errorText + " ";
                 ExceptionTextBlock.IsVisible = true;
             }
             else
@@ -54,7 +57,6 @@ public partial class LogEventView : UserControl
             }
 
             MainTextBlock.Inlines = inlines;
-
         }
 
         base.OnDataContextChanged(e);

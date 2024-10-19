@@ -37,6 +37,11 @@ public class DesignStressTestProcessViewModel : ReactiveObject, IStressTestProce
     public Axis[] BotsAxis { get; } = [];
     public Axis[] CPSAxis { get; } = [];
     public Margin DrawMargin { get; } = new();
+
+    public int WarningCount => 0;
+
+    public int ErrorCount => 0;
+
     public IEnumerable<ExceptionInfoViewModel> Exceptions { get; }
 
     public string? UrlPathSegment => "";

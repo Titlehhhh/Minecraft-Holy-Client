@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -41,6 +42,7 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
     public StressTestProcessViewModel(ICommand cancel, IStressTestProfile stressTest, LoggerWrapper wrapper)
     {
         Logs = wrapper.Events;
+
         Host = stressTest.Server;
         // Version = MinecraftVersionToStringConverter.McVerToString(stressTest.Version);
         Version = stressTest.Version.ToString();
@@ -110,6 +112,12 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
 
         this.WhenActivated(async d =>
         {
+            wrapper.Events.CollectionChanged += EventsOnCollectionChanged;
+
+            Disposable.Create(() =>
+            {
+                wrapper.Events.CollectionChanged -= EventsOnCollectionChanged;
+            }).DisposeWith(d);
             ConcurrentDictionary<Tuple<string, string>, ExceptionInfoViewModel> exceptions = new();
             //SourceCache<ExceptionInfoViewModel, Tuple<string,string>> 
             stressTest.OnBotException.Subscribe(ex =>
@@ -125,8 +133,8 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
                     exceptions[keyAsTuple] = new ExceptionInfoViewModel(keyAsTuple, 1);
                 }
             }).DisposeWith(d);
-            
-            
+
+
             Observable.Interval(TimeSpan.FromSeconds(1))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
@@ -164,6 +172,24 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
                     _cpsAxis.CustomSeparators = GetSeparators();
                 }).DisposeWith(d);
         });
+    }
+
+    private void EventsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        foreach (var eNewItem in e.NewItems)
+        {
+            if (eNewItem is LogEventViewModel lm)
+            {
+                if (lm.Level == "Error")
+                {
+                    ErrorCount++;
+                }
+                else if (lm.Level == "Warning")
+                {
+                    WarningCount++;
+                }
+            }
+        }
     }
 
 
@@ -246,6 +272,9 @@ public class StressTestProcessViewModel : ReactiveObject, IStressTestProcessView
     public Axis[] BotsAxis { get; set; }
     public Axis[] CPSAxis { get; set; }
     public Margin DrawMargin { get; set; }
+
+    [Reactive] public int WarningCount { get; private set; }
+    [Reactive] public int ErrorCount { get; private set; }
 
     #endregion
 

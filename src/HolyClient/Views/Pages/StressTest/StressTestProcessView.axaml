@@ -86,26 +86,37 @@
             </TabItem>
             <TabItem IsSelected="True" FontSize="16" Header="Log">
                 <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto">
-                    <Border 
-                        Padding="7" 
-                        CornerRadius="7" 
+                    <Border
+                        Padding="7"
+                        CornerRadius="7"
                         Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}">
 
-                        <StackPanel Orientation="Horizontal">
-                            <controls:FAPathIcon
-                                Width="18"
-                                Height="18"
-                                Foreground="{DynamicResource WarningColor}"
-                                Data="{DynamicResource WarningIconPath}" />
-                            <TextBlock FontSize="16" Foreground="LightGray" Margin="6,0,0,0" Text="3" />
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <Border Background="Transparent" ToolTip.Tip="Предупреждения">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <controls:FAPathIcon
+                                        Width="18"
+                                        Height="18"
+                                        Foreground="{DynamicResource WarningColor}"
+                                        Data="{DynamicResource WarningIconPath}" />
+                                    <TextBlock FontSize="16" Foreground="LightGray" 
+                                               Text="{Binding WarningCount}" />
 
-                            <controls:FAPathIcon
-                                Margin="10,0,0,0"
-                                Width="18"
-                                Height="18"
-                                Foreground="{DynamicResource ErrorColor}"
-                                Data="{DynamicResource ErrorIconPath}" />
-                            <TextBlock FontSize="16" Foreground="LightGray" Margin="6,0,0,0" Text="6" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="Transparent" ToolTip.Tip="Ошибки">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <controls:FAPathIcon
+
+                                        Width="18"
+                                        Height="18"
+                                        Foreground="{DynamicResource ErrorColor}"
+                                        Data="{DynamicResource ErrorIconPath}" />
+                                    <TextBlock FontSize="16" Foreground="LightGray" Text="{Binding ErrorCount}" />
+
+                                </StackPanel>
+                            </Border>
 
 
                         </StackPanel>
@@ -134,6 +145,8 @@
                     <StackPanel Margin="7,0,0,0" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
 
                         <ToggleButton
+                            x:Name="AutoScrollToggleButton"
+                            IsChecked="True"
                             ToolTip.Tip="Auto scroll"
                             ToolTip.Placement="Left"
                             ToolTip.BetweenShowDelay="3000"

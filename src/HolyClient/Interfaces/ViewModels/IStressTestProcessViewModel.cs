@@ -37,6 +37,9 @@ public interface IStressTestProcessViewModel : IReactiveObject, IRoutableViewMod
     Axis[] BotsAxis { get; }
     Axis[] CPSAxis { get; }
     Margin DrawMargin { get; }
+    
+    int WarningCount { get; }
+    int ErrorCount { get; }
 
     IEnumerable<ExceptionInfoViewModel> Exceptions { get; }
 }

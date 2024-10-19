@@ -38,6 +38,7 @@ public partial class StressTestProcessView : ReactiveUserControl<IStressTestProc
 
     private void Logs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        LogsScroll.ScrollToEnd();
+        if (AutoScrollToggleButton.IsChecked == true)
+            LogsScroll.ScrollToEnd();
     }
 }

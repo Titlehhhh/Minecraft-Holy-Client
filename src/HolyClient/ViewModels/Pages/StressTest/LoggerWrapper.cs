@@ -15,6 +15,7 @@ public class LoggerWrapper : ILogger, IDisposable
     private IDisposable? _cleanUp;
 
     private readonly SourceList<LogEvent> _logs = new();
+    
 
     public LoggerWrapper()
     {
