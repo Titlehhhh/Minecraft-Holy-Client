@@ -746,6 +746,51 @@
         return result;
     }
 
+    public static List<string> ServerboundLoginPackets(int protocolVersion)
+    {
+        List<string> result = new();
+        result.Add("ServerboundHelloPacket");
+        result.Add("ServerboundKeyPacket");
+        if (protocolVersion > 340 /* > 1.12.2 */ && protocolVersion < 764 /* < 1.20.2 */)
+        {
+            result.Add("ServerboundCustomQueryPacket");
+        }
+
+        if (protocolVersion > 763 /* > 1.20.1 */)
+        {
+            result.Add("ServerboundCustomQueryAnswerPacket");
+            result.Add("ServerboundLoginAcknowledgedPacket");
+        }
+
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ServerboundCookieResponseLoginPacket");
+        }
+
+        return result;
+    }
+
+    public static List<string> ClientboundLoginPackets(int protocolVersion)
+    {
+        List<string> result = new();
+
+        result.Add("ClientboundLoginDisconnectPacket");
+        result.Add("ClientboundHelloPacket");
+        result.Add("ClientboundGameProfilePacket");
+        result.Add("ClientboundLoginCompressionPacket");
+        if (protocolVersion > 340 /* > 1.12.2 */)
+        {
+            result.Add("ClientboundCustomQueryPacket");
+        }
+
+        if (protocolVersion > 765 /* > 1.20.4 */)
+        {
+            result.Add("ClientboundCookieRequestLoginPacket");
+        }
+
+        return result;
+    }
+
     public class GroupOfAdjacent<TSource, TKey> : IEnumerable<TSource>, IGrouping<TKey, TSource>
     {
         public TKey Key { get; set; }

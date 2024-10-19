@@ -18,7 +18,9 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        await BowBots();
+     await   MultipleConnections();
+     return;   
+     await BowBots();
     }
 
     private static async Task BowBots()
@@ -46,9 +48,9 @@ internal class Program
                 MinecraftClient client = new MinecraftClient()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(30),
-                    Host = "127.0.0.1",
+                    Host = "194.147.90.7",
                     Port = 25565,
-                    Username = $"TitleBot_{i + 1:D3}",
+                    Username = $"Adolf",
                     Version = MinecraftVersion.Latest
                 };
                 client.Disconnected += async (sender, eventArgs) =>
@@ -129,49 +131,7 @@ internal class Program
         await Task.Delay(-1);
     }
     
-    private static void NewMethod()
-    {
-        List<KeyValuePair<int, int>> list = new();
-        for (int i = 340; i <= 767; i++)
-        {
-            var g = GetServerboundPlayPacket(i, "CommandSuggestionPacket");
-            list.Add(new KeyValuePair<int, int>(i, g));
-        }
-
-        var ranges = list.GroupAdjacent(c => c.Value)
-            .Select(g => new VersionRange(
-                g.Min(c => c.Key),
-                g.Max(c => c.Key),
-                g.Key));
-
-
-        foreach (var r in ranges)
-        {
-            Console.WriteLine(r.ToSwitchCaseSend() + ",");
-        }
-
-
-        return;
-    }
-
-    private static int GetServerboundPlayPacket(int version, string packet)
-    {
-        return Ext.ServerboundPlayPackets(version).IndexOf("Serverbound" + packet);
-    }
-
-    private static int GetClientboundPlayPacket(int version, string packet)
-    {
-        return Ext.ClientboundPlayPackets(version).IndexOf("Clientbound" + packet);
-    }
     
-    private static int GetClientboundConfigPacket(int version, string packet)
-    {
-        return Ext.ClientboundConfigurationPackets(version).IndexOf("Clientbound" + packet);
-    }
-    private static int GetServerboundConfigPacket(int version, string packet)
-    {
-        return Ext.ServerboundConfigurationPackets(version).IndexOf("Serverbound" + packet);
-    }
 
 
     public static void SwitchGenerator(string packet, string side)
@@ -184,32 +144,5 @@ internal class Program
     }
 
 
-    class VersionRange
-    {
-        public int Min { get; }
-        public int Max { get; }
-        public int Id { get; }
-
-        public VersionRange(int min, int max, int id)
-        {
-            Min = min;
-            Max = max;
-            Id = id;
-        }
-
-        public string ToSwitchCaseSend()
-        {
-            if (Min != Max)
-            {
-                return $">= {Min} and <= {Max} => 0x{Id:X2}";
-            }
-
-            return $"{Min} => 0x{Id:X2}";
-        }
-
-        public override string ToString()
-        {
-            return $"From {Min} to {Max} id {Id}";
-        }
-    }
+   
 }

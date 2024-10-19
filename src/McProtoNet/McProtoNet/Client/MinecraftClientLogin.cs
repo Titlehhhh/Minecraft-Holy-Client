@@ -12,27 +12,20 @@ internal sealed class MinecraftClientLogin
 {
     private static readonly byte[] VarIntLoginIntent;
     private static readonly byte[] LoginAcknowledged;
-    private static readonly byte[] KnownPacksZero;
 
     private static readonly MemoryAllocator<byte> s_allocator = ArrayPool<byte>.Shared.ToAllocator();
 
     static MinecraftClientLogin()
     {
+        VarIntLoginIntent = VarIntToBytes(0x02);
+        LoginAcknowledged = VarIntToBytes(0x03);
+    }
+
+    static byte[] VarIntToBytes(int val)
+    {
         var ms = new MemoryStream();
-        ms.WriteVarInt(2);
-        VarIntLoginIntent = ms.ToArray();
-        ms.Position = 0;
-        ms.SetLength(0);
-
-        ms.WriteVarInt(0x03);
-        LoginAcknowledged = ms.ToArray();
-
-        ms.Position = 0;
-        ms.SetLength(0);
-
-        ms.WriteVarInt(0x07); //Packet id
-        ms.WriteVarInt(0x00);
-        KnownPacksZero = ms.ToArray();
+        ms.WriteVarInt(val);
+        return ms.ToArray();
     }
 
     public event Action<MinecraftClientState> StateChanged;
@@ -153,6 +146,7 @@ internal sealed class MinecraftClientLogin
                 }
             }
 
+            // >= 764
             if (configState)
             {
                 while (true)
@@ -163,85 +157,106 @@ internal sealed class MinecraftClientLogin
                         var needBreak = false;
 
 
-                        switch (inputPacket.Id)
+                        // int cookieRequest = options.ProtocolVersion switch
+                        // {
+                        // };
+                        // int pluginMessage = options.ProtocolVersion switch
+                        // {
+                        // };
+                        int finishConfig = options.ProtocolVersion switch
                         {
-                            case 0x00: // Cookie Request
-                                //if (!inputPacket.Data.TryReadString(out string key, out _))
+                            <= 765 => 0x02,
+                            <= 767 => 0x03,
+                        };
+                        int keepAlive = options.ProtocolVersion switch
+                        {
+                            765 => 0x03,
+                            >= 766 and <= 767 => 0x04
+                        };
+                        int ping = options.ProtocolVersion switch
+                        {
+                            765 => 0x04,
+                            >= 766 and <= 767 => 0x05
+                        };
+                        int knownPacks = options.ProtocolVersion switch
+                        {
+                            >= 340 and <= 765 => -1,
+                            >= 766 and <= 767 => 0x0E,
+                        };
+                        int disconnect = options.ProtocolVersion switch
+                        {
+                            >= 340 and <= 765 => 0x01,
+                            >= 766 and <= 767 => 0x02,
+                        };
+
+                        if (inputPacket.Id == finishConfig)
+                        {
+                            int packetId = options.ProtocolVersion switch
                             {
-                                //   throw new Exception("Failed Read");
-                            }
-
-
-                                break;
-                            case 0x01: // Plugin Message
-                                //var pluginPacket = ReadConfigPluginMessagePacket(inputPacket);
-
-                                break;
-                            case 0x02: // Disconnect (configuration)
-                                // inputPacket.Data.TryReadString(out var reason, out _);
-                                throw new LoginRejectedException("Login Disconnect");
-                                // throw new LoginRejectedException(reason);
-                                break;
-                            case 0x03:
-                                await sender.SendPacketAsync(LoginAcknowledged, cancellationToken);
-                                needBreak = true;
-                                break; // Finish
-                            case 0x04: // KeepAlive
-
-                                long id = ReadKeepAlive(inputPacket);
-
-                                var outP = CreateKeepAlive(id);
-                                try
-                                {
-                                    await sender.SendPacketAsync(outP, cancellationToken);
-                                }
-                                finally
-                                {
-                                    outP.Dispose();
-                                }
-
-                                break;
-                            case 0x05: // Ping
-                                var pong = PingPong(inputPacket);
-                                try
-                                {
-                                    await sender.SendPacketAsync(pong, cancellationToken);
-                                }
-                                finally
-                                {
-                                    pong.Dispose();
-                                }
-                                break;
-                            case 0x06: // Reset Chat
-                                break;
-                            case 0x07: // Registry Data
-                                break;
-                            case 0x08: // Remove Resource Pack
-                                break;
-                            case 0x09: // Add Resource Pack
-                                break;
-                            case 0x0A: // Store Cookie
-                                break;
-                            case 0x0B: // Transfer
-                                break;
-                            case 0x0C: // Feature Flags
-                                break;
-                            case 0x0D: // Update Tags
-                                break;
-
-                            case 0x0E: // Clientbound Known Packs
-                                await sender.SendPacketAsync(KnownPacksZero, cancellationToken);
-                                break;
-
-                            case 0x0F: // Custom Report Details
-                                break;
-
-                            case 0x10: // Server Links
-                                break;
-
-
-                            default: throw new Exception("Unknown packet: " + inputPacket.Id);
+                                >= 764 and <= 765 => 0x02,
+                                >= 766 and <= 767 => 0x03
+                            };
+                            var finishConfigServerbound = CreateFinishConfig(packetId);
+                            await sender.SendAndDisposeAsync(finishConfigServerbound, cancellationToken);
+                            needBreak = true;
                         }
+                        else if (inputPacket.Id == keepAlive)
+                        {
+                            long id = ReadKeepAlive(inputPacket);
+                            OutputPacket response = CreateKeepAlive(options.ProtocolVersion, id);
+                            await sender.SendAndDisposeAsync(response, cancellationToken);
+                        }
+                        else if (inputPacket.Id == ping)
+                        {
+                            await sender.SendAndDisposeAsync(
+                                PingPong(options.ProtocolVersion, inputPacket),
+                                cancellationToken);
+                        }
+                        else if (inputPacket.Id == knownPacks)
+                        {
+                            await sender.SendAndDisposeAsync(CreateZeroKnownPacks(options.ProtocolVersion),
+                                cancellationToken);
+                        }
+                        else if (inputPacket.Id == disconnect)
+                        {
+                            ThrowConfigDisconnect(options.ProtocolVersion, inputPacket);
+                        }
+
+
+                        if (options.ProtocolVersion >= 765)
+                        {
+                            int pushResourcePack = options.ProtocolVersion switch
+                            {
+                                765 => 0x07,
+                                >= 766 and <= 767 => 0x09,
+                            };
+                            if (inputPacket.Id == pushResourcePack)
+                            {
+                                var resourcePackPacket = ReadPushResourcePack(inputPacket);
+
+                                OutputPacket responseRP =
+                                    CreateResourcePack(options.ProtocolVersion, 0, resourcePackPacket.UUID);
+
+                                await sender.SendAndDisposeAsync(responseRP, cancellationToken);
+                            }
+                        }
+                        else
+                        {
+                            int resourcePack = options.ProtocolVersion switch
+                            {
+                                >= 340 and <= 764 => 0x06
+                            };
+                            if (inputPacket.Id == resourcePack)
+                            {
+                                var resourcePackPacket = ReadResourcePack(inputPacket);
+
+                                OutputPacket responseRP =
+                                    CreateResourcePack(options.ProtocolVersion, 0, resourcePackPacket.UUID);
+
+                                await sender.SendAndDisposeAsync(responseRP, cancellationToken);
+                            }
+                        }
+
 
                         if (needBreak)
                             break;
@@ -263,18 +278,114 @@ internal sealed class MinecraftClientLogin
         }
     }
 
+    private static OutputPacket CreateZeroKnownPacks(int protocolVersion)
+    {
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            int packetId = protocolVersion switch
+            {
+                >= 766 and <= 767 => 0x07,
+            };
+            writer.WriteVarInt(packetId);
+            writer.WriteVarInt(0);
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+    private static OutputPacket CreateFinishConfig(int id)
+    {
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            writer.WriteVarInt(id);
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
+    private static OutputPacket CreateResourcePack(int protocolVersion, int action, Guid uuid)
+    {
+        int packetId = protocolVersion switch
+        {
+            >= 340 and <= 765 => 0x05,
+            >= 766 and <= 767 => 0x06
+        };
+
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            writer.WriteVarInt(packetId);
+            if (protocolVersion < 765)
+            {
+                writer.WriteVarInt(action);
+            }
+            else
+            {
+                writer.WriteUUID(uuid);
+                writer.WriteVarInt(action);
+            }
+
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
+    private static ClientBoundResourcePackPacket ReadResourcePack(InputPacket packet)
+    {
+        scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+        string url = reader.ReadString();
+        Guid uuid = Guid.Empty;
+        return new ClientBoundResourcePackPacket(uuid, url);
+    }
+
+    private static ClientBoundResourcePackPacket ReadPushResourcePack(InputPacket packet)
+    {
+        scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+        Guid uuid = reader.ReadUUID();
+        string url = reader.ReadString();
+        return new ClientBoundResourcePackPacket(uuid, url);
+    }
+
     private static string ReadLoginDisconnect(InputPacket packet)
     {
         scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
         return reader.ReadString();
     }
 
-    private static OutputPacket PingPong(InputPacket packet)
+    private static void ThrowConfigDisconnect(int protocolVersion,InputPacket packet)
+    {
+        scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+        if (protocolVersion < 765)
+        {
+            throw new ConfigurationDisconnectException(reader.ReadString());
+        }
+        else
+        {
+            throw new ConfigurationDisconnectException(reader.ReadNbt(protocolVersion<764).ToString());
+        }
+    }
+
+    private static OutputPacket PingPong(int protocolVersion, InputPacket packet)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
         try
         {
-            writer.WriteVarInt(0x05);
+            int packetId = protocolVersion switch
+            {
+                <= 765 => 0x04,
+                <= 767 => 0x05
+            };
+            writer.WriteVarInt(packetId);
             writer.WriteBuffer(packet.Data.Span);
             return new OutputPacket(writer.GetWrittenMemory());
         }
@@ -283,12 +394,25 @@ internal sealed class MinecraftClientLogin
             writer.Dispose();
         }
     }
-    private static OutputPacket CreateKeepAlive(long id)
+
+    private static OutputPacket CreateKeepAlive(int protocolVersion, long id)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
-        writer.WriteVarInt(0x04); // Packet id
-        writer.WriteSignedLong(id);
-        return new OutputPacket(writer.GetWrittenMemory());
+        try
+        {
+            int packetId = protocolVersion switch
+            {
+                <= 765 => 0x03,
+                <= 767 => 0x04,
+            };
+            writer.WriteVarInt(packetId); // Packet id
+            writer.WriteSignedLong(id);
+            return new OutputPacket(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
     }
 
     private static int ReadTreshold(InputPacket p)
@@ -312,7 +436,7 @@ internal sealed class MinecraftClientLogin
         return new ClientboundConfigurationPluginMessagePacket(id, data);
     }
 
-    private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket,int protocolVersion)
+    private static EncryptionBeginPacket ReadEncryptionPacket(InputPacket inputPacket, int protocolVersion)
     {
         scoped var reader = new MinecraftPrimitiveSpanReader(inputPacket.Data);
         var serverId = reader.ReadString();
@@ -323,10 +447,10 @@ internal sealed class MinecraftClientLogin
         bool? shouldAuthenticate = null;
         if (protocolVersion > 765)
         {
-            shouldAuthenticate=   reader.ReadBoolean();
+            shouldAuthenticate = reader.ReadBoolean();
         }
-        
-        return new EncryptionBeginPacket(serverId, publicKey, verifyToken,shouldAuthenticate);
+
+        return new EncryptionBeginPacket(serverId, publicKey, verifyToken, shouldAuthenticate);
     }
 
     private static OutputPacket CreatePluginResponse(string channel, byte[] data)
@@ -440,6 +564,7 @@ internal sealed class MinecraftClientLogin
         public readonly byte[] PublicKey;
         public readonly byte[] VerifyToken;
         public readonly bool? ShouldAuthenticate;
+
         public EncryptionBeginPacket(string serverId, byte[] publicKey, byte[] verifyToken, bool? shouldAuthenticate)
         {
             ServerId = serverId;
@@ -460,6 +585,18 @@ internal sealed class MinecraftClientLogin
         }
 
         public readonly byte[] Data;
+    }
+
+    internal readonly struct ClientBoundResourcePackPacket
+    {
+        public readonly Guid UUID;
+        public readonly string Url;
+
+        public ClientBoundResourcePackPacket(Guid uuid, string url)
+        {
+            UUID = uuid;
+            Url = url;
+        }
     }
 }
 

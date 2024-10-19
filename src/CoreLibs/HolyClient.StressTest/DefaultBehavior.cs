@@ -33,7 +33,7 @@ public class DefaultBehavior : BaseStressTestBehavior
     [DisplayName("Spam text")]
     public BindingList<string> SpamTexts { get; set; } = new BindingList<string>
     {
-        "!Hello from Minecraft Holy CLient"
+        "!Hello from Minecraft Holy Client"
     };
 
     [DisplayName("Fisrt text send")]
@@ -59,15 +59,15 @@ public class DefaultBehavior : BaseStressTestBehavior
 
     public DefaultBehavior()
     {
-        
     }
+
     public override Task Start(CompositeDisposable d, IEnumerable<IStressTestBot> bots, ILogger logger,
         CancellationToken cancellationToken)
     {
         var spams = SpamTexts.ToArray();
         var first = FirstText.ToArray();
-        
-        
+
+
         string env = Environment.GetEnvironmentVariable("CapMonsterKey", EnvironmentVariableTarget.User);
 
 
@@ -81,12 +81,38 @@ public class DefaultBehavior : BaseStressTestBehavior
 
         _logger = logger;
         logger.Information("Start default behavior");
-        
+
         Task.Run(async () =>
         {
             foreach (var bot in bots)
             {
-                bot.ConfigureAutoRestart(AutoRestartAction);
+                object count = Reconnects;
+                Action<IStressTestBot> autoRestart = async (IStressTestBot bot) =>
+                {
+                    int asInt = (int)count;
+                    asInt--;
+                    if (asInt <= 0)
+                    {
+                        asInt = Reconnects;
+                    }
+
+                    Interlocked.Exchange(ref count, asInt);
+                    
+                    try
+                    {
+                        int copy = asInt;
+
+                        await Task.Delay(ReconnectTimeout);
+                        await bot.Restart(copy <= 0);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                };
+
+
+                bot.ConfigureAutoRestart(autoRestart);
 
                 MultiProtocol proto = bot.Protocol as MultiProtocol;
 
@@ -101,7 +127,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                             await proto.SendChatPacket(item);
                             await Task.Delay(500);
                         }
-                        
+
                         if (SpamNocom)
                         {
                             NocomEnable(proto);
@@ -111,13 +137,10 @@ public class DefaultBehavior : BaseStressTestBehavior
                         {
                             Crashing(proto);
                         }
-                        
+
                         if (!SpamEnable)
                             return;
-                        
-                        
 
-                        
 
                         CancellationTokenSource cts = new CancellationTokenSource();
                         Disposable.Create(() =>
@@ -132,17 +155,17 @@ public class DefaultBehavior : BaseStressTestBehavior
                             }
                         }).DisposeWith(d);
                         Random r = new();
-                        
+
                         while (!cts.IsCancellationRequested)
                         {
                             string spamText = spams[r.Next(0, spams.Length)];
-                            await proto.SendChatPacket($"{spamText} {r.Next(0,100):D3}" );
+                            await proto.SendChatPacket($"{spamText} {r.Next(0, 100):D3}");
                             await Task.Delay(SpamTimeout, cts.Token);
                         }
                     }
                     catch (Exception exception)
                     {
-                        logger.Error(exception, "Spam err: ");
+                        //logger.Error(exception, "Spam err: ");
                     }
                 }).DisposeWith(d);
 
@@ -167,13 +190,17 @@ public class DefaultBehavior : BaseStressTestBehavior
 
         return Task.CompletedTask;
     }
-    private static string generateJsonObject(int levels) {
+
+    private static string generateJsonObject(int levels)
+    {
         String ins = string.Join("", Enumerable.Range(0, levels)
                 .Select(i => "["))
             ;
         return "{a:" + ins + "}";
     }
+
     private static int length = 2032;
+
     static DefaultBehavior()
     {
         string overflow = generateJsonObject(length);
@@ -181,7 +208,9 @@ public class DefaultBehavior : BaseStressTestBehavior
         string partialCommand = message.Replace("{PAYLOAD}", overflow);
         crashCommand = partialCommand;
     }
+
     private static string crashCommand;
+
     private void Crashing(MultiProtocol proto)
     {
         Task.Run(async () =>

@@ -1,5 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using McProtoNet.Abstractions;
+using McProtoNet.Net;
 
 namespace McProtoNet;
 
@@ -270,35 +272,17 @@ public static class Extensions
         }
     }
 
-
-    public static int ReadToEnd(this Stream stream, Span<byte> buffer, int length)
-    {
-        var totalRead = 0;
-        while (totalRead < length)
-        {
-            var read = stream.Read(buffer.Slice(totalRead));
-            if (read <= 0)
-                throw new EndOfStreamException();
-
-            totalRead += read;
-        }
-
-        return totalRead;
-    }
-
-    public static async ValueTask<int> ReadToEndAsync(this Stream stream, Memory<byte> buffer, int length,
+    public static async ValueTask SendAndDisposeAsync(this MinecraftPacketSender sender, OutputPacket packet,
         CancellationToken token)
     {
-        var totalRead = 0;
-        while (totalRead < length)
+        try
         {
-            var read = await stream.ReadAsync(buffer.Slice(totalRead), token);
-            if (read <= 0)
-                throw new EndOfStreamException();
-
-            totalRead += read;
+            await sender.SendPacketAsync(packet, token);
         }
-
-        return totalRead;
+        finally
+        {
+            packet.Dispose();
+        }
     }
+
 }

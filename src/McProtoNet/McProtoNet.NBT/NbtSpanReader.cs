@@ -15,6 +15,7 @@ public ref struct NbtSpanReader
 {
     private SpanReader<byte> _reader;
     public int ConsumedCount => _reader.ConsumedCount;
+
     public NbtSpanReader(ReadOnlySpan<byte> data)
     {
         _reader = new SpanReader<byte>(data);
@@ -25,13 +26,44 @@ public ref struct NbtSpanReader
     {
         NbtTagType type = ReadTagType();
         string? rootName = readRootName ? ReadString() : null;
+        
+        if (TypeIsPrimitive(type))
+        {
+            return (T)ReadPrimitive(type, rootName);
+        }
+        
         if (_reader.RemainingCount <= 512) // Recursive
         {
-            return ReadRecursive(type, rootName) as T ?? throw new InvalidOperationException($"Error cast to {typeof(T)}");
+            return ReadRecursive(type, rootName) as T ??
+                   throw new InvalidOperationException($"Error cast to {typeof(T)}");
         }
         else
         {
             throw new NotImplementedException();
+            Stack<NbtTag> stack = new Stack<NbtTag>();
+            
+            do
+            {
+                
+
+                if (type == NbtTagType.Compound)
+                {
+                    
+                }
+                
+            } while (stack.Count > 0);
+        }
+    }
+
+    
+    private bool TypeIsPrimitive(NbtTagType type)
+    {
+        switch (type)
+        {
+            case NbtTagType.List:
+            case NbtTagType.Compound:
+                return false;
+            default: return true;
         }
     }
 

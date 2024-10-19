@@ -6,3 +6,10 @@ public sealed class LoginRejectedException : Exception
     {
     }
 }
+
+public sealed class ConfigurationDisconnectException : Exception
+{
+    public ConfigurationDisconnectException(string reason) : base(reason)
+    {
+    }
+}
