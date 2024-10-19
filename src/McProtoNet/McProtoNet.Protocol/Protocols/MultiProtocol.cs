@@ -336,6 +336,13 @@ public sealed class MultiProtocol : ProtocolBase
             };
             int loginPlay = ProtocolVersion switch
             {
+                340 => 0x23,
+                >= 341 and <= 392 => 0x26,
+                >= 393 and <= 404 => 0x25,
+                >= 405 and <= 476 => 0x27,
+                >= 477 and <= 498 => 0x25,
+                >= 499 and <= 734 => 0x26,
+                >= 735 and <= 750 => 0x25,
                 >= 751 and <= 754 => 0x24,
                 >= 755 and <= 758 => 0x26,
                 759 => 0x23,
@@ -343,7 +350,8 @@ public sealed class MultiProtocol : ProtocolBase
                 761 => 0x24,
                 >= 762 and <= 763 => 0x28,
                 >= 764 and <= 765 => 0x29,
-                >= 766 and <= 767 => 0x2B
+                >= 766 and <= 767 => 0x2B,
+
             };
             int spawnEntity = ProtocolVersion switch
             {
@@ -652,7 +660,11 @@ public sealed class MultiProtocol : ProtocolBase
         }
         catch (Exception e)
         {
-            throw new PacketParseException("Id: " + packet.Id, e);
+            if (packet.Id == 31)
+            {
+                Console.WriteLine(e);
+            }
+            throw new PacketParseException($"Id: {packet.Id}. Internal error: {e.GetType().FullName}", e);
         }
     }
 
