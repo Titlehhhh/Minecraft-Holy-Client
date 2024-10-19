@@ -72,7 +72,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
 
         RaiseStateChanged(MinecraftClientState.Disconnected, MinecraftClientState.Connect);
-
+        IDisposable? disposable = null;
         try
         {
             CleanUp();
@@ -94,12 +94,14 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
                 }
             }
 
+            disposable = tcpStream;
             mainStream = tcpStream;
             Debug.Assert(mainStream is not null, $"mainStream is not null?");
             var loginOptions = new LoginOptions(Host, Port, Version, Username);
 
 
             var result = await minecraftLogin.Login(tcpStream, loginOptions, newCts.Token);
+            disposable = result.Stream;
             _sendLock = new AsyncReaderWriterLock();
             mainStream = result.Stream;
 
@@ -107,6 +109,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         }
         catch (Exception ex)
         {
+            disposable?.Dispose();
             if (DisconnectIsPendingOrFinished(out var previus))
             {
                 return;
@@ -284,6 +287,7 @@ public sealed class MinecraftClient : Disposable, IPacketBroker
         _packetSender = packetSender;
 
         packetReader.SwitchCompression(loginizationResult.CompressionThreshold);
+       
         try
         {
             MinecraftClientState old = // Enable SendPacket
