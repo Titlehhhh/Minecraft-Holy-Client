@@ -61,22 +61,25 @@ public class DefaultBehavior : BaseStressTestBehavior
     {
     }
 
+    private volatile int IsCaptcha = 0;
+
     public override Task Start(CompositeDisposable d, IEnumerable<IStressTestBot> bots, ILogger logger,
         CancellationToken cancellationToken)
     {
+        IsCaptcha = 0;
         var spams = SpamTexts.ToArray();
         var first = FirstText.ToArray();
 
 
-        string env = Environment.GetEnvironmentVariable("CapMonsterKey", EnvironmentVariableTarget.User);
-
-
-        var clientOptions = new ClientOptions
-        {
-            ClientKey = env
-        };
-        Directory.CreateDirectory("captches");
-        _capMonsterClient = CapMonsterCloudClientFactory.Create(clientOptions);
+        // string env = Environment.GetEnvironmentVariable("CapMonsterKey", EnvironmentVariableTarget.User);
+        //
+        //
+        // var clientOptions = new ClientOptions
+        // {
+        //     ClientKey = env
+        // };
+        // Directory.CreateDirectory("captches");
+        // _capMonsterClient = CapMonsterCloudClientFactory.Create(clientOptions);
 
 
         _logger = logger;
@@ -97,7 +100,7 @@ public class DefaultBehavior : BaseStressTestBehavior
                     }
 
                     Interlocked.Exchange(ref count, asInt);
-                    
+
                     try
                     {
                         int copy = asInt;
@@ -116,6 +119,12 @@ public class DefaultBehavior : BaseStressTestBehavior
 
                 MultiProtocol proto = bot.Protocol as MultiProtocol;
 
+                proto.OnResourcePack.Subscribe(p =>
+                {
+                    proto.SendResourcePack(action: 0, uuid: p.UUID);
+                }).DisposeWith(d);
+                
+                
                 proto.OnLogin.Subscribe(async x =>
                 {
                     try
@@ -168,8 +177,23 @@ public class DefaultBehavior : BaseStressTestBehavior
                         //logger.Error(exception, "Spam err: ");
                     }
                 }).DisposeWith(d);
+                IDisposable mapData = null;
+                mapData=      proto.OnMapItemData.Subscribe(x =>
+                    {
+                        try
+                        {
+                            if (Interlocked.CompareExchange(ref IsCaptcha, 1, 0) == 0)
+                            {
+                                logger.Warning("Боты получили каптчу");
+                            }
+                        }
+                        finally
+                        {
+                            mapData.Dispose();
+                        }
+                    });
 
-                proto.OnMapItemData.Subscribe(OnMapItem).DisposeWith(d);
+                d.Add(mapData);
 
                 proto.OnPosition.FirstAsync().Subscribe(async p =>
                 {

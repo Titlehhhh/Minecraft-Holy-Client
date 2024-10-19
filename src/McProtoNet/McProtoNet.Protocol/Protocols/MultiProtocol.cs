@@ -18,6 +18,15 @@ public sealed class KeepAlivePacket
     public long KeepAliveId { get; }
 }
 
+public sealed class ResourcePackPacket
+{
+    public Guid UUID { get; }
+
+    public ResourcePackPacket(Guid uuid)
+    {
+        UUID = uuid;
+    }
+}
 public sealed class LoginPacket
 {
     public int Id { get; }
@@ -279,6 +288,7 @@ public sealed class MultiProtocol : ProtocolBase
     private readonly Subject<EntityTeleportPacket> _onEntityTeleport = new();
     private readonly Subject<EntityMoveLookPacket> _onEntityMoveLook = new();
     private readonly Subject<MapItemDataPacket> _onMapItemData = new();
+    private readonly Subject<ResourcePackPacket> _onResourcePack = new();
 
     public MultiProtocol(IPacketBroker client) : base(client)
     {
@@ -294,6 +304,7 @@ public sealed class MultiProtocol : ProtocolBase
     public IObservable<EntityTeleportPacket> OnEntityTeleport => _onEntityTeleport;
     public IObservable<EntityMoveLookPacket> OnEntityMoveLook => _onEntityMoveLook;
     public IObservable<MapItemDataPacket> OnMapItemData => _onMapItemData;
+    public IObservable<ResourcePackPacket> OnResourcePack => _onResourcePack;
 
     protected override void OnPacketReceived(InputPacket packet)
     {
@@ -351,14 +362,57 @@ public sealed class MultiProtocol : ProtocolBase
                 >= 762 and <= 763 => 0x28,
                 >= 764 and <= 765 => 0x29,
                 >= 766 and <= 767 => 0x2B,
-
             };
             int spawnEntity = ProtocolVersion switch
             {
                 >= 340 and <= 761 => 0x00,
                 >= 762 and <= 767 => 0x01
             };
-
+            int resourcePack = ProtocolVersion switch
+            {
+                340 => 0x34,
+                >= 341 and <= 392 => 0x38,
+                >= 393 and <= 404 => 0x37,
+                >= 405 and <= 476 => 0x3D,
+                >= 477 and <= 498 => 0x39,
+                >= 499 and <= 734 => 0x3A,
+                >= 735 and <= 750 => 0x39,
+                >= 751 and <= 754 => 0x38,
+                >= 755 and <= 758 => 0x3C,
+                759 => 0x3A,
+                760 => 0x3D,
+                761 => 0x3C,
+                >= 762 and <= 763 => 0x40,
+                764 => 0x42,
+                >= 765 and <= 767 => -1,
+            };
+            int pushResourcePack = ProtocolVersion switch
+            {
+                >= 340 and <= 764 => -1,
+                765 => 0x44,
+                >= 766 and <= 767 => 0x46
+            };
+            if (ProtocolVersion < 759)
+            {
+                int chatPacket = ProtocolVersion switch
+                {
+                    >= 340 and <= 392 => 0x0F,
+                    >= 393 and <= 498 => 0x0E,
+                    >= 499 and <= 734 => 0x0F,
+                    >= 735 and <= 754 => 0x0E,
+                    >= 755 and <= 758 => 0x0F
+                };
+                if (packet.Id == chatPacket)
+                {
+                    scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+                    if (ProtocolVersion < 765)
+                    {
+                    }
+                    else
+                    {
+                    }
+                }
+            }
 
             if (keepAlive == packet.Id)
             {
@@ -465,28 +519,16 @@ public sealed class MultiProtocol : ProtocolBase
                 _onSpawnEntity.OnNext(new SpawnEntityPacket(entityId, objectUUID, type, x, y, z, pitch, yaw,
                     headPitch, objectData, velocityX, velocityY, velocityZ));
             }
-            else if (ProtocolVersion < 759)
+            else if (packet.Id == resourcePack)
             {
-                int chatPacket = ProtocolVersion switch
-                {
-                    >= 340 and <= 392 => 0x0F,
-                    >= 393 and <= 498 => 0x0E,
-                    >= 499 and <= 734 => 0x0F,
-                    >= 735 and <= 754 => 0x0E,
-                    >= 755 and <= 758 => 0x0F
-                };
-                if (packet.Id == chatPacket)
-                {
-                    scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
-                    if (ProtocolVersion < 765)
-                    {
-                        
-                    }
-                    else
-                    {
-                        
-                    }
-                }
+                
+                _onResourcePack.OnNext(new ResourcePackPacket(Guid.Empty));
+            }
+            else if (packet.Id == pushResourcePack)
+            {
+                scoped var reader = new MinecraftPrimitiveSpanReader(packet.Data);
+                Guid uuid = reader.ReadUUID();
+                _onResourcePack.OnNext(new ResourcePackPacket(uuid));
             }
 
             if (ProtocolVersion != 767)
@@ -660,15 +702,49 @@ public sealed class MultiProtocol : ProtocolBase
         }
         catch (Exception e)
         {
-            if (packet.Id == 31)
-            {
-                Console.WriteLine(e);
-            }
             throw new PacketParseException($"Id: {packet.Id}. Internal error: {e.GetType().FullName}", e);
         }
     }
 
+    public ValueTask SendResourcePack(int action, Guid uuid)
+    {
+        scoped var writer = new MinecraftPrimitiveSpanWriter();
+        try
+        {
+            int packetId = ProtocolVersion switch
+            {
+                340 => 0x18,
+                >= 341 and <= 392 => 0x1E,
+                >= 393 and <= 404 => 0x1D,
+                >= 405 and <= 476 => 0x21,
+                >= 477 and <= 578 => 0x1F,
+                >= 579 and <= 736 => 0x20,
+                >= 737 and <= 750 => 0x22,
+                >= 751 and <= 758 => 0x21,
+                759 => 0x23,
+                >= 760 and <= 763 => 0x24,
+                764 => 0x27,
+                765 => 0x28,
+                >= 766 and <= 767 => 0x2B,
+            };
+            writer.WriteVarInt(packetId);
+            if (ProtocolVersion < 765)
+            {
+                writer.WriteVarInt(action);
+            }
+            else
+            {
+                writer.WriteUUID(uuid);
+                writer.WriteVarInt(action);
+            }
 
+            return base.SendPacketCore(writer.GetWrittenMemory());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
     public ValueTask SendClientInformation(string locale, sbyte viewDistance, int chatMode, bool chatColors, byte skin,
         int mainHand, bool enableTextFiltering, bool allowServerListings)
     {
@@ -714,7 +790,7 @@ public sealed class MultiProtocol : ProtocolBase
         }
     }
 
-    public ValueTask SendCommandSuggestionsRequest(int id, string command,bool assumeCommand, Position? lookAt)
+    public ValueTask SendCommandSuggestionsRequest(int id, string command, bool assumeCommand, Position? lookAt)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
         try
@@ -743,6 +819,7 @@ public sealed class MultiProtocol : ProtocolBase
                     writer.WriteBoolean(true);
                     writer.WritePosition(lookAt.Value);
                 }
+
                 writer.WriteBoolean(false);
             }
             else
@@ -750,8 +827,8 @@ public sealed class MultiProtocol : ProtocolBase
                 writer.WriteVarInt(id);
                 writer.WriteString(command);
             }
-            
-            
+
+
             return SendPacketCore(writer.GetWrittenMemory());
         }
         catch
@@ -760,6 +837,7 @@ public sealed class MultiProtocol : ProtocolBase
             throw;
         }
     }
+
     public ValueTask SendPosition(double x, double y, double z, bool onGround)
     {
         scoped var writer = new MinecraftPrimitiveSpanWriter();
@@ -1068,6 +1146,7 @@ public sealed class MultiProtocol : ProtocolBase
         _onEntityMoveLook.Dispose();
         _onPlayerInfoUpdate.Dispose();
         _onMapItemData.Dispose();
+        _onResourcePack.Dispose();
         base.Dispose();
     }
 }
