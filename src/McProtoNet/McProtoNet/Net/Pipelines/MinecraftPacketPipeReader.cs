@@ -2,7 +2,6 @@
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-
 using McProtoNet.Abstractions;
 using McProtoNet.Net.Zlib;
 
@@ -10,7 +9,6 @@ namespace McProtoNet.Net;
 
 internal sealed class MinecraftPacketPipeReader
 {
-   
     private readonly PipeReader pipeReader;
 
     public MinecraftPacketPipeReader(PipeReader pipeReader)
@@ -39,16 +37,23 @@ internal sealed class MinecraftPacketPipeReader
                 break;
             }
 
+            var buffer = result.Buffer;
+            var consumed = buffer.Start;
+            var examined = buffer.End;
+
             if (result.IsCompleted) break;
 
             if (result.IsCanceled) break;
 
 
-            var buffer = result.Buffer;
-
             try
             {
-                while (TryReadPacket(ref buffer, out var packet)) yield return Decompress(packet);
+                while (TryReadPacket(ref buffer, out var packet))
+                {
+                    //consumed = buffer.Start;
+                    //examined = consumed;
+                    yield return Decompress(packet);
+                }
             }
             finally
             {
@@ -62,6 +67,7 @@ internal sealed class MinecraftPacketPipeReader
     private static bool TryReadPacket(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> packet)
     {
         scoped SequenceReader<byte> reader = new(buffer);
+
 
         packet = ReadOnlySequence<byte>.Empty;
 
@@ -78,6 +84,7 @@ internal sealed class MinecraftPacketPipeReader
         packet = reader.UnreadSequence.Slice(0, length);
 
         reader.Advance(length);
+
 
         buffer = buffer.Slice(reader.Position);
 
@@ -106,9 +113,9 @@ internal sealed class MinecraftPacketPipeReader
 
                     var decompressed = ArrayPool<byte>.Shared.Rent(sizeUncompressed);
                     rented = decompressed;
-                   
 
-                  using scoped  var decompressor = new ZlibDecompressor();
+
+                    using scoped var decompressor = new ZlibDecompressor();
                     if (compressed.IsSingleSegment)
                     {
                         var result = decompressor.Decompress(
@@ -148,8 +155,11 @@ internal sealed class MinecraftPacketPipeReader
                 mainData = data.Slice(len);
             }
 
-            throw new NotImplementedException();
-            //return new InputPacket( mainData);
+            MemoryOwner<byte> gg = ArrayPool<byte>.Shared.ToAllocator()
+                .AllocateExactly((int)mainData.Length);
+            mainData.ToArray().AsSpan().CopyTo(gg.Span);
+
+            return new InputPacket(id, gg);
         }
         finally
         {
@@ -159,7 +169,7 @@ internal sealed class MinecraftPacketPipeReader
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ReadOnlySequence<byte> DecompressMultiSegment(ReadOnlySequence<byte> compressed, byte[] decompressed,
-      scoped  ZlibDecompressor decompressor, int sizeUncompressed, out int id)
+        scoped ZlibDecompressor decompressor, int sizeUncompressed, out int id)
     {
         var compressedLength = (int)compressed.Length;
 
