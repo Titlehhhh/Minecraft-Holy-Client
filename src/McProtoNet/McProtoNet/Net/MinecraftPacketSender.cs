@@ -12,14 +12,14 @@ public sealed class MinecraftPacketSender
 
    
 
-    private int _compressionThreshold;
+    private int _compressionThreshold=-1;
     public Stream BaseStream { get; set; }
 
     
 
     public ValueTask SendPacketAsync(ReadOnlyMemory<byte> data, CancellationToken token = default)
     {
-        if (_compressionThreshold > 0)
+        if (_compressionThreshold >= 0)
         {
             var uncompressedSize = data.Length;
 

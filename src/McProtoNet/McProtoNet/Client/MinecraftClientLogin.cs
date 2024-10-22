@@ -120,8 +120,8 @@ internal sealed class MinecraftClientLogin
                             //if (!inputPacket.Data.TryReadVarInt(out threshold, out _))
 
 
-                            threshold = ReadTreshold(inputPacket);
-                            reader.SwitchCompression(threshold);
+                            threshold = ReadThreshold(inputPacket);
+                            reader.EnableCompression(threshold);
                             sender.SwitchCompression(threshold);
 
                             break;
@@ -445,7 +445,7 @@ internal sealed class MinecraftClientLogin
         }
     }
 
-    private static int ReadTreshold(InputPacket p)
+    private static int ReadThreshold(InputPacket p)
     {
         scoped MinecraftPrimitiveSpanReader r = new MinecraftPrimitiveSpanReader(p.Data);
         return r.ReadVarInt();

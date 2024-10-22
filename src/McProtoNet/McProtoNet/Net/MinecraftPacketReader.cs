@@ -11,7 +11,7 @@ public sealed class MinecraftPacketReader
     private static readonly MemoryAllocator<byte> memoryAllocator = ArrayPool<byte>.Shared.ToAllocator();
 
 
-    private int _compressionThreshold;
+    private int _compressionThreshold=-1;
 
     public Stream BaseStream { get; set; }
 
@@ -25,7 +25,7 @@ public sealed class MinecraftPacketReader
     public async ValueTask<InputPacket> ReadNextPacketAsync(CancellationToken token = default)
     {
         var len = await BaseStream.ReadVarIntAsync(token);
-        if (_compressionThreshold <= 0)
+        if (_compressionThreshold<0)
         {
             var buffer = memoryAllocator.AllocateExactly(len);
             try
@@ -110,8 +110,10 @@ public sealed class MinecraftPacketReader
     }
 
 
-    public void SwitchCompression(int threshold)
+    public void EnableCompression(int threshold)
     {
         _compressionThreshold = threshold;
+       
     }
+
 }
