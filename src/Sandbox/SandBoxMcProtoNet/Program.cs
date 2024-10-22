@@ -2,30 +2,135 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO.Pipelines;
+using System.Net;
+using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using DiscordRPC;
+using DotNext;
+using DotNext.Buffers;
 using DotNext.Collections.Generic;
+using DotNext.IO;
+using McProtoNet;
+using McProtoNet.Abstractions;
 using McProtoNet.Client;
 using McProtoNet.MultiVersionProtocol;
+using McProtoNet.Net;
 using McProtoNet.Protocol;
 using McProtoNet.Serialization;
 using QuickProxyNet;
+using QuickProxyNet.ProxyChecker;
 
 internal class Program
 {
+    private static async Task<List<ProxyRecord>> ParseProxy(string url, ProxyType type)
+    {
+        List<ProxyRecord> records = new();
+        using HttpClient httpClient = new HttpClient();
+        await using var stream = await httpClient.GetStreamAsync(url);
+        using var sr = new StreamReader(stream);
+        
+        while (!sr.EndOfStream)
+        {
+            string? line = await sr.ReadLineAsync();
+
+            if (!string.IsNullOrEmpty(line))
+            {
+                var hostport = line.Split(':');
+                try
+                {
+                    ProxyRecord record = new ProxyRecord(type, hostport[0], int.Parse(hostport[1]), null);
+                    records.Add(record);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }
+
+        return records;
+    }
+
     public static async Task Main(string[] args)
     {
-     await   MultipleConnections();
-     return;   
-     await BowBots();
+        HashSet<ProxyRecord> records = new HashSet<ProxyRecord>();
+
+        foreach (var type in Enum.GetValues<ProxyType>())
+        {
+            try
+            {
+                string typeStr = type.ToString().ToLower();
+                string url =
+                    $"https://raw.githubusercontent.com/SevenworksDev/proxy-list/refs/heads/main/proxies/{typeStr}.txt";
+                records.AddAll(await ParseProxy(url, type));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+
+        Console.WriteLine($"Parse {records.Count} proxies");
+
+        var checker = ProxyChecker.CreateChunked(records, new ProxyCheckerChunkedOptions()
+        {
+            QueueSize = 100,
+            InfinityLoop = false,
+            IsSingleConsumer = true,
+            SendAlive = false,
+            ChunkSize = 30_000,
+            ConnectTimeout = TimeSpan.FromSeconds(10),
+            TargetHost = "google.com",
+            TargetPort = 443
+        });
+
+        Task t = checker.Start();
+
+        Task read = Task.Run(async () =>
+        {
+            await using (StreamWriter sw = new StreamWriter("proxies.txt", true))
+            {
+                try
+                {
+                    var proxy = await checker.GetNextProxy(default);
+                    Console.WriteLine($"PROXY! {proxy.Type} GetType(): {proxy.GetType()}");
+                    await sw.WriteLineAsync($"{proxy.Type.ToString().ToLower()}://{proxy.ProxyHost}:{proxy.ProxyPort}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        });
+
+        await Task.WhenAll(t, read);
+
+        return;
+
+        MinecraftClient client = new MinecraftClient()
+        {
+            ConnectTimeout = TimeSpan.FromSeconds(30),
+            Host = "94.130.3.102",
+            Port = 25845,
+            Username = $"TTT",
+            Version = MinecraftVersion.Latest
+        };
+        await client.Start();
+        await Task.Delay(-1);
+        return;
+
+        await MultipleConnections();
+        return;
+        await BowBots();
     }
 
     private static async Task BowBots()
     {
-        
         List<BowBot> bots = new();
         for (int i = 0; i < 20; i++)
         {
@@ -48,9 +153,9 @@ internal class Program
                 MinecraftClient client = new MinecraftClient()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(30),
-                    Host = "194.147.90.7",
-                    Port = 25565,
-                    Username = $"Adolf",
+                    Host = "94.130.3.102",
+                    Port = 25845,
+                    Username = $"TTT",
                     Version = MinecraftVersion.Latest
                 };
                 client.Disconnected += async (sender, eventArgs) =>
@@ -130,8 +235,6 @@ internal class Program
 
         await Task.Delay(-1);
     }
-    
-    
 
 
     public static void SwitchGenerator(string packet, string side)
@@ -142,7 +245,4 @@ internal class Program
         {
         }
     }
-
-
-   
 }
