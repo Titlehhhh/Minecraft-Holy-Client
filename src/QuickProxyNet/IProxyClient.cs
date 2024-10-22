@@ -18,8 +18,8 @@ public interface IProxyClient
     int ReadTimeout { get; set; }
 
 
-    Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default);
+    ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default);
     ValueTask<Stream> ConnectAsync(Stream source, string host, int port, CancellationToken cancellationToken = default);
 
-    Task<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default);
+    ValueTask<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default);
 }

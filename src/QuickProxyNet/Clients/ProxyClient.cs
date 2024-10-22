@@ -46,7 +46,7 @@ public abstract class ProxyClient : IProxyClient
     public int WriteTimeout { get; set; }
     public int ReadTimeout { get; set; }
 
-    public async Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
+    public async ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
         var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
         {
@@ -79,7 +79,7 @@ public abstract class ProxyClient : IProxyClient
         }
     }
 
-    public virtual async Task<Stream> ConnectAsync(string host, int port, int timeout,
+    public virtual async ValueTask<Stream> ConnectAsync(string host, int port, int timeout,
         CancellationToken cancellationToken = default)
     {
         ValidateArguments(host, port, timeout);

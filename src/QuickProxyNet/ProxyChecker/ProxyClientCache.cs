@@ -9,7 +9,7 @@ internal class ProxyClientCache : IProxyClient
     private IProxyClient _client;
     private Stream _stream;
     private long timeAdded;
-    private readonly Task<Stream> cacheResult;
+    private readonly ValueTask<Stream> cacheResult;
     private readonly string host;
     private readonly int port;
     private Action onDisposed;
@@ -47,7 +47,7 @@ internal class ProxyClientCache : IProxyClient
         _stream = stream;
         this.onDisposed = onDisposed;
         onDisposed += OnDisposed;
-        cacheResult = Task.FromResult(_stream);
+        cacheResult = ValueTask.FromResult(_stream);
         timeAdded = Stopwatch.GetTimestamp();
     }
 
@@ -75,7 +75,7 @@ internal class ProxyClientCache : IProxyClient
         return this.host == host && this.port == port;
     }
 
-    public Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
+    public ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
         if (CheckHostPort(host, port) && CheckTime())
         {
@@ -102,11 +102,12 @@ internal class ProxyClientCache : IProxyClient
         }
     }
 
-    public Task<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default)
+    public ValueTask<Stream> ConnectAsync(string host, int port, int timeout,
+        CancellationToken cancellationToken = default)
     {
         if (CheckHostPort(host, port) && CheckTime())
         {
-            return Task.FromResult(_stream);
+            return ValueTask.FromResult(_stream);
         }
         else
         {

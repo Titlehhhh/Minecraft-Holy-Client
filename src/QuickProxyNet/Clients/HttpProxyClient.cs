@@ -13,7 +13,7 @@ public class HttpProxyClient : ProxyClient
     {
     }
 
-    public override ProxyType Type => ProxyType.HTTPS;
+    public override ProxyType Type => ProxyType.HTTP;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public override async ValueTask<Stream> ConnectAsync(Stream stream, string host, int port,

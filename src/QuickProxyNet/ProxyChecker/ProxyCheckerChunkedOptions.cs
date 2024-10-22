@@ -2,17 +2,20 @@
 
 public struct ProxyCheckerChunkedOptions
 {
-    public int ChunkSize { get; set; }
-    public int ConnectTimeout { get; set; }
-    public bool IsSingleConsumer { get; set; }
-    public string TargetHost { get; set; }
-    public int TargetPort { get; set; }
-    public bool SendAlive { get; set; }
+    public required int ChunkSize { get; set; }
+    public required int QueueSize { get; set; }
+    public required TimeSpan ConnectTimeout { get; set; }
+    public required bool IsSingleConsumer { get; set; }
+    public required string TargetHost { get; set; }
+    public required int TargetPort { get; set; }
+    public required bool SendAlive { get; set; }
+
+    public required bool InfinityLoop { get; set; } 
 
     internal void Validate()
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(QueueSize, nameof(QueueSize));
         ArgumentOutOfRangeException.ThrowIfNegative(ChunkSize, nameof(ChunkSize));
-        ArgumentOutOfRangeException.ThrowIfNegative(ConnectTimeout,nameof(ConnectTimeout));
         ArgumentOutOfRangeException.ThrowIfNegative(TargetPort, nameof(TargetPort));
         ArgumentException.ThrowIfNullOrEmpty(TargetHost, nameof(TargetHost));
     }
@@ -20,6 +23,6 @@ public struct ProxyCheckerChunkedOptions
     public override string ToString()
     {
         return
-            $"{nameof(ChunkSize)}: {ChunkSize}, {nameof(ConnectTimeout)}: {ConnectTimeout}, {nameof(IsSingleConsumer)}: {IsSingleConsumer}, {nameof(TargetHost)}: {TargetHost}, {nameof(TargetPort)}: {TargetPort}, {nameof(SendAlive)}: {SendAlive}";
+            $"{nameof(ChunkSize)}: {ChunkSize}, {nameof(QueueSize)}: {QueueSize}, {nameof(ConnectTimeout)}: {ConnectTimeout}, {nameof(IsSingleConsumer)}: {IsSingleConsumer}, {nameof(TargetHost)}: {TargetHost}, {nameof(TargetPort)}: {TargetPort}, {nameof(SendAlive)}: {SendAlive}, {nameof(InfinityLoop)}: {InfinityLoop}";
     }
 }

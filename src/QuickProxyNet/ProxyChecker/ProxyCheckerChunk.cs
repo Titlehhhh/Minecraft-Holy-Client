@@ -1,37 +1,29 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading.Channels;
+using DotNext.Collections.Generic;
 using Fody;
 
 namespace QuickProxyNet.ProxyChecker;
 
 internal class ProxyCheckerChunk : IProxyChecker
 {
-    private event Action Disposed;
 
-    private readonly string _targetHost;
-    private readonly int _targetPort;
-    private readonly int chunkSize;
-    private readonly int conntectTimeout;
+    private readonly ProxyCheckerChunkedOptions _options;
     private Channel<IProxyClient> _channel;
     private IEnumerable<ProxyRecord> _proxies;
     private ChannelWriter<IProxyClient> _writer;
     private ChannelReader<IProxyClient> _reader;
     private CancellationTokenSource _cts;
-    private bool sendAlive;
 
-    private bool disposed;
+    private bool _disposed;
 
-    public ProxyCheckerChunk(IEnumerable<ProxyRecord> proxies, int chunkSize, int connectTimeout, string targetHost,
-        int targetPort, bool sendAlive)
+    public ProxyCheckerChunk(IEnumerable<ProxyRecord> proxies, ProxyCheckerChunkedOptions options)
     {
-        this.chunkSize = chunkSize;
-        this.conntectTimeout = connectTimeout;
-        _targetHost = targetHost;
-        _targetPort = targetPort;
-        this.sendAlive = sendAlive;
         _proxies = proxies;
+        _options = options;
         _cts = new CancellationTokenSource();
-        _channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(this.chunkSize)
+        _channel = Channel.CreateBounded<IProxyClient>(new BoundedChannelOptions(options.QueueSize)
         {
             SingleWriter = true
         });
@@ -42,24 +34,21 @@ internal class ProxyCheckerChunk : IProxyChecker
 
     private void CheckDisposed()
     {
-        if (disposed)
+        if (_disposed)
             throw new ObjectDisposedException(nameof(ProxyCheckerChunk));
     }
 
     public void Dispose()
     {
-        if (disposed)
+        if (_disposed)
             return;
-        disposed = true;
+        _disposed = true;
         _writer.TryComplete();
         _cts.Cancel();
         _cts.Dispose();
         _cts = null;
         _proxies = null;
         _channel = null;
-
-
-        Disposed?.Invoke();
     }
 
     public Task Start()
@@ -74,6 +63,29 @@ internal class ProxyCheckerChunk : IProxyChecker
         return _reader.ReadAsync(cancellationToken);
     }
 
+    private static IEnumerable<IProxyClient> Convert(IEnumerable<ProxyRecord> records,
+        ProxyClientFactory proxyClientFactory)
+    {
+        foreach (var proxy in records)
+        {
+            bool success = false;
+            IProxyClient? client = null;
+
+            try
+            {
+                client = proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port, proxy.Credentials);
+                success = true;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            if (success)
+                yield return client!;
+        }
+    }
+
     private Task RunCore()
     {
         return Task.Run(async () =>
@@ -81,64 +93,36 @@ internal class ProxyCheckerChunk : IProxyChecker
             try
             {
                 ProxyClientFactory proxyClientFactory = new();
-                var clients = _proxies
-                    .Select(proxy => proxyClientFactory.Create(proxy.Type, proxy.Host, proxy.Port, proxy.Credentials));
+                var clients = Convert(_proxies, proxyClientFactory);
 
-                ArgumentOutOfRangeException.ThrowIfNegative(chunkSize, nameof(chunkSize));
+                ArgumentOutOfRangeException.ThrowIfNegative(_options.ChunkSize, nameof(_options.ChunkSize));
 
+                List<Task<CheckResult>> tasks = new();
 
-                var tasks = new List<Task<CheckResult>>(chunkSize);
-                
                 while (!_cts.IsCancellationRequested)
                 {
-                    foreach (var chunk in clients.Chunk(chunkSize))
+                    foreach (var chunk in clients.Chunk(_options.ChunkSize))
                     {
                         try
                         {
-                            using (var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token))
-                            {
-                                foreach (var client in chunk)
-                                {
-                                    _cts.Token.ThrowIfCancellationRequested();
-                                    tasks.Add(CheckProxy(client, linked.Token));
-                                }
+                            _cts.Token.ThrowIfCancellationRequested();
 
-                                linked.CancelAfter(conntectTimeout);
-                                await Task.WhenAll(tasks);
+                            foreach (var client in chunk)
+                            {
+                                Task<CheckResult> task = CheckProxy(client, _options.ConnectTimeout, _cts.Token);
+                                tasks.Add(task);
                             }
 
+                            await Task.WhenAll(tasks);
 
-                            var count = 0;
-                            List<string> messages = new List<string>();
-                            for (var i = 0; i < Math.Min(chunkSize, tasks.Count); i++)
+
+                            foreach (Task<CheckResult> task in tasks)
                             {
-                                var task = tasks[i];
-                                await task;
                                 if (task.Result.Connected)
                                 {
-                                    count++;
-                                    var client = chunk[i];
-
-                                    IProxyClient sendClient = sendAlive
-                                        ? new ProxyClientCache(client, task.Result.Stream!, this.Disposed)
-                                        : client;
-
-                                    await _writer.WriteAsync(sendClient, _cts.Token);
+                                    await task.Result.Stream!.DisposeAsync();
+                                    await _writer.WriteAsync(task.Result.Client!, _cts.Token);
                                 }
-                                else
-                                {
-                                    if (task.Result.Error is not null)
-                                        messages.Add(task.Result.Error.Message);
-                                }
-                            }
-
-                            if (false)
-                            {
-                                Console.WriteLine($"Proxy {count}/{chunkSize}");
-                                Console.WriteLine(string.Join('\n', messages
-                                    .GroupBy(x => x)
-                                    .OrderByDescending(x => x.Count())
-                                    .Select(x => $"{x.Count()} {x.Key}")));
                             }
                         }
                         finally
@@ -146,6 +130,9 @@ internal class ProxyCheckerChunk : IProxyChecker
                             tasks.Clear();
                         }
                     }
+
+                    if (!_options.InfinityLoop)
+                        return;
                 }
             }
             catch (Exception ex)
@@ -161,17 +148,19 @@ internal class ProxyCheckerChunk : IProxyChecker
         });
     }
 
-    [ConfigureAwait(false)]
-    private async Task<CheckResult> CheckProxy(IProxyClient client, CancellationToken cancellationToken)
+    private async Task<CheckResult> CheckProxy(IProxyClient client, TimeSpan timeout, CancellationToken cancellationToken)
     {
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
         {
-            var stream = await client.ConnectAsync(_targetHost, _targetPort, cancellationToken);
+            linked.CancelAfter(timeout);
+            Stream stream = await client.ConnectAsync(_options.TargetHost, _options.TargetPort, linked.Token)
+                .ConfigureAwait(false);
             return new CheckResult(true, null, stream, client);
         }
-        catch (Exception exception)
+        catch (Exception e)
         {
-            return new CheckResult(false, exception, null, null);
+            return new CheckResult(false, e, null, client);
         }
     }
 
