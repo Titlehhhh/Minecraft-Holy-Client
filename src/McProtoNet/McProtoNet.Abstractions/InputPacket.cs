@@ -12,6 +12,14 @@ public readonly struct InputPacket : IDisposable
     private readonly MemoryOwner<byte> owner;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public InputPacket(int id,MemoryOwner<byte> owner)
+    {
+        this.owner = owner;
+        Id = id;
+        Data = this.owner.Memory;
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public InputPacket(MemoryOwner<byte> owner)
     {
         this.owner = owner;
