@@ -1,0 +1,58 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HolyClient.Views.SimpleProxySettingsView">
+    <StackPanel Spacing="10">
+        <Border Classes="SettingItem" Margin="5,0,20,0">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Таймаут" FontSize="15" />
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                    <TextBox
+                        Text="10"
+
+                        HorizontalAlignment="Left"
+                        MaxHeight="180"
+                        Width="200">
+                        <TextBox.Styles>
+                            <Style Selector="DataValidationErrors">
+                                <Setter Property="Theme"
+                                        Value="{DynamicResource TooltipDataValidationErrors}" />
+                            </Style>
+                        </TextBox.Styles>
+                    </TextBox>
+                    <ComboBox SelectedIndex="0">
+                        <ComboBox.Items>
+                            <x:String>sec</x:String>
+                            <x:String>ms</x:String>
+                            <x:String>min</x:String>
+                        </ComboBox.Items>
+                    </ComboBox>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Боты на прокси" FontSize="15" />
+                <NumericUpDown
+                    HorizontalAlignment="Left"
+                    Value="1"
+                    Width="200"/>
+            </StackPanel>
+        </Border>
+
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Количество попыток подключения к прокси" FontSize="15" />
+                <NumericUpDown
+                    HorizontalAlignment="Left"
+                    Value="1"
+                    Width="200"/>
+
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

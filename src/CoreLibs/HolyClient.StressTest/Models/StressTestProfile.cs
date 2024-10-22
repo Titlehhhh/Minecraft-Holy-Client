@@ -128,10 +128,12 @@ public class StressTestProfile : ReactiveObject, IStressTestProfile
                 {
                     IProxyChecker proxyChecker = ProxyChecker.CreateChunked(proxies, new ProxyCheckerChunkedOptions()
                     {
+                        QueueSize = NumberOfBots,
                         ChunkSize = NumberOfBots * 10,
-                        ConnectTimeout = 10_000,
+                        ConnectTimeout = TimeSpan.FromSeconds(10),
                         IsSingleConsumer = false,
                         SendAlive = true,
+                        InfinityLoop = true,
                         TargetHost = host,
                         TargetPort = port
                     });

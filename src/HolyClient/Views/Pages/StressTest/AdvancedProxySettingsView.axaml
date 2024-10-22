@@ -1,0 +1,137 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
+             x:Class="HolyClient.Views.AdvancedProxySettingsView">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.Disable">
+            <Style Selector="^:disabled">
+                <Setter Property="Opacity" Value="0.5" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel Spacing="10">
+        <Border Margin="5,0,20,0" Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Таймаут" FontSize="15" />
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                    <TextBox
+                        Text="10"
+
+                        HorizontalAlignment="Left"
+                        MaxHeight="180"
+                        Width="200">
+                        <TextBox.Styles>
+                            <Style Selector="DataValidationErrors">
+                                <Setter Property="Theme"
+                                        Value="{DynamicResource TooltipDataValidationErrors}" />
+                            </Style>
+                        </TextBox.Styles>
+                    </TextBox>
+                    <ComboBox SelectedIndex="0">
+                        <ComboBox.Items>
+                            <x:String>sec</x:String>
+                            <x:String>ms</x:String>
+                            <x:String>min</x:String>
+                        </ComboBox.Items>
+                    </ComboBox>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Количество попыток" FontSize="15" />
+                <NumericUpDown
+                    Width="200"
+                    Value="1"
+                    HorizontalAlignment="Left"/>
+            </StackPanel>
+        </Border>
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Режим проверки" FontSize="15" />
+                <ComboBox SelectedIndex="0">
+                    <ComboBox.Items>
+                        <x:String>Чанками</x:String>
+                        <x:String>Многопоточный</x:String>
+                    </ComboBox.Items>
+                </ComboBox>
+            </StackPanel>
+        </Border>
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Количество потоков" FontSize="15" />
+                <StackPanel>
+                    <CheckBox
+                        Name="AutoCalculateThreadCountCheckBox"
+                        IsChecked="True"
+                        Content="Рассчитать автоматически"
+                        FontSize="14"
+                        VerticalContentAlignment="Center" />
+                    <Grid HorizontalAlignment="Left" ColumnDefinitions="*,Auto">
+                        <NumericUpDown
+                            Value="1000"
+                            IsEnabled="{Binding !#AutoCalculateThreadCountCheckBox.IsChecked}"
+                            Width="200" />
+                        <TextBlock
+                            Grid.Column="1"
+                            IsVisible="{Binding #AutoCalculateThreadCountCheckBox.IsChecked}"
+                            Foreground="Gray"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Margin="4,0,0,0"
+                            Text="Количество ботов умножается на 10" />
+                    </Grid>
+
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Размер очереди" FontSize="15" />
+                <StackPanel>
+                    <CheckBox
+                        Name="AutoCalculateQueueSizeCheckBox"
+                        IsChecked="True"
+                        Content="Рассчитать автоматически"
+                        FontSize="14"
+                        VerticalContentAlignment="Center" />
+                    <Grid HorizontalAlignment="Left" ColumnDefinitions="*,Auto">
+                        <NumericUpDown
+                            Value="100"
+                            IsEnabled="{Binding !#AutoCalculateQueueSizeCheckBox.IsChecked}"
+                            Width="200" />
+                        <TextBlock
+                            Grid.Column="1"
+                            IsVisible="{Binding #AutoCalculateQueueSizeCheckBox.IsChecked}"
+                            Foreground="Gray"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Margin="4,0,0,0"
+                            Text="Равен количеству ботов" />
+                    </Grid>
+
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border Classes="SettingItem">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Дополнительные настройки" FontSize="15" />
+                <CheckBox
+                    Name="SendAliveProxyCheckBox"
+                    Content="Отправлять прокси &quot;горячими&quot;"
+                    FontSize="14"
+                    VerticalContentAlignment="Center" />
+                <StackPanel IsEnabled="{Binding !#SendAliveProxyCheckBox.IsChecked}" Spacing="3">
+                    <TextBlock Classes="Disable" Text="Целевой хост для проверки" />
+                    <MaskedTextBox Watermark="Host:Port" UseFloatingWatermark="False" HorizontalAlignment="Left"
+                                   Width="200" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+    </StackPanel>
+</UserControl>

@@ -2,15 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
              xmlns:vm="using:HolyClient.ViewModels"
              x:DataType="vm:StressTestProfileViewModel"
              x:CompileBindings="True"
-
              xmlns:pgc="using:Avalonia.PropertyGrid.Controls"
              xmlns:sg="using:SpacedGridControl.Avalonia"
              xmlns:converters="using:HolyClient.Converters"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:views="using:HolyClient.Views"
              x:Class="HolyClient.Views.StressTestProfileView">
     <UserControl.Resources>
         <converters:MinecraftVersionToStringConverter x:Key="VersionToStringConverter" />
@@ -147,6 +147,30 @@
                     </StackPanel>
 
                 </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Proxy settings" IsSelected="True" FontSize="15">
+
+                <Grid ColumnDefinitions="Auto,Auto,*">
+                    <Border VerticalAlignment="Top" Margin="0" Classes="SettingItem">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Режим обработки прокси" FontSize="15" />
+                            <ComboBox Name="testCB" Width="200" SelectedIndex="0">
+                                <ComboBox.Items>
+                                    <x:String>Простой</x:String>
+                                    <x:String>Продвинутый</x:String>
+                                </ComboBox.Items>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+                    <Rectangle Margin="10,0,0,0" Fill="DimGray" Width="0.5" RadiusX="0.5" RadiusY="0.5" Grid.Column="1"/>
+                   <ScrollViewer Grid.Column="2" Margin="5,0,0,0">
+                       <Panel>
+                           <views:SimpleProxySettingsView IsVisible="{Binding !#testCB.SelectedIndex}"/>
+                           <views:AdvancedProxySettingsView IsVisible="{Binding #testCB.SelectedIndex}"/>
+                       </Panel>
+                   </ScrollViewer>
+                </Grid>
             </TabItem>
 
             <TabItem Header="{Tr StressTest.Configuration.Proxy}" FontSize="15">
@@ -333,10 +357,9 @@
 
 
             <TabItem FontSize="15" Header="Behavior" IsVisible="{Binding CurrentBehavior}">
-
-
-                <pgc:PropertyGrid DataContext="{Binding CurrentBehavior}" />
-
+                <ScrollViewer>
+                    <pgc:PropertyGrid DataContext="{Binding CurrentBehavior}" />
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 
