@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia.Controls.Primitives;
+using Avalonia.PropertyGrid.Services;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using HolyClient.Localization;
@@ -36,7 +37,9 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         CultureInfo.CurrentCulture = new CultureInfo(ConvertCode(Loc.Instance.CurrentLanguage));
         Loc.Instance.CurrentLanguageChanged += (__, e) =>
         {
-            CultureInfo.CurrentCulture = new CultureInfo(ConvertCode(e.NewLanguageId));
+            var convert = ConvertCode(e.NewLanguageId);
+            CultureInfo.CurrentCulture = new CultureInfo(convert);
+            LocalizationService.Default.SelectCulture(convert);
             //Nav.SwitchLang();
         };
     }
