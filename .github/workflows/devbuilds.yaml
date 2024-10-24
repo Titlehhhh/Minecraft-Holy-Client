@@ -1,0 +1,22 @@
+name: dev-builds
+# This workflow represents a set of basic End-to-End tests
+on:
+  push:
+    branches:
+      - 'dev'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  basic:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+          cache: true
