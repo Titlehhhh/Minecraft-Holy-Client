@@ -1,9 +1,5 @@
 ﻿using System.Runtime.Intrinsics.X86;
 using HolyClient.StressTest;
-using McProtoNet;
-using McProtoNet.Client;
-using McProtoNet.Net;
-using McProtoNet.Protocol754;
 using MemoryPack;
 using Serilog;
 

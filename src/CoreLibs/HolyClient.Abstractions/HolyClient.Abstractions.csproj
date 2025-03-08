@@ -7,6 +7,9 @@
 
     </PropertyGroup>
 
+    <PropertyGroup>
+        <McProtoNetVersion>2.0.0-preview.3</McProtoNetVersion>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
@@ -14,12 +17,15 @@
         <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
         <PackageReference Include="Serilog" Version="4.0.2" />
         <PackageReference Include="System.Reactive" Version="6.0.1" />
+        
+        <PackageReference Include="McProtoNet" Version="$(McProtoNetVersion)"/>
+        <PackageReference Include="McProtoNet.Protocol" Version="$(McProtoNetVersion)"/>
+        <PackageReference Include="McProtoNet.NBT" Version="$(McProtoNetVersion)"/>
+        <PackageReference Include="McProtoNet.Serialization" Version="$(McProtoNetVersion)"/>
+        <PackageReference Include="McProtoNet.Utils" Version="$(McProtoNetVersion)"/>
+        <PackageReference Include="McProtoNet.Abstractions" Version="$(McProtoNetVersion)"/>
     </ItemGroup>
 
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\McProtoNet\McProtoNet\McProtoNet.csproj"/>
-    </ItemGroup>
 
 
 </Project>

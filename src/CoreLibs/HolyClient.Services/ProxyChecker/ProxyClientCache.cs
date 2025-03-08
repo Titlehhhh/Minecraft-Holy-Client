@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace QuickProxyNet.ProxyChecker;
@@ -27,6 +28,18 @@ internal class ProxyClientCache : IProxyClient
     {
         get => _client.LocalEndPoint;
         set => _client.LocalEndPoint = value;
+    }
+
+    public LingerOption? LingerState
+    {
+        get => _client.LingerState;
+        set => _client.LingerState = value;
+    }
+
+    public bool NoDelay
+    {
+        get => _client.NoDelay;
+        set => _client.NoDelay = value;
     }
 
     public int WriteTimeout

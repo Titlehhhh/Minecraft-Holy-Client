@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using DotNext;
 using HolyClient.ViewModels;
 using LiveChartsCore;
 using LiveChartsCore.Measure;

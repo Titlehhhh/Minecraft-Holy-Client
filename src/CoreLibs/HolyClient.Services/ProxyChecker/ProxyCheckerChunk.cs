@@ -1,8 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Threading.Channels;
-using DotNext.Collections.Generic;
-using Fody;
+﻿using System.Threading.Channels;
 
 namespace QuickProxyNet.ProxyChecker;
 

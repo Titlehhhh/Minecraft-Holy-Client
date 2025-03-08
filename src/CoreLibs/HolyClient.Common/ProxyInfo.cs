@@ -1,24 +1,15 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using QuickProxyNet;
-using QuickProxyNet.ProxyChecker;
 
 namespace HolyClient.Common;
 
-public struct ProxyInfo
+public record struct ProxyInfo
 {
     public ProxyType Type { get; set; }
-
-
     public string Host { get; set; }
-
     public ushort Port { get; set; }
-
-
     public string? Login { get; set; }
-
-
     public string? Password { get; set; }
 
     public static bool TryParse(string line, ProxyType? type, out ProxyInfo proxy)
@@ -34,11 +25,11 @@ public struct ProxyInfo
             Uri uri = new Uri(line);
             ProxyType typeFromScheme = uri.Scheme switch
             {
-                "http" => ProxyType.HTTP,
-                "https" => ProxyType.HTTPS,
-                "socks4" => ProxyType.SOCKS4,
-                "socks4a" => ProxyType.SOCKS4a,
-                "socks5" => ProxyType.SOCKS5,
+                "http" => ProxyType.Http,
+                "https" => ProxyType.Https,
+                "socks4" => ProxyType.Socks4,
+                "socks4a" => ProxyType.Socks4a,
+                "socks5" => ProxyType.Socks5,
                 _ => throw new NotSupportedException("No support proxy type: " + uri.Scheme)
             };
             string? login = "";
@@ -82,26 +73,6 @@ public struct ProxyInfo
 
         proxy = default;
         return false;
-    }
-
-    public override bool Equals([NotNullWhen(true)] object? obj)
-    {
-        if (obj is ProxyInfo proxyInfo)
-            return Host == proxyInfo.Host
-                   && Port == proxyInfo.Port
-                   && Type == proxyInfo.Type
-                   && Login == proxyInfo.Login
-                   && Password == proxyInfo.Password;
-        return false;
-    }
-
-    public static implicit operator ProxyRecord(ProxyInfo info)
-    {
-        NetworkCredential? credential = null;
-        if (!(string.IsNullOrEmpty(info.Login) || string.IsNullOrEmpty(info.Password)))
-            credential = new NetworkCredential(info.Login, info.Password);
-        
-        return new ProxyRecord(info.Type, info.Host, info.Port, credential);
     }
     
 }
