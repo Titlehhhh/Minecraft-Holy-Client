@@ -56,6 +56,15 @@ All components of the application have been designed to **maximize performance**
 </tr>
 </table>
 
+## ⚠️ PROJECT STATUS: INACTIVE ⚠️
+
+This project is currently **not actively maintained**.
+
+It served as a foundation for experiments and development, but due to architectural limitations and technical debt, it’s no longer being worked on in its current form.
+
+➡️ For more details, see [STATUS](./status/en.md).
+
+
 ## Installation
 
 Minecraft Holy Client is available for **Windows**, **Linux** and **MacOs**. In addition, it is **portable** and is not installed on the system, so it can be easily uninstalled.
