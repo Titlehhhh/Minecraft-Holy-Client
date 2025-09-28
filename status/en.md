@@ -29,6 +29,9 @@ Yes, once it's ready for general use.
 **Why is development taking so long?**  
 This is a side project I work on in my free time, alongside studies and personal commitments.
 
+**How can development be accelerated?**  
+By contributing code, reporting issues, writing documentation, or supporting the project financially (see [Support](../README.md#-support-the-project)). Every contribution helps move things forward faster.
+
 **What features will the new version have?**
 - Multi-version support (1.12.2 up to the latest version)
 - Attack modes (BotJoiner, Memory)
@@ -55,3 +58,4 @@ I’ll do my best to provide proper API documentation.
 ![img_3.png](img_3.png)
 
 ![img_4.png](img_4.png)
+
