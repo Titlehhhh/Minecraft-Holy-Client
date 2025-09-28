@@ -64,6 +64,17 @@ It served as a foundation for experiments and development, but due to architectu
 
 ➡️ For more details, see [STATUS](./status/en.md).
 
+## 💸 Support the project
+
+You can support development by donating cryptocurrency:
+
+**USDT (TON)**: `UQB5OyxViBHENXXKPpIZdAXJmrmmqn599_aNkYeRe9HqXY4Q`
+
+**USDT (TRC20)**: `TKbnv1CkfQs1UBSoJVbwuqPAhaHDiy7Vbm`
+
+**BTC**: `bc1qgx4glhjhjyw7sz2qt5mhyg40cspgp8lanpl282`
+
+
 
 ## Installation
 
@@ -112,6 +123,7 @@ Contributions are always welcome!
 
 The default plugin has few features. It just sends `/register <pass> <pass>`  first and starts spamming immediately. 
 Minecraft servers are a large number, with different anti-bot systems and if you want to test your server for bot attacks, it makes sense to write a custom plugin that would bypass it. How to write custom plugins is written here.
+
 
 
 
